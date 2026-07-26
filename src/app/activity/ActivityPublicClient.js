@@ -64,7 +64,7 @@ export default function ActivityPublicClient({ activities = [] }) {
           style={{ backgroundImage: 'url("/images/about/sre%20first%20meet.jpg")' }}
         />
         {/* Creative Left-to-Right Fading Gradient Mask to make it distinct from the About page and remove yellow tint */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0cc48a] via-[#0cc48a]/92 to-[#0cc48a]/35 dark:from-[#07130e] dark:via-[#07130e]/95 dark:to-[#07130e]/30 pointer-events-none transition-colors duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#032218] via-[#0aa373]/95 to-[#0cc48a]/65 dark:from-[#050c09] dark:via-[#07130e]/95 dark:to-[#07130e]/30 pointer-events-none transition-colors duration-300" />
 
         {/* Content */}
         <div className="relative z-10 max-w-7xl mx-auto w-full">
