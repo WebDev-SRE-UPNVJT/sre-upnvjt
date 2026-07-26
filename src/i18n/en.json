@@ -1103,6 +1103,22 @@
       "get_official_prefix": "Get Our Official ",
       "get_official_highlight": "Merchandise",
       "shopee": "Shopee Store"
+    },
+    "login": {
+      "welcome": "Welcome",
+      "to_the": "to the",
+      "future": "Future",
+      "left_desc": "Sign in to manage projects, track microgrid operations, and access the Society of Renewable Energy portal.",
+      "title": "Sign In",
+      "subtitle": "Enter your credentials to access your account.",
+      "email_label": "Email address",
+      "password_label": "Password",
+      "remember_me": "Remember me",
+      "btn_login": "Sign In",
+      "btn_logging_in": "Signing In...",
+      "no_account": "Don't have an account?",
+      "create_account": "Create Account",
+      "back": "Back"
     }
   }
 }

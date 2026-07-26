@@ -1103,6 +1103,22 @@
       "get_official_prefix": "Dapatkan Merchandise Resmi ",
       "get_official_highlight": "Kami",
       "shopee": "Toko Shopee"
+    },
+    "login": {
+      "welcome": "Selamat Datang",
+      "to_the": "di",
+      "future": "Masa Depan",
+      "left_desc": "Masuk untuk mengelola proyek, memantau operasional microgrid, dan mengakses portal Society of Renewable Energy.",
+      "title": "Masuk",
+      "subtitle": "Masukkan kredensial Anda untuk mengakses akun.",
+      "email_label": "Alamat Email",
+      "password_label": "Kata Sandi",
+      "remember_me": "Ingat saya",
+      "btn_login": "Masuk",
+      "btn_logging_in": "Masuk...",
+      "no_account": "Belum punya akun?",
+      "create_account": "Buat Akun",
+      "back": "Kembali"
     }
   }
 }

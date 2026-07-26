@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -73,7 +73,7 @@ export default function LoginPage() {
           className="group flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 text-[13px] font-bold text-white/70 hover:text-white cursor-pointer backdrop-blur-md"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          {language === "id" ? "Kembali" : "Back"}
+          {t("visitor.login.back")}
         </button>
       </div>
       <div className="hidden lg:flex w-1/2 relative flex-col justify-between p-12 lg:p-20 overflow-hidden">
@@ -111,16 +111,15 @@ export default function LoginPage() {
               transition={{ delay: 0.2, duration: 0.8 }}
             >
               <h2 className="text-[48px] xl:text-[64px] font-display font-black uppercase tracking-tighter leading-[0.9] mb-6">
-                Welcome <br />
+                {t("visitor.login.welcome")} <br />
                 <span className="text-[#e8ecc4] font-serif italic font-normal text-[36px] xl:text-[48px] lowercase tracking-normal">
-                  to the
+                  {t("visitor.login.to_the")}
                 </span>{" "}
                 <br />
-                Future
+                {t("visitor.login.future")}
               </h2>
               <p className="text-white/70 max-w-sm text-[15px] leading-relaxed font-light">
-                Sign in to manage projects, track microgrid operations, and
-                access the Society of Renewable Energy portal.
+                {t("visitor.login.left_desc")}
               </p>
             </motion.div>
           </div>
@@ -148,10 +147,10 @@ export default function LoginPage() {
         >
           <div className="mb-12">
             <h1 className="text-[32px] md:text-[40px] font-display font-bold tracking-tight mb-2">
-              Sign In
+              {t("visitor.login.title")}
             </h1>
             <p className="text-white/50 text-[14px]">
-              Enter your credentials to access your account.
+              {t("visitor.login.subtitle")}
             </p>
           </div>
 
@@ -170,7 +169,7 @@ export default function LoginPage() {
                 htmlFor="email"
                 className="absolute text-[15px] text-white/50 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-[#e8ecc4] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
               >
-                Email address
+                {t("visitor.login.email_label")}
               </label>
             </div>
 
@@ -188,7 +187,7 @@ export default function LoginPage() {
                 htmlFor="password"
                 className="absolute text-[15px] text-white/50 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-[#e8ecc4] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
               >
-                Password
+                {t("visitor.login.password_label")}
               </label>
               <button
                 type="button"
@@ -225,7 +224,7 @@ export default function LoginPage() {
                   </svg>
                 </div>
                 <span className="text-[13px] text-white/60 group-hover:text-white transition-colors select-none">
-                  Remember me
+                  {t("visitor.login.remember_me")}
                 </span>
               </label>
             </div>
@@ -241,7 +240,7 @@ export default function LoginPage() {
               disabled={isLoading}
               className="group relative w-full flex items-center justify-center gap-3 bg-[#e8ecc4] text-[#0a1c15] text-[15px] font-bold tracking-widest uppercase rounded-full px-8 py-4 mt-4 overflow-hidden transition-transform active:scale-95 hover:bg-white disabled:opacity-70 disabled:active:scale-100"
             >
-              {isLoading ? "Signing In..." : "Sign In"}
+              {isLoading ? t("visitor.login.btn_logging_in") : t("visitor.login.btn_login")}
               {!isLoading && (
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               )}
@@ -250,12 +249,12 @@ export default function LoginPage() {
 
           {isPublicRegistrationEnabled && (
             <div className="mt-10 text-center text-[13px] text-white/50">
-              Don't have an account?{" "}
+              {t("visitor.login.no_account")}{" "}
               <Link
                 href="/register"
                 className="text-[#e8ecc4] hover:text-white transition-colors font-bold tracking-wide"
               >
-                Create Account
+                {t("visitor.login.create_account")}
               </Link>
             </div>
           )}
