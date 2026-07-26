@@ -2,14 +2,16 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Eye, EyeOff } from "lucide-react";
+import { ArrowRight, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/i18n/LanguageProvider";
 
 export const dynamic = "force-dynamic";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { language } = useLanguage();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -63,7 +65,17 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex bg-[#0a1c15] text-white overflow-hidden">
+    <div className="min-h-screen w-full flex bg-[#0a1c15] text-white overflow-hidden relative">
+      {/* Back Button */}
+      <div className="absolute top-8 right-8 z-50">
+        <button
+          onClick={() => router.back()}
+          className="group flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 text-[13px] font-bold text-white/70 hover:text-white cursor-pointer backdrop-blur-md"
+        >
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+          {language === "id" ? "Kembali" : "Back"}
+        </button>
+      </div>
       <div className="hidden lg:flex w-1/2 relative flex-col justify-between p-12 lg:p-20 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <video
