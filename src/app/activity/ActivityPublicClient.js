@@ -63,11 +63,8 @@ export default function ActivityPublicClient({ activities = [] }) {
           className="absolute inset-0 bg-cover bg-center scale-110 md:scale-120 pointer-events-none"
           style={{ backgroundImage: 'url("/images/about/sre%20first%20meet.jpg")' }}
         />
-        {/* Tint overlay with transition to ensure high readability */}
-        <div className="absolute inset-0 bg-[#0aa373]/90 dark:bg-[#060f0b]/93 pointer-events-none transition-colors duration-300" />
-        {/* Ambient Glows */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-yellow-300/10 dark:bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-yellow-400/10 dark:bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />
+        {/* Creative Left-to-Right Fading Gradient Mask to make it distinct from the About page and remove yellow tint */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0cc48a] via-[#0cc48a]/92 to-[#0cc48a]/35 dark:from-[#07130e] dark:via-[#07130e]/95 dark:to-[#07130e]/30 pointer-events-none transition-colors duration-300" />
 
         {/* Content */}
         <div className="relative z-10 max-w-7xl mx-auto w-full">
