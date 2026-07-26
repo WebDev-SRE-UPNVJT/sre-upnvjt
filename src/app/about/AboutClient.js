@@ -5,8 +5,9 @@ import { motion } from "framer-motion";
 import { 
   ArrowUpRight, BookOpen, Cpu, Leaf, Users, Mail, MapPin
 } from "lucide-react";
-import { DepartmentCard } from "@/components/organization/OrgComponents";
 import { useLanguage } from "@/i18n/LanguageProvider";
+import { useTheme } from "next-themes";
+import { DepartmentCard } from "@/components/organization/OrgComponents";
 
 // ─── Animation Variants ────────────────────────────────────────────────────────
 
@@ -76,6 +77,12 @@ const MISSION_ITEMS = [
 
 export default function AboutClient({ departmentsData = [] }) {
   const { t } = useLanguage();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+  const isDark = mounted ? resolvedTheme === "dark" : false;
 
   const localPillars = PILLARS.map((p) => {
     switch (p.num) {
@@ -104,7 +111,10 @@ export default function AboutClient({ departmentsData = [] }) {
           style={{ backgroundImage: 'url("/images/about/sre%20first%20meet.jpg")' }}
         />
         {/* Tint overlay with transition to ensure high readability */}
-        <div className="absolute inset-0 pointer-events-none transition-colors duration-300 z-10 about-hero-overlay" />
+        <div 
+          className="absolute inset-0 pointer-events-none transition-colors duration-300 z-10" 
+          style={{ backgroundColor: isDark ? 'rgba(6, 15, 11, 0.93)' : 'rgba(8, 140, 97, 0.90)' }}
+        />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none z-0" aria-hidden="true" />
         
         <div className="max-w-7xl mx-auto relative z-20">

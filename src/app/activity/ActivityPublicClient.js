@@ -1,13 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, MapPin, Sparkles, Filter, Activity as ActivityIcon, ArrowUpRight, Tag } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageProvider";
+import { useTheme } from "next-themes";
 
 export default function ActivityPublicClient({ activities = [] }) {
   const { language, t } = useLanguage();
   const [selectedType, setSelectedType] = useState("ALL");
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  const isDark = mounted ? resolvedTheme === "dark" : false;
 
   const now = new Date();
   
@@ -64,7 +71,14 @@ export default function ActivityPublicClient({ activities = [] }) {
           style={{ backgroundImage: 'url("/images/about/sre%20first%20meet.jpg")' }}
         />
         {/* Creative Left-to-Right Fading Gradient Mask to make it distinct from the About page and remove yellow tint */}
-        <div className="absolute inset-0 pointer-events-none transition-colors duration-300 z-10 activity-hero-overlay" />
+        <div 
+          className="absolute inset-0 pointer-events-none transition-all duration-300 z-10" 
+          style={{
+            backgroundImage: isDark
+              ? 'linear-gradient(to right, rgba(5, 12, 9, 1.0) 0%, rgba(7, 19, 14, 0.95) 50%, rgba(7, 19, 14, 0.30) 100%)'
+              : 'linear-gradient(to right, rgba(3, 34, 24, 1.0) 0%, rgba(10, 163, 115, 0.95) 50%, rgba(12, 196, 138, 0.65) 100%)'
+          }}
+        />
 
         {/* Content */}
         <div className="relative z-20 max-w-7xl mx-auto w-full">
