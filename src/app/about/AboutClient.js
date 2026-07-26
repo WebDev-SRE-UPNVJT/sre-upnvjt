@@ -156,7 +156,7 @@ export default function AboutClient({ departmentsData = [] }) {
               {localMissionItems.map((item, idx) => (
                 <div 
                   key={idx} 
-                  className="flex items-start gap-4 p-5 rounded-2xl bg-white/10 dark:bg-[#07130e] border border-white/20 dark:border-white/5 hover:border-yellow-300/40 dark:hover:border-emerald-500/30 transition-all duration-300 shadow-md"
+                  className="flex items-start gap-4 p-5 rounded-2xl bg-white/15 dark:bg-[#07130e]/85 border border-white/30 dark:border-white/10 hover:border-yellow-300/50 dark:hover:border-emerald-500/40 transition-all duration-300 shadow-md"
                 >
                   <div className="w-8 h-8 rounded-full bg-yellow-300 dark:bg-emerald-500/20 text-slate-950 dark:text-emerald-400 flex items-center justify-center font-black text-sm shrink-0 mt-0.5">
                     0{idx + 1}
@@ -194,11 +194,11 @@ export default function AboutClient({ departmentsData = [] }) {
                 <motion.div
                   key={pillar.num}
                   variants={staggerChild}
-                  className="group p-8 rounded-3xl bg-white/10 dark:bg-[#050e0a] border border-white/20 dark:border-white/5 hover:border-yellow-300/40 dark:hover:border-emerald-500/40 transition-all duration-500 hover:shadow-lg flex flex-col justify-between"
+                  className="group p-8 rounded-3xl bg-white/15 dark:bg-[#050e0a] border border-white/30 dark:border-white/10 hover:border-yellow-300/50 dark:hover:border-emerald-500/55 transition-all duration-500 hover:shadow-lg flex flex-col justify-between"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-8">
-                      <div className="w-12 h-12 rounded-2xl bg-white/10 dark:bg-emerald-500/10 border border-white/20 dark:border-emerald-500/20 flex items-center justify-center text-yellow-300 dark:text-emerald-400 group-hover:scale-110 transition-transform duration-300">
+                      <div className="w-12 h-12 rounded-2xl bg-white/15 dark:bg-emerald-500/10 border border-white/30 dark:border-emerald-500/20 flex items-center justify-center text-yellow-300 dark:text-emerald-400 group-hover:scale-110 transition-transform duration-300">
                         <IconComp className="w-6 h-6" />
                       </div>
                       <span className="text-2xl font-black text-white/50 dark:text-white/20 group-hover:text-yellow-300/80 dark:group-hover:text-emerald-400/80 transition-colors">
