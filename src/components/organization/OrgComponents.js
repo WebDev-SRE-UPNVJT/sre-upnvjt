@@ -3,6 +3,22 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowUpRight, Mail, Users, User, Shield, ArrowRight, Network } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageProvider";
+
+const translateRole = (role, t) => {
+  if (!role) return "";
+  const rLower = role.toLowerCase();
+  if (rLower === "president") return t("visitor.org.president");
+  if (rLower.includes("vice president")) return t("visitor.org.vp");
+  if (rLower.includes("secretary") || rLower.includes("sekretaris")) return t("visitor.org.secretary");
+  if (rLower.includes("director")) return t("visitor.org.director");
+  if (rLower === "division manager" || rLower.includes("manager")) return t("visitor.org.managers");
+  if (rLower.startsWith("staff of")) {
+    const div = role.substring(9);
+    return t("visitor.org.staff_of").replace("{division}", div);
+  }
+  return role;
+};
 
 // Inline LinkedIn SVG to avoid import package versions mismatch
 function LinkedinIcon({ className }) {
@@ -26,6 +42,7 @@ export function AvatarFallback({ className }) {
 
 // ─── 2. Department Card component ──────────────────────────────────────────────
 export function DepartmentCard({ dept, index, isExecutive = false }) {
+  const { t } = useLanguage();
   const numberStr = String(index + 1).padStart(2, "0");
   
   let presidentName = "";
@@ -77,24 +94,24 @@ export function DepartmentCard({ dept, index, isExecutive = false }) {
                 <div className="flex items-start gap-2.5">
                   <User className="w-4 h-4 text-[#e8ecc4] dark:text-emerald-400 shrink-0 mt-0.5" />
                   <span>
-                    <strong className="text-[#e8ecc4] dark:text-emerald-400 font-extrabold uppercase tracking-wide">President:</strong>{" "}
-                    {presidentName || "Not Assigned"}
+                    <strong className="text-[#e8ecc4] dark:text-emerald-400 font-extrabold uppercase tracking-wide">{t("visitor.org.president")}:</strong>{" "}
+                    {presidentName || t("visitor.org.not_assigned")}
                   </span>
                 </div>
                 {/* Vice Presidents */}
                 <div className="flex items-start gap-2.5">
                   <User className="w-4 h-4 text-[#e8ecc4] dark:text-emerald-400 shrink-0 mt-0.5" />
                   <span>
-                    <strong className="text-[#e8ecc4] dark:text-emerald-400 font-extrabold uppercase tracking-wide">Vice President:</strong>{" "}
-                    {vpNames || "Not Assigned"}
+                    <strong className="text-[#e8ecc4] dark:text-emerald-400 font-extrabold uppercase tracking-wide">{t("visitor.org.vp")}:</strong>{" "}
+                    {vpNames || t("visitor.org.not_assigned")}
                   </span>
                 </div>
                 {/* Secretary */}
                 <div className="flex items-start gap-2.5">
                   <User className="w-4 h-4 text-[#e8ecc4] dark:text-emerald-400 shrink-0 mt-0.5" />
                   <span>
-                    <strong className="text-[#e8ecc4] dark:text-emerald-400 font-extrabold uppercase tracking-wide">Secretary:</strong>{" "}
-                    {secretaryNames || "Not Assigned"}
+                    <strong className="text-[#e8ecc4] dark:text-emerald-400 font-extrabold uppercase tracking-wide">{t("visitor.org.secretary")}:</strong>{" "}
+                    {secretaryNames || t("visitor.org.not_assigned")}
                   </span>
                 </div>
               </div>
@@ -103,18 +120,18 @@ export function DepartmentCard({ dept, index, isExecutive = false }) {
                 <div className="flex items-center gap-3 text-xs font-bold text-white/90">
                   <User className="w-4 h-4 text-[#e8ecc4] dark:text-emerald-400" />
                   <span className="truncate text-white">
-                    Director: <strong className="text-[#e8ecc4] dark:text-emerald-400 font-extrabold">{dept.directorName || "Not Assigned"}</strong>
+                    {t("visitor.org.director")}: <strong className="text-[#e8ecc4] dark:text-emerald-400 font-extrabold">{dept.directorName || t("visitor.org.not_assigned")}</strong>
                   </span>
                 </div>
 
                 <div className="flex items-center gap-6 text-xs text-white/80 dark:text-gray-400 font-semibold font-bold">
                   <span className="flex items-center gap-1.5 text-white">
                     <Shield className="w-3.5 h-3.5 text-[#e8ecc4]/85 dark:text-emerald-400/70" />
-                    {dept.managerCount} Managers
+                    {dept.managerCount} {t("visitor.org.managers")}
                   </span>
                   <span className="flex items-center gap-1.5 text-white">
                     <Users className="w-3.5 h-3.5 text-[#e8ecc4]/85 dark:text-emerald-400/70" />
-                    {dept.staffCount} Staff Members
+                    {dept.staffCount} {t("visitor.org.staff")}
                   </span>
                 </div>
               </>
@@ -126,7 +143,7 @@ export function DepartmentCard({ dept, index, isExecutive = false }) {
             <span
               className="inline-flex items-center gap-2 text-xs font-black tracking-widest uppercase text-[#e8ecc4] group-hover:text-yellow-300 dark:text-emerald-400 dark:group-hover:text-yellow-400 transition-all duration-300"
             >
-              View Team
+              {t("visitor.org.view_team")}
             </span>
             <div className="w-8 h-8 rounded-full bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/10 flex items-center justify-center text-white group-hover:bg-yellow-300 group-hover:text-slate-900 group-hover:border-yellow-300 transition-all duration-300">
               <ArrowUpRight className="w-4 h-4 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" strokeWidth={1.5} />
@@ -203,9 +220,11 @@ function getAvatarByName(name) {
 
 // ─── 3. Member Card component (Used for Manager and Staff) ─────────────────────
 export function MemberCard({ member, fallbackRole }) {
+  const { t } = useLanguage();
   if (!member) return null;
   const name = member.name || "Unnamed Member";
-  const role = member.role || fallbackRole || "Team Member";
+  const rawRole = member.role || fallbackRole || "Team Member";
+  const role = translateRole(rawRole, t);
   const photo = member.photo;
   const npm = member.npm;
 
@@ -236,7 +255,7 @@ export function MemberCard({ member, fallbackRole }) {
         </div>
         <div className="text-[11px] text-[#e8ecc4]/80 dark:text-emerald-300/60 font-medium shrink-0">
           <div>{major}</div>
-          <div>Angkatan {batch}</div>
+          <div>{t("visitor.org.angkatan").replace("{batch}", batch)}</div>
         </div>
       </div>
     </div>
@@ -245,18 +264,20 @@ export function MemberCard({ member, fallbackRole }) {
 
 // ─── 4. Director Card component ───────────────────────────────────────────────
 export function DirectorCard({ director, fallbackRole }) {
+  const { t } = useLanguage();
   if (!director) {
     return (
       <div className="max-w-md mx-auto text-center p-8 bg-white/5 border border-white/10 rounded-3xl">
         <User className="w-12 h-12 mx-auto text-white/20 mb-3" />
-        <h3 className="text-lg font-black text-white/50">No Director Assigned</h3>
-        <p className="text-xs text-white/40 mt-1">This position is currently empty.</p>
+        <h3 className="text-lg font-black text-white/50">{t("visitor.org.no_members")}</h3>
+        <p className="text-xs text-white/40 mt-1">{t("visitor.org.not_assigned")}</p>
       </div>
     );
   }
 
   const name = director.name || "Director Profile";
-  const role = director.role || fallbackRole || "Director";
+  const rawRole = director.role || fallbackRole || "Director";
+  const role = translateRole(rawRole, t);
   const photo = director.photo;
   const socials = director.socials || {};
   const npm = director.npm;
@@ -286,7 +307,7 @@ export function DirectorCard({ director, fallbackRole }) {
         </h3>
         <div className="text-xs sm:text-sm text-[#e8ecc4]/80 dark:text-emerald-300/60 font-medium mb-3">
           <div>{major}</div>
-          <div>Angkatan {batch}</div>
+          <div>{t("visitor.org.angkatan").replace("{batch}", batch)}</div>
         </div>
         
         {/* Social Links */}
@@ -319,6 +340,7 @@ export function DirectorCard({ director, fallbackRole }) {
 
 // ─── 5. Manager Section component ──────────────────────────────────────────────
 export function ManagerSection({ divisions }) {
+  const { t } = useLanguage();
   const divisionsWithManagers = divisions ? divisions.filter(div => div.manager) : [];
   
   if (divisionsWithManagers.length === 0) return null;
@@ -327,10 +349,10 @@ export function ManagerSection({ divisions }) {
     <div className="space-y-12">
       <div className="text-center">
         <h3 className="text-sm font-black text-yellow-300 dark:text-emerald-400 tracking-[0.25em] uppercase mb-1">
-          Division Managers
+          {t("visitor.org.div_managers")}
         </h3>
         <h2 className="text-3xl font-display font-black text-white uppercase tracking-tight">
-          Kepengurusan Divisi
+          {t("visitor.org.div_leadership")}
         </h2>
       </div>
 
@@ -350,6 +372,7 @@ export function ManagerSection({ divisions }) {
 
 // ─── 6. Staff Grid component ──────────────────────────────────────────────────
 export function StaffGrid({ divisions }) {
+  const { t } = useLanguage();
   // Aggregate all staff across all divisions
   const allStaff = [];
   if (divisions) {
@@ -371,10 +394,10 @@ export function StaffGrid({ divisions }) {
     <div className="space-y-12">
       <div className="text-center">
         <h3 className="text-sm font-black text-yellow-300 dark:text-emerald-400 tracking-[0.25em] uppercase mb-1">
-          Staff 
+          {t("visitor.org.staff_title")}
         </h3>
         <h2 className="text-3xl font-display font-black text-white uppercase tracking-tight">
-          Seluruh Anggota Staf
+          {t("visitor.org.all_staff")}
         </h2>
       </div>
 
@@ -394,6 +417,7 @@ export function StaffGrid({ divisions }) {
 
 // ─── 7. Org Tree Section component (Hierarchical Layout) ────────────────────────
 export function OrgTreeSection({ dept }) {
+  const { t } = useLanguage();
   if (!dept) return null;
 
   const isExecutive = dept.code?.toUpperCase() === "EXE";
@@ -423,10 +447,10 @@ export function OrgTreeSection({ dept }) {
           <div className="flex flex-col items-center w-full mt-10">
             <div className="text-center mb-6">
               <h3 className="text-xs sm:text-sm font-black text-yellow-300 dark:text-emerald-400 tracking-[0.25em] uppercase mb-1">
-                Executive Leader
+                {t("visitor.org.exec_leader")}
               </h3>
               <h2 className="text-3xl sm:text-4xl font-display font-black text-white uppercase tracking-tight drop-shadow-md">
-                President
+                {t("visitor.org.president")}
               </h2>
             </div>
             
@@ -447,7 +471,7 @@ export function OrgTreeSection({ dept }) {
           <div className="w-full flex flex-col items-center mt-8">
             <div className="text-center mb-6">
               <h2 className="text-2xl sm:text-3xl font-display font-black text-white uppercase tracking-tight drop-shadow-md">
-                Vice Presidents
+                {t("visitor.org.vp")}s
               </h2>
             </div>
 
@@ -472,7 +496,7 @@ export function OrgTreeSection({ dept }) {
           <div className="w-full flex flex-col items-center mt-8">
             <div className="text-center mb-6">
               <h2 className="text-2xl sm:text-3xl font-display font-black text-white uppercase tracking-tight drop-shadow-md">
-                Secretaries
+                {t("visitor.org.secretary")}s
               </h2>
             </div>
 
@@ -499,10 +523,10 @@ export function OrgTreeSection({ dept }) {
         <div className="flex flex-col items-center w-full mt-10">
           <div className="text-center mb-6">
             <h3 className="text-xs sm:text-sm font-black text-yellow-300 dark:text-emerald-400 tracking-[0.25em] uppercase mb-1">
-              Department Leader
+              {t("visitor.org.dept_leader")}
             </h3>
             <h2 className="text-3xl sm:text-4xl font-display font-black text-white uppercase tracking-tight drop-shadow-md">
-              Director
+              {t("visitor.org.director")}
             </h2>
           </div>
           

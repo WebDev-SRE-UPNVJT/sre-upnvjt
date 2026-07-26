@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { ShoppingBag, ArrowUpRight, Package, ShoppingCart, ExternalLink, Tag } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageProvider";
 
 const InstagramIcon = (props) => (
   <svg className={`fill-current ${props.className || "w-5 h-5"}`} viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
@@ -11,6 +12,7 @@ const InstagramIcon = (props) => (
 );
 
 export default function MerchPublicClient({ merchandise = [] }) {
+  const { t } = useLanguage();
   const formatRupiah = (val) => {
     const num = Number(val) || 0;
     return new Intl.NumberFormat("id-ID", {
@@ -44,15 +46,15 @@ export default function MerchPublicClient({ merchandise = [] }) {
             className="flex flex-col gap-6"
           >
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-yellow-300/15 border border-yellow-300/30 text-yellow-300 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider w-fit mb-2">
-              <ShoppingBag className="w-4 h-4" /> OFFICIAL GEAR & MERCH
+              <ShoppingBag className="w-4 h-4" /> {t("visitor.merchandise.hero_badge")}
             </div>
 
             <h1 className="text-4xl md:text-6xl font-display font-black leading-tight tracking-tight uppercase">
-              OFFICIAL MERCHANDISE <br className="hidden md:inline" />
-              <span className="text-yellow-300 dark:text-emerald-400">SRE UPN JATIM!</span>
+              {t("visitor.merchandise.title").split(" SRE ")[0]} <br className="hidden md:inline" />
+              <span className="text-yellow-300 dark:text-emerald-400">SRE {t("visitor.merchandise.title").split(" SRE ")[1]}</span>
             </h1>
             <p className="text-lg md:text-xl font-light text-white dark:text-gray-300 leading-relaxed max-w-xl">
-              Support the green energy transition in style. Check out our exclusive official apparel, accessories, and gear packages!
+              {t("visitor.merchandise.subtitle")}
             </p>
           </motion.div>
 
@@ -84,7 +86,7 @@ export default function MerchPublicClient({ merchandise = [] }) {
             </svg>
             
             <div className="absolute bottom-6 left-6 right-6 text-center">
-              <span className="text-xs font-mono tracking-widest text-yellow-300 dark:text-emerald-400 uppercase font-bold">AVAILABLE NOW</span>
+              <span className="text-xs font-mono tracking-widest text-yellow-300 dark:text-emerald-400 uppercase font-bold">{t("visitor.merchandise.available_now")}</span>
             </div>
           </motion.div>
         </div>
@@ -95,9 +97,9 @@ export default function MerchPublicClient({ merchandise = [] }) {
         <section className="py-20 px-6 md:px-12 lg:px-20 bg-[#e8ecc4] dark:bg-[#040e0a] border-b border-white/10 transition-colors duration-300">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <span className="text-xs font-black text-[#0cc48a] dark:text-emerald-400 tracking-widest uppercase mb-2 block">• EXCLUSIVE OFFERS</span>
+              <span className="text-xs font-black text-[#0cc48a] dark:text-emerald-400 tracking-widest uppercase mb-2 block">{t("visitor.merchandise.exclusive_offers")}</span>
               <h2 className="text-3xl md:text-5xl font-display font-black uppercase text-[#07130e] dark:text-white tracking-tight">
-                OUR SPECIAL <span className="text-[#0cc48a] dark:text-emerald-400">BUNDLES</span>
+                {t("visitor.merchandise.special_bundles").split(" ").slice(0, 2).join(" ")} <span className="text-[#0cc48a] dark:text-emerald-400">{t("visitor.merchandise.special_bundles").split(" ").pop()}</span>
               </h2>
             </div>
 
@@ -142,10 +144,10 @@ export default function MerchPublicClient({ merchandise = [] }) {
                           rel="noopener noreferrer"
                           className="px-4 py-2 bg-[#0cc48a] hover:bg-[#0ab37d] text-white dark:bg-emerald-500 dark:hover:bg-emerald-400 dark:text-black font-bold text-xs rounded-xl transition-all shadow-lg flex items-center gap-1"
                         >
-                          Buy Now <ExternalLink className="w-3.5 h-3.5" />
+                          {t("visitor.merchandise.buy_now")} <ExternalLink className="w-3.5 h-3.5" />
                         </a>
                       ) : (
-                        <span className="text-xs text-[#07130e]/60 dark:text-gray-500 italic">Contact SRE</span>
+                        <span className="text-xs text-[#07130e]/60 dark:text-gray-500 italic">{t("visitor.merchandise.contact_sre")}</span>
                       )}
                     </div>
                   </div>
@@ -160,9 +162,9 @@ export default function MerchPublicClient({ merchandise = [] }) {
       <section id="catalog" className="scroll-mt-20 py-20 px-6 md:px-12 lg:px-20 border-b border-white/10 bg-[#08a270] dark:bg-[#07130e] transition-colors duration-300">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <span className="text-xs font-black text-yellow-300 dark:text-emerald-400 tracking-widest uppercase mb-2 block">• MERCHANDISE CATALOG</span>
+            <span className="text-xs font-black text-yellow-300 dark:text-emerald-400 tracking-widest uppercase mb-2 block">{t("visitor.merchandise.catalog")}</span>
             <h2 className="text-3xl md:text-5xl font-display font-black uppercase text-white tracking-tight">
-              OUR <span className="text-yellow-300 dark:text-emerald-400">PRODUCTS</span>
+              {t("visitor.merchandise.products").split(" ").slice(0, -1).join(" ")} <span className="text-yellow-300 dark:text-emerald-400">{t("visitor.merchandise.products").split(" ").pop()}</span>
             </h2>
           </div>
 
@@ -176,9 +178,9 @@ export default function MerchPublicClient({ merchandise = [] }) {
               <div className="w-16 h-16 rounded-2xl bg-yellow-300/10 text-yellow-300 dark:bg-emerald-500/10 dark:text-emerald-400 flex items-center justify-center mb-4">
                 <Package className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">No merchandise available yet</h3>
+              <h3 className="text-xl font-bold text-white mb-2">{t("visitor.merchandise.no_merch")}</h3>
               <p className="text-xs text-white/70 dark:text-gray-400 max-w-md">
-                We are working hard to create exclusive gear packages for you. Check back soon or follow our social media!
+                {t("visitor.merchandise.no_merch_desc")}
               </p>
             </motion.div>
           ) : (
@@ -203,7 +205,7 @@ export default function MerchPublicClient({ merchandise = [] }) {
                           ? "bg-yellow-300/25 text-yellow-300 border border-yellow-300/45 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30" 
                           : "bg-red-500/30 text-red-200 border border-red-500/40 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/20"
                       }`}>
-                        {item.isAvailable ? "Available" : "Out of Stock"}
+                        {item.isAvailable ? t("visitor.merchandise.available") : t("visitor.merchandise.out_of_stock")}
                       </span>
                     </div>
                   </div>
@@ -227,10 +229,10 @@ export default function MerchPublicClient({ merchandise = [] }) {
                           rel="noopener noreferrer"
                           className="px-4 py-2 bg-yellow-300 hover:bg-yellow-200 text-[#07130e] dark:bg-emerald-500 dark:hover:bg-emerald-400 dark:text-black font-bold text-xs rounded-xl transition-all shadow-lg flex items-center gap-1"
                         >
-                          Buy <ExternalLink className="w-3.5 h-3.5" />
+                          {t("visitor.merchandise.buy")} <ExternalLink className="w-3.5 h-3.5" />
                         </a>
                       ) : (
-                        <span className="text-xs text-white/60 dark:text-gray-500 italic">No link</span>
+                        <span className="text-xs text-white/60 dark:text-gray-500 italic">{t("visitor.merchandise.no_link")}</span>
                       )}
                     </div>
                   </div>
@@ -245,10 +247,10 @@ export default function MerchPublicClient({ merchandise = [] }) {
       <section className="py-20 px-6 md:px-12 lg:px-20 bg-[#0cc48a] dark:bg-[#030a07] text-white relative overflow-hidden transition-colors duration-300">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-start lg:items-center gap-12 relative z-10">
           <div className="max-w-xl">
-            <span className="text-xs font-black text-yellow-300 dark:text-emerald-400 tracking-widest uppercase mb-2 block">• ORDER & INQUIRIES</span>
+            <span className="text-xs font-black text-yellow-300 dark:text-emerald-400 tracking-widest uppercase mb-2 block">{t("visitor.merchandise.order_inquiries")}</span>
             <h2 className="text-3xl md:text-5xl font-display font-black leading-tight uppercase mb-4 text-white dark:text-white">
-              Get Our Official <br />
-              <span className="text-yellow-300 dark:text-emerald-400">Merchandise</span>
+              {t("visitor.merchandise.get_official").split(" ").slice(0, 3).join(" ")} <br />
+              <span className="text-yellow-300 dark:text-emerald-400">{t("visitor.merchandise.get_official").split(" ").slice(3).join(" ")}</span>
             </h2>
           </div>
 
@@ -270,7 +272,7 @@ export default function MerchPublicClient({ merchandise = [] }) {
               className="flex items-center justify-center gap-3 bg-yellow-300 text-[#07130e] hover:bg-yellow-200 shadow-lg shadow-yellow-300/20 dark:bg-emerald-500 dark:text-black dark:hover:bg-emerald-400 dark:shadow-emerald-500/20 px-8 py-4 rounded-2xl text-sm font-bold uppercase tracking-wider transition-all duration-300 transform hover:scale-105"
             >
               <ShoppingCart className="w-5 h-5" />
-              Shopee Store
+              {t("visitor.merchandise.shopee")}
             </a>
           </div>
         </div>

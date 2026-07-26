@@ -6,6 +6,7 @@ import { Mail } from "lucide-react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { useLanguage } from "@/i18n/LanguageProvider";
 
 const InstagramIcon = (props) => (
   <svg className={`fill-current ${props.className || "w-4 h-4"}`} viewBox="0 0 24 24" aria-hidden="true">
@@ -56,6 +57,7 @@ export default function Footer() {
   const pathname = usePathname();
   const { theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const { t } = useLanguage();
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -88,11 +90,11 @@ export default function Footer() {
           <nav className="mb-8 w-full" aria-label="Footer navigation">
             <ul className="flex flex-wrap justify-center items-center gap-x-8 md:gap-x-12 gap-y-4">
               {[
-                { label: "Home", href: "/" },
-                { label: "About", href: "/about" },
-                { label: "Activity", href: "/activity" },
-                { label: "Articles", href: "/articles" },
-                { label: "Merchandise", href: "/merchandise" }
+                { label: t("visitor.footer.home"), href: "/" },
+                { label: t("visitor.footer.about"), href: "/about" },
+                { label: t("visitor.footer.activity"), href: "/activity" },
+                { label: t("visitor.footer.articles"), href: "/articles" },
+                { label: t("visitor.footer.merchandise"), href: "/merchandise" }
               ].map((link) => (
                 <li key={link.href}>
                   <Link
@@ -124,7 +126,7 @@ export default function Footer() {
 
           {/* Bottom Copyright */}
           <div className="text-[12px] text-white/90 dark:text-gray-400 font-bold">
-            © {new Date().getFullYear()} Society of Renewable Energy UPN Veteran Jawa Timur. All rights reserved.
+            © {new Date().getFullYear()} Society of Renewable Energy UPN Veteran Jawa Timur. {t("visitor.footer.all_rights")}
           </div>
         </div>
       </footer>

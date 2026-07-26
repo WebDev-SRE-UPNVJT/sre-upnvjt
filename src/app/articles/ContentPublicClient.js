@@ -7,6 +7,7 @@ import Image from "next/image";
 import { 
   ChevronRight, Calendar, ArrowRight, Search, FileText, Leaf
 } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageProvider";
 
 // ─── Animation Variants ────────────────────────────────────────────────────────
 
@@ -37,6 +38,7 @@ const CATEGORY_COLORS = {
 
 // ─── Empty State ───────────────────────────────────────────────────────────────
 function EmptyState({ query }) {
+  const { t } = useLanguage();
   return (
     <motion.div
       key="empty"
@@ -60,19 +62,19 @@ function EmptyState({ query }) {
       </div>
       <div>
         <h3 className="text-[24px] font-display font-black uppercase tracking-tight text-white dark:text-white mb-2 drop-shadow-sm">
-          No Articles Found
+          {t("visitor.articles.no_articles")}
         </h3>
         <p className="text-[15px] text-white dark:text-gray-200 max-w-sm mx-auto leading-relaxed font-bold">
           {query
-            ? `No results for "${query}". Try a different keyword or browse all topics.`
-            : "No articles available in this category yet. Check back soon."}
+            ? t("visitor.articles.no_results").replace("{query}", query)
+            : t("visitor.articles.no_category_articles")}
         </p>
       </div>
       <button
         onClick={() => window.location.reload()}
         className="mt-2 px-8 py-3 rounded-full bg-yellow-300 dark:bg-emerald-500 text-slate-950 dark:text-slate-950 border-2 border-yellow-400 dark:border-emerald-600 text-[12px] font-black uppercase tracking-widest hover:bg-yellow-400 dark:hover:bg-emerald-600 shadow-md transition-all duration-300 focus-visible:outline-yellow-300 dark:focus-visible:outline-emerald-500"
       >
-        Browse All
+        {t("visitor.articles.browse_all")}
       </button>
     </motion.div>
   );
@@ -81,6 +83,7 @@ function EmptyState({ query }) {
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 export default function ContentPublicClient({ initialArticles }) {
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
 
@@ -111,16 +114,16 @@ export default function ContentPublicClient({ initialArticles }) {
         <div className="max-w-7xl mx-auto px-0 md:px-6 relative z-10 text-center">
           <motion.div {...fadeUp} initial={fadeUp.initial} animate={fadeUp.animate} transition={fadeUp.transition}>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-yellow-300 dark:text-emerald-400 text-xs font-bold uppercase tracking-widest mb-6">
-              <FileText className="w-4 h-4" aria-hidden="true" /> Latest Updates
+              <FileText className="w-4 h-4" aria-hidden="true" /> {t("visitor.articles.latest_updates")}
             </div>
             <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-6 text-white dark:text-white font-display">
-              Articles &{" "}
+              {t("visitor.articles.title").split(" & ")[0]} &{" "}
               <span className="text-yellow-300 dark:text-emerald-400">
-                Insights
+                {t("visitor.articles.title").split(" & ")[1]}
               </span>
             </h1>
             <p className="text-lg text-emerald-50/90 dark:text-white/55 max-w-2xl mx-auto mb-10">
-              Read the latest news, research, and updates from the Society of Renewable Energy UPN Veteran Jawa Timur.
+              {t("visitor.articles.desc")}
             </p>
             
             {/* Search bar with focus animation — clean solid border, no white glowing box shadow */}
@@ -128,7 +131,7 @@ export default function ContentPublicClient({ initialArticles }) {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-yellow-300 dark:text-emerald-400 pointer-events-none" aria-hidden="true" />
               <input 
                 type="text"
-                placeholder="Search articles by title or author..."
+                placeholder={t("visitor.articles.search_placeholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 aria-label="Search articles"
@@ -164,7 +167,7 @@ export default function ContentPublicClient({ initialArticles }) {
                     />
                   )}
                   <span className="relative z-10">
-                    {cat === "all" ? "All Topics" : cat}
+                    {cat === "all" ? t("visitor.articles.all_topics") : cat}
                   </span>
                 </button>
               ))}

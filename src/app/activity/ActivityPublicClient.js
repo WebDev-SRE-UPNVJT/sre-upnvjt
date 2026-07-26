@@ -3,8 +3,10 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, MapPin, Sparkles, Filter, Activity as ActivityIcon, ArrowUpRight, Tag } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageProvider";
 
 export default function ActivityPublicClient({ activities = [] }) {
+  const { language, t } = useLanguage();
   const [selectedType, setSelectedType] = useState("ALL");
 
   const now = new Date();
@@ -42,7 +44,7 @@ export default function ActivityPublicClient({ activities = [] }) {
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
     try {
-      return new Date(dateStr).toLocaleDateString('en-US', {
+      return new Date(dateStr).toLocaleDateString(language === "id" ? "id-ID" : "en-US", {
         month: 'short',
         day: 'numeric',
         year: 'numeric'
@@ -74,17 +76,17 @@ export default function ActivityPublicClient({ activities = [] }) {
             </div>
             
             <h1 className="text-4xl md:text-6xl font-display font-black tracking-tight uppercase leading-tight text-white mb-6">
-              ACTIVITIES & <span className="text-yellow-300 dark:text-emerald-400">PROGRAMS</span>
+              {t("visitor.activity.title").split(" & ")[0]} & <span className="text-yellow-300 dark:text-emerald-400">{t("visitor.activity.title").split(" & ")[1]}</span>
             </h1>
 
             <p className="text-lg md:text-xl text-white dark:text-gray-300 font-light leading-relaxed mb-8 max-w-2xl">
-              Explore our latest initiatives, workshops, outreach campaigns, and energy transition events.
+              {t("visitor.activity.subtitle")}
             </p>
 
             <div className="flex items-center gap-4 text-sm font-semibold text-white/80 dark:text-gray-400">
               <span className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-yellow-300 dark:bg-emerald-400 animate-pulse" />
-                {activities.length} Total Registered Activities
+                {activities.length} {t("visitor.activity.total_act")}
               </span>
             </div>
           </motion.div>
@@ -117,7 +119,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-[#07130e]/60 dark:text-gray-500 p-8 text-center bg-[#07130e]/5 dark:bg-emerald-950/20">
                       <ActivityIcon className="w-16 h-16 text-[#0cc48a]/30 dark:text-emerald-500/30 mb-3" />
-                      <span className="text-xs uppercase font-bold tracking-widest text-[#0cc48a]/50 dark:text-emerald-500/50">No Image Uploaded</span>
+                      <span className="text-xs uppercase font-bold tracking-widest text-[#0cc48a]/50 dark:text-emerald-500/50">{t("visitor.activity.no_image")}</span>
                     </div>
                   )}
 
@@ -139,7 +141,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                         : "bg-[#0cc48a]/10 text-[#07130e] border border-[#0cc48a]/20 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30"
                     }`}>
                       <span className={`w-2 h-2 rounded-full ${isUpcomingFeatured ? "bg-amber-500 animate-ping" : "bg-[#0cc48a] dark:bg-emerald-400 animate-pulse"}`} />
-                      {isUpcomingFeatured ? "UPCOMING EVENT" : "LATEST EVENT"}
+                      {isUpcomingFeatured ? t("visitor.activity.upcoming") : t("visitor.activity.latest")}
                     </span>
                   </div>
 
@@ -148,7 +150,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                   </h2>
 
                   <p className="text-[#07130e]/80 dark:text-gray-300 text-sm md:text-base leading-relaxed font-normal whitespace-pre-line line-clamp-4">
-                    {featuredActivity.description || "No description available for this activity."}
+                    {featuredActivity.description || t("visitor.activity.no_desc")}
                   </p>
 
                   {/* Metadata Bar */}
@@ -159,7 +161,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                           <Calendar className="w-4 h-4" />
                         </div>
                         <div>
-                          <span className="text-[10px] uppercase font-bold tracking-wider text-[#07130e]/60 dark:text-gray-400 block">Date</span>
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-[#07130e]/60 dark:text-gray-400 block">{t("visitor.activity.date")}</span>
                           <span className="font-semibold text-[#07130e] dark:text-white">{formatDate(featuredActivity.date)}</span>
                         </div>
                       </div>
@@ -171,7 +173,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                           <MapPin className="w-4 h-4" />
                         </div>
                         <div>
-                          <span className="text-[10px] uppercase font-bold tracking-wider text-[#07130e]/60 dark:text-gray-400 block">Location</span>
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-[#07130e]/60 dark:text-gray-400 block">{t("visitor.activity.location")}</span>
                           <span className="font-semibold text-[#07130e] dark:text-white truncate max-w-[180px] block">{featuredActivity.location}</span>
                         </div>
                       </div>
@@ -191,27 +193,27 @@ export default function ActivityPublicClient({ activities = [] }) {
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
             <div>
               <span className="text-xs font-black text-yellow-300 dark:text-emerald-400 tracking-widest uppercase mb-2 block">
-                • ARCHIVE & OTHER DISPATCHES
+                {t("visitor.activity.archive_title")}
               </span>
               <h2 className="text-3xl md:text-4xl font-display font-black text-white uppercase tracking-tight">
-                Our <span className="text-yellow-300 dark:text-emerald-400">Events</span>
+                Our <span className="text-yellow-300 dark:text-emerald-400">{t("visitor.activity.our_events").split(" ").pop()}</span>
               </h2>
             </div>
 
             {/* Filter Tabs */}
             {types.length > 1 && (
               <div className="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
-                {types.map(t => (
+                {types.map(tabType => (
                   <button
-                    key={t}
-                    onClick={() => setSelectedType(t)}
+                    key={tabType}
+                    onClick={() => setSelectedType(tabType)}
                     className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 border ${
-                      selectedType === t
+                      selectedType === tabType
                         ? "bg-yellow-300 text-[#07130e] border-yellow-300 shadow-lg shadow-yellow-300/20 dark:bg-emerald-500 dark:text-black dark:border-emerald-500 dark:shadow-emerald-500/20"
                         : "bg-white/10 hover:bg-white/20 text-white border-white/10 hover:text-yellow-300 dark:bg-white/5 dark:hover:bg-white/10 dark:text-gray-300 dark:hover:text-white dark:border-white/5"
                     }`}
                   >
-                    {t}
+                    {tabType === "ALL" ? t("visitor.articles.all_topics") : tabType}
                   </button>
                 ))}
               </div>
@@ -222,11 +224,11 @@ export default function ActivityPublicClient({ activities = [] }) {
           {filteredRemaining.length === 0 ? (
             <div className="text-center py-20 bg-white/10 dark:bg-white/[0.01] border border-dashed border-white/20 dark:border-white/10 rounded-3xl">
               <ActivityIcon className="w-12 h-12 text-yellow-300/60 dark:text-gray-600 mx-auto mb-4" />
-              <h3 className="text-lg font-bold text-white mb-1">No other activities found</h3>
+              <h3 className="text-lg font-bold text-white mb-1">{t("visitor.activity.no_act_found")}</h3>
               <p className="text-xs text-white/70 dark:text-gray-400 max-w-sm mx-auto">
                 {activities.length === 0
-                  ? "There are currently no activities registered in the database."
-                  : "No events match the selected category filter."}
+                  ? t("visitor.activity.no_act_db")
+                  : t("visitor.activity.no_act_filter")}
               </p>
             </div>
           ) : (
@@ -270,7 +272,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                         {act.name}
                       </h3>
                       <p className="text-white/90 dark:text-gray-300 text-xs leading-relaxed mb-6 line-clamp-3">
-                        {act.description || "No description provided."}
+                        {act.description || t("visitor.activity.no_desc")}
                       </p>
                     </div>
 

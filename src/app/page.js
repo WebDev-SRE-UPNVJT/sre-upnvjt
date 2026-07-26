@@ -20,6 +20,7 @@ import { useTheme } from "next-themes";
 import { getPublicContent } from "@/app/actions/contentActions";
 import ActivityCarousel from "@/app/ActivityCarouselClient";
 import { getActivities } from "@/app/actions/activityActions";
+import { useLanguage } from "@/i18n/LanguageProvider";
 
 export const dynamic = "force-dynamic";
 
@@ -112,6 +113,7 @@ const ACTIVITIES = [
 
 export default function Home() {
   const { theme, resolvedTheme } = useTheme();
+  const { t } = useLanguage();
   const [mounted, setMounted] = useState(false);
   const [dbActivities, setDbActivities] = useState([]);
 
@@ -132,6 +134,17 @@ export default function Home() {
   const [publicActivitiesList, setPublicActivitiesList] = useState([]);
   const [publicTestimonialsList, setPublicTestimonialsList] = useState([]);
   const [isScrolled, setIsScrolled] = useState(false);
+
+  const localActivities = ACTIVITIES.map((act) => {
+    switch(act.id) {
+      case 0: return { ...act, title: t("visitor.home.campus_audit_title"), description: t("visitor.home.campus_audit_desc") };
+      case 1: return { ...act, title: t("visitor.home.re_project_title"), description: t("visitor.home.re_project_desc") };
+      case 2: return { ...act, title: t("visitor.home.study_discussion_title"), description: t("visitor.home.study_discussion_desc") };
+      case 3: return { ...act, title: t("visitor.home.social_project_title"), description: t("visitor.home.social_project_desc") };
+      case 4: return { ...act, title: t("visitor.home.external_events_title"), description: t("visitor.home.external_events_desc") };
+      default: return act;
+    }
+  });
 
   useEffect(() => {
     fetch('/api/partners')
@@ -259,7 +272,7 @@ export default function Home() {
             <span className={`text-[12px] sm:text-[14px] font-medium tracking-wide text-right ${
               isLight ? "text-white" : "text-white/90 drop-shadow-md"
             }`}>
-              Student Organization at <strong className="text-white font-bold block sm:inline">UPN Veteran Jawa Timur</strong>
+              {t("visitor.home.student_org_at")} <strong className="text-white font-bold block sm:inline">UPN Veteran Jawa Timur</strong>
             </span>
           </div>
 
@@ -308,7 +321,7 @@ export default function Home() {
             <div className="flex flex-col w-full h-full lg:pt-0">
               <div>
                 <h2 className="text-3xl lg:text-4xl font-black uppercase text-white leading-none">
-                  ABOUT <span className="text-yellow-300 dark:text-emerald-400">SRE</span>
+                  {t("visitor.home.about_sre")}
                 </h2>
               </div>
 
@@ -336,7 +349,7 @@ export default function Home() {
               <div>
                 <h3 className="text-3xl lg:text-4xl font-black uppercase text-white">SRE INDONESIA</h3>
                 <p className="mt-3 text-white dark:text-gray-300 text-base leading-relaxed font-medium">
-                  Society of Renewable Energy (SRE) Indonesia is the national student organization uniting university chapters across Indonesia in the mission to accelerate the country&apos;s clean energy transition. Through education, research, and community action, we drive the clean energy revolution.
+                  {t("visitor.home.about_desc_sre_id")}
                 </p>
               </div>
               
@@ -345,16 +358,16 @@ export default function Home() {
               <div>
                 <h3 className="text-2xl lg:text-3xl font-black text-yellow-300 dark:text-emerald-400">SRE UPN JATIM</h3>
                 <p className="mt-3 text-white dark:text-gray-300 text-base leading-relaxed font-medium">
-                  SRE UPN Veteran Jawa Timur is a collaborative student chapter under SRE Indonesia based in Surabaya. Since 2021, we have been empowering students through hands-on clean energy campaigns, professional research projects, and community technology deployments.
+                  {t("visitor.home.about_desc_sre_upnvjt")}
                 </p>
               </div>
 
               {/* Badge Row (Horizontal grid row of 3 stat cards) */}
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { text: "FOUNDED", value: "Est. 2021", Icon: Sprout },
-                  { text: "NETWORK", value: "SRE Indonesia", Icon: Globe },
-                  { text: "CAMPUS", value: "UPN Veteran Jatim", Icon: Building2 }
+                  { text: t("visitor.home.founded"), value: "Est. 2021", Icon: Sprout },
+                  { text: t("visitor.home.network"), value: "SRE Indonesia", Icon: Globe },
+                  { text: t("visitor.home.campus"), value: "UPN Veteran Jatim", Icon: Building2 }
                 ].map((stat, idx) => (
                   <div
                     key={idx}
@@ -378,7 +391,7 @@ export default function Home() {
                   className="group inline-flex items-center gap-3 w-fit focus-visible:outline-emerald-600 focus-visible:outline-offset-4 rounded"
                 >
                   <span className="relative text-[14px] font-bold tracking-[0.18em] uppercase text-white dark:text-white after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[1.5px] after:w-0 after:bg-yellow-300 dark:after:bg-emerald-400 after:transition-all after:duration-300 group-hover:after:w-full">
-                    LEARN MORE ABOUT US
+                    {t("visitor.home.learn_more")}
                   </span>
                   <motion.span
                     whileHover={{ x: 4 }}
@@ -413,21 +426,20 @@ export default function Home() {
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <span className="text-yellow-300 dark:text-emerald-400 text-xl leading-none select-none font-black">•</span>
                   <span className="text-[15px] md:text-[17px] font-black tracking-[0.25em] text-yellow-300 dark:text-emerald-400 uppercase drop-shadow-md">
-                    WHAT WE DO
+                    {t("visitor.home.what_we_do")}
                   </span>
                 </div>
                 <h2 className="text-[36px] md:text-[44px] font-display font-black tracking-tight text-white dark:text-white uppercase leading-[1.1]">
-                  OUR <span className="text-yellow-300 dark:text-emerald-400">ACTIVITY</span>
+                  OUR <span className="text-yellow-300 dark:text-emerald-400">{t("visitor.home.our_activity")}</span>
                 </h2>
                 <div className="h-[4px] w-20 bg-yellow-300 dark:bg-emerald-400 mx-auto mt-2 rounded-full" aria-hidden="true" />
                 <p className="text-[15px] md:text-[16px] text-white dark:text-gray-300 max-w-xl mx-auto mt-3 font-bold leading-relaxed">
-                  From research to community impact <br />
-                  explore what SRE UPN JATIM does on the ground.
+                  {t("visitor.home.activity_desc")}
                 </p>
               </motion.div>
 
               {/* 3 Cards Carousel Row */}
-              <ActivityCarousel activities={dbActivities.length > 0 ? dbActivities : ACTIVITIES} />
+              <ActivityCarousel activities={dbActivities.length > 0 ? dbActivities : localActivities} />
 
               {/* SEE ALL ACTIVITIES CTA Button */}
               <div className="w-full text-center mt-6">
@@ -441,7 +453,7 @@ export default function Home() {
                     href="/activity"
                     className="group inline-flex items-center gap-2 border-2 border-yellow-300/60 hover:bg-yellow-300 hover:text-[#0cc48a] text-yellow-300 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#040e0a] font-bold tracking-wider text-xs uppercase px-8 py-3.5 rounded-full transition-all duration-300 focus-visible:outline-yellow-300"
                   >
-                    SEE ALL ACTIVITIES
+                    {t("visitor.home.see_all")}
                     <ArrowUpRight className="w-4 h-4 text-yellow-300 group-hover:text-[#0cc48a] dark:text-emerald-400 dark:group-hover:text-[#040e0a] transition-colors" aria-hidden="true" />
                   </Link>
                 </motion.div>
@@ -463,10 +475,10 @@ export default function Home() {
                 transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                 className="mb-12 text-center"
               >
-                <span className="text-[14px] font-semibold tracking-wider text-yellow-300 dark:text-emerald-400 uppercase mb-3 block">Testimonials & Review</span>
-                <h2 className="text-[36px] font-display font-black tracking-tight text-white dark:text-white uppercase">What Members Say</h2>
+                <span className="text-[14px] font-semibold tracking-wider text-yellow-300 dark:text-emerald-400 uppercase mb-3 block">{t("visitor.home.testimonials")}</span>
+                <h2 className="text-[36px] font-display font-black tracking-tight text-white dark:text-white uppercase">{t("visitor.home.testimonials_title")}</h2>
                 <p className="text-[15px] text-white dark:text-white/60 mt-4 max-w-lg mx-auto font-medium">
-                  Hear directly from members about their learning journey, growth, and team experiences at SRE UPNVJT.
+                  {t("visitor.home.testimonials_desc")}
                 </p>
               </motion.div>
               
@@ -515,10 +527,10 @@ export default function Home() {
                 transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                 className="mb-12"
               >
-                <span className="text-[14px] font-semibold tracking-wider text-yellow-300 dark:text-emerald-400 uppercase mb-3 block">Collaboration & Synergy</span>
-                <h2 className="text-[36px] font-display font-black tracking-tight text-white dark:text-white uppercase">Our Partners</h2>
+                <span className="text-[14px] font-semibold tracking-wider text-yellow-300 dark:text-emerald-400 uppercase mb-3 block">{t("visitor.home.partners")}</span>
+                <h2 className="text-[36px] font-display font-black tracking-tight text-white dark:text-white uppercase">{t("visitor.home.partners_title")}</h2>
                 <p className="text-[15px] text-white dark:text-white/60 mt-4 max-w-lg mx-auto font-medium">
-                  Organizations, institutions, and communities we work with to accelerate the sustainable transition.
+                  {t("visitor.home.partners_desc")}
                 </p>
               </motion.div>
               

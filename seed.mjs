@@ -150,7 +150,7 @@ async function main() {
       isActive: true,
       roleId: staffRole.id,
       departmentId: dept.id,
-    });
+    });œ
     console.log('Staff created: staff@sre.co.id / password123');
   } else {
     console.log('Staff already exists.');

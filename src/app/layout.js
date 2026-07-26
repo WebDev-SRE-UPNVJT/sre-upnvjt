@@ -6,6 +6,7 @@ import { LanguageProvider } from "@/i18n/LanguageProvider";
 import { db } from "@/lib/db";
 import { systemSetting } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import FloatingThemeToggle from "@/components/FloatingThemeToggle";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -47,6 +48,7 @@ export default async function RootLayout({ children }) {
             <HeaderWrapper />
             {children}
             <FooterWrapper />
+            <FloatingThemeToggle />
           </LanguageProvider>
         </Providers>
       </body>

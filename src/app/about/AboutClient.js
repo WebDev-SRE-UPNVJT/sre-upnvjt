@@ -6,6 +6,7 @@ import {
   ArrowUpRight, BookOpen, Cpu, Leaf, Users, Mail, MapPin
 } from "lucide-react";
 import { DepartmentCard } from "@/components/organization/OrgComponents";
+import { useLanguage } from "@/i18n/LanguageProvider";
 
 // ─── Animation Variants ────────────────────────────────────────────────────────
 
@@ -74,6 +75,24 @@ const MISSION_ITEMS = [
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 export default function AboutClient({ departmentsData = [] }) {
+  const { t } = useLanguage();
+
+  const localPillars = PILLARS.map((p) => {
+    switch (p.num) {
+      case "01": return { ...p, title: t("visitor.about.pillar_edu"), desc: t("visitor.about.pillar_edu_desc") };
+      case "02": return { ...p, title: t("visitor.about.pillar_tech"), desc: t("visitor.about.pillar_tech_desc") };
+      case "03": return { ...p, title: t("visitor.about.pillar_env"), desc: t("visitor.about.pillar_env_desc") };
+      case "04": return { ...p, title: t("visitor.about.pillar_emp"), desc: t("visitor.about.pillar_emp_desc") };
+      default: return p;
+    }
+  });
+
+  const localMissionItems = [
+    { desc: t("visitor.about.mission_1") },
+    { desc: t("visitor.about.mission_2") },
+    { desc: t("visitor.about.mission_3") }
+  ];
+
   return (
     <div className="min-h-screen bg-[#0bb37e] dark:bg-[#07130e] text-white dark:text-white selection:bg-yellow-300 selection:text-[#07130e] antialiased overflow-hidden">
 
@@ -89,13 +108,13 @@ export default function AboutClient({ departmentsData = [] }) {
             className="flex flex-col items-start gap-4 mb-6"
           >
             <span className="inline-block py-2 px-5 rounded-full bg-[#099c6d] dark:bg-white/5 border-2 border-yellow-300/60 dark:border-white/20 text-[11px] font-black tracking-widest uppercase text-yellow-300 dark:text-[#e8ecc4] shadow-md">
-              About SRE UPNVJT
+              {t("visitor.about.title_badge")}
             </span>
           </motion.div>
 
           <motion.div variants={wordReveal} initial="hidden" animate="show" className="max-w-4xl">
             <h1 className="text-4xl sm:text-6xl md:text-7xl font-display font-black tracking-tight text-white dark:text-white uppercase leading-[0.95] drop-shadow-md">
-              {"Accelerating energy transition through student innovation".split(" ").map((word, i) => {
+              {t("visitor.about.hero_title").split(" ").map((word, i) => {
                 const isHighlight = i === 2 || i === 4 || i === 5;
                 return (
                   <motion.span 
@@ -114,28 +133,27 @@ export default function AboutClient({ departmentsData = [] }) {
             {...fadeUp(0.3)}
             className="mt-8 text-lg sm:text-xl font-bold text-white dark:text-gray-200 max-w-2xl leading-relaxed drop-shadow-sm"
           >
-            Society of Renewable Energy (SRE) UPN &quot;Veteran&quot; Jawa Timur adalah organisasi mahasiswa yang berdedikasi untuk mendorong akselerasi dan adopsi energi baru terbarukan.
+            {t("visitor.about.hero_desc")}
           </motion.p>
         </div>
       </section>
 
-      {/* ── 2. Vision & Mission Section ──────────────────────────────────────── */}
       <section id="vision" className="scroll-mt-20 py-24 px-6 md:px-12 lg:px-20 bg-[#0aa373] dark:bg-[#040e0a] border-b-2 border-white/25 dark:border-white/15 transition-colors duration-300">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
           <motion.div {...fadeUp(0)} className="lg:col-span-5 space-y-6">
-            <span className="text-sm md:text-base font-black text-yellow-300 dark:text-emerald-400 tracking-[0.3em] uppercase block drop-shadow-sm">Vision</span>
+            <span className="text-sm md:text-base font-black text-yellow-300 dark:text-emerald-400 tracking-[0.3em] uppercase block drop-shadow-sm">{t("visitor.about.vision")}</span>
             <h2 className="text-3xl sm:text-5xl font-display font-black text-white dark:text-white uppercase tracking-tight leading-tight drop-shadow-md">
               Center of Renewable Excellence
             </h2>
             <p className="text-base sm:text-lg font-bold text-white dark:text-gray-200 leading-relaxed drop-shadow-sm">
-              Menjadi wadah utama dan pusat keunggulan mahasiswa UPN &quot;Veteran&quot; Jawa Timur dalam pengembangan ilmu pengetahuan, teknologi, dan aksi nyata di bidang energi bersih demi mewujudkan masa depan Indonesia yang berkelanjutan.
+              {t("visitor.about.vision_desc")}
             </p>
           </motion.div>
-
+ 
           <motion.div {...fadeUp(0.15)} className="lg:col-span-7 space-y-6">
-            <span className="text-sm md:text-base font-black text-yellow-300 dark:text-emerald-400 tracking-[0.3em] uppercase block drop-shadow-sm">Mission</span>
+            <span className="text-sm md:text-base font-black text-yellow-300 dark:text-emerald-400 tracking-[0.3em] uppercase block drop-shadow-sm">{t("visitor.about.mission")}</span>
             <div className="space-y-4">
-              {MISSION_ITEMS.map((item, idx) => (
+              {localMissionItems.map((item, idx) => (
                 <div 
                   key={idx} 
                   className="flex items-start gap-4 p-5 rounded-2xl bg-white/10 dark:bg-[#07130e] border border-white/20 dark:border-white/5 hover:border-yellow-300/40 dark:hover:border-emerald-500/30 transition-all duration-300 shadow-md"
@@ -153,17 +171,16 @@ export default function AboutClient({ departmentsData = [] }) {
         </div>
       </section>
 
-      {/* ── 3. Four Strategic Pillars ────────────────────────────────────────── */}
       <section id="pillars" className="scroll-mt-20 py-24 px-6 md:px-12 lg:px-20 bg-[#099c6d] dark:bg-[#07130e] border-b-2 border-white/25 dark:border-white/15 transition-colors duration-300">
         <div className="max-w-7xl mx-auto">
           <motion.div {...fadeUp(0)} className="text-center mb-16 max-w-2xl mx-auto">
-            <span className="text-sm md:text-base font-black text-yellow-300 dark:text-emerald-400 tracking-[0.3em] uppercase block mb-3 drop-shadow-sm">Four Pillars</span>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-display font-black text-white dark:text-white uppercase tracking-tight drop-shadow-md">Focus Areas</h2>
+            <span className="text-sm md:text-base font-black text-yellow-300 dark:text-emerald-400 tracking-[0.3em] uppercase block mb-3 drop-shadow-sm">{t("visitor.about.four_pillars")}</span>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-display font-black text-white dark:text-white uppercase tracking-tight drop-shadow-md">{t("visitor.about.focus_areas")}</h2>
             <p className="text-base md:text-lg font-bold text-white dark:text-gray-200 mt-4 leading-relaxed drop-shadow-sm">
-              Kerangka kerja utama SRE UPNVJT dalam menggerakkan dampak nyata di lingkungan kampus dan masyarakat.
+              {t("visitor.about.pillars_desc")}
             </p>
           </motion.div>
-
+ 
           <motion.div 
             variants={staggerParent}
             initial="hidden"
@@ -171,7 +188,7 @@ export default function AboutClient({ departmentsData = [] }) {
             viewport={{ once: true, margin: "-60px" }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
           >
-            {PILLARS.map((pillar) => {
+            {localPillars.map((pillar) => {
               const IconComp = pillar.icon;
               return (
                 <motion.div
@@ -203,16 +220,16 @@ export default function AboutClient({ departmentsData = [] }) {
       </section>
 
       {/* ── 4. Structure Section ────────────────────────────────────────────── */}
-      <section id="structure" className="scroll-mt-20 py-24 px-6 md:px-12 lg:px-20 bg-[#0bb37e] dark:bg-[#040e0a] border-b-2 border-white/25 dark:border-white/15 transition-colors duration-300">
+       <section id="structure" className="scroll-mt-20 py-24 px-6 md:px-12 lg:px-20 bg-[#0bb37e] dark:bg-[#040e0a] border-b-2 border-white/25 dark:border-white/15 transition-colors duration-300">
         <div className="max-w-7xl mx-auto flex flex-col items-center">
           <motion.div 
             {...fadeUp(0)}
             className="text-center mb-16 max-w-3xl"
           >
-            <span className="text-sm md:text-base font-black text-yellow-300 dark:text-emerald-400 tracking-[0.3em] uppercase block mb-3 drop-shadow-sm">Internal Departments</span>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-display font-black text-white dark:text-white uppercase tracking-tight drop-shadow-md">Struktur Organisasi</h2>
+            <span className="text-sm md:text-base font-black text-yellow-300 dark:text-emerald-400 tracking-[0.3em] uppercase block mb-3 drop-shadow-sm">{t("visitor.about.internal_depts")}</span>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-display font-black text-white dark:text-white uppercase tracking-tight drop-shadow-md">{t("visitor.about.org_structure")}</h2>
             <p className="text-base md:text-lg font-bold text-white dark:text-gray-200 mt-4 max-w-xl mx-auto leading-relaxed drop-shadow-sm">
-              SRE UPNVJT operates through six focused divisions, each responsible for a critical pillar of our movement.
+              {t("visitor.about.structure_desc")}
             </p>
           </motion.div>
 
@@ -253,16 +270,16 @@ export default function AboutClient({ departmentsData = [] }) {
         <div className="max-w-5xl mx-auto relative z-10 flex flex-col items-center gap-10">
           <motion.div {...fadeUp(0)} className="flex flex-col items-center gap-5">
             <span className="px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 text-[10px] font-black tracking-widest uppercase text-yellow-300 dark:text-emerald-400">
-              Get Connected
+              {t("visitor.about.get_connected")}
             </span>
             <h2 className="text-4xl sm:text-6xl font-display font-black uppercase leading-tight tracking-tighter text-white dark:text-white">
               LET&apos;S GET{" "}
               <span className="text-yellow-300 dark:text-emerald-400">
-                CONNECTED
+                {t("visitor.about.lets_connect").split(" ").pop()}
               </span>
             </h2>
-            <p className="text-emerald-50/90 dark:text-white/50 text-[15px] max-w-md leading-relaxed">
-              Terhubung bersama kami untuk diskusi kemitraan, sponsor, media, atau sekadar bertukar wawasan seputar energi alternatif.
+            <p className="text-emerald-50/90 dark:text-white/55 text-[15px] max-w-md leading-relaxed">
+              {t("visitor.about.connect_desc")}
             </p>
           </motion.div>
 
@@ -360,7 +377,7 @@ export default function AboutClient({ departmentsData = [] }) {
                 aria-label="Open UPN Veteran Jawa Timur location in Google Maps"
               >
                 <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
-                Open in Google Maps
+                {t("visitor.about.open_gmaps")}
                 <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />
               </a>
             </div>

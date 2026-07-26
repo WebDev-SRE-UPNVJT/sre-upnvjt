@@ -5,6 +5,7 @@ import { ArrowRight, Sun, Moon, User, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
+import { useLanguage } from "@/i18n/LanguageProvider";
 
 const InstagramIcon = (props) => (
   <svg className={`fill-current ${props.className || "w-4 h-4"}`} viewBox="0 0 24 24" aria-hidden="true">
@@ -66,6 +67,7 @@ export default function Header() {
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
+  const { language, setLanguage, t } = useLanguage();
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -82,11 +84,11 @@ export default function Header() {
   }, [mobileMenuOpen]);
 
   const navItems = [
-    { name: "Home", path: "/" },
-    { name: "About", path: "/about" },
-    { name: "Activity", path: "/activity" },
-    { name: "Articles", path: "/articles" },
-    { name: "Merchandise", path: "/merchandise" },
+    { name: t("visitor.navbar.home"), path: "/" },
+    { name: t("visitor.navbar.about"), path: "/about" },
+    { name: t("visitor.navbar.activity"), path: "/activity" },
+    { name: t("visitor.navbar.articles"), path: "/articles" },
+    { name: t("visitor.navbar.merchandise"), path: "/merchandise" },
   ];
 
   const close = () => setMobileMenuOpen(false);
@@ -176,32 +178,32 @@ export default function Header() {
             })}
           </div>
 
-          {/* Desktop CTA — Theme toggle + Login */}
-          <div className="hidden md:flex items-center gap-3">
-            {/* Dark/Light Mode Toggle */}
-            {mounted && (
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                aria-label={
-                  theme === "dark"
-                    ? "Switch to light mode"
-                    : "Switch to dark mode"
-                }
-                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 border ${
-                  useDarkText
-                    ? "border-[#07130e]/30 text-[#07130e] hover:bg-[#07130e]/10"
-                    : "border-white/30 text-white hover:bg-white/10"
+          {/* Desktop CTA — Language toggle + Login */}
+          <div className="hidden md:flex items-center gap-4">
+            {/* Language Switcher */}
+            <div className="flex items-center text-[13px] font-bold tracking-wide mr-1 bg-white/15 dark:bg-black/35 rounded-full p-1 border border-white/20 dark:border-white/5 select-none shadow-inner">
+              <button
+                onClick={() => setLanguage("id")}
+                className={`px-3 py-1.5 rounded-full transition-all duration-300 ${
+                  language === "id"
+                    ? "bg-white text-[#0a9468] dark:bg-emerald-500 dark:text-black font-extrabold shadow-md"
+                    : "text-white/80 hover:text-white"
                 }`}
               >
-                {theme === "dark" ? (
-                  <Sun className="w-4 h-4" aria-hidden="true" />
-                ) : (
-                  <Moon className="w-4 h-4" aria-hidden="true" />
-                )}
-              </motion.button>
-            )}
+                ID
+              </button>
+              <button
+                onClick={() => setLanguage("en")}
+                className={`px-3 py-1.5 rounded-full transition-all duration-300 ${
+                  language === "en"
+                    ? "bg-white text-[#0a9468] dark:bg-emerald-500 dark:text-black font-extrabold shadow-md"
+                    : "text-white/80 hover:text-white"
+                }`}
+              >
+                EN
+              </button>
+            </div>
+
             <Link href="/login">
               <motion.div
                 whileHover={{ scale: 1.05 }}
@@ -212,7 +214,7 @@ export default function Header() {
                     : "border-white/30 text-white hover:bg-white hover:text-[#07130e]"
                 }`}
               >
-                Login
+                {t("visitor.navbar.login")}
                 <ArrowRight className="w-4 h-4 opacity-70 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
               </motion.div>
             </Link>
@@ -295,7 +297,7 @@ export default function Header() {
                         : "text-emerald-400"
                     }`}
                   >
-                    Navigation Menu
+                    {t("visitor.navbar.nav_menu")}
                   </span>
                   <span
                     className={`text-[10px] font-mono transition-colors duration-500 ${
@@ -371,7 +373,7 @@ export default function Header() {
                   })}
                 </nav>
 
-                {/* Actions Row: Login CTA + Mobile Dark/Light Mode Toggle */}
+                {/* Actions Row: Login CTA + Mobile Language Toggle */}
                 <motion.div
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -392,26 +394,35 @@ export default function Header() {
                     }`}
                   >
                     <User className="w-4 h-4" />
-                    Login
+                    {t("visitor.navbar.login")}
                   </Link>
 
-                  {mounted && (
+                  <div className="flex items-center bg-white/10 border border-white/25 rounded-full p-1 shrink-0 h-12 select-none">
                     <button
-                      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                      aria-label="Toggle theme"
-                      className={`w-12 h-12 rounded-full border backdrop-blur-md flex items-center justify-center active:scale-90 transition-all shrink-0 ${
-                        theme === "light"
-                          ? "border-white/20 bg-white/5 text-yellow-300 hover:bg-white/10"
-                          : "border-white/20 bg-white/5 text-white hover:bg-white/10"
+                      onClick={() => setLanguage("id")}
+                      className={`px-4 h-full rounded-full text-xs font-black transition-all duration-300 ${
+                        language === "id"
+                          ? (mounted && theme === "light" 
+                              ? "bg-yellow-300 text-slate-950 shadow-md"
+                              : "bg-emerald-400 text-[#07130e] shadow-md")
+                          : "text-white/80"
                       }`}
                     >
-                      {theme === "dark" ? (
-                        <Sun className="w-5 h-5 text-emerald-400" />
-                      ) : (
-                        <Moon className="w-5 h-5 text-yellow-300" />
-                      )}
+                      ID
                     </button>
-                  )}
+                    <button
+                      onClick={() => setLanguage("en")}
+                      className={`px-4 h-full rounded-full text-xs font-black transition-all duration-300 ${
+                        language === "en"
+                          ? (mounted && theme === "light" 
+                              ? "bg-yellow-300 text-slate-950 shadow-md"
+                              : "bg-emerald-400 text-[#07130e] shadow-md")
+                          : "text-white/80"
+                      }`}
+                    >
+                      EN
+                    </button>
+                  </div>
                 </motion.div>
               </div>
 
