@@ -60,14 +60,14 @@ export default function ActivityPublicClient({ activities = [] }) {
       <section className="relative py-20 md:py-28 px-6 md:px-12 flex items-center overflow-hidden border-b border-white/10 bg-[#0cc48a] dark:bg-[#07130e] transition-colors duration-300">
         {/* Background Image of SRE Meeting */}
         <div 
-          className="absolute inset-0 bg-cover bg-center scale-110 md:scale-120 pointer-events-none"
+          className="absolute inset-0 bg-cover bg-center scale-110 md:scale-120 pointer-events-none z-0"
           style={{ backgroundImage: 'url("/images/about/sre%20first%20meet.jpg")' }}
         />
         {/* Creative Left-to-Right Fading Gradient Mask to make it distinct from the About page and remove yellow tint */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#032218] via-[#0aa373]/95 to-[#0cc48a]/65 dark:from-[#050c09] dark:via-[#07130e]/95 dark:to-[#07130e]/30 pointer-events-none transition-colors duration-300" />
+        <div className="absolute inset-0 pointer-events-none transition-colors duration-300 z-10 activity-hero-overlay" />
 
         {/* Content */}
-        <div className="relative z-10 max-w-7xl mx-auto w-full">
+        <div className="relative z-20 max-w-7xl mx-auto w-full">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

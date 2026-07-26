@@ -100,14 +100,14 @@ export default function AboutClient({ departmentsData = [] }) {
       <section id="hero" className="scroll-mt-20 relative pt-44 pb-24 px-6 overflow-hidden border-b-2 border-white/25 dark:border-white/15 bg-[#0bb37e] dark:bg-[#07130e]">
         {/* Background Image of SRE Meeting */}
         <div 
-          className="absolute inset-0 bg-cover bg-center scale-110 md:scale-120 pointer-events-none"
+          className="absolute inset-0 bg-cover bg-center scale-110 md:scale-120 pointer-events-none z-0"
           style={{ backgroundImage: 'url("/images/about/sre%20first%20meet.jpg")' }}
         />
         {/* Tint overlay with transition to ensure high readability */}
-        <div className="absolute inset-0 bg-[#088c61]/90 dark:bg-[#060f0b]/93 pointer-events-none transition-colors duration-300" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" aria-hidden="true" />
+        <div className="absolute inset-0 pointer-events-none transition-colors duration-300 z-10 about-hero-overlay" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none z-0" aria-hidden="true" />
         
-        <div className="max-w-7xl mx-auto relative z-10">
+        <div className="max-w-7xl mx-auto relative z-20">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
