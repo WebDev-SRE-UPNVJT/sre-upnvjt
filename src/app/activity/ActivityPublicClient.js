@@ -58,6 +58,13 @@ export default function ActivityPublicClient({ activities = [] }) {
     <div className="min-h-screen bg-[#0cc48a] dark:bg-[#07130e] text-white pt-20 font-sans transition-colors duration-300">
       {/* ── HERO BANNER SECTION ── */}
       <section className="relative py-20 md:py-28 px-6 md:px-12 flex items-center overflow-hidden border-b border-white/10 bg-[#0cc48a] dark:bg-[#07130e] transition-colors duration-300">
+        {/* Background Image of SRE Meeting */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center scale-110 md:scale-120 pointer-events-none"
+          style={{ backgroundImage: 'url("/images/about/sre%20first%20meet.jpg")' }}
+        />
+        {/* Tint overlay with transition to ensure high readability */}
+        <div className="absolute inset-0 bg-[#0aa373]/90 dark:bg-[#060f0b]/93 pointer-events-none transition-colors duration-300" />
         {/* Ambient Glows */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-yellow-300/10 dark:bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-10 right-10 w-96 h-96 bg-yellow-400/10 dark:bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />
