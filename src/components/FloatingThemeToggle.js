@@ -23,13 +23,17 @@ export default function FloatingThemeToggle() {
       initial={{ opacity: 0, scale: 0.8, y: 50 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="fixed bottom-6 right-6 z-[60]"
+      className="fixed bottom-20 right-6 z-[60]"
     >
       <motion.button
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.92 }}
         onClick={() => setTheme(isDark ? "light" : "dark")}
-        className="w-14 h-14 rounded-full flex items-center justify-center relative overflow-hidden bg-white/70 dark:bg-[#07130e]/75 backdrop-blur-lg border border-white/40 dark:border-white/10 text-slate-800 dark:text-yellow-300 shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:shadow-[#0bb37e]/20 dark:hover:shadow-[#e8ecc4]/10 transition-shadow duration-300 focus:outline-none focus:ring-2 focus:ring-[#0bb37e] focus:ring-offset-2 dark:focus:ring-[#e8ecc4]"
+        className={`w-11 h-11 rounded-full flex items-center justify-center relative overflow-hidden backdrop-blur-lg border-2 shadow-lg transition-all duration-300 focus:outline-none ${
+          isDark
+            ? "bg-[#07130e]/85 border-emerald-400 text-emerald-400 shadow-black/30"
+            : "bg-[#0cc48a]/85 border-yellow-300 text-yellow-300 shadow-slate-900/10"
+        }`}
         aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       >
         <AnimatePresence mode="wait" initial={false}>
@@ -40,9 +44,9 @@ export default function FloatingThemeToggle() {
               animate={{ rotate: 0, opacity: 1, scale: 1 }}
               exit={{ rotate: 90, opacity: 0, scale: 0.6 }}
               transition={{ duration: 0.3 }}
-              className="text-yellow-400 font-bold"
+              className="text-emerald-400 font-bold"
             >
-              <Sun className="w-6 h-6 stroke-[2]" />
+              <Sun className="w-5 h-5 stroke-[2]" />
             </motion.div>
           ) : (
             <motion.div
@@ -51,9 +55,9 @@ export default function FloatingThemeToggle() {
               animate={{ rotate: 0, opacity: 1, scale: 1 }}
               exit={{ rotate: -90, opacity: 0, scale: 0.6 }}
               transition={{ duration: 0.3 }}
-              className="text-emerald-700 font-bold"
+              className="text-yellow-300 font-bold"
             >
-              <Moon className="w-6 h-6 stroke-[2]" />
+              <Moon className="w-5 h-5 stroke-[2]" />
             </motion.div>
           )}
         </AnimatePresence>

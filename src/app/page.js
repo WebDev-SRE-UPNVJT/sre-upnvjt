@@ -430,7 +430,7 @@ export default function Home() {
                   </span>
                 </div>
                 <h2 className="text-[36px] md:text-[44px] font-display font-black tracking-tight text-white dark:text-white uppercase leading-[1.1]">
-                  OUR <span className="text-yellow-300 dark:text-emerald-400">{t("visitor.home.our_activity")}</span>
+                  {t("visitor.home.our_activity_prefix")}<span className="text-yellow-300 dark:text-emerald-400">{t("visitor.home.our_activity_highlight")}</span>
                 </h2>
                 <div className="h-[4px] w-20 bg-yellow-300 dark:bg-emerald-400 mx-auto mt-2 rounded-full" aria-hidden="true" />
                 <p className="text-[15px] md:text-[16px] text-white dark:text-gray-300 max-w-xl mx-auto mt-3 font-bold leading-relaxed">

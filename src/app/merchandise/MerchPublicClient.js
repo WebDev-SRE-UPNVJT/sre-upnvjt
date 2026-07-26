@@ -99,7 +99,7 @@ export default function MerchPublicClient({ merchandise = [] }) {
             <div className="text-center mb-16">
               <span className="text-xs font-black text-[#0cc48a] dark:text-emerald-400 tracking-widest uppercase mb-2 block">{t("visitor.merchandise.exclusive_offers")}</span>
               <h2 className="text-3xl md:text-5xl font-display font-black uppercase text-[#07130e] dark:text-white tracking-tight">
-                {t("visitor.merchandise.special_bundles").split(" ").slice(0, 2).join(" ")} <span className="text-[#0cc48a] dark:text-emerald-400">{t("visitor.merchandise.special_bundles").split(" ").pop()}</span>
+                {t("visitor.merchandise.special_bundles_prefix")}<span className="text-[#0cc48a] dark:text-emerald-400">{t("visitor.merchandise.special_bundles_highlight")}</span>
               </h2>
             </div>
 
@@ -164,7 +164,7 @@ export default function MerchPublicClient({ merchandise = [] }) {
           <div className="text-center mb-16">
             <span className="text-xs font-black text-yellow-300 dark:text-emerald-400 tracking-widest uppercase mb-2 block">{t("visitor.merchandise.catalog")}</span>
             <h2 className="text-3xl md:text-5xl font-display font-black uppercase text-white tracking-tight">
-              {t("visitor.merchandise.products").split(" ").slice(0, -1).join(" ")} <span className="text-yellow-300 dark:text-emerald-400">{t("visitor.merchandise.products").split(" ").pop()}</span>
+              {t("visitor.merchandise.products_prefix")}<span className="text-yellow-300 dark:text-emerald-400">{t("visitor.merchandise.products_highlight")}</span>
             </h2>
           </div>
 
@@ -249,8 +249,8 @@ export default function MerchPublicClient({ merchandise = [] }) {
           <div className="max-w-xl">
             <span className="text-xs font-black text-yellow-300 dark:text-emerald-400 tracking-widest uppercase mb-2 block">{t("visitor.merchandise.order_inquiries")}</span>
             <h2 className="text-3xl md:text-5xl font-display font-black leading-tight uppercase mb-4 text-white dark:text-white">
-              {t("visitor.merchandise.get_official").split(" ").slice(0, 3).join(" ")} <br />
-              <span className="text-yellow-300 dark:text-emerald-400">{t("visitor.merchandise.get_official").split(" ").slice(3).join(" ")}</span>
+              {t("visitor.merchandise.get_official_prefix")} <br />
+              <span className="text-yellow-300 dark:text-emerald-400">{t("visitor.merchandise.get_official_highlight")}</span>
             </h2>
           </div>
 

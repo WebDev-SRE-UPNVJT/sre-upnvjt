@@ -181,28 +181,29 @@ export default function Header() {
           {/* Desktop CTA — Language toggle + Login */}
           <div className="hidden md:flex items-center gap-4">
             {/* Language Switcher */}
-            <div className="flex items-center text-[13px] font-bold tracking-wide mr-1 bg-white/15 dark:bg-black/35 rounded-full p-1 border border-white/20 dark:border-white/5 select-none shadow-inner">
-              <button
-                onClick={() => setLanguage("id")}
+            <button
+              onClick={() => setLanguage(language === "id" ? "en" : "id")}
+              className="flex items-center text-[13px] font-bold tracking-wide mr-1 bg-white/15 dark:bg-black/35 rounded-full p-1 border border-white/20 dark:border-white/5 select-none shadow-inner cursor-pointer"
+            >
+              <span
                 className={`px-3 py-1.5 rounded-full transition-all duration-300 ${
                   language === "id"
-                    ? "bg-white text-[#0a9468] dark:bg-emerald-500 dark:text-black font-extrabold shadow-md"
+                    ? "bg-white text-amber-600 dark:bg-emerald-500 dark:text-black font-extrabold shadow-md"
                     : "text-white/80 hover:text-white"
                 }`}
               >
                 ID
-              </button>
-              <button
-                onClick={() => setLanguage("en")}
+              </span>
+              <span
                 className={`px-3 py-1.5 rounded-full transition-all duration-300 ${
                   language === "en"
-                    ? "bg-white text-[#0a9468] dark:bg-emerald-500 dark:text-black font-extrabold shadow-md"
+                    ? "bg-white text-amber-600 dark:bg-emerald-500 dark:text-black font-extrabold shadow-md"
                     : "text-white/80 hover:text-white"
                 }`}
               >
                 EN
-              </button>
-            </div>
+              </span>
+            </button>
 
             <Link href="/login">
               <motion.div
@@ -397,10 +398,12 @@ export default function Header() {
                     {t("visitor.navbar.login")}
                   </Link>
 
-                  <div className="flex items-center bg-white/10 border border-white/25 rounded-full p-1 shrink-0 h-12 select-none">
-                    <button
-                      onClick={() => setLanguage("id")}
-                      className={`px-4 h-full rounded-full text-xs font-black transition-all duration-300 ${
+                  <button
+                    onClick={() => setLanguage(language === "id" ? "en" : "id")}
+                    className="flex items-center bg-white/10 border border-white/25 rounded-full p-1 shrink-0 h-12 select-none cursor-pointer"
+                  >
+                    <span
+                      className={`px-4 h-full flex items-center rounded-full text-xs font-black transition-all duration-300 ${
                         language === "id"
                           ? (mounted && theme === "light" 
                               ? "bg-yellow-300 text-slate-950 shadow-md"
@@ -409,10 +412,9 @@ export default function Header() {
                       }`}
                     >
                       ID
-                    </button>
-                    <button
-                      onClick={() => setLanguage("en")}
-                      className={`px-4 h-full rounded-full text-xs font-black transition-all duration-300 ${
+                    </span>
+                    <span
+                      className={`px-4 h-full flex items-center rounded-full text-xs font-black transition-all duration-300 ${
                         language === "en"
                           ? (mounted && theme === "light" 
                               ? "bg-yellow-300 text-slate-950 shadow-md"
@@ -421,8 +423,8 @@ export default function Header() {
                       }`}
                     >
                       EN
-                    </button>
-                  </div>
+                    </span>
+                  </button>
                 </motion.div>
               </div>
 

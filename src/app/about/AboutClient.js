@@ -273,9 +273,9 @@ export default function AboutClient({ departmentsData = [] }) {
               {t("visitor.about.get_connected")}
             </span>
             <h2 className="text-4xl sm:text-6xl font-display font-black uppercase leading-tight tracking-tighter text-white dark:text-white">
-              LET&apos;S GET{" "}
+              {t("visitor.about.lets_connect_prefix")}
               <span className="text-yellow-300 dark:text-emerald-400">
-                {t("visitor.about.lets_connect").split(" ").pop()}
+                {t("visitor.about.lets_connect_highlight")}
               </span>
             </h2>
             <p className="text-emerald-50/90 dark:text-white/55 text-[15px] max-w-md leading-relaxed">

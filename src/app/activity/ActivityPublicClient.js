@@ -196,7 +196,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                 {t("visitor.activity.archive_title")}
               </span>
               <h2 className="text-3xl md:text-4xl font-display font-black text-white uppercase tracking-tight">
-                Our <span className="text-yellow-300 dark:text-emerald-400">{t("visitor.activity.our_events").split(" ").pop()}</span>
+                {t("visitor.activity.our_events_prefix")}<span className="text-yellow-300 dark:text-emerald-400">{t("visitor.activity.our_events_highlight")}</span>
               </h2>
             </div>
 
