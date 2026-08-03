@@ -15,7 +15,7 @@ export async function PUT(req, { params }) {
     const resolvedParams = await params;
     const id = parseInt(resolvedParams.id);
     const body = await req.json();
-    const { title, description, rewardXp, deadline } = body;
+    const { title, description, rewardXp, deadline, folderId, submissionType, maxUploadSizeMb, allowMultipleFiles } = body;
 
     if (!title || !description || !deadline) {
       return NextResponse.json({ error: "Judul, deskripsi, dan tenggat waktu wajib diisi" }, { status: 400 });
@@ -27,6 +27,10 @@ export async function PUT(req, { params }) {
         description,
         rewardXp: rewardXp ? parseInt(rewardXp) : 0,
         deadline: new Date(deadline),
+        folderId: folderId ? String(folderId).trim() : null,
+        submissionType: submissionType || "BOTH",
+        maxUploadSizeMb: maxUploadSizeMb ? parseInt(maxUploadSizeMb) : 10,
+        allowMultipleFiles: Boolean(allowMultipleFiles),
       })
       .where(eq(task.id, id))
       .returning();

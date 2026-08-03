@@ -13,6 +13,9 @@ import {
   Zap,
   Sun,
   Wind,
+  Handshake,
+  Sparkles,
+  Crown,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -81,6 +84,82 @@ const ARTICLES = [
 ];
 
 const PARTNERS = ["SRE Indonesia", "UPN Veteran Jawa Timur", "SRE UPNVJT"];
+
+const DEFAULT_PARTNERS = [
+  {
+    id: "def-1",
+    name: "PT FREEPORT INDONESIA",
+    logoUrl: "",
+    tier: "PLATINUM",
+    websiteUrl: "#",
+  },
+  {
+    id: "def-2",
+    name: "ANTAM",
+    logoUrl: "",
+    tier: "PLATINUM",
+    websiteUrl: "#",
+  },
+  {
+    id: "def-3",
+    name: "PLN NUSANTARA RENEWABLES",
+    logoUrl: "",
+    tier: "GOLD",
+    websiteUrl: "#",
+  },
+  {
+    id: "def-4",
+    name: "PUPUK KALTIM",
+    logoUrl: "",
+    tier: "GOLD",
+    websiteUrl: "#",
+  },
+  {
+    id: "def-5",
+    name: "PLN NUSANTARA POWER",
+    logoUrl: "",
+    tier: "GOLD",
+    websiteUrl: "#",
+  },
+  {
+    id: "def-6",
+    name: "SKK MIGAS PERTAMINA EP",
+    logoUrl: "",
+    tier: "SILVER",
+    websiteUrl: "#",
+  },
+  {
+    id: "def-7",
+    name: "PERTAMINA PHE WMO",
+    logoUrl: "",
+    tier: "SILVER",
+    websiteUrl: "#",
+  },
+];
+
+function PartnerLogoImage({ partner, className }) {
+  const [hasError, setHasError] = useState(false);
+  const isStockPhoto = partner.logoUrl?.includes("unsplash.com");
+
+  if (hasError || !partner.logoUrl || isStockPhoto) {
+    return (
+      <div className="flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl bg-white/90 dark:bg-white/10 text-slate-900 dark:text-white font-display font-black text-xs sm:text-sm tracking-wide uppercase whitespace-nowrap shadow-sm border border-slate-200/60 dark:border-white/20 group-hover:scale-105 transition-all duration-300">
+        <Handshake className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+        <span>{partner.name}</span>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={partner.logoUrl}
+      alt={partner.name}
+      onError={() => setHasError(true)}
+      className={className}
+      title={partner.name}
+    />
+  );
+}
 
 const MOCK_ACTIVITIES = [
   {
@@ -285,7 +364,7 @@ export default function Home() {
             ══════════════════════════════════════════════════════════════════════ */}
 
         {/* Marquee ticker */}
-        <div className="bg-[#099c6d] dark:bg-[#050e09] border-y-2 border-white/25 dark:border-white/15 py-5 overflow-hidden flex select-none relative z-10" aria-hidden="true">
+        <div className="bg-[#099c6d] dark:bg-[#050e09] border-y-2 border-white/25 dark:border-transparent py-5 overflow-hidden flex select-none relative z-10" aria-hidden="true">
           <motion.div
             animate={{ x: ["0%", "-50%"] }}
             transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
@@ -303,7 +382,7 @@ export default function Home() {
         {/* ── About Section — 2-Column Redesign ── */}
         <section
           id="about"
-          className="scroll-mt-20 relative bg-[#0bb37e] dark:bg-[#07130e] text-white py-24 px-6 lg:px-20 flex items-center border-b-2 border-white/25 dark:border-white/15 overflow-hidden"
+          className="scroll-mt-20 relative bg-[#0bb37e] dark:bg-[#07130e] text-white py-24 px-6 lg:px-20 flex items-center border-b-2 border-white/25 dark:border-transparent overflow-hidden"
           style={{ minHeight: "100vh" }}
         >
           {/* BACKGROUND ICONS — z-0, spread across center (inline styles to guarantee opacity) */}
@@ -410,7 +489,7 @@ export default function Home() {
         {/* ── Our Activity Section — 100vh ── */}
         <section
           id="activity"
-          className="scroll-mt-20 bg-[#0cc48a] dark:bg-[#040e0a] py-8 lg:py-12 px-6 lg:px-20 border-b-2 border-white/25 dark:border-white/15 relative overflow-hidden flex items-center justify-center lg:h-screen lg:min-h-screen"
+          className="scroll-mt-20 bg-[#0cc48a] dark:bg-[#040e0a] py-8 lg:py-12 px-6 lg:px-20 border-b-2 border-white/25 dark:border-transparent relative overflow-hidden flex items-center justify-center lg:h-screen lg:min-h-screen"
         >
           <div className="w-full relative z-10 flex flex-col items-center">
             <div className="site-container w-full flex flex-col justify-between items-center gap-4">
@@ -466,7 +545,7 @@ export default function Home() {
 
         {/* ── Testimonials Section ──────────────────────────────────────────────── */}
         {publicTestimonialsList.length > 0 && (
-          <section className="bg-[#089668] dark:bg-[#07130e] border-t-2 border-white/25 dark:border-white/15 py-24 relative overflow-hidden">
+          <section className="bg-[#089668] dark:bg-[#07130e] border-t-2 border-white/25 dark:border-transparent py-24 relative overflow-hidden">
             <div className="site-container flex flex-col items-center">
               <motion.div
                 initial={{ opacity: 0, y: 22 }}
@@ -516,54 +595,139 @@ export default function Home() {
           </section>
         )}
 
-        {/* ── Partners Section ──────────────────────────────────────────────────── */}
-        {partnersList.length > 0 && (
-          <section id="partners" className="scroll-mt-20 bg-[#099c6d] dark:bg-[#07130e] pb-24 relative overflow-hidden">
-            <div className="site-container flex flex-col items-center justify-center text-center">
-              <motion.div
-                initial={{ opacity: 0, y: 22 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                className="mb-12"
-              >
-                <span className="text-[14px] font-semibold tracking-wider text-yellow-300 dark:text-emerald-400 uppercase mb-3 block">{t("visitor.home.partners")}</span>
-                <h2 className="text-[36px] font-display font-black tracking-tight text-white dark:text-white uppercase">{t("visitor.home.partners_title")}</h2>
-                <p className="text-[15px] text-white dark:text-white/60 mt-4 max-w-lg mx-auto font-medium">
-                  {t("visitor.home.partners_desc")}
-                </p>
-              </motion.div>
+        {/* ── Partners Section — Redesigned Premium Glassmorphic Showcase ──────── */}
+        <section id="partners" className="scroll-mt-20 relative bg-[#099c6d] dark:bg-[#07130e] py-24 md:py-32 px-6 lg:px-20 overflow-hidden transition-colors duration-500">
+          {/* Ambient Glow Effects */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-yellow-300/10 dark:bg-emerald-500/10 blur-[130px] rounded-full pointer-events-none" />
+          <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-white/5 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="site-container relative z-10 flex flex-col items-center justify-center text-center">
+            {/* Header */}
+            <motion.div
+              initial={{ opacity: 0, y: 22 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+              className="flex flex-col items-center max-w-2xl"
+            >
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 dark:bg-emerald-500/10 border border-white/25 dark:border-emerald-500/20 text-yellow-300 dark:text-emerald-400 text-xs font-black tracking-widest uppercase shadow-md mb-4 backdrop-blur-md">
+                <Handshake className="w-4 h-4 text-yellow-300 dark:text-emerald-400" />
+                <span>{t("visitor.home.partners")}</span>
+              </div>
+
+              <h2 className="text-3xl sm:text-5xl md:text-6xl font-display font-black tracking-tight text-white uppercase drop-shadow-md">
+                {t("visitor.home.partners_title")}
+              </h2>
+
+              <div className="h-[4px] w-20 bg-yellow-300 dark:bg-emerald-400 mx-auto mt-4 rounded-full" aria-hidden="true" />
+
+              <p className="text-sm md:text-base text-white/90 dark:text-gray-300 mt-4 leading-relaxed font-bold max-w-lg">
+                {t("visitor.home.partners_desc")}
+              </p>
+            </motion.div>
+
+            {/* Unified Single Master Sponsor Board Card */}
+            {(() => {
+              const allPartners = partnersList.length > 0 ? partnersList : DEFAULT_PARTNERS;
               
-              <motion.div
-                variants={staggerParent}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, margin: "-60px" }}
-                className="flex flex-wrap justify-center items-center gap-6 md:gap-12 opacity-80 mt-8"
-              >
-                {partnersList.map((partner) => {
-                  let sizeClasses = "w-40 h-20 md:w-48 md:h-24";
-                  if (partner.tier === "LARGE") sizeClasses = "w-56 h-28 md:w-72 md:h-36";
-                  if (partner.tier === "SMALL") sizeClasses = "w-32 h-16 md:w-36 md:h-16";
-                  return (
-                    <motion.div
-                      key={partner.id}
-                      variants={staggerChild}
-                      className={`${sizeClasses} bg-white/10 dark:bg-white/5 hover:bg-white/20 dark:hover:bg-white/10 rounded-2xl border border-white/20 dark:border-white/8 p-4 flex items-center justify-center hover:border-yellow-300/40 dark:hover:border-white/20 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer group`}
-                    >
-                      <img 
-                        src={partner.logoUrl} 
-                        alt={partner.name} 
-                        className="max-w-full max-h-full object-contain filter grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500"
-                        title={partner.name}
-                      />
-                    </motion.div>
-                  );
-                })}
-              </motion.div>
-            </div>
-          </section>
-        )}
+              const platinumPartners = allPartners.filter(p => {
+                const t = (p.tier || "").toUpperCase();
+                return t === "PLATINUM" || t === "LARGE" || t === "UTAMA";
+              });
+
+              const goldPartners = allPartners.filter(p => {
+                const t = (p.tier || "").toUpperCase();
+                return t === "GOLD" || t === "MEDIUM";
+              });
+
+              const silverPartners = allPartners.filter(p => {
+                const t = (p.tier || "").toUpperCase();
+                return t !== "PLATINUM" && t !== "LARGE" && t !== "UTAMA" && t !== "GOLD" && t !== "MEDIUM";
+              });
+
+              return (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.96, y: 24 }}
+                  whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-60px" }}
+                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                  className="w-full max-w-6xl mx-auto rounded-[36px] md:rounded-[48px] p-6 sm:p-10 md:p-14 shadow-[0_30px_70px_rgba(0,0,0,0.35)] border-2 border-white/40 dark:border-emerald-500/30 relative overflow-hidden backdrop-blur-3xl mt-10 flex flex-col items-center gap-6 md:gap-8 bg-gradient-to-br from-white/95 via-[#f6fcf8]/95 to-[#edf7f2]/95 dark:from-[#0b1c15]/95 dark:via-[#071510]/95 dark:to-[#040e0a]/95 group hover:border-yellow-300 dark:hover:border-emerald-400 transition-all duration-700"
+                >
+                  {/* Glowing Top Border Accent Sheen */}
+                  <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-transparent via-yellow-300 dark:via-emerald-400 to-transparent opacity-90 z-20" />
+
+                  {/* High-Tech Dot Matrix Pattern Overlay */}
+                  <div className="absolute inset-0 opacity-[0.22] dark:opacity-[0.15] bg-[radial-gradient(#10b981_1.2px,transparent_1.2px)] [background-size:24px_24px] pointer-events-none" />
+
+                  {/* Multi-Colored Ambient Glow Orbs inside the card */}
+                  <div className="absolute -top-24 -right-24 w-80 h-80 bg-yellow-300/25 dark:bg-emerald-400/20 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
+                  <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-400/25 dark:bg-teal-500/20 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
+
+                  {/* Row 1: Large Logos (Centered) */}
+                  {(platinumPartners.length > 0 ? platinumPartners : allPartners.slice(0, 2)).length > 0 && (
+                    <div className="w-full flex flex-wrap justify-center items-center gap-8 sm:gap-12 md:gap-16 relative z-10 py-1">
+                      {(platinumPartners.length > 0 ? platinumPartners : allPartners.slice(0, 2)).map((partner) => (
+                        <a
+                          key={partner.id || partner.name}
+                          href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
+                          target={partner.websiteUrl && partner.websiteUrl !== "#" ? "_blank" : undefined}
+                          rel="noopener noreferrer"
+                          className="group flex items-center justify-center p-2.5 transition-transform duration-300 hover:scale-105"
+                        >
+                          <PartnerLogoImage
+                            partner={partner}
+                            className="h-16 sm:h-22 md:h-26 max-w-[280px] sm:max-w-[380px] md:max-w-[420px] object-contain filter brightness-95 contrast-125 group-hover:brightness-105 group-hover:scale-105 transition-all duration-300"
+                          />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Row 2: Medium Logos */}
+                  {(goldPartners.length > 0 ? goldPartners : allPartners.slice(2, 4)).length > 0 && (
+                    <div className="w-full flex flex-wrap justify-center items-center gap-5 sm:gap-8 md:gap-12 relative z-10 py-1">
+                      {(goldPartners.length > 0 ? goldPartners : allPartners.slice(2, 4)).map((partner) => (
+                        <a
+                          key={partner.id || partner.name}
+                          href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
+                          target={partner.websiteUrl && partner.websiteUrl !== "#" ? "_blank" : undefined}
+                          rel="noopener noreferrer"
+                          className="group flex items-center justify-center p-2 transition-transform duration-300 hover:scale-105"
+                        >
+                          <PartnerLogoImage
+                            partner={partner}
+                            className="h-11 sm:h-15 md:h-18 max-w-[180px] sm:max-w-[230px] md:max-w-[260px] object-contain filter brightness-95 group-hover:brightness-105 group-hover:scale-105 transition-all duration-300"
+                          />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Row 3: Smaller Logos */}
+                  {(silverPartners.length > 0 ? silverPartners : allPartners.slice(4)).length > 0 && (
+                    <div className="w-full flex flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-8 relative z-10 pt-1">
+                      {(silverPartners.length > 0 ? silverPartners : allPartners.slice(4)).map((partner) => (
+                        <a
+                          key={partner.id || partner.name}
+                          href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
+                          target={partner.websiteUrl && partner.websiteUrl !== "#" ? "_blank" : undefined}
+                          rel="noopener noreferrer"
+                          className="group flex items-center justify-center p-1.5 transition-transform duration-300 hover:scale-105"
+                        >
+                          <PartnerLogoImage
+                            partner={partner}
+                            className="h-8 sm:h-11 md:h-13 max-w-[120px] sm:max-w-[160px] md:max-w-[190px] object-contain filter opacity-95 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300"
+                          />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              );
+            })()}
+          </div>
+        </section>
       </main>
     </div>
   );

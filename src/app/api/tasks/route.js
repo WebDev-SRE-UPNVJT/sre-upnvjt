@@ -1,27 +1,35 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { task, taskSubmission } from "@/db/schema";
-import { desc, count, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 
 export async function GET() {
   try {
-    const tasks = await db
-      .select({
-        id: task.id,
-        title: task.title,
-        description: task.description,
-        rewardXp: task.rewardXp,
-        deadline: task.deadline,
-        createdById: task.createdById,
-        createdAt: task.createdAt,
-        submissionCount: count(taskSubmission.id),
-      })
-      .from(task)
-      .leftJoin(taskSubmission, eq(taskSubmission.taskId, task.id))
-      .groupBy(task.id)
-      .orderBy(task.deadline);
+    const rawTasks = await db.query.task.findMany({
+      orderBy: [asc(task.deadline)],
+      with: {
+        submissions: {
+          columns: { id: true }
+        }
+      }
+    });
+
+    const tasks = rawTasks.map(t => ({
+      id: t.id,
+      title: t.title,
+      description: t.description,
+      rewardXp: t.rewardXp,
+      deadline: t.deadline,
+      folderId: t.folderId,
+      maxUploadSizeMb: t.maxUploadSizeMb,
+      allowMultipleFiles: t.allowMultipleFiles,
+      submissionType: t.submissionType,
+      createdById: t.createdById,
+      createdAt: t.createdAt,
+      submissionCount: t.submissions?.length || 0,
+    }));
 
     return NextResponse.json(tasks);
   } catch (error) {
@@ -37,7 +45,7 @@ export async function POST(req) {
     }
 
     const body = await req.json();
-    const { title, description, rewardXp, deadline } = body;
+    const { title, description, rewardXp, deadline, folderId, submissionType, maxUploadSizeMb, allowMultipleFiles } = body;
 
     if (!title || !description || !deadline) {
       return NextResponse.json({ error: "Judul, deskripsi, dan tenggat waktu wajib diisi" }, { status: 400 });
@@ -48,6 +56,10 @@ export async function POST(req) {
       description,
       rewardXp: rewardXp ? parseInt(rewardXp) : 0,
       deadline: new Date(deadline),
+      folderId: folderId ? String(folderId).trim() : null,
+      submissionType: submissionType || "BOTH",
+      maxUploadSizeMb: maxUploadSizeMb ? parseInt(maxUploadSizeMb) : 10,
+      allowMultipleFiles: Boolean(allowMultipleFiles),
       createdById: session.user.id,
     }).returning();
 

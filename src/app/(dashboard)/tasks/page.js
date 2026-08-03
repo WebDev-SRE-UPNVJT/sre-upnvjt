@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { hasAccess } from "@/lib/permissions";
 import { db } from "@/lib/db";
 import { task, taskSubmission } from "@/db/schema";
-import { desc, eq, count } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import TasksClient from "./TasksClient";
 
 export const dynamic = "force-dynamic";
@@ -22,22 +22,30 @@ export default async function TasksAdminPage() {
     redirect("/dashboard");
   }
 
-  // Fetch tasks with submission counts
-  const tasks = await db
-    .select({
-      id: task.id,
-      title: task.title,
-      description: task.description,
-      rewardXp: task.rewardXp,
-      deadline: task.deadline,
-      createdById: task.createdById,
-      createdAt: task.createdAt,
-      submissionCount: count(taskSubmission.id),
-    })
-    .from(task)
-    .leftJoin(taskSubmission, eq(taskSubmission.taskId, task.id))
-    .groupBy(task.id)
-    .orderBy(task.deadline);
+  // Fetch tasks with submission counts cleanly without SQL GROUP BY errors
+  const rawTasks = await db.query.task.findMany({
+    orderBy: [asc(task.deadline)],
+    with: {
+      submissions: {
+        columns: { id: true }
+      }
+    }
+  });
+
+  const tasks = rawTasks.map(t => ({
+    id: t.id,
+    title: t.title,
+    description: t.description,
+    rewardXp: t.rewardXp,
+    deadline: t.deadline,
+    folderId: t.folderId,
+    maxUploadSizeMb: t.maxUploadSizeMb,
+    allowMultipleFiles: t.allowMultipleFiles,
+    submissionType: t.submissionType,
+    createdById: t.createdById,
+    createdAt: t.createdAt,
+    submissionCount: t.submissions?.length || 0,
+  }));
 
   // Fetch all submissions
   const rawSubmissions = await db.query.taskSubmission.findMany({

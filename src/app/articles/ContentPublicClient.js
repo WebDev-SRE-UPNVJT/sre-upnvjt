@@ -182,7 +182,7 @@ export default function ContentPublicClient({ initialArticles }) {
         aria-live="polite"
         aria-atomic="false"
         aria-label="Articles grid"
-        className="scroll-mt-20 py-20 px-6 bg-[#0aa373] dark:bg-[#050e0a] border-t-2 border-white/25 dark:border-white/15 relative z-10"
+        className="scroll-mt-20 py-20 px-6 bg-[#0aa373] dark:bg-[#050e0a] border-t-2 border-white/25 dark:border-transparent relative z-10"
       >
         <div className="max-w-7xl mx-auto px-0 md:px-6">
           <AnimatePresence mode="wait">

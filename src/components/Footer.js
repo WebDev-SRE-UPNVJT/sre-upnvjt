@@ -132,7 +132,7 @@ export default function Footer() {
       </footer>
 
       {/* Dynamic Renewable Energy Vector Scene — Plants, Turbines, and Solar Panels */}
-      <div className={`w-full leading-[0] pointer-events-none select-none relative z-20 bg-[#0bb37e] dark:bg-[#07130e] border-t border-white/10 dark:border-white/5`}>
+      <div className={`w-full leading-[0] pointer-events-none select-none relative z-20 bg-[#0bb37e] dark:bg-[#07130e] border-t border-white/10 dark:border-transparent`}>
         <svg
           viewBox="0 0 1440 180"
           preserveAspectRatio="none"

@@ -104,7 +104,7 @@ export default function AboutClient({ departmentsData = [] }) {
     <div className="min-h-screen bg-[#0bb37e] dark:bg-[#07130e] text-white dark:text-white selection:bg-yellow-300 selection:text-[#07130e] antialiased overflow-hidden">
 
       {/* ── 1. Hero Section ─────────────────────────────────────────────────── */}
-      <section id="hero" className="scroll-mt-20 relative pt-44 pb-24 px-6 overflow-hidden border-b-2 border-white/25 dark:border-white/15 bg-[#0bb37e] dark:bg-[#07130e]">
+      <section id="hero" className="scroll-mt-20 relative pt-44 pb-24 px-6 overflow-hidden border-b-2 border-white/25 dark:border-transparent bg-[#0bb37e] dark:bg-[#07130e]">
         {/* Background Image of SRE Meeting */}
         <div 
           className="absolute inset-0 bg-cover bg-center scale-110 md:scale-120 pointer-events-none z-0"
@@ -155,7 +155,7 @@ export default function AboutClient({ departmentsData = [] }) {
         </div>
       </section>
 
-      <section id="vision" className="scroll-mt-20 py-24 px-6 md:px-12 lg:px-20 bg-[#0aa373] dark:bg-[#040e0a] border-b-2 border-white/25 dark:border-white/15 transition-colors duration-300">
+      <section id="vision" className="scroll-mt-20 py-24 px-6 md:px-12 lg:px-20 bg-[#0aa373] dark:bg-[#040e0a] border-b-2 border-white/25 dark:border-transparent transition-colors duration-300">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
           <motion.div {...fadeUp(0)} className="lg:col-span-5 space-y-6">
             <span className="text-sm md:text-base font-black text-yellow-300 dark:text-emerald-400 tracking-[0.3em] uppercase block drop-shadow-sm">{t("visitor.about.vision")}</span>
@@ -188,7 +188,7 @@ export default function AboutClient({ departmentsData = [] }) {
         </div>
       </section>
 
-      <section id="pillars" className="scroll-mt-20 py-24 px-6 md:px-12 lg:px-20 bg-[#099c6d] dark:bg-[#07130e] border-b-2 border-white/25 dark:border-white/15 transition-colors duration-300">
+      <section id="pillars" className="scroll-mt-20 py-24 px-6 md:px-12 lg:px-20 bg-[#099c6d] dark:bg-[#07130e] border-b-2 border-white/25 dark:border-transparent transition-colors duration-300">
         <div className="max-w-7xl mx-auto">
           <motion.div {...fadeUp(0)} className="text-center mb-16 max-w-2xl mx-auto">
             <span className="text-sm md:text-base font-black text-yellow-300 dark:text-emerald-400 tracking-[0.3em] uppercase block mb-3 drop-shadow-sm">{t("visitor.about.four_pillars")}</span>
@@ -237,7 +237,7 @@ export default function AboutClient({ departmentsData = [] }) {
       </section>
 
       {/* ── 4. Structure Section ────────────────────────────────────────────── */}
-       <section id="structure" className="scroll-mt-20 py-24 px-6 md:px-12 lg:px-20 bg-[#0bb37e] dark:bg-[#040e0a] border-b-2 border-white/25 dark:border-white/15 transition-colors duration-300">
+       <section id="structure" className="scroll-mt-20 py-24 px-6 md:px-12 lg:px-20 bg-[#0bb37e] dark:bg-[#040e0a] border-b-2 border-white/25 dark:border-transparent transition-colors duration-300">
         <div className="max-w-7xl mx-auto flex flex-col items-center">
           <motion.div 
             {...fadeUp(0)}

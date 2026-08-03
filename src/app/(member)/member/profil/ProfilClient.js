@@ -170,33 +170,32 @@ export default function ProfilClient({ user, recentTasks, recentQuizzes }) {
         </div>
 
         {/* Level & Badge Gamified Card */}
-        <div className={`relative rounded-3xl p-[2px] overflow-hidden group shadow-xl ${levelData.color} bg-white dark:bg-[#08120e]`}>
-          <div className="absolute inset-0 bg-gradient-to-br from-current to-transparent opacity-20" />
-          <div className="relative h-full rounded-[1.4rem] p-6 backdrop-blur-md flex flex-col justify-between border border-current bg-white/90 dark:bg-black/40">
+        <div className="relative rounded-3xl p-[2px] overflow-hidden group shadow-xl bg-gradient-to-br from-emerald-500/30 via-teal-500/20 to-emerald-500/30 dark:from-emerald-500/20 dark:via-teal-500/10 dark:to-emerald-500/20 border border-emerald-500/30 dark:border-emerald-500/30">
+          <div className="relative h-full rounded-[1.4rem] p-6 backdrop-blur-xl flex flex-col justify-between bg-white/95 dark:bg-[#08120e]/95 text-slate-900 dark:text-white">
             {/* Hexagon Pattern */}
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/honey_im_subtle.png')] opacity-10 pointer-events-none mix-blend-overlay" />
             
             <div className="relative z-10">
               <div className="flex justify-between items-center mb-4">
-                <span className="text-[10px] font-black uppercase tracking-widest opacity-60">{t("member_profile.rank")}</span>
-                <span className="text-[10px] font-black px-3 py-1 rounded-full border-2 border-current flex items-center gap-1 shadow-[0_0_10px_currentColor] bg-current text-white dark:text-black">
-                  <Award className="w-3 h-3" /> {levelData.levelName}
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-emerald-400/80">{t("member_profile.rank")}</span>
+                <span className="text-[10px] font-black px-3.5 py-1.5 rounded-full border border-emerald-500/40 dark:border-emerald-400/40 flex items-center gap-1.5 shadow-[0_0_12px_rgba(16,185,129,0.25)] bg-emerald-500/15 dark:bg-emerald-500/25 text-emerald-800 dark:text-emerald-300 backdrop-blur-md">
+                  <Award className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> {levelData.levelName}
                 </span>
               </div>
-              <h2 className="text-4xl font-display font-black mb-1 drop-shadow-md tracking-tighter text-current">Lvl {levelData.currentLevel}</h2>
-              <p className="text-[11px] font-bold leading-relaxed opacity-80 mt-1 uppercase tracking-wider">
+              <h2 className="text-4xl font-display font-black mb-1 drop-shadow-sm tracking-tighter text-emerald-600 dark:text-emerald-400">Lvl {levelData.currentLevel}</h2>
+              <p className="text-[11px] font-bold leading-relaxed opacity-80 mt-1 uppercase tracking-wider text-slate-600 dark:text-emerald-200/80">
                 {levelData.nextLevelXp ? `${t("member_profile.xp_to_next_pre")}${levelData.nextLevelXp - levelData.totalXp}${t("member_profile.xp_to_next_post")}` : t("member_profile.max_rank_reached")}
               </p>
             </div>
 
-            <div className="mt-6 pt-4 relative z-10">
-              <div className="flex justify-between text-[10px] font-black uppercase mb-2 opacity-80 tracking-widest">
+            <div className="mt-6 pt-4 relative z-10 border-t border-slate-200/80 dark:border-white/10">
+              <div className="flex justify-between text-[10px] font-black uppercase mb-2 opacity-80 tracking-widest text-slate-600 dark:text-emerald-300/80">
                 <span>{t("member_profile.total")} {levelData.totalXp} XP</span>
                 <span>{levelData.nextLevelXp ? `${t("member_profile.next")} ${levelData.nextLevelXp} XP` : t("member_profile.max_level")}</span>
               </div>
-              <div className="w-full bg-slate-200 dark:bg-black/50 h-3 rounded-full overflow-hidden border border-current shadow-inner relative p-[2px]">
+              <div className="w-full bg-slate-100 dark:bg-black/50 h-3 rounded-full overflow-hidden border border-emerald-500/30 shadow-inner relative p-[2px]">
                 <div 
-                  className="bg-current h-full rounded-full transition-all duration-1000 relative overflow-hidden" 
+                  className="bg-emerald-500 h-full rounded-full transition-all duration-1000 relative overflow-hidden shadow-[0_0_12px_rgba(16,185,129,0.5)]" 
                   style={{ width: `${levelData.progressPercentage}%` }}
                 >
                   <div className="absolute inset-0 bg-white/30 w-full animate-[shimmer_2s_infinite]" />

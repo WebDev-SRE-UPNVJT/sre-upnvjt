@@ -148,12 +148,8 @@ export default function DashboardLayout({ children }) {
         })}
       </nav>
 
-      {/* Footer Tools: Theme & Logout */}
+      {/* Footer Tools: Logout */}
       <div className={`mt-auto pt-4 border-t border-gray-200 dark:border-white/5 relative z-10 flex flex-col gap-2`}>
-        <div className={`flex ${isSidebarCollapsed ? 'justify-center' : 'justify-between items-center'} px-2 py-2 mb-2`}>
-          {!isSidebarCollapsed && <span className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-white/30">Theme</span>}
-          <ThemeToggle />
-        </div>
         <button 
           onClick={() => signOut({ callbackUrl: '/login' })}
           className={`flex items-center gap-4 py-3.5 rounded-xl text-[14px] font-medium text-red-500/80 dark:text-red-400/80 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-300 group ${isSidebarCollapsed ? 'w-12 h-12 justify-center px-0 mx-auto' : 'w-full px-4'}`}
@@ -250,12 +246,8 @@ export default function DashboardLayout({ children }) {
                 })}
               </nav>
 
-              {/* Footer Tools: Theme & Logout */}
+              {/* Footer Tools: Logout */}
               <div className="mt-4 pt-6 border-t border-gray-200 dark:border-white/5 relative z-10 shrink-0 pb-6 flex flex-col gap-4">
-                <div className="flex justify-between items-center px-4">
-                  <span className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-white/30">Theme</span>
-                  <ThemeToggle />
-                </div>
                 {/* Logout */}
                 <div className="p-4 border-t border-gray-100 dark:border-white/5">
                   <button 

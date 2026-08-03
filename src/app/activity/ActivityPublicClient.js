@@ -64,7 +64,7 @@ export default function ActivityPublicClient({ activities = [] }) {
   return (
     <div className="min-h-screen bg-[#0cc48a] dark:bg-[#07130e] text-white pt-20 font-sans transition-colors duration-300">
       {/* ── HERO BANNER SECTION ── */}
-      <section className="relative py-20 md:py-28 px-6 md:px-12 flex items-center overflow-hidden border-b border-white/10 bg-[#0cc48a] dark:bg-[#07130e] transition-colors duration-300">
+      <section className="relative py-20 md:py-28 px-6 md:px-12 flex items-center overflow-hidden border-b border-white/10 dark:border-transparent bg-[#0cc48a] dark:bg-[#07130e] transition-colors duration-300">
         {/* Background Image of SRE Meeting */}
         <div 
           className="absolute inset-0 bg-cover bg-center scale-110 md:scale-120 pointer-events-none z-0"
@@ -205,7 +205,7 @@ export default function ActivityPublicClient({ activities = [] }) {
       )}
 
       {/* ── OTHER ACTIVITIES SECTION ── */}
-      <section className="scroll-mt-20 py-16 md:py-24 px-6 md:px-12 relative border-t border-white/15 dark:border-white/10 bg-[#08a270] dark:bg-[#050e0a] transition-colors duration-300">
+      <section className="scroll-mt-20 py-16 md:py-24 px-6 md:px-12 relative border-t border-white/15 dark:border-transparent bg-[#08a270] dark:bg-[#050e0a] transition-colors duration-300">
         <div className="max-w-7xl mx-auto">
           {/* Header & Category Filters */}
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">

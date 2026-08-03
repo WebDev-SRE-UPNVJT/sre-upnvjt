@@ -13,7 +13,16 @@ import { hasAccess } from "@/lib/permissions";
 import * as XLSX from "xlsx";
 import { calculateSpeedBonusXp } from "@/lib/xpUtils";
 
-const EMPTY_TASK = { title: "", description: "", rewardXp: "30", deadline: "" };
+const EMPTY_TASK = {
+  title: "",
+  description: "",
+  rewardXp: "30",
+  deadline: "",
+  folderId: "",
+  submissionType: "FILE",
+  maxUploadSizeMb: "10",
+  allowMultipleFiles: false,
+};
 
 function CustomSelect({ value, onChange, options, icon: Icon, placeholder = "Pilih..." }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -130,6 +139,10 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
         description: tk.description,
         rewardXp: tk.rewardXp?.toString() || "30",
         deadline: localISOTime,
+        folderId: tk.folderId || "",
+        submissionType: tk.submissionType === "LINK" ? "LINK" : "FILE",
+        maxUploadSizeMb: tk.maxUploadSizeMb?.toString() || "10",
+        allowMultipleFiles: tk.allowMultipleFiles ?? false,
       });
     } else {
       setTaskForm({ ...EMPTY_TASK });
@@ -160,6 +173,10 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
           description: taskForm.description,
           rewardXp: parseInt(taskForm.rewardXp),
           deadline: taskForm.deadline,
+          folderId: taskForm.folderId ? taskForm.folderId.trim() : null,
+          submissionType: taskForm.submissionType === "LINK" ? "LINK" : "FILE",
+          maxUploadSizeMb: parseInt(taskForm.maxUploadSizeMb) || 10,
+          allowMultipleFiles: Boolean(taskForm.allowMultipleFiles),
         }),
       });
 
@@ -759,6 +776,11 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
                         <span className="text-xs text-gray-400 dark:text-white/30 line-clamp-1 mt-0.5 max-w-[320px]">
                           {tk.description}
                         </span>
+                        {tk.folderId && (
+                          <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 text-[10px] font-mono font-bold">
+                            GDrive: {tk.folderId}
+                          </div>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500 dark:text-white/60">
                         <div className="flex items-center gap-2">
@@ -1146,6 +1168,66 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
                         className={inputCls} />
                     </InputField>
                   </div>
+
+                  <InputField label="Tipe Pengumpulan Tugas *">
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        { value: "FILE", label: "File / Berkas Upload" },
+                        { value: "LINK", label: "Link / Tautan URL" },
+                      ].map(opt => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => setTaskForm(p => ({ ...p, submissionType: opt.value }))}
+                          className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all ${
+                            taskForm.submissionType === opt.value
+                              ? "bg-primary/15 text-primary border-primary dark:text-primary-light shadow-sm"
+                              : "bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-700 dark:text-white/70 hover:bg-gray-50 dark:hover:bg-white/10"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </InputField>
+
+                  {taskForm.submissionType === "FILE" && (
+                    <div className="p-4 bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 rounded-2xl space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <InputField label="Maksimal Ukuran File (MB)">
+                          <input
+                            type="number"
+                            min="1"
+                            max="500"
+                            value={taskForm.maxUploadSizeMb}
+                            onChange={e => setTaskForm(p => ({ ...p, maxUploadSizeMb: e.target.value }))}
+                            className={inputCls}
+                            placeholder="Contoh: 10"
+                          />
+                        </InputField>
+                        <div className="flex flex-col justify-end">
+                          <label className="flex items-center gap-3 p-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl cursor-pointer hover:border-primary/50 transition-all">
+                            <input
+                              type="checkbox"
+                              checked={taskForm.allowMultipleFiles}
+                              onChange={e => setTaskForm(p => ({ ...p, allowMultipleFiles: e.target.checked }))}
+                              className="w-4 h-4 rounded text-primary focus:ring-primary accent-emerald-500"
+                            />
+                            <span className="text-xs font-bold text-gray-800 dark:text-white">Boleh &gt; 1 File</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <InputField label="Google Drive Folder ID (Opsional)">
+                    <input type="text" value={taskForm.folderId}
+                      onChange={e => setTaskForm(p => ({ ...p, folderId: e.target.value }))}
+                      className={inputCls} placeholder="Contoh: 1WX9qOsbnLeGT44cdoV1uvY4jkvNu8f1E" />
+                    <span className="text-[11px] text-gray-500 dark:text-white/40 mt-1 block">
+                      ID Folder Google Drive tempat berkas submisi tugas ini disimpan. Kosongkan jika ingin menggunakan folder default.
+                    </span>
+                  </InputField>
                 </form>
               </div>
 

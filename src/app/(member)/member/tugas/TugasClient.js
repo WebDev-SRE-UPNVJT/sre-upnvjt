@@ -144,7 +144,7 @@ function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
   const { t }             = useLanguage();
   const router            = useRouter();
   const fileRef           = useRef(null);
-  const [type, setType]   = useState(task?.submissionType === "FILE" ? "file" : "link");
+  const [type, setType]   = useState(task?.submissionType === "LINK" ? "link" : "file");
   const [url, setUrl]     = useState(submission?.fileUrl ?? "");
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -156,11 +156,31 @@ function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
   const canSubmit = status === "NOT_STARTED" || status === "REJECTED";
   const statusCfg = STATUS_CONFIG[status];
 
+  const maxMb = task?.maxUploadSizeMb || 10;
+  const allowMulti = task?.allowMultipleFiles ?? false;
+
+  const validateAndSetFiles = (rawFiles) => {
+    setError("");
+    let selected = Array.from(rawFiles || []);
+
+    if (!allowMulti && selected.length > 1) {
+      selected = [selected[0]];
+    }
+
+    for (const f of selected) {
+      if (f.size > maxMb * 1024 * 1024) {
+        setError(`Ukuran berkas "${f.name}" (${(f.size / (1024 * 1024)).toFixed(1)} MB) melebihi batas maksimal ${maxMb} MB.`);
+        return;
+      }
+    }
+
+    setFiles(selected);
+  };
+
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragging(false);
-    const dropped = Array.from(e.dataTransfer.files);
-    setFiles(dropped);
+    validateAndSetFiles(e.dataTransfer.files);
   };
 
   const handleSubmit = async (e) => {
@@ -180,7 +200,14 @@ function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
         fd.append("fileUrl", url.trim());
       } else {
         if (files.length === 0) { setError("Pilih file terlebih dahulu."); setLoading(false); return; }
-        for (const f of files) fd.append("file", f);
+        for (const f of files) {
+          if (f.size > maxMb * 1024 * 1024) {
+            setError(`Ukuran berkas "${f.name}" melebihi batas maksimal ${maxMb} MB.`);
+            setLoading(false);
+            return;
+          }
+          fd.append("file", f);
+        }
       }
 
       const res = await fetch(`/api/tasks/${task.id}/submissions`, { method: "POST", body: fd });
@@ -237,17 +264,25 @@ function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
             <p className="text-sm text-slate-600 dark:text-white/60 leading-relaxed whitespace-pre-line">{task.description}</p>
           </div>
 
-          {/* Deadline + submission type */}
+          {/* Deadline + submission type + limits */}
           <div className="flex flex-wrap gap-2.5">
             <span className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-white/50">
               <Calendar className="w-3.5 h-3.5" />
               Deadline: {new Date(task.deadline).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
             </span>
-            {task.submissionType && (
-              <span className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-500">
-                {task.submissionType === "FILE" ? <UploadCloud className="w-3.5 h-3.5" /> : <LinkIcon className="w-3.5 h-3.5" />}
-                Submit via {task.submissionType === "FILE" ? "File" : "Link"}
-              </span>
+            <span className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-500">
+              {type === "link" ? <LinkIcon className="w-3.5 h-3.5" /> : <UploadCloud className="w-3.5 h-3.5" />}
+              {type === "link" ? "Hanya Link / Tautan" : "Hanya File / Berkas"}
+            </span>
+            {type === "file" && (
+              <>
+                <span className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400">
+                  Maks {maxMb} MB
+                </span>
+                <span className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400">
+                  {allowMulti ? "Boleh >1 File" : "Maks 1 File"}
+                </span>
+              </>
             )}
           </div>
 
@@ -279,27 +314,6 @@ function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
           {/* ── Submit form ──────────────────────────────────────────── */}
           {canSubmit && (
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Type selector — hanya tampil jika BOTH */}
-              {(!task.submissionType || task.submissionType === "BOTH") && (
-                <div className="flex gap-2 p-1.5 bg-slate-100 dark:bg-white/5 rounded-2xl">
-                  {[
-                    { key: "link", icon: LinkIcon,    label: "Submit Link" },
-                    { key: "file", icon: UploadCloud, label: "Upload File" },
-                  ].map(({ key, icon: Icon, label }) => (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => { setType(key); setFiles([]); setError(""); }}
-                      className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black transition-all duration-300 ${
-                        type === key
-                          ? "bg-white dark:bg-[#0d1f17] text-primary border border-primary/20 shadow-sm"
-                          : "text-slate-500 dark:text-white/40"}`}
-                    >
-                      <Icon className="w-3.5 h-3.5" />{label}
-                    </button>
-                  ))}
-                </div>
-              )}
 
               {/* Link input */}
               {type === "link" && (
@@ -329,7 +343,7 @@ function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
                         ? "border-emerald-500/50 bg-emerald-500/5"
                         : "border-slate-300 dark:border-white/15 hover:border-primary/50 hover:bg-primary/5"}`}
                 >
-                  <input ref={fileRef} type="file" multiple className="hidden" onChange={(e) => setFiles(Array.from(e.target.files))} />
+                  <input ref={fileRef} type="file" multiple={allowMulti} className="hidden" onChange={(e) => validateAndSetFiles(e.target.files)} />
 
                   {files.length > 0 ? (
                     <div className="space-y-2">

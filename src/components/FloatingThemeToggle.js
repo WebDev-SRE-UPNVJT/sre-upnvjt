@@ -15,7 +15,16 @@ export default function FloatingThemeToggle() {
     setMounted(true);
   }, []);
 
-  if (!mounted || pathname === "/login") return null;
+  const hiddenPrefixes = [
+    "/login", "/dashboard", "/member", "/staff", "/users", "/roles",
+    "/tasks", "/departments", "/forms", "/content", "/testimonials",
+    "/merch", "/partners", "/literature", "/ppt", "/quiz", "/activities",
+    "/leaderboard", "/attendance", "/events-admin", "/applications", "/settings"
+  ];
+
+  const isHidden = hiddenPrefixes.some((p) => pathname === p || pathname.startsWith(p + "/"));
+
+  if (!mounted || isHidden) return null;
 
   const currentTheme = theme === "system" ? resolvedTheme : theme;
   const isDark = currentTheme === "dark";

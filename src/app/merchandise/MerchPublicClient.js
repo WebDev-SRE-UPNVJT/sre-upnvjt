@@ -34,7 +34,7 @@ export default function MerchPublicClient({ merchandise = [] }) {
     <div className="min-h-screen bg-[#0cc48a] dark:bg-[#07130e] text-white pt-24 select-none font-sans transition-colors duration-300">
       
       {/* ── 1. Hero Section ── */}
-      <section className="relative bg-[#0cc48a] dark:bg-[#07130e] text-white py-20 px-6 md:px-12 lg:px-20 overflow-hidden border-b border-white/10 transition-colors duration-300">
+      <section className="relative bg-[#0cc48a] dark:bg-[#07130e] text-white py-20 px-6 md:px-12 lg:px-20 overflow-hidden border-b border-white/10 dark:border-transparent transition-colors duration-300">
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
         <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-yellow-300/10 dark:bg-emerald-500/10 blur-[100px]" />
         
@@ -66,23 +66,32 @@ export default function MerchPublicClient({ merchandise = [] }) {
           >
             <div className="absolute inset-0 bg-gradient-to-tr from-yellow-300/10 to-transparent dark:from-emerald-500/10 dark:to-transparent" />
             <svg
-              className="w-48 h-48 text-yellow-300/30 group-hover:text-yellow-300/50 dark:text-emerald-400/20 dark:group-hover:text-emerald-400/40 transition-colors duration-500"
+              className="w-48 h-48 text-yellow-300/40 group-hover:text-yellow-300/60 dark:text-emerald-400/40 dark:group-hover:text-emerald-400/60 transition-colors duration-500"
               viewBox="0 0 100 100"
               fill="none"
               stroke="currentColor"
-              strokeWidth="1.5"
             >
-              <line x1="50" y1="45" x2="50" y2="95" strokeWidth="2.5" />
-              <motion.g
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
-                style={{ transformOrigin: "50px 45px" }}
-              >
-                <circle cx="50" cy="45" r="3" fill="currentColor" />
-                <path d="M50 45 L50 15 L53 30 Z" fill="currentColor" />
-                <path d="M50 45 L24 60 L38 52 Z" fill="currentColor" />
-                <path d="M50 45 L76 60 L62 52 Z" fill="currentColor" />
-              </motion.g>
+              {/* Tapered Tower (Matches Footer Wind Turbine) */}
+              <path d="M 46.5 95 L 50 50 L 53.5 95 Z" fill="currentColor" opacity="0.75" />
+
+              {/* Rotating Blade Assembly Perfectly Centered at (50, 50) */}
+              <g>
+                <animateTransform
+                  attributeName="transform"
+                  type="rotate"
+                  from="0 50 50"
+                  to="360 50 50"
+                  dur="12s"
+                  repeatCount="indefinite"
+                />
+                {/* 3 Rounded Straight-Line Blades */}
+                <line x1="50" y1="50" x2="50" y2="12" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" opacity="0.9" />
+                <line x1="50" y1="50" x2="50" y2="12" transform="rotate(120 50 50)" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" opacity="0.9" />
+                <line x1="50" y1="50" x2="50" y2="12" transform="rotate(240 50 50)" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" opacity="0.9" />
+
+                {/* Center Hub */}
+                <circle cx="50" cy="50" r="4.5" fill="currentColor" />
+              </g>
             </svg>
             
             <div className="absolute bottom-6 left-6 right-6 text-center">
@@ -94,7 +103,7 @@ export default function MerchPublicClient({ merchandise = [] }) {
 
       {/* ── 2. Our Special Bundle Section (Dinamis) ── */}
       {bundles.length > 0 && (
-        <section className="py-20 px-6 md:px-12 lg:px-20 bg-[#e8ecc4] dark:bg-[#040e0a] border-b border-white/10 transition-colors duration-300">
+        <section className="py-20 px-6 md:px-12 lg:px-20 bg-[#e8ecc4] dark:bg-[#040e0a] border-b border-white/10 dark:border-transparent transition-colors duration-300">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <span className="text-xs font-black text-[#0cc48a] dark:text-emerald-400 tracking-widest uppercase mb-2 block">{t("visitor.merchandise.exclusive_offers")}</span>
@@ -159,7 +168,7 @@ export default function MerchPublicClient({ merchandise = [] }) {
       )}
 
       {/* ── 3. Our Products Section (100% Dinamis) ── */}
-      <section id="catalog" className="scroll-mt-20 py-20 px-6 md:px-12 lg:px-20 border-b border-white/10 bg-[#08a270] dark:bg-[#07130e] transition-colors duration-300">
+      <section id="catalog" className="scroll-mt-20 py-20 px-6 md:px-12 lg:px-20 border-b border-white/10 dark:border-transparent bg-[#08a270] dark:bg-[#07130e] transition-colors duration-300">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <span className="text-xs font-black text-yellow-300 dark:text-emerald-400 tracking-widest uppercase mb-2 block">{t("visitor.merchandise.catalog")}</span>
