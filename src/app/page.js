@@ -143,8 +143,8 @@ function PartnerLogoImage({ partner, className }) {
 
   if (hasError || !partner.logoUrl || isStockPhoto) {
     return (
-      <div className="flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl bg-white/90 dark:bg-white/10 text-slate-900 dark:text-white font-display font-black text-xs sm:text-sm tracking-wide uppercase whitespace-nowrap shadow-sm border border-slate-200/60 dark:border-white/20 group-hover:scale-105 transition-all duration-300">
-        <Handshake className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+      <div className="flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl bg-white/15 hover:bg-white/25 dark:bg-white/10 dark:hover:bg-white/15 text-white font-display font-black text-xs sm:text-sm tracking-wide uppercase whitespace-nowrap shadow-sm border border-white/25 dark:border-white/20 group-hover:scale-105 transition-all duration-300 backdrop-blur-md">
+        <Handshake className="w-4 h-4 text-yellow-300 dark:text-emerald-400 shrink-0" />
         <span>{partner.name}</span>
       </div>
     );
@@ -651,17 +651,17 @@ export default function Home() {
                   whileInView={{ opacity: 1, scale: 1, y: 0 }}
                   viewport={{ once: true, margin: "-60px" }}
                   transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                  className="w-full max-w-6xl mx-auto rounded-[36px] md:rounded-[48px] p-6 sm:p-10 md:p-14 shadow-[0_30px_70px_rgba(0,0,0,0.35)] border-2 border-white/40 dark:border-emerald-500/30 relative overflow-hidden backdrop-blur-3xl mt-10 flex flex-col items-center gap-6 md:gap-8 bg-gradient-to-br from-white/95 via-[#f6fcf8]/95 to-[#edf7f2]/95 dark:from-[#0b1c15]/95 dark:via-[#071510]/95 dark:to-[#040e0a]/95 group hover:border-yellow-300 dark:hover:border-emerald-400 transition-all duration-700"
+                  className="w-full max-w-6xl mx-auto rounded-[36px] md:rounded-[48px] p-6 sm:p-10 md:p-14 shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_30px_70px_rgba(0,0,0,0.35)] border-2 border-white/30 dark:border-emerald-500/30 relative overflow-hidden backdrop-blur-3xl mt-10 flex flex-col items-center gap-6 md:gap-8 bg-gradient-to-br from-white/20 via-white/10 to-white/15 dark:from-[#0b1c15]/95 dark:via-[#071510]/95 dark:to-[#040e0a]/95 group hover:border-yellow-300 dark:hover:border-emerald-400 transition-all duration-700"
                 >
                   {/* Glowing Top Border Accent Sheen */}
                   <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-transparent via-yellow-300 dark:via-emerald-400 to-transparent opacity-90 z-20" />
 
                   {/* High-Tech Dot Matrix Pattern Overlay */}
-                  <div className="absolute inset-0 opacity-[0.22] dark:opacity-[0.15] bg-[radial-gradient(#10b981_1.2px,transparent_1.2px)] [background-size:24px_24px] pointer-events-none" />
+                  <div className="absolute inset-0 opacity-[0.20] dark:opacity-[0.15] bg-[radial-gradient(#ffffff_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#10b981_1.2px,transparent_1.2px)] [background-size:24px_24px] pointer-events-none" />
 
                   {/* Multi-Colored Ambient Glow Orbs inside the card */}
-                  <div className="absolute -top-24 -right-24 w-80 h-80 bg-yellow-300/25 dark:bg-emerald-400/20 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
-                  <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-400/25 dark:bg-teal-500/20 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
+                  <div className="absolute -top-24 -right-24 w-80 h-80 bg-yellow-300/20 dark:bg-emerald-400/20 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
+                  <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-400/20 dark:bg-teal-500/20 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
 
                   {/* Row 1: Large Logos (Centered) */}
