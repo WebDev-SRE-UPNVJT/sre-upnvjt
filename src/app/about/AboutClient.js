@@ -353,7 +353,7 @@ export default function AboutClient({ departmentsData = [] }) {
                 target={href.startsWith("http") ? "_blank" : undefined}
                 rel={href.startsWith("http") ? "noreferrer noopener" : undefined}
                 aria-label={ariaLabel}
-                className="w-12 h-12 rounded-full bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/10 hover:bg-yellow-300 hover:text-slate-900 hover:border-yellow-300 flex items-center justify-center text-white dark:text-white transition-all duration-300 hover:scale-110 focus-visible:outline-yellow-300"
+                className="w-12 h-12 rounded-full bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/10 hover:bg-yellow-300 hover:text-slate-900 hover:border-yellow-300 dark:hover:bg-emerald-400 dark:hover:text-[#07130e] dark:hover:border-emerald-400 flex items-center justify-center text-white dark:text-white transition-all duration-300 hover:scale-110 focus-visible:outline-yellow-300 dark:focus-visible:outline-emerald-400"
               >
                 {icon}
               </motion.a>
