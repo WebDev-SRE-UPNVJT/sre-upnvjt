@@ -268,7 +268,7 @@ export default function MerchPublicClient({ merchandise = [] }) {
               href="https://instagram.com/sre.upnvjt"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-3 bg-white/10 hover:bg-white/20 border border-white/20 text-[#07130e] dark:text-white px-8 py-4 rounded-2xl text-sm font-bold uppercase tracking-wider transition-all duration-300 transform hover:scale-105"
+              className="flex items-center justify-center gap-3 bg-white/10 hover:bg-white/20 border-2 border-white/35 dark:border-white/20 text-[#07130e] dark:text-white px-8 py-4 rounded-2xl text-sm font-bold uppercase tracking-wider transition-all duration-300 transform hover:scale-105"
             >
               <InstagramIcon className="w-5 h-5 text-[#07130e] dark:text-emerald-400" />
               @sre.upnvjt
