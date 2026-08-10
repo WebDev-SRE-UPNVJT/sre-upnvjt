@@ -596,56 +596,57 @@ export default function Home() {
         )}
 
         {/* ── Partners Section — Redesigned Premium Glassmorphic Showcase ──────── */}
-        <section id="partners" className="scroll-mt-20 relative bg-[#099c6d] dark:bg-[#07130e] py-24 md:py-32 px-6 lg:px-20 overflow-hidden transition-colors duration-500">
-          {/* Ambient Glow Effects */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-yellow-300/10 dark:bg-emerald-500/10 blur-[130px] rounded-full pointer-events-none" />
-          <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-white/5 rounded-full blur-3xl pointer-events-none" />
+        {(() => {
+          const activePartners = partnersList.filter(p => p.isActive !== false);
+          if (activePartners.length === 0) return null;
 
-          <div className="site-container relative z-10 flex flex-col items-center justify-center text-center">
-            {/* Header */}
-            <motion.div
-              initial={{ opacity: 0, y: 22 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
-              className="flex flex-col items-center max-w-2xl"
-            >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 dark:bg-emerald-500/10 border border-white/25 dark:border-emerald-500/20 text-yellow-300 dark:text-emerald-400 text-xs font-black tracking-widest uppercase shadow-md mb-4 backdrop-blur-md">
-                <Handshake className="w-4 h-4 text-yellow-300 dark:text-emerald-400" />
-                <span>{t("visitor.home.partners")}</span>
-              </div>
+          const platinumPartners = activePartners.filter(p => {
+            const t = (p.tier || "").toUpperCase();
+            return t === "PLATINUM" || t === "LARGE" || t === "UTAMA";
+          });
 
-              <h2 className="text-3xl sm:text-5xl md:text-6xl font-display font-black tracking-tight text-white uppercase drop-shadow-md">
-                {t("visitor.home.partners_title")}
-              </h2>
+          const goldPartners = activePartners.filter(p => {
+            const t = (p.tier || "").toUpperCase();
+            return t === "GOLD" || t === "MEDIUM";
+          });
 
-              <div className="h-[4px] w-20 bg-yellow-300 dark:bg-emerald-400 mx-auto mt-4 rounded-full" aria-hidden="true" />
+          const silverPartners = activePartners.filter(p => {
+            const t = (p.tier || "").toUpperCase();
+            return t !== "PLATINUM" && t !== "LARGE" && t !== "UTAMA" && t !== "GOLD" && t !== "MEDIUM";
+          });
 
-              <p className="text-sm md:text-base text-white/90 dark:text-gray-300 mt-4 leading-relaxed font-bold max-w-lg">
-                {t("visitor.home.partners_desc")}
-              </p>
-            </motion.div>
+          return (
+            <section id="partners" className="scroll-mt-20 relative bg-[#099c6d] dark:bg-[#07130e] py-24 md:py-32 px-6 lg:px-20 overflow-hidden transition-colors duration-500">
+              {/* Ambient Glow Effects */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-yellow-300/10 dark:bg-emerald-500/10 blur-[130px] rounded-full pointer-events-none" />
+              <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-white/5 rounded-full blur-3xl pointer-events-none" />
 
-            {/* Unified Single Master Sponsor Board Card */}
-            {(() => {
-              const allPartners = partnersList.length > 0 ? partnersList : DEFAULT_PARTNERS;
-              
-              const platinumPartners = allPartners.filter(p => {
-                const t = (p.tier || "").toUpperCase();
-                return t === "PLATINUM" || t === "LARGE" || t === "UTAMA";
-              });
+              <div className="site-container relative z-10 flex flex-col items-center justify-center text-center">
+                {/* Header */}
+                <motion.div
+                  initial={{ opacity: 0, y: 22 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex flex-col items-center max-w-2xl"
+                >
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 dark:bg-emerald-500/10 border border-white/25 dark:border-emerald-500/20 text-yellow-300 dark:text-emerald-400 text-xs font-black tracking-widest uppercase shadow-md mb-4 backdrop-blur-md">
+                    <Handshake className="w-4 h-4 text-yellow-300 dark:text-emerald-400" />
+                    <span>{t("visitor.home.partners")}</span>
+                  </div>
 
-              const goldPartners = allPartners.filter(p => {
-                const t = (p.tier || "").toUpperCase();
-                return t === "GOLD" || t === "MEDIUM";
-              });
+                  <h2 className="text-3xl sm:text-5xl md:text-6xl font-display font-black tracking-tight text-white uppercase drop-shadow-md">
+                    {t("visitor.home.partners_title")}
+                  </h2>
 
-              const silverPartners = allPartners.filter(p => {
-                const t = (p.tier || "").toUpperCase();
-                return t !== "PLATINUM" && t !== "LARGE" && t !== "UTAMA" && t !== "GOLD" && t !== "MEDIUM";
-              });
+                  <div className="h-[4px] w-20 bg-yellow-300 dark:bg-emerald-400 mx-auto mt-4 rounded-full" aria-hidden="true" />
 
-              return (
+                  <p className="text-sm md:text-base text-white/90 dark:text-gray-300 mt-4 leading-relaxed font-bold max-w-lg">
+                    {t("visitor.home.partners_desc")}
+                  </p>
+                </motion.div>
+
+                {/* Unified Single Master Sponsor Board Card */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.96, y: 24 }}
                   whileInView={{ opacity: 1, scale: 1, y: 0 }}
@@ -659,35 +660,30 @@ export default function Home() {
                   {/* High-Tech Dot Matrix Pattern Overlay */}
                   <div className="absolute inset-0 opacity-[0.20] dark:opacity-[0.15] bg-[radial-gradient(#ffffff_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#10b981_1.2px,transparent_1.2px)] [background-size:24px_24px] pointer-events-none" />
 
-                  {/* Multi-Colored Ambient Glow Orbs inside the card */}
-                  <div className="absolute -top-24 -right-24 w-80 h-80 bg-yellow-300/20 dark:bg-emerald-400/20 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
-                  <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-400/20 dark:bg-teal-500/20 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
-
-                  {/* Row 1: Large Logos (Centered) */}
-                  {(platinumPartners.length > 0 ? platinumPartners : allPartners.slice(0, 2)).length > 0 && (
-                    <div className="w-full flex flex-wrap justify-center items-center gap-8 sm:gap-12 md:gap-16 relative z-10 py-1">
-                      {(platinumPartners.length > 0 ? platinumPartners : allPartners.slice(0, 2)).map((partner) => (
+                  {/* Row 1: Large Logos (Platinum) */}
+                  {(platinumPartners.length > 0 ? platinumPartners : activePartners.slice(0, 2)).length > 0 && (
+                    <div className="w-full flex flex-wrap justify-center items-center gap-6 sm:gap-10 md:gap-14 relative z-10 pb-2">
+                      {(platinumPartners.length > 0 ? platinumPartners : activePartners.slice(0, 2)).map((partner) => (
                         <a
                           key={partner.id || partner.name}
                           href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
                           target={partner.websiteUrl && partner.websiteUrl !== "#" ? "_blank" : undefined}
                           rel="noopener noreferrer"
-                          className="group flex items-center justify-center p-2.5 transition-transform duration-300 hover:scale-105"
+                          className="group flex items-center justify-center p-2 transition-transform duration-300 hover:scale-105"
                         >
                           <PartnerLogoImage
                             partner={partner}
-                            className="h-16 sm:h-22 md:h-26 max-w-[280px] sm:max-w-[380px] md:max-w-[420px] object-contain filter brightness-95 contrast-125 group-hover:brightness-105 group-hover:scale-105 transition-all duration-300"
+                            className="h-16 sm:h-20 md:h-24 max-w-[220px] sm:max-w-[280px] md:max-w-[340px] object-contain filter drop-shadow-md group-hover:drop-shadow-xl group-hover:scale-105 transition-all duration-300"
                           />
                         </a>
                       ))}
                     </div>
                   )}
 
-                  {/* Row 2: Medium Logos */}
-                  {(goldPartners.length > 0 ? goldPartners : allPartners.slice(2, 4)).length > 0 && (
-                    <div className="w-full flex flex-wrap justify-center items-center gap-5 sm:gap-8 md:gap-12 relative z-10 py-1">
-                      {(goldPartners.length > 0 ? goldPartners : allPartners.slice(2, 4)).map((partner) => (
+                  {/* Row 2: Medium Logos (Gold) */}
+                  {(goldPartners.length > 0 ? goldPartners : activePartners.slice(2, 4)).length > 0 && (
+                    <div className="w-full flex flex-wrap justify-center items-center gap-5 sm:gap-8 md:gap-10 relative z-10 py-1">
+                      {(goldPartners.length > 0 ? goldPartners : activePartners.slice(2, 4)).map((partner) => (
                         <a
                           key={partner.id || partner.name}
                           href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
@@ -705,9 +701,9 @@ export default function Home() {
                   )}
 
                   {/* Row 3: Smaller Logos */}
-                  {(silverPartners.length > 0 ? silverPartners : allPartners.slice(4)).length > 0 && (
+                  {(silverPartners.length > 0 ? silverPartners : activePartners.slice(4)).length > 0 && (
                     <div className="w-full flex flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-8 relative z-10 pt-1">
-                      {(silverPartners.length > 0 ? silverPartners : allPartners.slice(4)).map((partner) => (
+                      {(silverPartners.length > 0 ? silverPartners : activePartners.slice(4)).map((partner) => (
                         <a
                           key={partner.id || partner.name}
                           href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
@@ -724,10 +720,10 @@ export default function Home() {
                     </div>
                   )}
                 </motion.div>
-              );
-            })()}
-          </div>
-        </section>
+              </div>
+            </section>
+          );
+        })()}
       </main>
     </div>
   );

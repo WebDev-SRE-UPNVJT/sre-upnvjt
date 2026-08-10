@@ -132,7 +132,7 @@ export default function Header() {
               <img
                 src="/images/logo.png"
                 alt="SRE Logo"
-                className="h-10 w-auto object-contain transition-all duration-300 brightness-0 invert"
+                className="h-7 sm:h-8 md:h-10 w-auto object-contain transition-all duration-300 brightness-0 invert"
               />
             </motion.div>
           </Link>
@@ -223,13 +223,20 @@ export default function Header() {
         </div>
       </motion.nav>
 
-      <div className="fixed top-0 right-6 h-20 flex items-center z-[70] md:hidden">
+      <motion.div 
+        animate={{ 
+          opacity: 1,
+          pointerEvents: "auto" 
+        }}
+        transition={{ duration: 0.3 }}
+        className="fixed top-0 right-6 h-20 flex items-center z-[70] md:hidden"
+      >
         <HamburgerIcon
           isOpen={mobileMenuOpen}
           onClick={() => setMobileMenuOpen((v) => !v)}
           useDarkText={useDarkText}
         />
-      </div>
+      </motion.div>
 
       <AnimatePresence>
         {mobileMenuOpen && (
@@ -242,26 +249,16 @@ export default function Header() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
               onClick={close}
-              className="fixed inset-0 z-40 md:hidden bg-black/40 backdrop-blur-sm"
+              className="fixed inset-0 z-40 md:hidden bg-black/60 backdrop-blur-md"
             />
-            {/* Menu Panel – slides in from top with theme support */}
+            {/* Menu Panel – Fullscreen backdrop blur overlay */}
             <motion.div
               key="panel"
-              initial={{ opacity: 0, clipPath: "inset(0 0 100% 0)" }}
-              animate={{ opacity: 1, clipPath: "inset(0 0 0% 0)" }}
-              exit={{ opacity: 0, clipPath: "inset(0 0 100% 0)" }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className={`fixed inset-0 z-50 md:hidden h-[100dvh] flex flex-col justify-between px-7 pt-20 pb-6 overflow-y-auto min-h-0 relative overflow-hidden transition-colors duration-500 ${
-                mounted && theme === "light"
-                  ? "bg-[#0bb37e] text-white"
-                  : "bg-[#07130e] text-white"
-              }`}
-              style={{
-                background:
-                  mounted && theme === "light"
-                    ? "linear-gradient(160deg, #0bb37e 0%, #0aa373 50%, #099c6d 100%)"
-                    : "linear-gradient(160deg, #091c15 0%, #06130d 50%, #0a1f18 100%)",
-              }}
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="fixed inset-0 z-50 md:hidden h-[100dvh] flex flex-col justify-between px-7 pt-20 pb-6 overflow-y-auto bg-black/40 backdrop-blur-xl text-white transition-colors duration-500"
             >
               {/* Glowing Background Ambient Orbs */}
               <div

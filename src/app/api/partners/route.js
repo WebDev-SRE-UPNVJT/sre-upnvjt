@@ -40,7 +40,7 @@ export async function POST(req) {
       isActive: isActive !== undefined ? isActive : true,
     }).returning({ id: partner.id });
 
-    return NextResponse.json({ success: true, partner: { id: result.id, name, logoUrl, websiteUrl, tier } }, { status: 201 });
+    return NextResponse.json({ success: true, partner: { id: result.id, name, logoUrl, websiteUrl, tier, isActive: isActive !== undefined ? isActive : true } }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

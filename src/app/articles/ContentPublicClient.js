@@ -87,21 +87,9 @@ export default function ContentPublicClient({ initialArticles }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
 
-  const categories = ["all", "Research", "News", "Insight"];
-
-  const getArticleCategory = (article) => {
-    const titleLower = article.title.toLowerCase();
-    if (titleLower.includes("biofuel") || titleLower.includes("wind") || titleLower.includes("grid")) return "Research";
-    if (titleLower.includes("event") || titleLower.includes("chapter") || titleLower.includes("mou")) return "News";
-    return "Insight";
-  };
-
   const filteredArticles = initialArticles.filter(art => {
     const q = searchQuery.toLowerCase();
-    const matchesSearch = art.title.toLowerCase().includes(q) || (art.author?.name || "").toLowerCase().includes(q);
-    const category = getArticleCategory(art);
-    const matchesCategory = activeCategory === "all" || category === activeCategory;
-    return matchesSearch && matchesCategory;
+    return art.title.toLowerCase().includes(q) || (art.author?.name || "").toLowerCase().includes(q);
   });
 
   return (
@@ -138,40 +126,6 @@ export default function ContentPublicClient({ initialArticles }) {
                 className="w-full bg-[#099c6d] dark:bg-[#0a1f15] border-2 border-white/30 dark:border-white/15 rounded-2xl py-4 pl-12 pr-6 text-white dark:text-white placeholder:text-white/70 dark:placeholder:text-white/40 focus:outline-none focus:border-yellow-300 dark:focus:border-emerald-400 font-bold transition-all duration-300 shadow-md"
               />
             </div>
-
-            {/* ── Animated category filter pills ──────────────────────────── */}
-            <div
-              role="tablist"
-              aria-label="Article categories"
-              className="flex gap-2 justify-center overflow-x-auto pb-4 max-w-2xl mx-auto hide-scrollbar"
-            >
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  role="tab"
-                  aria-selected={activeCategory === cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`relative px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider shrink-0 transition-colors duration-200 border focus-visible:outline-yellow-300 ${
-                    activeCategory === cat
-                      ? "text-slate-950 dark:text-slate-950 border-transparent"
-                      : "bg-white/10 dark:bg-white/5 text-white/80 dark:text-gray-400 border-white/20 dark:border-white/5 hover:text-yellow-300 dark:hover:text-white hover:border-white/30 dark:hover:border-white/15"
-                  }`}
-                >
-                  {/* Animated sliding background pill */}
-                  {activeCategory === cat && (
-                    <motion.span
-                      layoutId="cat-active-pill"
-                      className="absolute inset-0 rounded-xl bg-yellow-300 dark:bg-emerald-500"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                      aria-hidden="true"
-                    />
-                  )}
-                  <span className="relative z-10">
-                    {cat === "all" ? t("visitor.articles.all_topics") : cat}
-                  </span>
-                </button>
-              ))}
-            </div>
           </motion.div>
         </div>
       </section>
@@ -198,8 +152,6 @@ export default function ContentPublicClient({ initialArticles }) {
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
               >
                 {filteredArticles.map((article) => {
-                  const cat = getArticleCategory(article);
-                  const catColor = CATEGORY_COLORS[cat] || CATEGORY_COLORS.default;
                   return (
                     <motion.div
                       key={article.id}
@@ -228,12 +180,6 @@ export default function ContentPublicClient({ initialArticles }) {
                             )}
                             {/* Hover gradient overlay */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" aria-hidden="true" />
-                            {/* Category badge */}
-                            <div className="absolute top-4 left-4 z-10">
-                              <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border backdrop-blur-sm ${catColor}`}>
-                                {cat}
-                              </span>
-                            </div>
                           </div>
                           
                           {/* Content */}

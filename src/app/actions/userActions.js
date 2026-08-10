@@ -26,8 +26,15 @@ export async function createUser(data) {
   try {
     const { name, email, password, npm, positionName, isActive, roleId, departmentId, divisionId } = data;
     
-    const existingUser = await db.query.user.findFirst({ where: eq(user.email, email) });
-    if (existingUser) return { success: false, error: "Email already exists" };
+    // Check duplicate email
+    const existingEmail = await db.query.user.findFirst({ where: eq(user.email, email) });
+    if (existingEmail) return { success: false, error: "Email sudah digunakan oleh pengguna lain." };
+
+    // Check duplicate NPM
+    if (npm && npm.trim() !== "") {
+      const existingNpm = await db.query.user.findFirst({ where: eq(user.npm, npm) });
+      if (existingNpm) return { success: false, error: "NPM sudah terdaftar pada akun pengguna lain." };
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -45,7 +52,12 @@ export async function createUser(data) {
     revalidatePath("/users");
     return { success: true, data: { id: result.id, name, email } };
   } catch (error) {
-    return { success: false, error: error.message };
+    if (error.code === '23505' || error.message?.includes('unique') || error.message?.includes('duplicate')) {
+      if (error.message?.includes('email')) return { success: false, error: "Email sudah digunakan oleh pengguna lain." };
+      if (error.message?.includes('npm')) return { success: false, error: "NPM sudah terdaftar pada akun pengguna lain." };
+      return { success: false, error: "Data email atau NPM sudah terdaftar di sistem." };
+    }
+    return { success: false, error: "Gagal menambahkan pengguna. Silakan periksa kembali isian formulir." };
   }
 }
 
@@ -53,6 +65,20 @@ export async function updateUser(id, data) {
   try {
     const { name, email, password, npm, positionName, isActive, roleId, departmentId, divisionId } = data;
     
+    // Check duplicate email for another user
+    const existingEmail = await db.query.user.findFirst({ 
+      where: (u, { and, eq, ne }) => and(eq(u.email, email), ne(u.id, id)) 
+    });
+    if (existingEmail) return { success: false, error: "Email sudah digunakan oleh pengguna lain." };
+
+    // Check duplicate NPM for another user
+    if (npm && npm.trim() !== "") {
+      const existingNpm = await db.query.user.findFirst({ 
+        where: (u, { and, eq, ne }) => and(eq(u.npm, npm), ne(u.id, id)) 
+      });
+      if (existingNpm) return { success: false, error: "NPM sudah terdaftar pada akun pengguna lain." };
+    }
+
     const updateData = {
       name,
       email,
@@ -72,7 +98,12 @@ export async function updateUser(id, data) {
     revalidatePath("/users");
     return { success: true, data: { id, name, email } };
   } catch (error) {
-    return { success: false, error: error.message };
+    if (error.code === '23505' || error.message?.includes('unique') || error.message?.includes('duplicate')) {
+      if (error.message?.includes('email')) return { success: false, error: "Email sudah digunakan oleh pengguna lain." };
+      if (error.message?.includes('npm')) return { success: false, error: "NPM sudah terdaftar pada akun pengguna lain." };
+      return { success: false, error: "Data email atau NPM sudah terdaftar di sistem." };
+    }
+    return { success: false, error: "Gagal memperbarui data pengguna. Silakan periksa kembali isian formulir." };
   }
 }
 
@@ -82,6 +113,6 @@ export async function deleteUser(id) {
     revalidatePath("/users");
     return { success: true };
   } catch (error) {
-    return { success: false, error: error.message };
+    return { success: false, error: "Gagal menghapus pengguna." };
   }
 }

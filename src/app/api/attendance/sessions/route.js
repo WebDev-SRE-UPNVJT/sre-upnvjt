@@ -7,6 +7,11 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function GET() {
   try {
+    const sessionUser = await getServerSession(authOptions);
+    if (!sessionUser?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const sessions = await db.query.attendanceSession.findMany({
       orderBy: [desc(attendanceSession.date)],
       with: {

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Users, Plus, Edit2, Trash2, X, Search, Shield, Building2, UserCircle, ChevronDown
+  Users, Plus, Edit2, Trash2, X, Search, Shield, Building2, UserCircle, ChevronDown, AlertTriangle
 } from "lucide-react";
 import { 
   createUser, updateUser, deleteUser 
@@ -161,11 +161,27 @@ export default function UsersClient({ initialUsers, roles, departments, division
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm(t("users.delete_confirm"))) return;
-    const res = await deleteUser(id);
-    if (res.success) refreshData();
-    else alert(t("users.fail_delete") + res.error);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, user: null });
+
+  const handleOpenDeleteModal = (user) => {
+    setDeleteModal({ isOpen: true, user });
+  };
+
+  const handleCloseDeleteModal = () => {
+    setDeleteModal({ isOpen: false, user: null });
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!deleteModal.user) return;
+    setLoading(true);
+    const res = await deleteUser(deleteModal.user.id);
+    setLoading(false);
+    if (res.success) {
+      handleCloseDeleteModal();
+      refreshData();
+    } else {
+      setError(res.error || "Gagal menghapus pengguna.");
+    }
   };
 
   const roleOptions = (roles || []).map(r => ({ value: r?.id, label: r?.name?.replace("_", " ") }));
@@ -287,7 +303,7 @@ export default function UsersClient({ initialUsers, roles, departments, division
                         )}
                         {canDelete && (
                           <button 
-                            onClick={() => handleDelete(user.id)} 
+                            onClick={() => handleOpenDeleteModal(user)} 
                             className="p-2 text-gray-500 dark:text-white/50 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -432,6 +448,69 @@ export default function UsersClient({ initialUsers, roles, departments, division
                   </button>
                 </div>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {deleteModal.isOpen && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={handleCloseDeleteModal}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white dark:bg-[#071510] border border-gray-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 w-full max-w-md relative z-10 shadow-2xl"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 flex items-center justify-center mb-6">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                Hapus Pengguna Secara Permanen?
+              </h2>
+              
+              <p className="text-sm text-gray-500 dark:text-white/60 leading-relaxed mb-6">
+                Apakah Anda yakin ingin menghapus akun <span className="font-bold text-gray-900 dark:text-white">{deleteModal.user?.name}</span> ({deleteModal.user?.email})? Tindakan ini tidak dapat dibatalkan.
+              </p>
+
+              {error && (
+                <div className="p-3 mb-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-semibold">
+                  {error}
+                </div>
+              )}
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleCloseDeleteModal}
+                  disabled={loading}
+                  className="px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-gray-500 dark:text-white/70 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDeleteUser}
+                  disabled={loading}
+                  className="px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20 transition-all flex items-center gap-2 disabled:opacity-50"
+                >
+                  {loading ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    "Hapus Permanen"
+                  )}
+                </button>
+              </div>
             </motion.div>
           </div>
         )}

@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import { Zap } from "lucide-react";
 import { getUserLevelData, LEVEL_TIERS } from "@/lib/leveling";
+import { useLanguage } from "@/i18n/LanguageProvider";
 
 /**
  * XPProgressBar — Animated XP progress bar dengan level milestone markers.
@@ -52,6 +53,8 @@ export default function XPProgressBar({
   // XP untuk level max (tidak ada next level)
   const isMaxLevel = currentLevel === LEVEL_TIERS[0].level;
   const displayNextXp = nextLevelXp ?? LEVEL_TIERS[0].minXp;
+
+  const { t } = useLanguage();
 
   return (
     <div className={`w-full ${className}`}>
@@ -118,7 +121,7 @@ export default function XPProgressBar({
 
       {showStats && !isMaxLevel && (
         <p className="text-[9px] text-slate-400 dark:text-white/30 font-bold mt-1.5 text-right">
-          {(displayNextXp - totalXp).toLocaleString()} XP lagi ke level berikutnya
+          {t("dashboard.xp_to_next", { xp: (displayNextXp - totalXp).toLocaleString() })}
         </p>
       )}
     </div>

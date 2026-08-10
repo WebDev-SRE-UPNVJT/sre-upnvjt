@@ -127,10 +127,10 @@ export default function PptClient({ initialModules, currentUser }) {
       
       let uploadedSlides = 0;
       for (const webpFile of webpFiles) {
-        // Upload webp file
+        // Upload webp file to module-specific folder in R2
         const fd = new FormData();
         fd.append("file", webpFile);
-        fd.append("folder", "ppt-slides");
+        fd.append("folder", `ppt-slides/module-${activeModule.id}`);
         
         const uploadRes = await fetch("/api/upload", { method: "POST", body: fd });
         const uploadData = await uploadRes.json();
@@ -442,7 +442,11 @@ export default function PptClient({ initialModules, currentUser }) {
                             {slide.title || <span className="text-gray-400 dark:text-white/30 italic font-normal">Tanpa judul</span>}
                           </h3>
                           <a
-                            href={slide.fileUrl}
+                            href={
+                              slide.fileUrl?.startsWith("http://") || slide.fileUrl?.startsWith("https://")
+                                ? slide.fileUrl
+                                : `${(process.env.NEXT_PUBLIC_R2_PUBLIC_URL || "https://cdn.webly.biz.id/").replace(/\/$/, "")}/${slide.fileUrl?.replace(/^\//, "")}`
+                            }
                             target="_blank"
                             rel="noreferrer"
                             className="text-[11px] text-primary hover:underline flex items-center gap-1 mt-0.5"

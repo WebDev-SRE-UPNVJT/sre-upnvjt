@@ -23,8 +23,8 @@ const EMPTY_QUIZ = {
 
 const EMPTY_QUESTION = {
   type: "MULTIPLE_CHOICE", question: "", points: "10",
-  options: [{ id: "1", text: "" }, { id: "2", text: "" }],
-  correctOptionId: "1",
+  options: [{ id: "A", text: "" }, { id: "B", text: "" }],
+  correctOptionId: "A",
 };
 
 function CustomSelect({ value, onChange, options, icon: Icon, placeholder = "Pilih..." }) {
@@ -229,20 +229,22 @@ export default function QuizClient({ initialQuizzes, initialSubmissions, current
   };
 
   const handleAddOption = () => {
-    const nextId = (questionForm.options.length + 1).toString();
+    const nextChar = String.fromCharCode(65 + questionForm.options.length); // 'A', 'B', 'C', 'D'
     setQuestionForm(prev => ({
       ...prev,
-      options: [...prev.options, { id: nextId, text: "" }],
+      options: [...prev.options, { id: nextChar, text: "" }],
     }));
   };
 
   const handleRemoveOption = (id) => {
     setQuestionForm(prev => {
       const remaining = prev.options.filter(o => o.id !== id);
+      // Re-index option IDs to A, B, C, D...
+      const reindexed = remaining.map((o, idx) => ({ ...o, id: String.fromCharCode(65 + idx) }));
       return {
         ...prev,
-        options: remaining,
-        correctOptionId: prev.correctOptionId === id && remaining.length > 0 ? remaining[0].id : prev.correctOptionId,
+        options: reindexed,
+        correctOptionId: prev.correctOptionId === id && reindexed.length > 0 ? reindexed[0].id : prev.correctOptionId,
       };
     });
   };
@@ -253,12 +255,14 @@ export default function QuizClient({ initialQuizzes, initialSubmissions, current
     setIsLoading(true);
     const isEditing = Boolean(targetQuestion?.id);
 
+    const isChoiceType = ["MULTIPLE_CHOICE", "MULTIPLE_CHOICE_COMPLEX", "TRUE_FALSE"].includes(questionForm.type);
+
     const payload = {
       type: questionForm.type,
       question: questionForm.question,
       points: parseInt(questionForm.points) || 10,
-      options: questionForm.type === "MULTIPLE_CHOICE" ? questionForm.options : [],
-      correctOptionId: questionForm.type === "MULTIPLE_CHOICE" ? questionForm.correctOptionId : null,
+      options: isChoiceType ? questionForm.options : [],
+      correctOptionId: isChoiceType || questionForm.type === "SHORT_ANSWER" ? questionForm.correctOptionId : null,
     };
 
     const res = isEditing
@@ -298,10 +302,26 @@ export default function QuizClient({ initialQuizzes, initialSubmissions, current
     setIsLoading(false);
   };
 
-  const handleOpenGradeModal = (sub) => {
+  const handleOpenGradeModal = async (sub) => {
     setTargetSubmission(sub);
     setEssayScoreInput(sub.essayScore?.toString() || "");
     setGradeModal(true);
+
+    // Ensure full questions data with questions array is loaded
+    if (sub.quizId) {
+      try {
+        const res = await fetch(`/api/quiz/${sub.quizId}`);
+        const fullQuiz = await res.json();
+        if (fullQuiz && fullQuiz.questions) {
+          setTargetSubmission(prev => prev ? {
+            ...prev,
+            quiz: { ...prev.quiz, ...fullQuiz, questions: fullQuiz.questions }
+          } : prev);
+        }
+      } catch (err) {
+        console.error("Error fetching quiz questions for modal:", err);
+      }
+    }
   };
 
   const handleGradeSubmission = async (e) => {
@@ -524,7 +544,11 @@ export default function QuizClient({ initialQuizzes, initialSubmissions, current
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => { setView("list"); setActiveQuiz(null); setQuestions([]); }}
+              onClick={() => {
+                setView("list");
+                setActiveQuiz(null);
+                setQuestions([]);
+              }}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-white/5 shadow-sm border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/70 hover:text-gray-900 dark:hover:text-white transition-all text-sm font-medium"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -535,19 +559,12 @@ export default function QuizClient({ initialQuizzes, initialSubmissions, current
                 <Target className="w-7 h-7 text-primary" />
                 {activeQuiz.title}
               </h1>
-              <p className="text-sm text-gray-500 dark:text-white/40 mt-1">Kelola daftar pertanyaan kuis.</p>
+              <p className="text-sm text-gray-500 dark:text-white/40 mt-1">
+                Kelola daftar pertanyaan kuis.
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {canUpdate && (
-              <button
-                onClick={() => handleOpenQuizModal(activeQuiz)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-white/5 shadow-sm border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/70 hover:text-gray-900 dark:hover:text-white transition-all text-sm font-medium"
-              >
-                <Settings className="w-4 h-4" />
-                Edit Kuis
-              </button>
-            )}
             {canCreate && (
               <button
                 onClick={() => handleOpenQuestionModal()}
@@ -564,15 +581,26 @@ export default function QuizClient({ initialQuizzes, initialSubmissions, current
         <div className="flex flex-wrap gap-4 mb-8 bg-white/40 dark:bg-white/[0.02] border border-gray-200/50 dark:border-white/10 rounded-2xl p-5 backdrop-blur-md">
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-white/70">
             <Clock className="w-4 h-4 text-primary" />
-            <span>Waktu: <strong>{activeQuiz.timeLimitMinutes ? `${activeQuiz.timeLimitMinutes} Menit` : "Tanpa Batas"}</strong></span>
+            <span>
+              Waktu:{" "}
+              <strong>
+                {activeQuiz.timeLimitMinutes
+                  ? `${activeQuiz.timeLimitMinutes} Menit`
+                  : "Tanpa Batas"}
+              </strong>
+            </span>
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-white/70">
             <CheckSquare className="w-4 h-4 text-primary" />
-            <span>Kriteria Kelulusan: <strong>{activeQuiz.passingScore}%</strong></span>
+            <span>
+              Kriteria Kelulusan: <strong>{activeQuiz.passingScore}%</strong>
+            </span>
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-white/70">
             <Award className="w-4 h-4 text-primary" />
-            <span>XP Reward: <strong>{activeQuiz.rewardXp} XP</strong></span>
+            <span>
+              XP Reward: <strong>{activeQuiz.rewardXp} XP</strong>
+            </span>
           </div>
         </div>
 
@@ -580,8 +608,12 @@ export default function QuizClient({ initialQuizzes, initialSubmissions, current
         {questions.length === 0 ? (
           <div className="py-24 flex flex-col items-center justify-center text-center bg-white/40 dark:bg-white/[0.02] border border-dashed border-gray-200/50 dark:border-white/10 rounded-3xl">
             <HelpCircle className="w-12 h-12 text-gray-400 dark:text-white/20 mb-4" />
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Belum ada pertanyaan</h3>
-            <p className="text-gray-500 dark:text-white/40 text-sm">Tambahkan pertanyaan baru untuk memulai.</p>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
+              Belum ada pertanyaan
+            </h3>
+            <p className="text-gray-500 dark:text-white/40 text-sm">
+              Tambahkan pertanyaan baru untuk memulai.
+            </p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -595,12 +627,28 @@ export default function QuizClient({ initialQuizzes, initialSubmissions, current
                     <span className="text-xs font-black text-primary bg-primary/10 px-2 py-0.5 rounded-md">
                       SOAL {idx + 1}
                     </span>
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${
-                      q.type === "MULTIPLE_CHOICE"
-                        ? "bg-blue-500/15 text-blue-400 border-blue-500/25"
-                        : "bg-purple-500/15 text-purple-400 border-purple-500/25"
-                    }`}>
-                      {q.type === "MULTIPLE_CHOICE" ? "Pilihan Ganda" : "Essay"}
+                    <span
+                      className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${
+                        q.type === "MULTIPLE_CHOICE"
+                          ? "bg-blue-500/15 text-blue-400 border-blue-500/25"
+                          : q.type === "MULTIPLE_CHOICE_COMPLEX"
+                            ? "bg-teal-500/15 text-teal-400 border-teal-500/25"
+                            : q.type === "SHORT_ANSWER"
+                              ? "bg-amber-500/15 text-amber-400 border-amber-500/25"
+                              : q.type === "TRUE_FALSE"
+                                ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/25"
+                                : "bg-purple-500/15 text-purple-400 border-purple-500/25"
+                      }`}
+                    >
+                      {q.type === "MULTIPLE_CHOICE"
+                        ? "Pilihan Ganda"
+                        : q.type === "MULTIPLE_CHOICE_COMPLEX"
+                          ? "Pilihan Ganda Kompleks"
+                          : q.type === "SHORT_ANSWER"
+                            ? "Jawaban Singkat"
+                            : q.type === "TRUE_FALSE"
+                              ? "Benar / Salah"
+                              : "Essay"}
                     </span>
                     <span className="text-xs text-gray-400 dark:text-white/30 font-medium">
                       {q.points} Poin
@@ -610,31 +658,70 @@ export default function QuizClient({ initialQuizzes, initialSubmissions, current
                     {q.question}
                   </p>
 
-                  {/* MCQ Options */}
-                  {q.type === "MULTIPLE_CHOICE" && Array.isArray(q.options) && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                      {q.options.map((opt) => {
-                        const isCorrect = opt.id === q.correctOptionId;
-                        return (
-                          <div
-                            key={opt.id}
-                            className={`flex items-center gap-3 p-3 rounded-xl border text-xs font-medium transition-all ${
-                              isCorrect
-                                ? "bg-green-500/10 border-green-500/30 text-green-400 font-bold"
-                                : "bg-gray-50/50 dark:bg-white/[0.01] border-gray-200 dark:border-white/5 text-gray-500 dark:text-white/50"
-                            }`}
-                          >
-                            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] uppercase font-bold shrink-0 ${
-                              isCorrect ? "bg-green-500 text-gray-900" : "bg-gray-200 dark:bg-white/10"
-                            }`}>
-                              {isCorrect ? <Check className="w-3 h-3" /> : opt.id}
-                            </span>
-                            <span className="truncate">{opt.text}</span>
-                          </div>
-                        );
-                      })}
+                  {/* SHORT_ANSWER preview */}
+                  {q.type === "SHORT_ANSWER" && q.correctOptionId && (
+                    <div className="mt-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs font-semibold text-amber-500">
+                      Kunci Jawaban Singkat:{" "}
+                      <span className="font-bold text-amber-400">
+                        {q.correctOptionId}
+                      </span>
                     </div>
                   )}
+
+                  {/* Options Preview */}
+                  {(() => {
+                    const normalizedType = (q.type || "").toUpperCase();
+                    const isOptionType = [
+                      "MULTIPLE_CHOICE",
+                      "MULTIPLE_CHOICE_COMPLEX",
+                      "TRUE_FALSE",
+                    ].includes(normalizedType);
+                    if (
+                      !isOptionType ||
+                      !Array.isArray(q.options) ||
+                      q.options.length === 0
+                    )
+                      return null;
+
+                    return (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+                        {q.options.map((opt) => {
+                          const correctArray = (q.correctOptionId || "")
+                            .split(",")
+                            .map((s) => s.trim());
+                          const isCorrect =
+                            normalizedType === "MULTIPLE_CHOICE_COMPLEX"
+                              ? correctArray.includes(opt.id)
+                              : opt.id === q.correctOptionId;
+                          return (
+                            <div
+                              key={opt.id}
+                              className={`flex items-center gap-3 p-3 rounded-xl border text-xs font-medium transition-all ${
+                                isCorrect
+                                  ? "bg-green-500/10 border-green-500/30 text-green-400 font-bold"
+                                  : "bg-gray-50/50 dark:bg-white/[0.01] border-gray-200 dark:border-white/5 text-gray-500 dark:text-white/50"
+                              }`}
+                            >
+                              <span
+                                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] uppercase font-bold shrink-0 ${
+                                  isCorrect
+                                    ? "bg-green-500 text-gray-900"
+                                    : "bg-gray-200 dark:bg-white/10"
+                                }`}
+                              >
+                                {isCorrect ? (
+                                  <Check className="w-3 h-3" />
+                                ) : (
+                                  opt.id
+                                )}
+                              </span>
+                              <span className="truncate">{opt.text}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 <div className="flex gap-2 shrink-0 self-end md:self-start">
@@ -648,7 +735,10 @@ export default function QuizClient({ initialQuizzes, initialSubmissions, current
                   )}
                   {canDelete && (
                     <button
-                      onClick={() => { setTargetQuestion(q); setQuestionDelModal(true); }}
+                      onClick={() => {
+                        setTargetQuestion(q);
+                        setQuestionDelModal(true);
+                      }}
                       className="w-8 h-8 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center border border-transparent hover:border-red-500/20 transition-all"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -664,8 +754,13 @@ export default function QuizClient({ initialQuizzes, initialSubmissions, current
         <AnimatePresence>
           {questionModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                onClick={handleCloseQuestionModal} className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={handleCloseQuestionModal}
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              />
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -677,97 +772,258 @@ export default function QuizClient({ initialQuizzes, initialSubmissions, current
                     <Target className="w-5 h-5 text-primary" />
                     {targetQuestion ? "Edit Pertanyaan" : "Pertanyaan Baru"}
                   </h2>
-                  <button onClick={handleCloseQuestionModal} className="text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                  <button
+                    onClick={handleCloseQuestionModal}
+                    className="text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                  >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
                 <div className="p-6 overflow-y-auto flex-1 space-y-5">
-                  <form id="questionForm" onSubmit={handleSaveQuestion} className="space-y-5">
+                  <form
+                    id="questionForm"
+                    onSubmit={handleSaveQuestion}
+                    className="space-y-5"
+                  >
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase mb-2">Tipe Soal</label>
-                        <select
-                          value={questionForm.type}
-                          onChange={e => setQuestionForm(p => ({ ...p, type: e.target.value }))}
-                          className="w-full h-12 px-4 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none"
-                        >
-                          <option value="MULTIPLE_CHOICE">Pilihan Ganda</option>
-                          <option value="ESSAY">Essay</option>
-                        </select>
+                        <label className="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase mb-2">
+                          Tipe Soal
+                        </label>
+                        <div className="relative">
+                          <select
+                            value={questionForm.type}
+                            onChange={(e) => {
+                              const newType = e.target.value;
+                              let newOptions = questionForm.options;
+                              if (newType === "TRUE_FALSE") {
+                                newOptions = [
+                                  { id: "A", text: "Benar" },
+                                  { id: "B", text: "Salah" },
+                                ];
+                              } else if (
+                                (newType === "MULTIPLE_CHOICE" ||
+                                  newType === "MULTIPLE_CHOICE_COMPLEX") &&
+                                newOptions.length === 0
+                              ) {
+                                newOptions = [
+                                  { id: "A", text: "" },
+                                  { id: "B", text: "" },
+                                ];
+                              }
+                              setQuestionForm((p) => ({
+                                ...p,
+                                type: newType,
+                                options: newOptions,
+                              }));
+                            }}
+                            className="w-full h-12 px-4 bg-white dark:bg-[#07130e] border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 text-sm font-semibold cursor-pointer appearance-none pr-10"
+                          >
+                            <option
+                              value="MULTIPLE_CHOICE"
+                              className="bg-white dark:bg-[#0a1612] text-gray-900 dark:text-white"
+                            >
+                              Pilihan Ganda (Single Choice)
+                            </option>
+                            <option
+                              value="MULTIPLE_CHOICE_COMPLEX"
+                              className="bg-white dark:bg-[#0a1612] text-gray-900 dark:text-white"
+                            >
+                              Pilihan Ganda Kompleks (Multi Select)
+                            </option>
+                            <option
+                              value="SHORT_ANSWER"
+                              className="bg-white dark:bg-[#0a1612] text-gray-900 dark:text-white"
+                            >
+                              Jawaban Singkat (Short Answer)
+                            </option>
+                            <option
+                              value="TRUE_FALSE"
+                              className="bg-white dark:bg-[#0a1612] text-gray-900 dark:text-white"
+                            >
+                              Benar / Salah (True or False)
+                            </option>
+                            <option
+                              value="ESSAY"
+                              className="bg-white dark:bg-[#0a1612] text-gray-900 dark:text-white"
+                            >
+                              Essay / Uraian
+                            </option>
+                          </select>
+                          <ChevronDown className="w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                        </div>
                       </div>
                       <div>
-                        <label className="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase mb-2">Poin</label>
+                        <label className="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase mb-2">
+                          Poin
+                        </label>
                         <input
                           type="number"
                           required
+                          min="1"
                           value={questionForm.points}
-                          onChange={e => setQuestionForm(p => ({ ...p, points: e.target.value }))}
-                          className="w-full h-12 px-4 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white focus:outline-none"
+                          onChange={(e) =>
+                            setQuestionForm((p) => ({
+                              ...p,
+                              points: e.target.value,
+                            }))
+                          }
+                          className="w-full h-12 px-4 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white focus:outline-none text-sm font-semibold"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase mb-2">Pertanyaan</label>
+                      <label className="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase mb-2">
+                        Pertanyaan
+                      </label>
                       <textarea
                         required
                         rows={3}
                         value={questionForm.question}
-                        onChange={e => setQuestionForm(p => ({ ...p, question: e.target.value }))}
-                        className="w-full p-4 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white focus:outline-none resize-none h-24"
+                        onChange={(e) =>
+                          setQuestionForm((p) => ({
+                            ...p,
+                            question: e.target.value,
+                          }))
+                        }
+                        className="w-full p-4 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white focus:outline-none resize-none h-24 text-sm font-medium placeholder:text-gray-400 dark:placeholder:text-white/20"
                         placeholder="Tuliskan isi pertanyaan..."
                       />
                     </div>
 
-                    {questionForm.type === "MULTIPLE_CHOICE" && (
+                    {/* SHORT_ANSWER KUNCI JAWABAN */}
+                    {questionForm.type === "SHORT_ANSWER" && (
+                      <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20 space-y-2">
+                        <label className="block text-[11px] font-bold tracking-wider text-primary uppercase">
+                          Kunci Jawaban Singkat (Auto-Graded)
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={questionForm.correctOptionId || ""}
+                          onChange={(e) =>
+                            setQuestionForm((p) => ({
+                              ...p,
+                              correctOptionId: e.target.value,
+                            }))
+                          }
+                          className="w-full h-12 px-4 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white focus:outline-none text-sm font-semibold"
+                          placeholder="Masukkan kata kunci jawaban persis (misal: Fotosintesis)"
+                        />
+                        <p className="text-[11px] text-gray-500 dark:text-white/40">
+                          Jawaban anggota yang cocok tanpa membedakan huruf
+                          besar/kecil akan dinilai benar secara otomatis.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* MULTIPLE CHOICE / MULTIPLE CHOICE COMPLEX / TRUE FALSE OPTIONS */}
+                    {(questionForm.type === "MULTIPLE_CHOICE" ||
+                      questionForm.type === "MULTIPLE_CHOICE_COMPLEX" ||
+                      questionForm.type === "TRUE_FALSE") && (
                       <div className="space-y-4 pt-2">
                         <div className="flex justify-between items-center">
-                          <label className="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase">Pilihan Jawaban</label>
-                          <button
-                            type="button"
-                            onClick={handleAddOption}
-                            className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
-                          >
-                            <Plus className="w-3.5 h-3.5" /> Tambah Pilihan
-                          </button>
+                          <label className="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase">
+                            Pilihan Jawaban{" "}
+                            {questionForm.type === "MULTIPLE_CHOICE_COMPLEX"
+                              ? "(Centang semua jawaban benar)"
+                              : "(Pilih 1 jawaban benar)"}
+                          </label>
+                          {questionForm.type !== "TRUE_FALSE" && (
+                            <button
+                              type="button"
+                              onClick={handleAddOption}
+                              className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+                            >
+                              <Plus className="w-3.5 h-3.5" /> Tambah Pilihan
+                            </button>
+                          )}
                         </div>
 
                         <div className="space-y-3">
-                          {questionForm.options.map((opt, oIdx) => (
-                            <div key={opt.id} className="flex gap-3 items-center">
-                              <input
-                                type="radio"
-                                name="correctOption"
-                                checked={questionForm.correctOptionId === opt.id}
-                                onChange={() => setQuestionForm(p => ({ ...p, correctOptionId: opt.id }))}
-                                className="w-4 h-4 text-primary focus:ring-primary focus:ring-offset-0 accent-primary cursor-pointer shrink-0"
-                              />
-                              <input
-                                type="text"
-                                required
-                                value={opt.text}
-                                onChange={e => {
-                                  const textVal = e.target.value;
-                                  setQuestionForm(p => ({
-                                    ...p,
-                                    options: p.options.map(o => o.id === opt.id ? { ...o, text: textVal } : o),
-                                  }));
-                                }}
-                                className="flex-1 h-10 px-4 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-900 dark:text-white focus:outline-none"
-                                placeholder={`Pilihan ${oIdx + 1}`}
-                              />
-                              {questionForm.options.length > 2 && (
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveOption(opt.id)}
-                                  className="text-red-400 hover:text-red-300 p-2"
-                                >
-                                  <X className="w-4 h-4" />
-                                </button>
-                              )}
-                            </div>
-                          ))}
+                          {questionForm.options.map((opt, oIdx) => {
+                            const isComplex =
+                              questionForm.type === "MULTIPLE_CHOICE_COMPLEX";
+                            const selectedArray = (
+                              questionForm.correctOptionId || ""
+                            )
+                              .split(",")
+                              .map((s) => s.trim());
+                            const isChecked = isComplex
+                              ? selectedArray.includes(opt.id)
+                              : questionForm.correctOptionId === opt.id;
+
+                            const toggleComplexOption = (id) => {
+                              let arr = (questionForm.correctOptionId || "")
+                                .split(",")
+                                .map((s) => s.trim())
+                                .filter(Boolean);
+                              if (arr.includes(id)) {
+                                arr = arr.filter((x) => x !== id);
+                              } else {
+                                arr.push(id);
+                              }
+                              setQuestionForm((p) => ({
+                                ...p,
+                                correctOptionId: arr.join(","),
+                              }));
+                            };
+
+                            return (
+                              <div
+                                key={opt.id}
+                                className="flex gap-3 items-center"
+                              >
+                                <input
+                                  type={isComplex ? "checkbox" : "radio"}
+                                  name="correctOption"
+                                  checked={isChecked}
+                                  onChange={() => {
+                                    if (isComplex) {
+                                      toggleComplexOption(opt.id);
+                                    } else {
+                                      setQuestionForm((p) => ({
+                                        ...p,
+                                        correctOptionId: opt.id,
+                                      }));
+                                    }
+                                  }}
+                                  className="w-4 h-4 text-primary focus:ring-primary focus:ring-offset-0 accent-primary cursor-pointer shrink-0"
+                                />
+                                <input
+                                  type="text"
+                                  required
+                                  readOnly={questionForm.type === "TRUE_FALSE"}
+                                  value={opt.text}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    setQuestionForm((p) => ({
+                                      ...p,
+                                      options: p.options.map((o) =>
+                                        o.id === opt.id
+                                          ? { ...o, text: val }
+                                          : o,
+                                      ),
+                                    }));
+                                  }}
+                                  placeholder={`Pilihan ${String.fromCharCode(65 + oIdx)}...`}
+                                  className="flex-1 h-11 px-4 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white focus:outline-none text-sm font-medium"
+                                />
+                                {questionForm.options.length > 2 &&
+                                  questionForm.type !== "TRUE_FALSE" && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveOption(opt.id)}
+                                      className="p-2 text-gray-400 hover:text-red-400 transition-colors"
+                                    >
+                                      <X className="w-4 h-4" />
+                                    </button>
+                                  )}
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
@@ -775,10 +1031,24 @@ export default function QuizClient({ initialQuizzes, initialSubmissions, current
                 </div>
 
                 <div className="p-6 border-t border-gray-200 dark:border-white/10 flex justify-end gap-3 bg-gray-50/50 dark:bg-white/[0.02]">
-                  <button type="button" onClick={handleCloseQuestionModal} className="px-5 py-2 rounded-xl text-sm font-semibold text-gray-500 dark:text-white/70 hover:bg-gray-100 dark:hover:bg-white/10">Batal</button>
-                  <button type="submit" form="questionForm" disabled={isLoading}
-                    className="px-5 py-2 rounded-xl text-sm font-bold bg-primary text-[#050e0a] hover:bg-primary-focus flex items-center gap-2">
-                    {isLoading ? <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /> : "Simpan"}
+                  <button
+                    type="button"
+                    onClick={handleCloseQuestionModal}
+                    className="px-5 py-2 rounded-xl text-sm font-semibold text-gray-500 dark:text-white/70 hover:bg-gray-100 dark:hover:bg-white/10"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    form="questionForm"
+                    disabled={isLoading}
+                    className="px-5 py-2 rounded-xl text-sm font-bold bg-primary text-[#050e0a] hover:bg-primary-focus flex items-center gap-2"
+                  >
+                    {isLoading ? (
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      "Simpan"
+                    )}
                   </button>
                 </div>
               </motion.div>
@@ -790,18 +1060,41 @@ export default function QuizClient({ initialQuizzes, initialSubmissions, current
         <AnimatePresence>
           {questionDelModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                onClick={() => setQuestionDelModal(false)} className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-                className="relative w-full max-w-sm bg-white dark:bg-[#0a1612] border border-gray-200 dark:border-white/10 rounded-3xl p-6 text-center">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setQuestionDelModal(false)}
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="relative w-full max-w-sm bg-white dark:bg-[#0a1612] border border-gray-200 dark:border-white/10 rounded-3xl p-6 text-center"
+              >
                 <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4 border border-red-500/25">
                   <AlertTriangle className="w-6 h-6 text-red-500" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Hapus Pertanyaan?</h3>
-                <p className="text-xs text-gray-500 dark:text-white/40 mb-6">Pertanyaan ini akan dihapus permanen dari kuis.</p>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                  Hapus Pertanyaan?
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-white/40 mb-6">
+                  Pertanyaan ini akan dihapus permanen dari kuis.
+                </p>
                 <div className="flex gap-3">
-                  <button onClick={() => setQuestionDelModal(false)} className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-xs font-semibold text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5">Batal</button>
-                  <button onClick={handleDeleteQuestion} className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-xs font-bold hover:bg-red-600">Hapus</button>
+                  <button
+                    onClick={() => setQuestionDelModal(false)}
+                    className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-xs font-semibold text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={handleDeleteQuestion}
+                    className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-xs font-bold hover:bg-red-600"
+                  >
+                    Hapus
+                  </button>
                 </div>
               </motion.div>
             </div>
@@ -809,7 +1102,10 @@ export default function QuizClient({ initialQuizzes, initialSubmissions, current
         </AnimatePresence>
 
         {/* Global Toast */}
-        <Toast notification={notification} onClose={() => setNotification(null)} />
+        <Toast
+          notification={notification}
+          onClose={() => setNotification(null)}
+        />
       </div>
     );
   }
@@ -1169,12 +1465,17 @@ export default function QuizClient({ initialQuizzes, initialSubmissions, current
                                   )}
                                 </td>
                                 <td className="px-6 py-4">
-                                  {sub.essayScore === null && canUpdate ? (
+                                  {canUpdate ? (
                                     <button
                                       onClick={() => handleOpenGradeModal(sub)}
-                                      className="h-8 px-3 rounded-lg bg-primary text-[#050e0a] text-xs font-bold hover:bg-primary-focus transition-all"
+                                      className={`h-8 px-3 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                                        sub.essayScore === null
+                                          ? "bg-primary text-[#050e0a] hover:bg-primary-focus shadow-md shadow-primary/20"
+                                          : "bg-white/10 hover:bg-white/20 text-gray-700 dark:text-white border border-gray-200 dark:border-white/10"
+                                      }`}
                                     >
-                                      Beri Nilai Essay
+                                      <UserCheck className="w-3.5 h-3.5" />
+                                      {sub.essayScore === null ? "Tinjau & Beri Nilai" : "Edit Nilai Essay"}
                                     </button>
                                   ) : (
                                     <span className="text-xs text-gray-400 dark:text-white/30">
@@ -1238,7 +1539,7 @@ export default function QuizClient({ initialQuizzes, initialSubmissions, current
                         onChange={e => setQuizForm(p => ({ ...p, timeLimitMinutes: e.target.value }))}
                         className={inputCls} placeholder="e.g. 30" />
                     </InputField>
-                    <InputField label="Lulus (%)">
+                    <InputField label="Lulus">
                       <input type="number" required min="0" max="100" value={quizForm.passingScore}
                         onChange={e => setQuizForm(p => ({ ...p, passingScore: e.target.value }))}
                         className={inputCls} placeholder="e.g. 70" />
@@ -1324,19 +1625,63 @@ export default function QuizClient({ initialQuizzes, initialSubmissions, current
                 <div>
                   <h3 className="text-xs font-bold text-gray-400 dark:text-white/30 uppercase tracking-widest mb-2">Jawaban Anggota:</h3>
                   <div className="space-y-4">
-                    {targetSubmission.answers.map((ans, aIdx) => {
-                      // Find matching question
-                      return (
-                        <div key={aIdx} className="p-4 bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-2xl">
-                          <div className="text-xs font-bold text-primary mb-1">PERTANYAAN #{aIdx + 1}</div>
-                          {ans.essayText ? (
-                            <p className="text-sm font-medium text-gray-900 dark:text-white italic">"{ans.essayText}"</p>
-                          ) : (
-                            <p className="text-xs text-gray-400">Pilihan Ganda (Sudah Terkalkulasi Otomatis)</p>
-                          )}
-                        </div>
-                      );
-                    })}
+                    {(() => {
+                      const matchingQuizObj = quizzes.find((q) => q.id === targetSubmission.quizId) || targetSubmission.quiz || activeQuiz;
+                      const allQuestions = matchingQuizObj?.questions || [];
+                      const subAnswers = targetSubmission.answers || [];
+
+                      // Identify essay items: either q.type is ESSAY/SHORT_ANSWER OR an answer in subAnswers has non-empty essayText
+                      const essayItems = subAnswers.map(ans => {
+                        const qObj = allQuestions.find(q => Number(q.id) === Number(ans.questionId));
+                        const qType = (qObj?.type || "").toLowerCase();
+                        const isEssayType = qType.includes("essay") || qType.includes("short");
+                        const hasEssayText = Boolean((ans.essayText && String(ans.essayText).trim()) || (ans.answer && typeof ans.answer === "string" && String(ans.answer).trim() && !ans.selectedOptionId && !ans.selectedOptionIds));
+                        
+                        if (isEssayType || hasEssayText) {
+                          return { ans, qObj };
+                        }
+                        return null;
+                      }).filter(Boolean);
+
+                      if (essayItems.length === 0) {
+                        return (
+                          <div className="p-6 text-center bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-2xl">
+                            <p className="text-xs text-gray-500 dark:text-white/40">Tidak ada jawaban tipe Essay yang terdeteksi pada submisi kuis ini.</p>
+                          </div>
+                        );
+                      }
+
+                      return essayItems.map(({ ans, qObj }, aIdx) => {
+                        let rawVal = ans.essayText ?? ans.answer;
+                        let answerDisplay = "";
+                        if (Array.isArray(rawVal)) answerDisplay = rawVal.join(", ");
+                        else if (rawVal !== undefined && rawVal !== null) answerDisplay = String(rawVal);
+
+                        return (
+                          <div key={ans.questionId || aIdx} className="p-4 bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-2xl space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-black text-primary uppercase tracking-widest">SOAL ESSAY #{aIdx + 1}</span>
+                              <span className="text-[9px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">
+                                {qObj?.type || "ESSAY"}
+                              </span>
+                            </div>
+                            <p className="text-xs font-bold text-gray-900 dark:text-white">{qObj?.question || `Pertanyaan ID #${ans.questionId}`}</p>
+                            <div className="pt-2 border-t border-gray-200/50 dark:border-white/5">
+                              <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Jawaban Member:</div>
+                              {answerDisplay.trim() ? (
+                                <p className="text-sm font-semibold text-gray-900 dark:text-white bg-white dark:bg-black/30 p-3.5 rounded-xl border border-gray-200 dark:border-white/10 italic leading-relaxed">
+                                  "{answerDisplay}"
+                                </p>
+                              ) : (
+                                <p className="text-xs text-gray-400 italic bg-white/5 p-3 rounded-xl border border-white/5">
+                                  Member tidak mengisi jawaban untuk soal ini.
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
                   </div>
                 </div>
 

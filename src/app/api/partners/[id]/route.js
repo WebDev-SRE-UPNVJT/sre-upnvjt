@@ -31,7 +31,7 @@ export async function PUT(req, { params }) {
       isActive: isActive !== undefined ? isActive : true,
     }).where(eq(partner.id, partnerId));
 
-    return NextResponse.json({ success: true, partner: { id: partnerId, name, logoUrl, websiteUrl, tier } }, { status: 200 });
+    return NextResponse.json({ success: true, partner: { id: partnerId, name, logoUrl, websiteUrl, tier, isActive: isActive !== undefined ? isActive : true } }, { status: 200 });
   } catch (error) {
     if (error.code === 'P2025') {
       return NextResponse.json({ error: "Partner not found" }, { status: 404 });

@@ -501,6 +501,7 @@
       "night": "Good Night"
     },
     "welcome_msg": "Here is a summary of activities, organization performance, and tasks you need to complete today.",
+    "xp_to_next": "{xp} XP left to next level",
     "id_card": {
       "official_access": "Official Organization Access",
       "cardholder": "Cardholder",
@@ -512,6 +513,12 @@
       "urgent": "Urgent",
       "attendance_msg": "You have {count} active attendance sessions that you haven't filled. Please fill your attendance before the session closes.",
       "fill_attendance": "Fill Attendance Now"
+    },
+    "stats": {
+      "total_xp": "TOTAL XP",
+      "tasks_approved": "TASKS DONE",
+      "rank": "RANKING",
+      "attendance": "ATTENDANCE"
     },
     "widgets": {
       "total_members": "Total Members",
@@ -1074,6 +1081,54 @@
       "search_placeholder": "Search articles by title or author...",
       "all_topics": "All Topics",
       "no_articles": "No Articles Found",
+      "no_results": "No results for \"{query}\". Try a different keyword or browse all topics.",
+      "no_category_articles": "No articles available in this category yet. Check back soon.",
+      "browse_all": "Browse All",
+      "back_articles": "Back to Articles",
+      "no_cover": "No cover image provided"
+    },
+    "merchandise": {
+      "hero_badge": "OFFICIAL GEAR & MERCH",
+      "title": "OFFICIAL MERCHANDISE SRE UPN JATIM!",
+      "subtitle": "Support the green energy transition in style. Check out our exclusive official apparel, accessories, and gear packages!",
+      "available_now": "AVAILABLE NOW",
+      "exclusive_offers": "• EXCLUSIVE OFFERS",
+      "special_bundles_prefix": "OUR SPECIAL ",
+      "special_bundles_highlight": "BUNDLES",
+      "buy_now": "Buy Now",
+      "contact_sre": "Contact SRE",
+      "catalog": "• MERCHANDISE CATALOG",
+      "products_prefix": "OUR ",
+      "products_highlight": "PRODUCTS",
+      "no_merch": "No merchandise available yet",
+      "no_merch_desc": "We are working hard to create exclusive gear packages for you. Check back soon or follow our social media!",
+      "available": "Available",
+      "out_of_stock": "Out of Stock",
+      "buy": "Buy",
+      "no_link": "No link",
+      "order_inquiries": "• ORDER & INQUIRIES",
+      "get_official_prefix": "Get Our Official ",
+      "get_official_highlight": "Merchandise",
+      "shopee": "Shopee Store"
+    },
+    "login": {
+      "welcome": "Welcome",
+      "to_the": "to the",
+      "future": "Future",
+      "left_desc": "Sign in to manage projects, track microgrid operations, and access the Society of Renewable Energy portal.",
+      "title": "Sign In",
+      "subtitle": "Enter your credentials to access your account.",
+      "email_label": "Email address",
+      "password_label": "Password",
+      "remember_me": "Remember me",
+      "btn_login": "Sign In",
+      "btn_logging_in": "Signing In...",
+      "no_account": "Don't have an account?",
+      "create_account": "Create Account",
+      "back": "Back"
+    }
+  }
+}     "no_articles": "No Articles Found",
       "no_results": "No results for \"{query}\". Try a different keyword or browse all topics.",
       "no_category_articles": "No articles available in this category yet. Check back soon.",
       "browse_all": "Browse All",

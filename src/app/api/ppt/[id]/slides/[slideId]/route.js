@@ -46,6 +46,20 @@ export async function DELETE(req, { params }) {
     const slideId = parseInt(resolvedParams.slideId);
     const moduleId = parseInt(resolvedParams.id);
 
+    // Fetch slide to get fileUrl for R2 deletion
+    const slide = await db.query.pptSlide.findFirst({
+      where: eq(pptSlide.id, slideId),
+    });
+
+    if (slide?.fileUrl) {
+      try {
+        const { deleteFromR2 } = await import("@/lib/r2");
+        await deleteFromR2(slide.fileUrl);
+      } catch (r2Err) {
+        console.warn("Failed to delete slide image from R2:", r2Err);
+      }
+    }
+
     await db.delete(pptSlide).where(eq(pptSlide.id, slideId));
 
     // Re-sequence remaining slides in this module

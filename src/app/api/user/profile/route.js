@@ -29,20 +29,22 @@ export async function PUT(req) {
       return NextResponse.json({ error: "Email is already taken" }, { status: 400 });
     }
 
-    if (npm) {
-      const existingNpm = await db.query.user.findFirst({
-        where: eq(user.npm, npm),
-      });
+    const updateData = {};
 
-      if (existingNpm && existingNpm.id !== parseInt(session.user.id)) {
-        return NextResponse.json({ error: "NPM is already taken" }, { status: 400 });
+    if (name) updateData.name = name;
+
+    if (npm !== undefined) {
+      if (npm) {
+        const existingNpm = await db.query.user.findFirst({
+          where: eq(user.npm, npm),
+        });
+
+        if (existingNpm && existingNpm.id !== parseInt(session.user.id)) {
+          return NextResponse.json({ error: "NPM is already taken" }, { status: 400 });
+        }
+        updateData.npm = npm;
       }
     }
-
-    const updateData = {
-      name,
-      npm: npm || null,
-    }; // We do not update email
 
     if (profilePictureUrl !== undefined) {
       updateData.profilePictureUrl = profilePictureUrl;

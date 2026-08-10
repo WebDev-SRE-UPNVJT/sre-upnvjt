@@ -13,6 +13,7 @@ export const metadata = {
 
 export default async function MerchandisePage() {
   const dbMerchandise = await db.query.merchandise.findMany({
+    where: (m, { eq }) => eq(m.isAvailable, true),
     orderBy: [desc(merchandise.createdAt)]
   });
 

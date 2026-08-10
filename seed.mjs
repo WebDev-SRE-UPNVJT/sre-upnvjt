@@ -150,7 +150,7 @@ async function main() {
       isActive: true,
       roleId: staffRole.id,
       departmentId: dept.id,
-    });œ
+    });
     console.log('Staff created: staff@sre.co.id / password123');
   } else {
     console.log('Staff already exists.');
@@ -306,7 +306,7 @@ async function main() {
     { name: 'Naufal Reyhan Dwinosavero', npm: '24032010246', positionName: 'Staff', dept: 'Media & Creative', division: 'Social Media Division' },
     { name: 'Muhammad Raynar Hammam', npm: '24082010128', positionName: 'Manager', dept: 'Media & Creative', division: 'Web Development Division' },
     { name: 'Ghulamin Chalim Alwi', npm: '25081010173', positionName: 'Staff', dept: 'Media & Creative', division: 'Web Development Division' },
-    { name: 'Riko Fernanda Saputra', npm: '29081010301', positionName: 'Staff', dept: 'Media & Creative', division: 'Web Development Division' },
+    { name: 'Riko Fernanda Saputra', npm: '25081010301', positionName: 'Staff', dept: 'Media & Creative', division: 'Web Development Division' },
     { name: 'Kaka Dimas Soehendra Putra', npm: '24082010171', positionName: 'Staff', dept: 'Media & Creative', division: 'Web Development Division' },
     { name: 'Himi Imtiyaz Syahputra', npm: '24032010219', positionName: 'Director', dept: 'Public Relations', division: '-' },
     { name: 'Nailah Dinda Nur Aini', npm: '24034010124', positionName: 'Manager', dept: 'Public Relations', division: 'Internal Division' },
@@ -332,9 +332,9 @@ async function main() {
     });
 
     if (!userRecord) {
-      // Role: superadmin for President, VP Internal, VP External, Directors — member for everyone else
+      // Role: SUPER_ADMIN for President, VP Internal, VP External, Directors — STAFF for everyone else
       const isSuperAdmin = ['President', 'Vice President Internal', 'Vice President External', 'Director'].includes(m.positionName);
-      const assignedRoleId = isSuperAdmin ? adminRole.id : memberRole.id;
+      const assignedRoleId = isSuperAdmin ? adminRole.id : staffRole.id;
 
       // Department
       const deptCode = deptKeyToCode[m.dept];
@@ -366,9 +366,20 @@ async function main() {
       userRecord = await db.query.user.findFirst({
         where: (u, { eq }) => eq(u.email, email)
       });
-      console.log(`User created: ${m.name} (${email})`);
+      console.log(`User created: ${m.name} (${email}) with role ${isSuperAdmin ? 'SUPER_ADMIN' : 'STAFF'}`);
     } else {
-      console.log(`User already exists: ${m.name} (${email})`);
+      // If user exists, ensure role is updated to STAFF if not a super admin position
+      const isSuperAdmin = ['President', 'Vice President Internal', 'Vice President External', 'Director'].includes(m.positionName);
+      const targetRoleId = isSuperAdmin ? adminRole.id : staffRole.id;
+      
+      if (userRecord.roleId !== targetRoleId) {
+        await db.update(schema.user)
+          .set({ roleId: targetRoleId, positionName: m.positionName })
+          .where(eq(schema.user.id, userRecord.id));
+        console.log(`Updated role to ${isSuperAdmin ? 'SUPER_ADMIN' : 'STAFF'} for ${m.name}`);
+      } else {
+        console.log(`User already exists: ${m.name} (${email})`);
+      }
     }
 
     // 5. Ensure memberProfile for every user (xp: 0, level: 1)

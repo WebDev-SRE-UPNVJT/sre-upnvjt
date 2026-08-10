@@ -501,6 +501,7 @@
       "night": "Selamat Malam"
     },
     "welcome_msg": "Berikut ringkasan aktivitas, performa organisasi, dan hal yang perlu Anda selesaikan hari ini.",
+    "xp_to_next": "{xp} XP lagi ke level berikutnya",
     "id_card": {
       "official_access": "Akses Resmi Organisasi",
       "cardholder": "Pemegang Kartu",
@@ -512,6 +513,12 @@
       "urgent": "Penting",
       "attendance_msg": "Anda memiliki {count} sesi absensi aktif yang belum Anda isi. Segera isi absensi Anda sebelum sesi ditutup.",
       "fill_attendance": "Isi Absensi Sekarang"
+    },
+    "stats": {
+      "total_xp": "XP TERCAPAI",
+      "tasks_approved": "TUGAS SELESAI",
+      "rank": "PERINGKAT",
+      "attendance": "KEHADIRAN"
     },
     "widgets": {
       "total_members": "Total Anggota",

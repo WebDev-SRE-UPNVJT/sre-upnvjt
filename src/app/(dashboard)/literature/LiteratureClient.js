@@ -308,20 +308,20 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
             <select
               value={filterCategory}
               onChange={e => setFilterCategory(e.target.value)}
-              className="h-10 px-3 bg-white dark:bg-white/5 shadow-sm dark:shadow-none border border-gray-200 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:border-primary/50 transition-all"
+              className="h-10 px-3.5 bg-white dark:bg-[#0d1c16] border border-gray-200 dark:border-white/15 rounded-xl text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 transition-all cursor-pointer shadow-sm"
             >
-              <option className="text-gray-900 dark:text-primary/50" value="all">Semua Kategori</option>
+              <option value="all" className="bg-white dark:bg-[#0a1612] text-gray-900 dark:text-white">Semua Kategori</option>
               {categories.map(c => (
-                <option className="text-gray-900 dark:text-primary/50" key={c.id} value={c.id.toString()}>{c.name}</option>
+                <option key={c.id} value={c.id.toString()} className="bg-white dark:bg-[#0a1612] text-gray-900 dark:text-white">{c.name}</option>
               ))}
             </select>
             <select
               value={filterType}
               onChange={e => setFilterType(e.target.value)}
-              className="h-10 px-3 bg-white dark:bg-white/5 shadow-sm dark:shadow-none border border-gray-200 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 transition-all"
+              className="h-10 px-3.5 bg-white dark:bg-[#0d1c16] border border-gray-200 dark:border-white/15 rounded-xl text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 transition-all cursor-pointer shadow-sm"
             >
-              <option className="text-gray-900 dark:text-primary/50" value="all">Semua Tipe</option>
-              {ITEM_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+              <option value="all" className="bg-white dark:bg-[#0a1612] text-gray-900 dark:text-white">Semua Tipe</option>
+              {ITEM_TYPES.map(t => <option key={t} value={t} className="bg-white dark:bg-[#0a1612] text-gray-900 dark:text-white">{t}</option>)}
             </select>
             <span className="flex items-center text-sm text-gray-500 dark:text-primary ml-auto">
               {filteredItems.length}
@@ -683,11 +683,11 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
                             required
                             value={itemForm.categoryId}
                             onChange={e => setItemForm(p => ({ ...p, categoryId: e.target.value }))}
-                            className={`${inputCls} flex-1`}
+                            className={`${inputCls} flex-1 text-gray-900 dark:text-white font-semibold cursor-pointer`}
                           >
-                            <option value="">— Pilih Kategori —</option>
+                            <option value="" className="bg-white dark:bg-[#0a1612] text-gray-900 dark:text-white">— Pilih Kategori —</option>
                             {categories.map(c => (
-                              <option key={c.id} value={c.id.toString()}>{c.name}</option>
+                              <option key={c.id} value={c.id.toString()} className="bg-white dark:bg-[#0a1612] text-gray-900 dark:text-white">{c.name}</option>
                             ))}
                           </select>
                           {selectedCatPreview?.imageUrl && (
@@ -716,9 +716,9 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
                       <select
                         value={itemForm.type}
                         onChange={e => setItemForm(p => ({ ...p, type: e.target.value }))}
-                        className={inputCls}
+                        className={`${inputCls} text-gray-900 dark:text-white font-semibold cursor-pointer`}
                       >
-                        {ITEM_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                        {ITEM_TYPES.map(t => <option key={t} value={t} className="bg-white dark:bg-[#0a1612] text-gray-900 dark:text-white">{t}</option>)}
                       </select>
                     </InputField>
 

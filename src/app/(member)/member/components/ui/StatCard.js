@@ -43,7 +43,7 @@ export default function StatCard({
       className={[
         "group relative bg-white dark:bg-[#08120e]",
         "border border-slate-200 dark:border-white/5",
-        "rounded-2xl p-5 flex items-center gap-4",
+        "rounded-2xl p-3.5 sm:p-5 flex items-center gap-3 sm:gap-4",
         "overflow-hidden shadow-sm dark:shadow-none",
         "hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)]",
         "hover:border-slate-300 dark:hover:border-white/10",
@@ -57,27 +57,27 @@ export default function StatCard({
       {/* Icon */}
       <div
         className={[
-          "relative z-10 p-3 rounded-xl border flex-shrink-0",
+          "relative z-10 p-2.5 sm:p-3 rounded-xl border flex-shrink-0",
           "group-hover:scale-110 transition-transform duration-300",
           iconBg,
           iconColor,
           iconBorder,
         ].join(" ")}
       >
-        <Icon className="w-5 h-5" />
+        <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 min-w-0">
+      <div className="relative z-10 min-w-0 flex-1">
         <p
           className={[
-            "text-2xl font-black leading-none tabular-nums",
+            "text-xl sm:text-2xl font-black leading-none tabular-nums truncate",
             valueColor || "text-slate-900 dark:text-white",
           ].join(" ")}
         >
           {value}
         </p>
-        <p className="text-[10px] text-slate-400 dark:text-white/40 font-bold uppercase tracking-wider mt-1 truncate">
+        <p className="text-[9px] sm:text-[10px] text-slate-400 dark:text-white/40 font-bold uppercase tracking-wider mt-1.5 leading-tight line-clamp-2">
           {label}
         </p>
         {children}

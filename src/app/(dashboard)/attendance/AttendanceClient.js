@@ -199,6 +199,12 @@ const formatTimeInput = (dStr) => {
       endDateTime.setHours(parseInt(eh), parseInt(em));
     }
 
+    let finalToken = sessionForm.token ? sessionForm.token.trim().toUpperCase() : "";
+    if (!finalToken) {
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      finalToken = Array.from({ length: 6 }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join("");
+    }
+
     try {
       const res = await fetch(url, {
         method,
@@ -209,7 +215,7 @@ const formatTimeInput = (dStr) => {
           date: dateObj.toISOString(),
           startTime: startDateTime ? startDateTime.toISOString() : null,
           endTime: endDateTime ? endDateTime.toISOString() : null,
-          token: sessionForm.token || null,
+          token: finalToken,
           isActive: sessionForm.isActive,
         }),
       });
@@ -605,7 +611,7 @@ const formatTimeInput = (dStr) => {
       </div>
 
       {/* Filters Bar */}
-      <div className="p-4 bg-white/40 dark:bg-white/[0.02] border border-gray-200/50 dark:border-white/10 rounded-2xl backdrop-blur-xl flex flex-wrap items-center justify-between gap-4">
+      <div className="relative z-30 p-4 bg-white/40 dark:bg-white/[0.02] border border-gray-200/50 dark:border-white/10 rounded-2xl backdrop-blur-xl flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-white/50">
             <Filter className="w-4 h-4 text-primary" />
@@ -940,32 +946,47 @@ const formatTimeInput = (dStr) => {
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase mb-2">Kode PIN / Token (Opsional)</label>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase">Kode PIN / Token</label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+                            const randToken = Array.from({ length: 6 }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join("");
+                            setSessionForm(p => ({ ...p, token: randToken }));
+                          }}
+                          className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1"
+                        >
+                          <RefreshCw className="w-3 h-3" /> Acak Token
+                        </button>
+                      </div>
                       <input
                         type="text"
                         maxLength={10}
                         value={sessionForm.token}
-                        onChange={e => setSessionForm(p => ({ ...p, token: e.target.value }))}
-                        className={inputCls}
-                        placeholder="e.g. 123456"
+                        onChange={e => setSessionForm(p => ({ ...p, token: e.target.value.toUpperCase() }))}
+                        className={`${inputCls} font-mono font-bold uppercase tracking-wider`}
+                        placeholder="Kosongkan untuk otomatis acak (Contoh: SRE78A)"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase mb-2">Waktu Mulai (Opsional)</label>
+                      <label className="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase mb-2">Waktu Mulai (24 Jam)</label>
                       <input
                         type="time"
+                        step="60"
                         value={sessionForm.startTime}
                         onChange={e => setSessionForm(p => ({ ...p, startTime: e.target.value }))}
                         className={inputCls}
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase mb-2">Waktu Selesai (Opsional)</label>
+                      <label className="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase mb-2">Waktu Selesai (24 Jam)</label>
                       <input
                         type="time"
+                        step="60"
                         value={sessionForm.endTime}
                         onChange={e => setSessionForm(p => ({ ...p, endTime: e.target.value }))}
                         className={inputCls}

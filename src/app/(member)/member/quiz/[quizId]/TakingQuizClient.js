@@ -54,11 +54,11 @@ const OPTION_THEMES = [
 // Dynamic font size based on text length — scales with viewport
 function getDynamicQuestionSize(text = "") {
   const len = text.length;
-  if (len < 60)  return "clamp(2.5rem, 5.5vw, 7rem)";    // very short → huge
-  if (len < 100) return "clamp(2rem, 4.5vw, 6rem)";       // short
-  if (len < 160) return "clamp(1.8rem, 3.5vw, 5rem)";     // medium
-  if (len < 220) return "clamp(1.5rem, 2.8vw, 4rem)";     // medium-long
-  return         "clamp(1.2rem, 2.2vw, 3rem)";             // very long
+  if (len < 60)  return "clamp(1.25rem, 2.8vw, 2.25rem)";  // clean & balanced
+  if (len < 100) return "clamp(1.15rem, 2.4vw, 1.85rem)";  // medium
+  if (len < 160) return "clamp(1.05rem, 2.0vw, 1.5rem)";   // long
+  if (len < 220) return "clamp(0.95rem, 1.6vw, 1.35rem)";  // longer
+  return         "clamp(0.875rem, 1.3vw, 1.2rem)";        // very long
 }
 
 function getDynamicOptionSize(text = "") {
@@ -155,10 +155,17 @@ export default function TakingQuizClient({ quiz, user }) {
   const [totalScore, setTotalScore] = useState(0);
   const [showStreakBadge, setShowStreakBadge] = useState(false);
 
-  // Load progress from localStorage once mounted on the client
+  const [timeLeft, setTimeLeft] = useState(
+    quiz.timeLimitMinutes ? quiz.timeLimitMinutes * 60 : 0,
+  );
+  const [timerActive, setTimerActive] = useState(!!quiz.timeLimitMinutes);
+
+  // Load progress and timestamp from localStorage once mounted on the client
   useEffect(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem(storageKey);
+      let startTime = Date.now();
+
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
@@ -168,25 +175,42 @@ export default function TakingQuizClient({ quiz, user }) {
           if (parsed.answers) {
             setAnswers(parsed.answers);
           }
+          if (parsed.startTime) {
+            startTime = parsed.startTime;
+          } else {
+            // Add startTime to old saved state if missing
+            parsed.startTime = startTime;
+            localStorage.setItem(storageKey, JSON.stringify(parsed));
+          }
         } catch (e) {
           console.error("Failed to parse progress", e);
         }
       }
+
+      if (quiz.timeLimitMinutes > 0) {
+        const totalDurationSec = quiz.timeLimitMinutes * 60;
+        const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
+        const remaining = Math.max(0, totalDurationSec - elapsedSec);
+        setTimeLeft(remaining);
+      }
     }
     setMounted(true);
-  }, [storageKey, questions.length]);
+  }, [storageKey, questions.length, quiz.timeLimitMinutes]);
 
-  // Save progress only after mount/initialization is complete
+  // Save progress and startTime only after mount/initialization is complete
   useEffect(() => {
     if (mounted && typeof window !== "undefined" && questions.length > 0) {
-      localStorage.setItem(storageKey, JSON.stringify({ currentIdx, answers }));
+      const saved = localStorage.getItem(storageKey);
+      let startTime = Date.now();
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed.startTime) startTime = parsed.startTime;
+        } catch (_) {}
+      }
+      localStorage.setItem(storageKey, JSON.stringify({ currentIdx, answers, startTime }));
     }
   }, [currentIdx, answers, storageKey, questions.length, mounted]);
-
-  const [timeLeft, setTimeLeft] = useState(
-    quiz.timeLimitMinutes ? quiz.timeLimitMinutes * 60 : 0,
-  );
-  const [timerActive, setTimerActive] = useState(!!quiz.timeLimitMinutes);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState(null);
@@ -244,14 +268,15 @@ export default function TakingQuizClient({ quiz, user }) {
     }
   }, [timeLeft]);
 
-  const handleSelectOption = (qId, optionId, type) => {
+  const handleSelectOption = (qId, optionId, rawType) => {
     if (feedback.status !== "none") return;
     const currentQ = questions.find((q) => q.id === qId);
+    const qType = (rawType || currentQ?.type || "").toLowerCase();
 
     setAnswers((prev) =>
       prev.map((ans) => {
         if (ans.questionId !== qId) return ans;
-        if (type === "multiple_choice_complex") {
+        if (qType === "multiple_choice_complex" || qType === "complex") {
           const currentIds = ans.selectedOptionIds || [];
           if (currentIds.includes(optionId)) {
             return { ...ans, selectedOptionIds: currentIds.filter((id) => id !== optionId) };
@@ -264,9 +289,10 @@ export default function TakingQuizClient({ quiz, user }) {
       }),
     );
 
-    if (type === "multiple_choice" || type === "true_false") {
-      const isCorrect = optionId === currentQ.correctOptionId;
-      const pts = isCorrect ? currentQ.points || 600 : 0;
+    if (qType === "multiple_choice" || qType === "true_false" || qType === "mcq" || qType === "tf") {
+      const isCorrect = String(optionId).trim() === String(currentQ.correctOptionId || "").trim();
+      const questionPoints = typeof currentQ.points === "number" ? currentQ.points : (parseInt(currentQ.points) || 10);
+      const pts = isCorrect ? questionPoints : 0;
 
       setFeedback({
         status: isCorrect ? "correct" : "incorrect",
@@ -304,15 +330,27 @@ export default function TakingQuizClient({ quiz, user }) {
     if (feedback.status !== "none") return;
     const currentQ = questions[currentIdx];
     const ans = answers.find((a) => a.questionId === currentQ.id);
+    const qType = (currentQ?.type || "").toLowerCase();
+
+    if (qType === "essay" || qType === "long_essay") {
+      // Long essay questions do not have auto-grading; they will be reviewed by mentor
+      if (currentIdx < questions.length - 1) {
+        setCurrentIdx(currentIdx + 1);
+      } else {
+        handleSubmitQuiz();
+      }
+      return;
+    }
 
     let isCorrect = true;
     let correctId = null;
     let pointsEarned = 0;
+    const questionPoints = typeof currentQ.points === "number" ? currentQ.points : (parseInt(currentQ.points) || 10);
 
-    if (currentQ.type === "multiple_choice_complex") {
+    if (qType === "multiple_choice_complex" || qType === "complex") {
       const correctArr = (currentQ.correctOptionId || "").split(",").map((s) => s.trim()).filter(Boolean);
-      const selectedArr = ans.selectedOptionIds || [];
-      const maxPoints = currentQ.points || 600;
+      const selectedArr = ans?.selectedOptionIds || [];
+      const maxPoints = questionPoints;
       if (correctArr.length > 0) {
         const pointsPerCorrect = maxPoints / correctArr.length;
         let earned = 0;
@@ -324,15 +362,15 @@ export default function TakingQuizClient({ quiz, user }) {
         isCorrect = pointsEarned > 0;
       }
       correctId = currentQ.correctOptionId;
-    } else if (currentQ.type === "short_answer") {
-      const userAns = (ans.essayText || "").trim().toLowerCase();
+    } else if (qType === "short_answer" || qType === "short_essay") {
+      const userAns = (ans?.essayText || "").trim().toLowerCase();
       const correctKey = (currentQ.correctOptionId || "").trim().toLowerCase();
       if (correctKey) {
         isCorrect = userAns === correctKey;
-        pointsEarned = isCorrect ? currentQ.points || 600 : 0;
+        pointsEarned = isCorrect ? questionPoints : 0;
       } else {
         isCorrect = true;
-        pointsEarned = currentQ.points || 600;
+        pointsEarned = questionPoints;
       }
     }
 
@@ -785,13 +823,13 @@ export default function TakingQuizClient({ quiz, user }) {
               {/* Meta badges row */}
               <div className="flex items-center gap-2 mb-2">
                 <div className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] font-black uppercase tracking-widest">
-                  {currentQ.type === "multiple_choice"
-                    ? "Pilihan Ganda"
-                    : currentQ.type === "true_false"
-                    ? "Benar / Salah"
-                    : currentQ.type === "multiple_choice_complex"
-                    ? "Multi Pilihan"
-                    : "Jawaban Singkat"}
+                  {(() => {
+                    const qType = (currentQ.type || "").toLowerCase();
+                    if (qType === "multiple_choice" || qType === "mcq") return "Pilihan Ganda";
+                    if (qType === "true_false" || qType === "tf") return "Benar / Salah";
+                    if (qType === "multiple_choice_complex" || qType === "complex") return "Multi Pilihan";
+                    return "Jawaban Singkat";
+                  })()}
                 </div>
                 {currentQ.points && (
                   <div className="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
@@ -855,226 +893,236 @@ export default function TakingQuizClient({ quiz, user }) {
               </AnimatePresence>
 
               {/* MULTIPLE CHOICE / TRUE-FALSE */}
-              {(currentQ.type === "multiple_choice" || currentQ.type === "true_false") && (
-                <>
-                  {/* ── DESKTOP: horizontal flex row ── */}
-                  <div className="hidden md:flex flex-row gap-3 h-full">
-                    {(shuffledOptionsMap[currentQ.id] || currentQ.options || []).map((opt, idx) => {
-                      const theme = OPTION_THEMES[idx % OPTION_THEMES.length];
+              {(() => {
+                const qType = (currentQ.type || "").toLowerCase();
+                const isMcqOrTf = qType === "multiple_choice" || qType === "true_false" || qType === "mcq" || qType === "tf";
+                const isComplex = qType === "multiple_choice_complex" || qType === "complex";
+                const isEssay = qType === "short_answer" || qType === "essay" || qType === "short_essay";
 
-                      if (feedback.status !== "none") {
-                        const isSelected = opt.id === feedback.selectedId;
-                        const isCorrect = opt.id === feedback.correctId;
-                        if (feedback.status === "correct" && !isCorrect) return null;
-                        if (feedback.status === "incorrect" && !isSelected && !isCorrect) return null;
-                        return (
-                          <motion.div key={opt.id} initial={{ scale: 0.95 }} animate={{ scale: 1 }}
-                            className={`flex-1 relative rounded-2xl overflow-hidden flex flex-col border-2 ${
-                              isCorrect ? "bg-emerald-500/20 border-emerald-400/70 shadow-[0_0_30px_rgba(16,185,129,0.25)]" : "bg-rose-500/15 border-rose-400/50"
-                            }`}
-                          >
-                            <div className={`shrink-0 w-10 h-10 m-3 mb-0 rounded-xl border-2 flex items-center justify-center font-black text-sm ${
-                              isCorrect ? "bg-emerald-500 border-emerald-400 text-white" : "bg-rose-500 border-rose-400 text-white"
-                            }`}>
-                              {isCorrect ? <Check className="w-5 h-5" strokeWidth={3} /> : <X className="w-5 h-5" strokeWidth={3} />}
-                            </div>
-                            <div className="quiz-scroll flex-1 overflow-y-auto px-4">
-                              <div className="min-h-full flex items-center py-3">
-                                <span className="font-bold text-white leading-snug block" style={{ fontSize: getDynamicOptionSize(opt.text) }}>{opt.text}</span>
+                if (isMcqOrTf) {
+                  return (
+                    <>
+                      {/* ── DESKTOP: horizontal flex row ── */}
+                      <div className="hidden md:flex flex-row gap-3 h-full">
+                        {(shuffledOptionsMap[currentQ.id] || currentQ.options || []).map((opt, idx) => {
+                          const theme = OPTION_THEMES[idx % OPTION_THEMES.length];
+
+                          if (feedback.status !== "none") {
+                            const isSelected = opt.id === feedback.selectedId;
+                            const isCorrect = opt.id === feedback.correctId;
+                            if (feedback.status === "correct" && !isCorrect) return null;
+                            if (feedback.status === "incorrect" && !isSelected && !isCorrect) return null;
+                            return (
+                              <motion.div key={opt.id} initial={{ scale: 0.95 }} animate={{ scale: 1 }}
+                                className={`flex-1 relative rounded-2xl overflow-hidden flex flex-col border-2 ${
+                                  isCorrect ? "bg-emerald-500/20 border-emerald-400/70 shadow-[0_0_30px_rgba(16,185,129,0.25)]" : "bg-rose-500/15 border-rose-400/50"
+                                }`}
+                              >
+                                <div className={`shrink-0 w-10 h-10 m-3 mb-0 rounded-xl border-2 flex items-center justify-center font-black text-sm ${
+                                  isCorrect ? "bg-emerald-500 border-emerald-400 text-white" : "bg-rose-500 border-rose-400 text-white"
+                                }`}>
+                                  {isCorrect ? <Check className="w-5 h-5" strokeWidth={3} /> : <X className="w-5 h-5" strokeWidth={3} />}
+                                </div>
+                                <div className="quiz-scroll flex-1 overflow-y-auto px-4">
+                                  <div className="min-h-full flex items-center py-3">
+                                    <span className="font-bold text-white leading-snug block" style={{ fontSize: getDynamicOptionSize(opt.text) }}>{opt.text}</span>
+                                  </div>
+                                </div>
+                                {!isCorrect && <div className="absolute inset-0 bg-black/35 backdrop-blur-[1px]" />}
+                              </motion.div>
+                            );
+                          }
+
+                          const isSelected = currentAns?.selectedOptionId === opt.id;
+                          return (
+                            <motion.button key={opt.id} whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.97 }}
+                              onClick={() => handleSelectOption(currentQ.id, opt.id, currentQ.type)}
+                              className={`flex-1 relative rounded-2xl overflow-hidden flex flex-col border-2 text-left transition-all ${
+                                isSelected
+                                  ? "bg-emerald-500/25 border-emerald-400/80 shadow-[0_0_25px_rgba(16,185,129,0.25)]"
+                                  : `bg-gradient-to-br ${theme.base} ${theme.shadow}`
+                              }`}
+                            >
+                              <div className={`shrink-0 w-10 h-10 m-3 mb-0 rounded-xl border-2 flex items-center justify-center font-black text-sm transition-all ${
+                                isSelected ? "bg-emerald-500 border-emerald-400 text-white shadow-[0_0_12px_rgba(16,185,129,0.5)]" : theme.label
+                              }`}>
+                                {OPTION_LABELS[idx]}
                               </div>
-                            </div>
-                            {!isCorrect && <div className="absolute inset-0 bg-black/35 backdrop-blur-[1px]" />}
-                          </motion.div>
-                        );
-                      }
-
-                      const isSelected = currentAns?.selectedOptionId === opt.id;
-                      return (
-                        <motion.button key={opt.id} whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.97 }}
-                          onClick={() => handleSelectOption(currentQ.id, opt.id, currentQ.type)}
-                          className={`flex-1 relative rounded-2xl overflow-hidden flex flex-col border-2 text-left transition-all ${
-                            isSelected
-                              ? "bg-emerald-500/25 border-emerald-400/80 shadow-[0_0_25px_rgba(16,185,129,0.25)]"
-                              : `bg-gradient-to-br ${theme.base} ${theme.shadow}`
-                          }`}
-                        >
-                          <div className={`shrink-0 w-10 h-10 m-3 mb-0 rounded-xl border-2 flex items-center justify-center font-black text-sm transition-all ${
-                            isSelected ? "bg-emerald-500 border-emerald-400 text-white shadow-[0_0_12px_rgba(16,185,129,0.5)]" : theme.label
-                          }`}>
-                            {OPTION_LABELS[idx]}
-                          </div>
-                          <div className="flex-1 overflow-y-auto px-4 quiz-scroll">
-                            <div className="min-h-full flex items-center py-3">
-                              <span className={`font-bold leading-snug block ${isSelected ? "text-white" : "text-white/90"}`} style={{ fontSize: getDynamicOptionSize(opt.text) }}>
-                                {opt.text}
-                              </span>
-                            </div>
-                          </div>
-                          {isSelected && <div className="absolute top-2 right-2"><CheckCircle2 className="w-4 h-4 text-emerald-400" /></div>}
-                          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-
-                  {/* ── MOBILE: vertical scrollable stack, equal height cards ── */}
-                  <div className="md:hidden flex flex-col gap-2.5 h-full">
-                    {(shuffledOptionsMap[currentQ.id] || currentQ.options || []).map((opt, idx) => {
-                      const theme = OPTION_THEMES[idx % OPTION_THEMES.length];
-
-                      if (feedback.status !== "none") {
-                        const isSelected = opt.id === feedback.selectedId;
-                        const isCorrect = opt.id === feedback.correctId;
-                        if (feedback.status === "correct" && !isCorrect) return null;
-                        if (feedback.status === "incorrect" && !isSelected && !isCorrect) return null;
-                        return (
-                          <motion.div key={opt.id} initial={{ scale: 0.95 }} animate={{ scale: 1 }}
-                            className={`shrink-0 relative rounded-2xl overflow-hidden flex flex-row items-center gap-3 border-2 ${
-                              isCorrect ? "bg-emerald-500/20 border-emerald-400/70" : "bg-rose-500/15 border-rose-400/50"
-                            }`}
-                          style={{ height: '120px' }}
-                          >
-                            <div className={`shrink-0 w-10 h-10 ml-3 rounded-xl border-2 flex items-center justify-center font-black text-sm ${
-                              isCorrect ? "bg-emerald-500 border-emerald-400 text-white" : "bg-rose-500 border-rose-400 text-white"
-                            }`}>
-                              {isCorrect ? <Check className="w-5 h-5" strokeWidth={3} /> : <X className="w-5 h-5" strokeWidth={3} />}
-                            </div>
-                            <div className="quiz-scroll flex-1 overflow-y-auto h-full pr-4">
-                              <div className="min-h-full flex items-center py-2">
-                                <span className="font-bold text-white text-base leading-snug block">{opt.text}</span>
+                              <div className="flex-1 overflow-y-auto px-4 quiz-scroll">
+                                <div className="min-h-full flex items-center py-3">
+                                  <span className={`font-bold leading-snug block ${isSelected ? "text-white" : "text-white/90"}`} style={{ fontSize: getDynamicOptionSize(opt.text) }}>
+                                    {opt.text}
+                                  </span>
+                                </div>
                               </div>
-                            </div>
-                            {!isCorrect && <div className="absolute inset-0 bg-black/35 backdrop-blur-[1px]" />}
-                          </motion.div>
-                        );
-                      }
+                              {isSelected && <div className="absolute top-2 right-2"><CheckCircle2 className="w-4 h-4 text-emerald-400" /></div>}
+                              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                            </motion.button>
+                          );
+                        })}
+                      </div>
 
-                      const isSelected = currentAns?.selectedOptionId === opt.id;
-                      return (
-                        <motion.button key={opt.id} whileTap={{ scale: 0.97 }}
-                          onClick={() => handleSelectOption(currentQ.id, opt.id, currentQ.type)}
-                          className={`shrink-0 relative w-full rounded-2xl overflow-hidden flex flex-row items-center gap-3 border-2 text-left transition-all ${
-                            isSelected
-                              ? "bg-emerald-500/25 border-emerald-400/80 shadow-[0_0_20px_rgba(16,185,129,0.25)]"
-                              : `bg-gradient-to-r ${theme.base}`
-                          }`}
-                          style={{ height: '120px' }}
-                        >
-                          <div className={`shrink-0 w-10 h-10 ml-3 rounded-xl border-2 flex items-center justify-center font-black text-sm transition-all ${
-                            isSelected ? "bg-emerald-500 border-emerald-400 text-white shadow-[0_0_10px_rgba(16,185,129,0.5)]" : theme.label
-                          }`}>
-                            {OPTION_LABELS[idx]}
-                          </div>
-                          <div className="quiz-scroll flex-1 overflow-y-auto h-full pr-3">
-                            <div className="min-h-full flex items-center py-2">
-                              <span className={`font-bold text-base leading-snug block ${isSelected ? "text-white" : "text-white/90"}`}>
-                                {opt.text}
-                              </span>
-                            </div>
-                          </div>
-                          {isSelected && <div className="absolute top-2 right-2"><CheckCircle2 className="w-4 h-4 text-emerald-400" /></div>}
-                          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
+                      {/* ── MOBILE: vertical scrollable stack, equal height cards ── */}
+                      <div className="md:hidden flex flex-col gap-2.5 h-full">
+                        {(shuffledOptionsMap[currentQ.id] || currentQ.options || []).map((opt, idx) => {
+                          const theme = OPTION_THEMES[idx % OPTION_THEMES.length];
 
-              {/* MULTIPLE CHOICE COMPLEX */}
-              {currentQ.type === "multiple_choice_complex" && (
-                <div className="flex flex-col h-full gap-2">
-                  <div className="shrink-0 flex items-center gap-2">
-                    <div className="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[9px] font-black uppercase tracking-widest">
-                      Pilih semua jawaban yang benar
+                          if (feedback.status !== "none") {
+                            const isSelected = opt.id === feedback.selectedId;
+                            const isCorrect = opt.id === feedback.correctId;
+                            if (feedback.status === "correct" && !isCorrect) return null;
+                            if (feedback.status === "incorrect" && !isSelected && !isCorrect) return null;
+                            return (
+                              <motion.div key={opt.id} initial={{ scale: 0.95 }} animate={{ scale: 1 }}
+                                className={`shrink-0 relative rounded-2xl overflow-hidden flex flex-row items-center gap-3 border-2 ${
+                                  isCorrect ? "bg-emerald-500/20 border-emerald-400/70" : "bg-rose-500/15 border-rose-400/50"
+                                }`}
+                              style={{ height: '120px' }}
+                              >
+                                <div className={`shrink-0 w-10 h-10 ml-3 rounded-xl border-2 flex items-center justify-center font-black text-sm ${
+                                  isCorrect ? "bg-emerald-500 border-emerald-400 text-white" : "bg-rose-500 border-rose-400 text-white"
+                                }`}>
+                                  {isCorrect ? <Check className="w-5 h-5" strokeWidth={3} /> : <X className="w-5 h-5" strokeWidth={3} />}
+                                </div>
+                                <div className="quiz-scroll flex-1 overflow-y-auto h-full pr-4">
+                                  <div className="min-h-full flex items-center py-2">
+                                    <span className="font-bold text-white text-base leading-snug block">{opt.text}</span>
+                                  </div>
+                                </div>
+                                {!isCorrect && <div className="absolute inset-0 bg-black/35 backdrop-blur-[1px]" />}
+                              </motion.div>
+                            );
+                          }
+
+                          const isSelected = currentAns?.selectedOptionId === opt.id;
+                          return (
+                            <motion.button key={opt.id} whileTap={{ scale: 0.97 }}
+                              onClick={() => handleSelectOption(currentQ.id, opt.id, currentQ.type)}
+                              className={`shrink-0 relative w-full rounded-2xl overflow-hidden flex flex-row items-center gap-3 border-2 text-left transition-all ${
+                                isSelected
+                                  ? "bg-emerald-500/25 border-emerald-400/80 shadow-[0_0_20px_rgba(16,185,129,0.25)]"
+                                  : `bg-gradient-to-r ${theme.base}`
+                              }`}
+                              style={{ height: '120px' }}
+                            >
+                              <div className={`shrink-0 w-10 h-10 ml-3 rounded-xl border-2 flex items-center justify-center font-black text-sm transition-all ${
+                                isSelected ? "bg-emerald-500 border-emerald-400 text-white shadow-[0_0_10px_rgba(16,185,129,0.5)]" : theme.label
+                              }`}>
+                                {OPTION_LABELS[idx]}
+                              </div>
+                              <div className="quiz-scroll flex-1 overflow-y-auto h-full pr-3">
+                                <div className="min-h-full flex items-center py-2">
+                                  <span className={`font-bold text-base leading-snug block ${isSelected ? "text-white" : "text-white/90"}`}>
+                                    {opt.text}
+                                  </span>
+                                </div>
+                              </div>
+                              {isSelected && <div className="absolute top-2 right-2"><CheckCircle2 className="w-4 h-4 text-emerald-400" /></div>}
+                              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                            </motion.button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  );
+                }
+
+                if (isComplex) {
+                  return (
+                    <div className="flex flex-col h-full gap-2">
+                      <div className="shrink-0 flex items-center gap-2">
+                        <div className="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[9px] font-black uppercase tracking-widest">
+                          Pilih semua jawaban yang benar
+                        </div>
+                      </div>
+
+                      {/* Desktop: horizontal */}
+                      <div className="hidden md:flex flex-1 min-h-0 flex-row gap-3">
+                        {(shuffledOptionsMap[currentQ.id] || currentQ.options || []).map((opt, idx) => {
+                          const isSelected = (currentAns?.selectedOptionIds || []).includes(opt.id);
+                          const theme = OPTION_THEMES[idx % OPTION_THEMES.length];
+                          return (
+                            <motion.button key={opt.id} whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.97 }}
+                              onClick={() => handleSelectOption(currentQ.id, opt.id, "multiple_choice_complex")}
+                              className={`flex-1 relative rounded-2xl overflow-hidden flex flex-col border-2 text-left transition-all ${
+                                isSelected ? "bg-emerald-500/25 border-emerald-400/80 shadow-[0_0_25px_rgba(16,185,129,0.2)]" : `bg-gradient-to-br ${theme.base}`
+                              }`}
+                            >
+                              <div className={`shrink-0 w-10 h-10 m-3 mb-0 rounded-xl border-2 flex items-center justify-center font-black text-sm transition-all ${
+                                isSelected ? "bg-emerald-500 border-emerald-400 text-white" : theme.label
+                              }`}>
+                                {isSelected ? <Check className="w-5 h-5" strokeWidth={3} /> : OPTION_LABELS[idx]}
+                              </div>
+                              <div className="flex-1 overflow-y-auto px-4 quiz-scroll">
+                                <div className="min-h-full flex items-center py-3">
+                                  <span className={`font-bold leading-snug block ${isSelected ? "text-white" : "text-white/90"}`} style={{ fontSize: getDynamicOptionSize(opt.text) }}>
+                                    {opt.text}
+                                  </span>
+                                </div>
+                              </div>
+                            </motion.button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Mobile: vertical scrollable stack */}
+                      <div className="md:hidden flex flex-col gap-2.5 overflow-y-auto quiz-scroll flex-1">
+                        {(shuffledOptionsMap[currentQ.id] || currentQ.options || []).map((opt, idx) => {
+                          const isSelected = (currentAns?.selectedOptionIds || []).includes(opt.id);
+                          const theme = OPTION_THEMES[idx % OPTION_THEMES.length];
+                          return (
+                            <motion.button key={opt.id} whileTap={{ scale: 0.97 }}
+                              onClick={() => handleSelectOption(currentQ.id, opt.id, "multiple_choice_complex")}
+                              className={`shrink-0 relative w-full rounded-2xl overflow-hidden flex flex-row items-center gap-3 border-2 text-left transition-all ${
+                                isSelected ? "bg-emerald-500/25 border-emerald-400/80 shadow-[0_0_20px_rgba(16,185,129,0.2)]" : `bg-gradient-to-r ${theme.base}`
+                              }`}
+                              style={{ height: '120px' }}
+                            >
+                              <div className={`shrink-0 w-10 h-10 ml-3 rounded-xl border-2 flex items-center justify-center font-black text-sm transition-all ${
+                                isSelected ? "bg-emerald-500 border-emerald-400 text-white" : theme.label
+                              }`}>
+                                {isSelected ? <Check className="w-5 h-5" strokeWidth={3} /> : OPTION_LABELS[idx]}
+                              </div>
+                              <div className="quiz-scroll flex-1 overflow-y-auto h-full pr-3">
+                                <div className="min-h-full flex items-center py-2">
+                                  <span className={`font-bold text-base leading-snug block ${isSelected ? "text-white" : "text-white/90"}`}>
+                                    {opt.text}
+                                  </span>
+                                </div>
+                              </div>
+                            </motion.button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                }
+
+                // Default / Fallback (Short Answer or Essay)
+                return (
+                  <div className="h-full flex flex-col justify-center items-center px-4">
+                    <div className="w-full max-w-xl">
+                      <input
+                        type="text"
+                        value={currentAns?.essayText || ""}
+                        onChange={(e) => handleTextChange(currentQ.id, e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleValidateManual();
+                          }
+                        }}
+                        disabled={feedback.status !== "none"}
+                        className="w-full bg-white/5 border-2 border-white/10 focus:border-emerald-500/50 rounded-2xl px-6 py-4 text-center text-lg md:text-xl font-bold text-white placeholder:text-white/20 focus:outline-none focus:bg-white/8 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
+                        placeholder="Ketik jawaban Anda di sini..."
+                      />
+                      <div className="text-[10px] text-center text-emerald-400/40 uppercase tracking-widest font-black mt-3">
+                        Tekan Enter untuk melanjutkan
+                      </div>
                     </div>
                   </div>
-
-                  {/* Desktop: horizontal */}
-                  <div className="hidden md:flex flex-1 min-h-0 flex-row gap-3">
-                    {(shuffledOptionsMap[currentQ.id] || currentQ.options || []).map((opt, idx) => {
-                      const isSelected = (currentAns?.selectedOptionIds || []).includes(opt.id);
-                      const theme = OPTION_THEMES[idx % OPTION_THEMES.length];
-                      return (
-                        <motion.button key={opt.id} whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.97 }}
-                          onClick={() => handleSelectOption(currentQ.id, opt.id, "multiple_choice_complex")}
-                          className={`flex-1 relative rounded-2xl overflow-hidden flex flex-col border-2 text-left transition-all ${
-                            isSelected ? "bg-emerald-500/25 border-emerald-400/80 shadow-[0_0_25px_rgba(16,185,129,0.2)]" : `bg-gradient-to-br ${theme.base}`
-                          }`}
-                        >
-                          <div className={`shrink-0 w-10 h-10 m-3 mb-0 rounded-xl border-2 flex items-center justify-center font-black text-sm transition-all ${
-                            isSelected ? "bg-emerald-500 border-emerald-400 text-white" : theme.label
-                          }`}>
-                            {isSelected ? <Check className="w-5 h-5" strokeWidth={3} /> : OPTION_LABELS[idx]}
-                          </div>
-                          <div className="flex-1 overflow-y-auto px-4 quiz-scroll">
-                            <div className="min-h-full flex items-center py-3">
-                              <span className={`font-bold leading-snug block ${isSelected ? "text-white" : "text-white/90"}`} style={{ fontSize: getDynamicOptionSize(opt.text) }}>
-                                {opt.text}
-                              </span>
-                            </div>
-                          </div>
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Mobile: vertical scrollable stack */}
-                  <div className="md:hidden flex flex-col gap-2.5 overflow-y-auto quiz-scroll flex-1">
-                    {(shuffledOptionsMap[currentQ.id] || currentQ.options || []).map((opt, idx) => {
-                      const isSelected = (currentAns?.selectedOptionIds || []).includes(opt.id);
-                      const theme = OPTION_THEMES[idx % OPTION_THEMES.length];
-                      return (
-                        <motion.button key={opt.id} whileTap={{ scale: 0.97 }}
-                          onClick={() => handleSelectOption(currentQ.id, opt.id, "multiple_choice_complex")}
-                          className={`shrink-0 relative w-full rounded-2xl overflow-hidden flex flex-row items-center gap-3 border-2 text-left transition-all ${
-                            isSelected ? "bg-emerald-500/25 border-emerald-400/80 shadow-[0_0_20px_rgba(16,185,129,0.2)]" : `bg-gradient-to-r ${theme.base}`
-                          }`}
-                          style={{ height: '120px' }}
-                        >
-                          <div className={`shrink-0 w-10 h-10 ml-3 rounded-xl border-2 flex items-center justify-center font-black text-sm transition-all ${
-                            isSelected ? "bg-emerald-500 border-emerald-400 text-white" : theme.label
-                          }`}>
-                            {isSelected ? <Check className="w-5 h-5" strokeWidth={3} /> : OPTION_LABELS[idx]}
-                          </div>
-                          <div className="quiz-scroll flex-1 overflow-y-auto h-full pr-3">
-                            <div className="min-h-full flex items-center py-2">
-                              <span className={`font-bold text-base leading-snug block ${isSelected ? "text-white" : "text-white/90"}`}>
-                                {opt.text}
-                              </span>
-                            </div>
-                          </div>
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* SHORT ANSWER */}
-              {currentQ.type === "short_answer" && (
-                <div className="h-full flex flex-col justify-center items-center px-4">
-                  <div className="w-full max-w-xl">
-                    <input
-                      type="text"
-                      value={currentAns?.essayText || ""}
-                      onChange={(e) => handleTextChange(currentQ.id, e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          handleValidateManual();
-                        }
-                      }}
-                      disabled={feedback.status !== "none"}
-                      className="w-full bg-white/5 border-2 border-white/10 focus:border-emerald-500/50 rounded-2xl px-6 py-4 text-center text-lg md:text-xl font-bold text-white placeholder:text-white/20 focus:outline-none focus:bg-white/8 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
-                      placeholder="Ketik jawaban Anda di sini..."
-                    />
-                    <div className="text-[10px] text-center text-emerald-400/40 uppercase tracking-widest font-black mt-3">
-                      Tekan Enter untuk melanjutkan
-                    </div>
-                  </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
           </motion.div>
         </AnimatePresence>
@@ -1129,47 +1177,34 @@ export default function TakingQuizClient({ quiz, user }) {
 
       {/* ── BOTTOM BAR (shrink-0, part of flex column, no overlap) ── */}
       <div
-        className={`shrink-0 relative z-30 px-4 pb-3 pt-1 flex items-center justify-between transition-opacity duration-300 ${
+        className={`shrink-0 relative z-30 px-4 pb-3 pt-1 flex items-center justify-end transition-opacity duration-300 ${
           feedback.status !== "none" ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
       >
-        {/* User info */}
-        <div className="flex items-center gap-3 bg-black/40 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/8">
-          <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-emerald-500/30 shrink-0">
-            <img
-              src={user?.image || "/images/default-avatar.png"}
-              alt="Avatar"
-              className="w-full h-full object-cover"
-              onError={(e) => (e.target.style.display = "none")}
-            />
-          </div>
-          <div>
-            <div className="text-xs font-bold text-white leading-tight">{user?.name || "Player"}</div>
-            <div className="flex items-center gap-1 text-[10px] text-emerald-400/70">
-              Member
-            </div>
-          </div>
-        </div>
-
         {/* Action button for complex/essay */}
-        {(currentQ.type === "multiple_choice_complex" || currentQ.type === "short_answer") && (
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={handleValidateManual}
-            disabled={isSubmitting}
-            className="px-6 h-11 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-black flex items-center gap-2 transition-all shadow-[0_4px_0_rgba(5,100,60,0.8)] hover:shadow-[0_2px_0_rgba(5,100,60,0.8)] active:shadow-none active:translate-y-1 border border-emerald-400/50 text-sm uppercase tracking-wider"
-          >
-            {isSubmitting ? (
-              <RefreshCw className="w-4 h-4 animate-spin" />
-            ) : (
-              <>
-                {currentIdx < questions.length - 1 ? "Lanjut" : "Selesai"}
-                <ChevronRight className="w-4 h-4" />
-              </>
-            )}
-          </motion.button>
-        )}
+        {(() => {
+          const qType = (currentQ.type || "").toLowerCase();
+          const isComplexOrEssay = qType === "multiple_choice_complex" || qType === "complex" || qType === "short_answer" || qType === "essay" || qType === "short_essay";
+          if (!isComplexOrEssay) return null;
+          return (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={handleValidateManual}
+              disabled={isSubmitting}
+              className="px-6 h-11 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-black flex items-center gap-2 transition-all shadow-[0_4px_0_rgba(5,100,60,0.8)] hover:shadow-[0_2px_0_rgba(5,100,60,0.8)] active:shadow-none active:translate-y-1 border border-emerald-400/50 text-sm uppercase tracking-wider"
+            >
+              {isSubmitting ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  {currentIdx < questions.length - 1 ? "Cek Jawaban & Lanjut" : "Kirim Kuis"}
+                  <ChevronRight className="w-4 h-4" />
+                </>
+              )}
+            </motion.button>
+          );
+        })()}
       </div>
     </div>
   );

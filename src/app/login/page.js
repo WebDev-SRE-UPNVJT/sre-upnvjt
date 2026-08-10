@@ -133,7 +133,7 @@ export default function LoginPage() {
               <img
                 src="/images/logo.png"
                 alt="SRE Logo"
-                className="h-8 w-auto object-contain"
+                className="h-7 w-auto object-contain brightness-0 invert-0 dark:brightness-0 dark:invert opacity-90 transition-all duration-300"
               />
             </div>
           </Link>

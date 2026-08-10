@@ -7,6 +7,11 @@ import { authOptions } from "../auth/[...nextauth]/route";
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const records = await db.query.attendance.findMany({
       with: {
         member: { columns: { id: true, name: true, npm: true } },

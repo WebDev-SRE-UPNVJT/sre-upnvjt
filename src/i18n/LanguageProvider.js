@@ -26,14 +26,20 @@ export function LanguageProvider({ children, initialLanguage = "id" }) {
     localStorage.setItem("app_lang", language);
   }, [language]);
 
-  const t = (key) => {
+  const t = (key, params = {}) => {
     const keys = key.split(".");
     let value = translations[language];
     for (const k of keys) {
       if (value === undefined) break;
       value = value[k];
     }
-    return value !== undefined ? value : key;
+    let res = value !== undefined ? value : key;
+    if (typeof res === "string" && params && typeof params === "object") {
+      Object.keys(params).forEach((paramKey) => {
+        res = res.replace(new RegExp(`\\{${paramKey}\\}`, "g"), params[paramKey]);
+      });
+    }
+    return res;
   };
 
   return (

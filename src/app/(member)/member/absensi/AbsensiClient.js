@@ -417,7 +417,7 @@ export default function AbsensiClient({ initialAttendance, validSessions = [], u
         <SectionHeader
           icon={Calendar}
           title="Riwayat Terakhir"
-          actionLabel="Lihat Semua Riwayat →"
+          actionLabel="Lihat Semua Riwayat"
           actionHref="/member/absensi/riwayat"
           className="mb-4"
         />

@@ -52,7 +52,12 @@ export async function getQuizSubmissions() {
     const data = await db.query.quizSubmission.findMany({
       with: {
         member: { columns: { id: true, name: true } },
-        quiz: { columns: { id: true, title: true, passingScore: true, rewardXp: true } },
+        quiz: {
+          columns: { id: true, title: true, passingScore: true, rewardXp: true },
+          with: {
+            questions: { orderBy: [asc(quizQuestion.order)] }
+          }
+        },
         gradedBy: { columns: { id: true, name: true } },
       },
       orderBy: [desc(quizSubmission.submittedAt)],

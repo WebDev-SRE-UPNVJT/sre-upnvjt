@@ -9,6 +9,7 @@ import {
   Target, Trophy, ClipboardCheck, User, LogOut, Menu, X, Zap, Award,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const SIDEBAR_ITEMS = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -135,14 +136,20 @@ export default function MemberSidebarClient({ user, profile }) {
         {/* Sidebar Nav */}
         {renderNavLinks()}
 
-        {/* Logout */}
-        <button
-          onClick={() => signOut({ callbackUrl: "/login" })}
-          className="mt-6 flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-sm font-semibold border border-transparent text-red-400 hover:bg-red-500/10 hover:border-red-500/20 transition-all cursor-pointer"
-        >
-          <LogOut className="w-5 h-5 shrink-0" />
-          <span>Keluar</span>
-        </button>
+        {/* Theme Toggle & Logout */}
+        <div className="mt-6 flex flex-col gap-2 pt-4 border-t border-white/5">
+          <div className="flex items-center gap-3 px-4 py-2">
+            <ThemeToggle />
+            <span className="text-xs font-medium text-gray-400">Tema Tampilan</span>
+          </div>
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-sm font-semibold border border-transparent text-red-400 hover:bg-red-500/10 hover:border-red-500/20 transition-all cursor-pointer"
+          >
+            <LogOut className="w-5 h-5 shrink-0" />
+            <span>Keluar</span>
+          </button>
+        </div>
       </div>
     </>
   );

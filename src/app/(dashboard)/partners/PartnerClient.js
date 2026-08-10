@@ -15,6 +15,7 @@ const EMPTY_PARTNER = {
   logoUrl: "",
   websiteUrl: "",
   tier: null,
+  isActive: true,
 };
 
 export default function PartnerClient({ initialPartners }) {
@@ -348,11 +349,31 @@ export default function PartnerClient({ initialPartners }) {
                       onChange={(e) => setCurrentPartner(prev => ({ ...prev, tier: e.target.value || null }))}
                       className="w-full h-12 px-4 bg-white dark:bg-white/5 shadow-sm dark:shadow-none border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 transition-all appearance-none"
                     >
-                      <option value="" className="bg-[#0a1612] text-gray-900 dark:text-white">— No Tier —</option>
-                      <option value="LARGE" className="bg-[#0a1612] text-gray-900 dark:text-white">{t("partners.large")}</option>
-                      <option value="MEDIUM" className="bg-[#0a1612] text-gray-900 dark:text-white">{t("partners.medium")}</option>
-                      <option value="SMALL" className="bg-[#0a1612] text-gray-900 dark:text-white">{t("partners.small")}</option>
+                      <option value="" className="bg-white dark:bg-[#0a1612] text-gray-900 dark:text-white">— No Tier —</option>
+                      <option value="LARGE" className="bg-white dark:bg-[#0a1612] text-gray-900 dark:text-white">{t("partners.large")}</option>
+                      <option value="MEDIUM" className="bg-white dark:bg-[#0a1612] text-gray-900 dark:text-white">{t("partners.medium")}</option>
+                      <option value="SMALL" className="bg-white dark:bg-[#0a1612] text-gray-900 dark:text-white">{t("partners.small")}</option>
                     </select>
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/10">
+                    <div>
+                      <div className="text-sm font-bold text-gray-900 dark:text-white">Status Aktif</div>
+                      <div className="text-xs text-gray-500 dark:text-white/50">Tampilkan mitra ini di halaman publik</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPartner(prev => ({ ...prev, isActive: !prev.isActive }))}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        currentPartner.isActive !== false ? 'bg-primary' : 'bg-gray-300 dark:bg-white/20'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          currentPartner.isActive !== false ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
                   </div>
                 </form>
               </div>

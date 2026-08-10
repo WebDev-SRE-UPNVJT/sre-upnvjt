@@ -783,14 +783,30 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
                         )}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500 dark:text-white/60">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-primary" />
-                          <span>
-                            {new Date(tk.deadline).toLocaleDateString("id-ID", {
-                              day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
-                            })}
-                          </span>
-                        </div>
+                        {(() => {
+                          const isOverdue = tk.deadline && new Date(tk.deadline) < new Date();
+                          return (
+                            <div className="flex items-center gap-2">
+                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold ${
+                                isOverdue 
+                                  ? "bg-red-500/10 text-red-500 border border-red-500/20" 
+                                  : "text-gray-500 dark:text-white/60"
+                              }`}>
+                                <Calendar className={`w-3.5 h-3.5 ${isOverdue ? "text-red-500" : "text-primary"}`} />
+                                <span>
+                                  {new Date(tk.deadline).toLocaleDateString("id-ID", {
+                                    day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false
+                                  })}
+                                </span>
+                                {isOverdue && (
+                                  <span className="ml-1 text-[9px] uppercase font-black px-1.5 py-0.5 rounded bg-red-500 text-white">
+                                    Berakhir
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="px-6 py-4">
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 text-xs font-bold">
@@ -1003,14 +1019,25 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
                                 </td>
                                 <td className="px-6 py-4 text-sm">
                                   {sub.fileUrl ? (
-                                    <a
-                                      href={sub.fileUrl}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="text-primary font-bold hover:underline flex items-center gap-1.5 text-xs"
-                                    >
-                                      <ExternalLink className="w-3.5 h-3.5" /> Buka Link File
-                                    </a>
+                                    <div className="flex flex-wrap items-center gap-1.5">
+                                      {sub.fileUrl.split(",").map((rawUrl, idx, arr) => {
+                                        const url = rawUrl.trim();
+                                        if (!url) return null;
+                                        return (
+                                          <a
+                                            key={idx}
+                                            href={url}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="px-2.5 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 font-bold transition-all text-xs inline-flex items-center gap-1 shrink-0"
+                                            title={`Buka Link ${arr.length > 1 ? `#${idx + 1}` : ""}`}
+                                          >
+                                            <ExternalLink className="w-3 h-3" />
+                                            {arr.length > 1 ? `File #${idx + 1}` : "Buka Link File"}
+                                          </a>
+                                        );
+                                      })}
+                                    </div>
                                   ) : (
                                     <span className="text-gray-400 text-xs">Tidak ada file</span>
                                   )}
@@ -1086,9 +1113,25 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
                         </td>
                         <td className="px-6 py-4 text-sm">
                           {sub.fileUrl ? (
-                            <a href={sub.fileUrl} target="_blank" rel="noreferrer" className="text-primary font-bold hover:underline flex items-center gap-1.5 text-xs">
-                              <ExternalLink className="w-3.5 h-3.5" /> Buka Link File
-                            </a>
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              {sub.fileUrl.split(",").map((rawUrl, idx, arr) => {
+                                const url = rawUrl.trim();
+                                if (!url) return null;
+                                return (
+                                  <a
+                                    key={idx}
+                                    href={url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="px-2.5 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 font-bold transition-all text-xs inline-flex items-center gap-1 shrink-0"
+                                    title={`Buka Link ${arr.length > 1 ? `#${idx + 1}` : ""}`}
+                                  >
+                                    <ExternalLink className="w-3 h-3" />
+                                    {arr.length > 1 ? `File #${idx + 1}` : "Buka Link File"}
+                                  </a>
+                                );
+                              })}
+                            </div>
                           ) : (
                             <span className="text-gray-400 text-xs">Tidak ada file</span>
                           )}
@@ -1157,8 +1200,8 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
                   </InputField>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <InputField label="Tenggat Waktu *">
-                      <input type="datetime-local" required value={taskForm.deadline}
+                    <InputField label="Tenggat Waktu * (Format 24 Jam)">
+                      <input type="datetime-local" required step="60" value={taskForm.deadline}
                         onChange={e => setTaskForm(p => ({ ...p, deadline: e.target.value }))}
                         className={inputCls} />
                     </InputField>
@@ -1311,14 +1354,28 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
                             {targetSubmission.member?.name || `User ${targetSubmission.memberId}`}
                           </div>
                         </div>
-                        <a
-                          href={targetSubmission.fileUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 text-xs font-bold transition-all flex items-center gap-1.5"
-                        >
-                          <ExternalLink className="w-3.5 h-3.5" /> Buka Link Submisi
-                        </a>
+                        <div className="flex items-center gap-2 flex-wrap justify-end">
+                          {targetSubmission.fileUrl ? (
+                            targetSubmission.fileUrl.split(",").map((rawUrl, idx, arr) => {
+                              const url = rawUrl.trim();
+                              if (!url) return null;
+                              return (
+                                <a
+                                  key={idx}
+                                  href={url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 text-xs font-bold transition-all flex items-center gap-1.5 shrink-0"
+                                >
+                                  <ExternalLink className="w-3.5 h-3.5" />
+                                  {arr.length > 1 ? `Buka File #${idx + 1}` : "Buka Link Submisi"}
+                                </a>
+                              );
+                            })
+                          ) : (
+                            <span className="text-gray-400 text-xs">Tidak ada file</span>
+                          )}
+                        </div>
                       </div>
 
                       {/* XP Breakdown Card */}

@@ -61,22 +61,37 @@ function getStatus(taskId, submissions) {
   return "PENDING";
 }
 
-function isDeadlineSoon(deadline) {
-  const diff = (new Date(deadline) - new Date()) / (1000 * 60 * 60 * 24);
-  return diff >= 0 && diff <= 3;
-}
+function getDeadlineInfo(deadlineStr) {
+  if (!deadlineStr) return { isOverdue: false, text: "Tanpa Deadline", isSoon: false, isUrgent: false };
 
-function isOverdue(deadline) {
-  return new Date(deadline) < new Date();
+  const now = new Date();
+  const deadline = new Date(deadlineStr);
+  const diffMs = deadline - now;
+
+  if (diffMs < 0) {
+    const overdueDays = Math.floor(Math.abs(diffMs) / (1000 * 60 * 60 * 24));
+    const text = overdueDays === 0 ? "Lewat deadline (Hari ini)" : `Lewat ${overdueDays} hari`;
+    return { isOverdue: true, text, isSoon: false, isUrgent: false };
+  }
+
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) {
+    return { isOverdue: false, text: `Tenggat ${diffHours} jam lagi`, isSoon: true, isUrgent: true };
+  } else if (diffDays <= 3) {
+    return { isOverdue: false, text: `Tenggat ${diffDays} hari lagi`, isSoon: true, isUrgent: false };
+  } else {
+    const formatted = deadline.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+    return { isOverdue: false, text: `${diffDays} hari lagi (${formatted})`, isSoon: false, isUrgent: false };
+  }
 }
 
 // ─── Task Card ───────────────────────────────────────────────────────────────
 function TaskCard({ task, submission, onOpen, index }) {
   const status   = getStatus(task.id, submission ? [submission] : []);
   const cfg      = STATUS_CONFIG[status];
-  const deadline = new Date(task.deadline).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
-  const soon     = isDeadlineSoon(task.deadline);
-  const overdue  = isOverdue(task.deadline);
+  const dlInfo   = getDeadlineInfo(task.deadline);
   const canSubmit = status === "NOT_STARTED" || status === "REJECTED";
 
   return (
@@ -105,12 +120,17 @@ function TaskCard({ task, submission, onOpen, index }) {
 
           <div className="flex flex-wrap items-center gap-2 mt-3">
             {/* Deadline chip */}
-            <span className={`flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-lg border
-              ${overdue ? "bg-red-500/10 text-red-500 border-red-500/20" :
-                soon    ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
-                          "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/40 border-slate-200 dark:border-white/10"}`}>
+            <span className={`flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-all ${
+              dlInfo.isOverdue
+                ? "bg-red-500/15 text-red-500 border-red-500/30 font-black shadow-[0_0_10px_rgba(239,68,68,0.2)]"
+                : dlInfo.isUrgent
+                ? "bg-red-500/10 text-red-400 border-red-500/25 font-bold animate-pulse"
+                : dlInfo.isSoon
+                ? "bg-amber-500/10 text-amber-500 border-amber-500/25 font-bold"
+                : "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/50 border-slate-200 dark:border-white/10"
+            }`}>
               <Clock className="w-3 h-3" />
-              {overdue ? "Lewat batas" : `${deadline}`}
+              {dlInfo.text}
             </span>
 
             {/* XP chip */}
@@ -161,20 +181,32 @@ function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
 
   const validateAndSetFiles = (rawFiles) => {
     setError("");
-    let selected = Array.from(rawFiles || []);
+    let incoming = Array.from(rawFiles || []);
 
-    if (!allowMulti && selected.length > 1) {
-      selected = [selected[0]];
-    }
-
-    for (const f of selected) {
+    for (const f of incoming) {
       if (f.size > maxMb * 1024 * 1024) {
         setError(`Ukuran berkas "${f.name}" (${(f.size / (1024 * 1024)).toFixed(1)} MB) melebihi batas maksimal ${maxMb} MB.`);
         return;
       }
     }
 
-    setFiles(selected);
+    if (!allowMulti) {
+      setFiles(incoming.slice(0, 1));
+    } else {
+      setFiles(prev => {
+        const combined = [...prev];
+        for (const file of incoming) {
+          if (!combined.some(f => f.name === file.name && f.size === file.size)) {
+            combined.push(file);
+          }
+        }
+        return combined;
+      });
+    }
+  };
+
+  const removeFileAtIndex = (indexToRemove) => {
+    setFiles(prev => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
   const handleDrop = (e) => {
@@ -266,10 +298,24 @@ function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
 
           {/* Deadline + submission type + limits */}
           <div className="flex flex-wrap gap-2.5">
-            <span className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-white/50">
-              <Calendar className="w-3.5 h-3.5" />
-              Deadline: {new Date(task.deadline).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
-            </span>
+            {(() => {
+              const isOverdue = task.deadline && new Date(task.deadline) < new Date();
+              return (
+                <span className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl border ${
+                  isOverdue
+                    ? "bg-red-500/10 border-red-500/20 text-red-500"
+                    : "bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-white/50"
+                }`}>
+                  <Calendar className={`w-3.5 h-3.5 ${isOverdue ? "text-red-500" : ""}`} />
+                  Deadline: {new Date(task.deadline).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+                  {isOverdue && (
+                    <span className="ml-1 text-[9px] uppercase font-black px-1.5 py-0.5 rounded bg-red-500 text-white">
+                      Lewat Deadline
+                    </span>
+                  )}
+                </span>
+              );
+            })()}
             <span className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-500">
               {type === "link" ? <LinkIcon className="w-3.5 h-3.5" /> : <UploadCloud className="w-3.5 h-3.5" />}
               {type === "link" ? "Hanya Link / Tautan" : "Hanya File / Berkas"}
@@ -346,23 +392,60 @@ function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
                   <input ref={fileRef} type="file" multiple={allowMulti} className="hidden" onChange={(e) => validateAndSetFiles(e.target.files)} />
 
                   {files.length > 0 ? (
-                    <div className="space-y-2">
-                      {files.map((f, i) => (
-                        <div key={i} className="flex items-center gap-2.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2.5">
-                          <FileText className="w-4 h-4 text-primary flex-shrink-0" />
-                          <span className="text-xs font-bold text-slate-700 dark:text-white truncate">{f.name}</span>
-                          <span className="text-[10px] text-slate-400 dark:text-white/30 ml-auto flex-shrink-0">{(f.size / 1024).toFixed(1)} KB</span>
+                    <div className="space-y-2.5" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-between pb-1 border-b border-slate-200 dark:border-white/10">
+                        <span className="text-xs font-bold text-slate-600 dark:text-white/70">
+                          {files.length} {allowMulti ? "berkas terpilih" : "berkas terpilih"}
+                        </span>
+                        <div className="flex items-center gap-3">
+                          {allowMulti && (
+                            <button
+                              type="button"
+                              onClick={() => fileRef.current?.click()}
+                              className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+                            >
+                              + Tambah File
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => setFiles([])}
+                            className="text-xs text-red-500 hover:underline"
+                          >
+                            Hapus Semua
+                          </button>
                         </div>
-                      ))}
-                      <button type="button" onClick={(e) => { e.stopPropagation(); setFiles([]); }} className="text-xs text-slate-400 hover:text-red-500 dark:text-white/30 dark:hover:text-red-400 transition-colors">
-                        Hapus pilihan
-                      </button>
+                      </div>
+
+                      <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                        {files.map((f, i) => (
+                          <div key={i} className="flex items-center gap-2.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2.5">
+                            <FileText className="w-4 h-4 text-primary flex-shrink-0" />
+                            <div className="flex-1 min-w-0 text-left">
+                              <p className="text-xs font-bold text-slate-700 dark:text-white truncate">{f.name}</p>
+                              <p className="text-[10px] text-slate-400 dark:text-white/30 font-mono">{(f.size / 1024).toFixed(1)} KB</p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeFileAtIndex(i)}
+                              className="p-1 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                              title="Hapus file ini"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ) : (
                     <>
                       <UploadCloud className={`w-10 h-10 mx-auto mb-3 transition-colors ${isDragging ? "text-primary" : "text-slate-300 dark:text-white/20"}`} />
-                      <p className="text-sm font-black text-slate-600 dark:text-white/60">Drag & drop file di sini</p>
-                      <p className="text-xs text-slate-400 dark:text-white/30 mt-1">atau klik untuk pilih file</p>
+                      <p className="text-sm font-black text-slate-600 dark:text-white/60">
+                        {allowMulti ? "Drag & drop beberapa file di sini" : "Drag & drop file di sini"}
+                      </p>
+                      <p className="text-xs text-slate-400 dark:text-white/30 mt-1">
+                        {allowMulti ? "atau klik untuk memilih multiple file" : "atau klik untuk pilih file"}
+                      </p>
                     </>
                   )}
                 </div>

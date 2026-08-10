@@ -54,6 +54,7 @@ export default function DashboardLayout({ children }) {
 
     // Member Operations
     { name: "Literature Bank", icon: FolderOpen, href: "/literature", module: "literature" },
+    { name: "Dokumen Internal", icon: FileText, href: "/documents", module: "documents" },
     { name: "PPT Modules", icon: Presentation, href: "/ppt", module: "ppt" },
     { name: "Quiz", icon: Target, href: "/quiz", module: "quiz" },
     { name: "Tasks", icon: FolderKanban, href: "/tasks", module: "tasks" },
@@ -70,6 +71,7 @@ export default function DashboardLayout({ children }) {
   const allowedNavItems = navItems.filter(item => {
     if (item.module === "overview" || item.module === "settings") return true;
     if (item.module === "partners") return role === "SUPER_ADMIN";
+    if (item.module === "documents") return hasAccess(session?.user, "documents", "read") || role === "SUPER_ADMIN" || role === "ADMIN";
     return hasAccess(session?.user, item.module, "read");
   });
 
@@ -79,9 +81,9 @@ export default function DashboardLayout({ children }) {
       <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
       <div className="absolute -left-20 top-20 w-40 h-40 bg-primary/20 blur-[100px] pointer-events-none" />
 
-      <div className={`mb-12 flex items-center relative z-10 transition-all duration-300 ${isSidebarCollapsed ? 'justify-center' : 'justify-between'}`}>
+      <div className={`mb-6 flex items-center relative z-10 transition-all duration-300 ${isSidebarCollapsed ? 'justify-center' : 'justify-between'}`}>
         <Link href="/" className="font-display font-black text-[28px] tracking-tighter text-gray-900 dark:text-white flex items-center gap-1 group">
-          <div className={`bg-primary dark:bg-white transition-all duration-300 ${isSidebarCollapsed ? 'h-10 w-10' : 'h-16 w-48'}`} style={{ WebkitMaskImage: "url(/images/logo.png)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", WebkitMaskPosition: "left center", maskImage: "url(/images/logo.png)", maskSize: "contain", maskRepeat: "no-repeat", maskPosition: "left center" }}></div>
+          <div className={`bg-primary dark:bg-white transition-all duration-300 ${isSidebarCollapsed ? 'h-10 w-10' : 'h-12 w-40'}`} style={{ WebkitMaskImage: "url(/images/logo.png)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", WebkitMaskPosition: "left center", maskImage: "url(/images/logo.png)", maskSize: "contain", maskRepeat: "no-repeat", maskPosition: "left center" }}></div>
           
         </Link>
         {isMobileMenuOpen && (
@@ -98,16 +100,16 @@ export default function DashboardLayout({ children }) {
             initial={{ opacity: 0, height: 0 }} 
             animate={{ opacity: 1, height: "auto" }} 
             exit={{ opacity: 0, height: 0, overflow: "hidden" }} 
-            className="mb-10 p-5 rounded-2xl bg-gradient-to-br from-gray-100 to-white dark:from-white/10 dark:to-white/5 border border-gray-200 dark:border-white/10 relative z-10 group shadow-sm dark:shadow-none"
+            className="mb-4 p-3.5 rounded-xl bg-gradient-to-br from-gray-100 to-white dark:from-white/10 dark:to-white/5 border border-gray-200 dark:border-white/10 relative z-10 group shadow-sm dark:shadow-none"
           >
-            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
-            <div className="text-[15px] font-bold text-gray-900 dark:text-white mb-1 tracking-wide">{session?.user?.name}</div>
-            <div className="text-[12px] text-gray-500 dark:text-white/40 mb-3 truncate">{session?.user?.email}</div>
-            <div className="flex flex-wrap gap-2 mt-2">
-              <span className="text-[9px] uppercase font-bold tracking-widest px-2.5 py-1.5 rounded-md bg-primary/10 dark:bg-primary/20 text-primary border border-primary/20 shadow-sm dark:shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl" />
+            <div className="text-[13px] font-bold text-gray-900 dark:text-white leading-tight tracking-wide">{session?.user?.name}</div>
+            <div className="text-[11px] text-gray-500 dark:text-white/40 truncate">{session?.user?.email}</div>
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              <span className="text-[8px] uppercase font-bold tracking-widest px-2 py-0.5 rounded bg-primary/10 dark:bg-primary/20 text-primary border border-primary/20">
                 {role?.replace("_", " ") || "No Role"}
               </span>
-              <span className="text-[9px] uppercase font-bold tracking-widest px-2.5 py-1.5 rounded-md bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white/70 border border-gray-200 dark:border-white/5">
+              <span className="text-[8px] uppercase font-bold tracking-widest px-2 py-0.5 rounded bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white/70 border border-gray-200 dark:border-white/5">
                 {session?.user?.departmentName || "No Dept"}
               </span>
             </div>
@@ -148,8 +150,24 @@ export default function DashboardLayout({ children }) {
         })}
       </nav>
 
-      {/* Footer Tools: Logout */}
+      {/* Footer Tools: Theme Toggle & Logout */}
       <div className={`mt-auto pt-4 border-t border-gray-200 dark:border-white/5 relative z-10 flex flex-col gap-2`}>
+        <div className={`flex items-center gap-3 py-2 ${isSidebarCollapsed ? 'justify-center px-0' : 'px-4'}`}>
+          <ThemeToggle />
+          <AnimatePresence>
+            {!isSidebarCollapsed && (
+              <motion.span
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: "auto" }}
+                exit={{ opacity: 0, width: 0 }}
+                className="text-[13px] font-medium text-gray-600 dark:text-white/60 whitespace-nowrap cursor-pointer"
+              >
+                Tema Tampilan
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </div>
+
         <button 
           onClick={() => signOut({ callbackUrl: '/login' })}
           className={`flex items-center gap-4 py-3.5 rounded-xl text-[14px] font-medium text-red-500/80 dark:text-red-400/80 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-300 group ${isSidebarCollapsed ? 'w-12 h-12 justify-center px-0 mx-auto' : 'w-full px-4'}`}
@@ -246,10 +264,14 @@ export default function DashboardLayout({ children }) {
                 })}
               </nav>
 
-              {/* Footer Tools: Logout */}
-              <div className="mt-4 pt-6 border-t border-gray-200 dark:border-white/5 relative z-10 shrink-0 pb-6 flex flex-col gap-4">
+              {/* Footer Tools: Theme Toggle & Logout */}
+              <div className="mt-4 pt-6 border-t border-gray-200 dark:border-white/5 relative z-10 shrink-0 pb-6 flex flex-col gap-2">
+                <div className="flex items-center gap-3 px-4 py-2">
+                  <ThemeToggle />
+                  <span className="text-[13px] font-medium text-gray-600 dark:text-white/60">Tema Tampilan</span>
+                </div>
                 {/* Logout */}
-                <div className="p-4 border-t border-gray-100 dark:border-white/5">
+                <div className="p-2 border-t border-gray-100 dark:border-white/5">
                   <button 
                     onClick={() => signOut({ callbackUrl: '/login' })}
                     className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 font-bold transition-all text-sm"

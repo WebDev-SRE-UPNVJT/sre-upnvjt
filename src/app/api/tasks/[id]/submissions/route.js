@@ -55,6 +55,41 @@ export async function PUT(req, { params }) {
 
     const wasApproved = submission.status === "APPROVED";
     const nowApproved = status === "APPROVED";
+    const nowRejected = status === "REJECTED";
+
+    // Delete files from Google Drive if status is changed to REJECTED
+    if (nowRejected && submission.fileUrl) {
+      try {
+        const oauth2Client = new google.auth.OAuth2(
+          process.env.GOOGLE_CLIENT_ID,
+          process.env.GOOGLE_CLIENT_SECRET,
+          'https://developers.google.com/oauthplayground'
+        );
+        oauth2Client.setCredentials({
+          refresh_token: process.env.GOOGLE_REFRESH_TOKEN
+        });
+        const drive = google.drive({ version: 'v3', auth: oauth2Client });
+
+        const urls = submission.fileUrl.split(",").map(u => u.trim());
+        for (const url of urls) {
+          if (url.includes("drive.google.com")) {
+            // Extract Google Drive File ID using regex
+            const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+              const fileId = match[1];
+              try {
+                await drive.files.delete({ fileId, supportsAllDrives: true });
+                console.log(`Successfully deleted Google Drive file ${fileId} on REJECT`);
+              } catch (driveErr) {
+                console.error(`Error deleting Google Drive file ${fileId}:`, driveErr);
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Google Drive client error during deletion on REJECT:", err);
+      }
+    }
 
     const [updated] = await db.update(taskSubmission)
       .set({
