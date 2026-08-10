@@ -70,25 +70,25 @@ export default function Footer() {
   return (
     <div className="w-full flex flex-col mt-0 relative z-10">
       {/* Main Footer Body */}
-      <footer className="bg-[#0bb37e] dark:bg-[#07130e] text-white/90 dark:text-white/70 border-transparent relative overflow-hidden pt-20 lg:pt-24 pb-12">
+      <footer className="bg-[#0bb37e] dark:bg-[#07130e] text-white/90 dark:text-white/70 border-transparent relative overflow-hidden pt-12 sm:pt-16 lg:pt-20 pb-8 sm:pb-10">
         {/* Subtle ambient glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" aria-hidden="true" />
 
         <div className="w-full max-w-[1400px] mx-auto px-6 md:px-12 relative z-10 flex flex-col items-center text-center">
           {/* Logo */}
-          <Link href="/" className="mb-8" aria-label="SRE UPNVJT Home">
+          <Link href="/" className="mb-6 sm:mb-8 inline-block" aria-label="SRE UPNVJT Home">
             <Image
               src="/images/logo.png"
               alt="SRE UPNVJT Logo"
-              width={160}
-              height={64}
-              className="h-16 w-auto object-contain brightness-0 invert dark:brightness-0 dark:invert dark:opacity-40 opacity-90 hover:opacity-100 dark:hover:opacity-60 transition-opacity"
+              width={140}
+              height={50}
+              className="h-10 sm:h-12 md:h-14 w-auto object-contain brightness-0 invert dark:brightness-0 dark:invert dark:opacity-50 opacity-95 hover:opacity-100 dark:hover:opacity-80 transition-opacity"
             />
           </Link>
 
-          {/* Navigation Links — Large Font */}
-          <nav className="mb-8 w-full" aria-label="Footer navigation">
-            <ul className="flex flex-wrap justify-center items-center gap-x-8 md:gap-x-12 gap-y-4">
+          {/* Navigation Links — Responsive & Professional Font Hierarchy */}
+          <nav className="mb-6 sm:mb-8 w-full max-w-2xl mx-auto" aria-label="Footer navigation">
+            <ul className="flex flex-wrap justify-center items-center gap-x-5 sm:gap-x-8 md:gap-x-10 gap-y-2.5 sm:gap-y-3">
               {[
                 { label: t("visitor.footer.home"), href: "/" },
                 { label: t("visitor.footer.about"), href: "/about" },
@@ -99,7 +99,7 @@ export default function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-lg md:text-xl font-bold tracking-wide text-white dark:text-gray-200 hover:text-yellow-300 dark:hover:text-emerald-400 transition-colors duration-200"
+                    className="text-xs sm:text-sm md:text-base font-semibold text-white/90 dark:text-gray-300 hover:text-white dark:hover:text-emerald-400 transition-colors duration-200"
                   >
                     {link.label}
                   </Link>
@@ -108,8 +108,8 @@ export default function Footer() {
             </ul>
           </nav>
 
-          {/* Social Media Links — Large Icons */}
-          <div className="flex justify-center items-center gap-8 mb-10">
+          {/* Social Media Links — Clean Interactive Icons */}
+          <div className="flex justify-center items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
             {SOCIAL_LINKS.map(({ label, href, Icon, aria: ariaLabel }) => (
               <a
                 key={label}
@@ -117,15 +117,15 @@ export default function Footer() {
                 target={href.startsWith("http") ? "_blank" : undefined}
                 rel={href.startsWith("http") ? "noreferrer noopener" : undefined}
                 aria-label={ariaLabel}
-                className="text-white/80 hover:text-yellow-300 dark:text-gray-400 dark:hover:text-emerald-400 transition-all duration-300 transform hover:scale-110"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 dark:bg-white/5 dark:hover:bg-emerald-500/20 text-white dark:text-gray-300 hover:text-white dark:hover:text-emerald-400 transition-all duration-300 transform hover:scale-105"
               >
-                <Icon className="w-8 h-8" />
+                <Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
               </a>
             ))}
           </div>
 
           {/* Bottom Copyright */}
-          <div className="text-[12px] text-white/90 dark:text-gray-400 font-bold">
+          <div className="text-[11px] sm:text-xs text-white/75 dark:text-gray-400 font-normal leading-relaxed max-w-md mx-auto">
             © {new Date().getFullYear()} Society of Renewable Energy UPN Veteran Jawa Timur. {t("visitor.footer.all_rights")}
           </div>
         </div>
