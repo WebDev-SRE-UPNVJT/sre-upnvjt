@@ -579,7 +579,7 @@ export default function Home() {
                   </div>
 
                   <h2 className="text-2xl sm:text-4xl md:text-5xl font-display font-black tracking-tight text-white uppercase drop-shadow-md leading-tight">
-                    {t("visitor.home.partners_title")}
+                    {t("visitor.home.partners_prefix") || "MITRA "}<span className="text-yellow-300 dark:text-emerald-400">{t("visitor.home.partners_highlight") || "KAMI"}</span>
                   </h2>
 
                   <div className="h-[3px] sm:h-[4px] w-16 sm:w-20 bg-yellow-300 dark:bg-emerald-400 mx-auto mt-3 rounded-full" aria-hidden="true" />

@@ -989,6 +989,8 @@
       "testimonials_desc": "Hear directly from members about their learning journey, growth, and team experiences at SRE UPNVJT.",
       "partners": "Collaboration & Synergy",
       "partners_title": "Our Partners",
+      "partners_prefix": "OUR ",
+      "partners_highlight": "PARTNERS",
       "partners_desc": "Organizations, institutions, and communities we work with to accelerate the sustainable transition.",
       "campus_audit_title": "Campus Energy Audit",
       "campus_audit_desc": "Conducting electrical consumption analysis and building-level energy efficiency studies.",
