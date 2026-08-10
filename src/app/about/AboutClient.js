@@ -113,7 +113,7 @@ export default function AboutClient({ departmentsData = [] }) {
         {/* Tint overlay with transition to ensure high readability */}
         <div 
           className="absolute inset-0 pointer-events-none transition-colors duration-300 z-10" 
-          style={{ backgroundColor: isDark ? 'rgba(6, 15, 11, 0.93)' : 'rgba(8, 140, 97, 0.90)' }}
+          style={{ backgroundColor: isDark ? 'rgba(6, 15, 11, 0.84)' : 'rgba(8, 140, 97, 0.90)' }}
         />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none z-0" aria-hidden="true" />
         
