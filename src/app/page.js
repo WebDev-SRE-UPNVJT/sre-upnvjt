@@ -612,18 +612,18 @@ export default function Home() {
                     <>
                       {/* Row 1: Large Logos (Platinum) */}
                       {platinumPartners.length > 0 && (
-                        <div className="w-full flex flex-wrap justify-center items-center gap-3 sm:gap-6 md:gap-10 relative z-10">
+                        <div className="w-full flex flex-wrap justify-center items-center gap-3 sm:gap-6 md:gap-8 relative z-10">
                           {platinumPartners.map((partner) => (
                             <a
                               key={partner.id || partner.name}
                               href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
                               target={partner.websiteUrl && partner.websiteUrl !== "#" ? "_blank" : undefined}
                               rel="noopener noreferrer"
-                              className="group flex items-center justify-center p-1 sm:p-2 transition-transform duration-300 hover:scale-105"
+                              className="group flex items-center justify-center px-6 py-3.5 sm:px-8 sm:py-5 bg-white dark:bg-[#f8fafc] rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-white/20 shadow-md hover:shadow-xl hover:-translate-y-1 hover:border-yellow-400 dark:hover:border-emerald-400 transition-all duration-300"
                             >
                               <PartnerLogoImage
                                 partner={partner}
-                                className="h-10 sm:h-16 md:h-20 max-w-[180px] sm:max-w-[240px] md:max-w-[300px] object-contain filter drop-shadow-md group-hover:drop-shadow-xl group-hover:scale-105 transition-all duration-300"
+                                className="h-9 sm:h-14 md:h-16 max-w-[180px] sm:max-w-[220px] md:max-w-[260px] object-contain group-hover:scale-105 transition-transform duration-300"
                               />
                             </a>
                           ))}
@@ -632,18 +632,18 @@ export default function Home() {
 
                       {/* Row 2: Medium Logos (Gold) */}
                       {goldPartners.length > 0 && (
-                        <div className="w-full flex flex-wrap justify-center items-center gap-2.5 sm:gap-5 md:gap-8 relative z-10">
+                        <div className="w-full flex flex-wrap justify-center items-center gap-2.5 sm:gap-4 md:gap-6 relative z-10">
                           {goldPartners.map((partner) => (
                             <a
                               key={partner.id || partner.name}
                               href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
                               target={partner.websiteUrl && partner.websiteUrl !== "#" ? "_blank" : undefined}
                               rel="noopener noreferrer"
-                              className="group flex items-center justify-center p-1 sm:p-2 transition-transform duration-300 hover:scale-105"
+                              className="group flex items-center justify-center px-5 py-3 sm:px-6 sm:py-4 bg-white dark:bg-[#f8fafc] rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-white/20 shadow-md hover:shadow-xl hover:-translate-y-1 hover:border-yellow-400 dark:hover:border-emerald-400 transition-all duration-300"
                             >
                               <PartnerLogoImage
                                 partner={partner}
-                                className="h-8 sm:h-12 md:h-16 max-w-[140px] sm:max-w-[200px] md:max-w-[240px] object-contain filter brightness-95 group-hover:brightness-105 group-hover:scale-105 transition-all duration-300"
+                                className="h-7 sm:h-10 md:h-12 max-w-[140px] sm:max-w-[170px] md:max-w-[200px] object-contain group-hover:scale-105 transition-transform duration-300"
                               />
                             </a>
                           ))}
@@ -652,18 +652,18 @@ export default function Home() {
 
                       {/* Row 3: Smaller Logos (Silver / Other) */}
                       {silverPartners.length > 0 && (
-                        <div className="w-full flex flex-wrap justify-center items-center gap-2 sm:gap-4 md:gap-6 relative z-10">
+                        <div className="w-full flex flex-wrap justify-center items-center gap-2 sm:gap-3 md:gap-4 relative z-10">
                           {silverPartners.map((partner) => (
                             <a
                               key={partner.id || partner.name}
                               href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
                               target={partner.websiteUrl && partner.websiteUrl !== "#" ? "_blank" : undefined}
                               rel="noopener noreferrer"
-                              className="group flex items-center justify-center p-1 transition-transform duration-300 hover:scale-105"
+                              className="group flex items-center justify-center px-4 py-2.5 sm:px-5 sm:py-3 bg-white dark:bg-[#f8fafc] rounded-lg sm:rounded-xl border border-slate-200/80 dark:border-white/20 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-yellow-400 dark:hover:border-emerald-400 transition-all duration-300"
                             >
                               <PartnerLogoImage
                                 partner={partner}
-                                className="h-7 sm:h-9 md:h-12 max-w-[110px] sm:max-w-[150px] md:max-w-[180px] object-contain filter opacity-95 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300"
+                                className="h-6 sm:h-8 md:h-9 max-w-[110px] sm:max-w-[130px] md:max-w-[150px] object-contain group-hover:scale-105 transition-transform duration-300"
                               />
                             </a>
                           ))}
@@ -672,18 +672,18 @@ export default function Home() {
                     </>
                   ) : (
                     /* Default Flex Grid if no tiers */
-                    <div className="w-full flex flex-wrap justify-center items-center gap-3 sm:gap-6 md:gap-8 relative z-10">
+                    <div className="w-full flex flex-wrap justify-center items-center gap-3 sm:gap-5 md:gap-6 relative z-10">
                       {dbPartners.map((partner) => (
                         <a
                           key={partner.id || partner.name}
                           href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
                           target={partner.websiteUrl && partner.websiteUrl !== "#" ? "_blank" : undefined}
                           rel="noopener noreferrer"
-                          className="group flex items-center justify-center p-1 sm:p-2 transition-transform duration-300 hover:scale-105"
+                          className="group flex items-center justify-center px-6 py-4 sm:px-8 sm:py-5 bg-white dark:bg-[#f8fafc] rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-white/20 shadow-md hover:shadow-xl hover:-translate-y-1 hover:border-yellow-400 dark:hover:border-emerald-400 transition-all duration-300"
                         >
                           <PartnerLogoImage
                             partner={partner}
-                            className="h-8 sm:h-12 md:h-16 max-w-[150px] sm:max-w-[200px] md:max-w-[250px] object-contain filter drop-shadow-md group-hover:drop-shadow-xl group-hover:scale-105 transition-all duration-300"
+                            className="h-8 sm:h-12 md:h-14 max-w-[160px] sm:max-w-[200px] md:max-w-[240px] object-contain group-hover:scale-105 transition-transform duration-300"
                           />
                         </a>
                       ))}
