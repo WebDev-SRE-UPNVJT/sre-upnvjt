@@ -6,12 +6,15 @@ import { ArrowRight, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/i18n/LanguageProvider";
+import { useTheme } from "next-themes";
 
 export const dynamic = "force-dynamic";
 
 export default function LoginPage() {
   const router = useRouter();
   const { language, t } = useLanguage();
+  const { theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,6 +23,12 @@ export default function LoginPage() {
   const { data: session, status } = useSession();
   const [isPublicRegistrationEnabled, setIsPublicRegistrationEnabled] =
     useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isLight = mounted && (theme === "light" || resolvedTheme === "light");
 
   React.useEffect(() => {
     if (status === "authenticated") {
@@ -83,10 +92,20 @@ export default function LoginPage() {
             autoPlay
             loop
             muted
+            playsInline
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-[#0a2e24] opacity-80 mix-blend-multiply" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0a1c15] via-transparent to-[#0a1c15]/50" />
+          {isLight ? (
+            <div
+              className="absolute inset-0 bg-black/45 z-0 pointer-events-none"
+              style={{ backgroundColor: "rgba(0, 0, 0, 0.45)" }}
+            />
+          ) : (
+            <>
+              <div className="absolute inset-0 bg-[#0a2e24] opacity-80 mix-blend-multiply" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0a1c15] via-transparent to-[#0a1c15]/50" />
+            </>
+          )}
         </div>
 
         <div className="relative z-10 flex flex-col justify-between h-full text-white">
