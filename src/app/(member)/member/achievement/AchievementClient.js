@@ -173,7 +173,7 @@ export default function AchievementClient({ profile, xpLogs, taskSubs, attendanc
             {[
               { label: "Total XP",    val: xp.toLocaleString(),      color: "text-amber-400",   icon: Zap },
               { label: "Badge Unlock", val: `${unlockedBadges.length}/${BADGE_DEFS.length}`, color: "text-purple-400", icon: Award },
-              { label: "Tugas ✓",     val: approvedTasks,             color: "text-emerald-400", icon: Trophy },
+              { label: "Tugas Selesai", val: approvedTasks,             color: "text-emerald-400", icon: Trophy },
               { label: "Quiz Lulus",  val: quizPassed,                color: "text-blue-400",    icon: BookOpen },
             ].map(({ label, val, color, icon: Icon }) => (
               <div key={label} className="bg-white/5 border border-white/10 rounded-2xl p-4">

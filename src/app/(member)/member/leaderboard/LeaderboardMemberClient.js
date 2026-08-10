@@ -286,9 +286,9 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
                         <Zap className="w-4 h-4 fill-current animate-pulse" />
                         {item.xp.toLocaleString()}
                       </div>
-                      <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 dark:text-white/40">XP</span>
-                      <div className={`text-[9px] font-black uppercase tracking-widest mt-1.5 ${cfg.labelColor}`}>
-                        {isGold ? "🏆 " : ""}{cfg.label}
+                      <div className={`text-[9px] font-black uppercase tracking-widest mt-1.5 flex items-center justify-center gap-1 ${cfg.labelColor}`}>
+                        {isGold && <Trophy className="w-3 h-3 text-amber-400 fill-amber-400 inline" />}
+                        {cfg.label}
                       </div>
                     </div>
                   </div>

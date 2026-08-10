@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, ExternalLink, Calendar, User, FileText, FolderOpen, Info } from "lucide-react";
+import { ArrowLeft, ExternalLink, Calendar, User, FileText, FolderOpen, Info, Search } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageProvider";
 import { useRouter } from "next/navigation";
 import dynamic from 'next/dynamic';
@@ -105,7 +105,7 @@ export default function LiteraturDetailClient({ item }) {
           <div className="mt-4 flex items-start gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-white/60">
             <Info className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
             <p className="text-sm font-medium leading-relaxed">
-              <strong>Tips Pencarian:</strong> Anda dapat mencari kata spesifik di dalam isi dokumen ini dengan menekan <kbd className="px-2 py-1 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-md text-xs font-mono shadow-sm">Ctrl + F</kbd> (atau <kbd className="px-2 py-1 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-md text-xs font-mono shadow-sm">Cmd + F</kbd> di Mac), atau dengan mengklik ikon 🔍 Kaca Pembesar di bagian atas dokumen (jika tersedia).
+              <strong>Tips Pencarian:</strong> Anda dapat mencari kata spesifik di dalam isi dokumen ini dengan menekan <kbd className="px-2 py-1 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-md text-xs font-mono shadow-sm">Ctrl + F</kbd> (atau <kbd className="px-2 py-1 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-md text-xs font-mono shadow-sm">Cmd + F</kbd> di Mac), atau dengan mengklik tombol <span className="inline-flex items-center gap-1 font-semibold text-slate-800 dark:text-white"><Search className="w-3.5 h-3.5 inline" /> Pencarian</span> di bagian atas dokumen (jika tersedia).
             </p>
           </div>
         </div>

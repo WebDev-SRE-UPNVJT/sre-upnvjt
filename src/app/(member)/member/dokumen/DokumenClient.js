@@ -112,7 +112,7 @@ export default function DokumenClient({ categories, initialDocuments }) {
       if (!res.ok) throw new Error(data.error ?? "Gagal mengupload dokumen");
 
       setDocs((prev) => [data.document, ...prev]);
-      setSuccess("✅ Dokumen berhasil diupload ke Google Drive!");
+      setSuccess("Dokumen berhasil diupload ke Google Drive!");
       setFile(null); setTitle(""); setDesc("");
       setTimeout(() => { setSuccess(""); setShowForm(false); }, 2000);
     } catch (err) {

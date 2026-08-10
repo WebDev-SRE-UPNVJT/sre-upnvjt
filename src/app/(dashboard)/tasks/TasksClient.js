@@ -227,7 +227,7 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
       // Notice Banner (Row 2)
       sheet.mergeCells("A2:H2");
       const noticeCell = sheet.getCell("A2");
-      noticeCell.value = "🔴 DILARANG MENGUBAH KOLOM MERAH (ID Submisi, ID User, Nama, Waktu, Link). 🟢 UBAH HANYA KOLOM HIJAU (Status, Catatan Feedback, Bonus XP).";
+      noticeCell.value = "DILARANG MENGUBAH KOLOM MERAH (ID Submisi, ID User, Nama, Waktu, Link). UBAH HANYA KOLOM HIJAU (Status, Catatan Feedback, Bonus XP).";
       noticeCell.font = { name: "Arial", size: 10, bold: true, color: { argb: "FF991B1B" } };
       noticeCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFEF2F2" } };
       noticeCell.alignment = { horizontal: "center", vertical: "middle" };
@@ -238,14 +238,14 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
 
       // Header Row (Row 4)
       const headers = [
-        { header: "ID Submisi 🔴", key: "submissionId", locked: true },
-        { header: "ID User 🔴", key: "memberId", locked: true },
-        { header: "Nama Anggota 🔴", key: "memberName", locked: true },
-        { header: "Waktu Submisi 🔴", key: "submittedAt", locked: true },
-        { header: "Link Submisi 🔴", key: "fileUrl", locked: true },
-        { header: "Status 🟢", key: "status", locked: false },
-        { header: "Catatan Feedback 🟢", key: "feedback", locked: false },
-        { header: "Bonus XP 🟢", key: "bonusXp", locked: false },
+        { header: "ID Submisi [LOCKED]", key: "submissionId", locked: true },
+        { header: "ID User [LOCKED]", key: "memberId", locked: true },
+        { header: "Nama Anggota [LOCKED]", key: "memberName", locked: true },
+        { header: "Waktu Submisi [LOCKED]", key: "submittedAt", locked: true },
+        { header: "Link Submisi [LOCKED]", key: "fileUrl", locked: true },
+        { header: "Status [EDITABLE]", key: "status", locked: false },
+        { header: "Catatan Feedback [EDITABLE]", key: "feedback", locked: false },
+        { header: "Bonus XP [EDITABLE]", key: "bonusXp", locked: false },
       ];
 
       const headerRow = sheet.getRow(4);
@@ -363,14 +363,14 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
       });
 
       const guideRowsData = [
-        ["ID Submisi 🔴", "DIKUNCI / DO NOT EDIT", "Merah", "DILARANG DIUBAH! Kunci referensi submisi."],
-        ["ID User 🔴", "DIKUNCI / DO NOT EDIT", "Merah", "DILARANG DIUBAH! ID identitas pengguna anggota."],
-        ["Nama Anggota 🔴", "READ ONLY", "Merah", "DILARANG DIUBAH! Informasi nama lengkap anggota."],
-        ["Waktu Submisi 🔴", "READ ONLY", "Merah", "DILARANG DIUBAH! Tanggal & jam submit tugas."],
-        ["Link Submisi 🔴", "READ ONLY", "Merah", "DILARANG DIUBAH! Tautan file submisi anggota."],
-        ["Status 🟢", "BISA DIEDIT ✏️", "Hijau", "Isikan salah satu dari: APPROVED (Disetujui), REJECTED (Ditolak / Perlu Revisi), atau PENDING (Menunggu Review)."],
-        ["Catatan Feedback 🟢", "BISA DIEDIT ✏️", "Hijau", "Tuliskan pesan / masukan / saran perbaikan untuk anggota (Opsional)."],
-        ["Bonus XP 🟢", "BISA DIEDIT ✏️", "Hijau", "Isikan angka bonus XP (contoh: 10 atau 20). XP ini akan otomatis ditambahkan ke profil anggota saat file di-import!"],
+        ["ID Submisi [LOCKED]", "DIKUNCI / DO NOT EDIT", "Merah", "DILARANG DIUBAH! Kunci referensi submisi."],
+        ["ID User [LOCKED]", "DIKUNCI / DO NOT EDIT", "Merah", "DILARANG DIUBAH! ID identitas pengguna anggota."],
+        ["Nama Anggota [LOCKED]", "READ ONLY", "Merah", "DILARANG DIUBAH! Informasi nama lengkap anggota."],
+        ["Waktu Submisi [LOCKED]", "READ ONLY", "Merah", "DILARANG DIUBAH! Tanggal & jam submit tugas."],
+        ["Link Submisi [LOCKED]", "READ ONLY", "Merah", "DILARANG DIUBAH! Tautan file submisi anggota."],
+        ["Status [EDITABLE]", "BISA DIEDIT", "Hijau", "Isikan salah satu dari: APPROVED (Disetujui), REJECTED (Ditolak / Perlu Revisi), atau PENDING (Menunggu Review)."],
+        ["Catatan Feedback [EDITABLE]", "BISA DIEDIT", "Hijau", "Tuliskan pesan / masukan / saran perbaikan untuk anggota (Opsional)."],
+        ["Bonus XP [EDITABLE]", "BISA DIEDIT", "Hijau", "Isikan angka bonus XP (contoh: 10 atau 20). XP ini akan otomatis ditambahkan ke profil anggota saat file di-import!"],
       ];
 
       guideRowsData.forEach((gr, idx) => {
@@ -540,8 +540,8 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
 
     setImportStep("SAVING");
     setImportProgressLogs([
-      "✓ [1/3] File Excel berhasil dibaca & diverifikasi",
-      "⌛ [2/3] Mengirim data submisi & memperbarui status di server...",
+      "[1/3] File Excel berhasil dibaca & diverifikasi",
+      "[2/3] Mengirim data submisi & memperbarui status di server...",
     ]);
 
     try {
@@ -555,8 +555,8 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
       if (res.ok) {
         setImportProgressLogs(prev => [
           ...prev,
-          "✓ [2/3] Status & catatan feedback berhasil diperbarui",
-          "✓ [3/3] Bonus XP berhasil dihitung & dikreditkan ke profil anggota",
+          "[2/3] Status & catatan feedback berhasil diperbarui",
+          "[3/3] Bonus XP berhasil dihitung & dikreditkan ke profil anggota",
         ]);
 
         if (resData.updatedSubmissions) {

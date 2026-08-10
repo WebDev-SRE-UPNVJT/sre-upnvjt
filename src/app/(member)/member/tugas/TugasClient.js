@@ -247,7 +247,7 @@ function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
 
       if (!res.ok) throw new Error(data.error ?? "Gagal mengirim submisi.");
 
-      setSuccess("🎉 Tugas berhasil disubmit! Menunggu review.");
+      setSuccess("Tugas berhasil disubmit! Menunggu review.");
       onSubmitSuccess(data.submission);
       router.refresh();
     } catch (err) {

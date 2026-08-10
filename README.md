@@ -67,7 +67,7 @@ node seed.mjs
 
 Akun default (development lokal saja — **ganti sebelum deploy ke production**):
 
-> ⚠️ Daftar akun default (email & password) akan diupdate di sini menyusul — cek dokumen kredensial tim atau tanya Admin sebelum itu tersedia.
+> Daftar akun default (email & password) akan diupdate di sini menyusul — cek dokumen kredensial tim atau tanya Admin sebelum itu tersedia.
 
 > Ganti password setelah pertama login. Untuk production, akun awal dibuat oleh reviewer/manager, bukan lewat seed default.
 
@@ -97,7 +97,7 @@ Lakukan urutan ini **setiap kali** mau mulai mengerjakan sesuatu, bukan cuma sek
    ```
    ke **database development/staging milik kamu sendiri** — bukan ke production. Baca preview perubahan sebelum konfirmasi.
 
-   > ⚠️ Bagian ini masih perlu disempurnakan (alur staging per-developer belum final). Ditulis dulu sebagai baseline yang benar secara prinsip — detail teknis staging akan diupdate menyusul.
+   > Bagian ini masih perlu disempurnakan (alur staging per-developer belum final). Ditulis dulu sebagai baseline yang benar secara prinsip — detail teknis staging akan diupdate menyusul.
 
 3. **Install dependency baru kalau ada:**
    ```bash
