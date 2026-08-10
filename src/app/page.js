@@ -589,40 +589,35 @@ export default function Home() {
                   </p>
                 </motion.div>
 
-                {/* Unified Master Sponsor Board Card with Dual-Direction Lightsaber Border */}
+                {/* Unified Master Sponsor Board Card with Crisp Dual-Direction Lightsaber Border */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.96, y: 24 }}
                   whileInView={{ opacity: 1, scale: 1, y: 0 }}
                   viewport={{ once: true, margin: "-60px" }}
                   transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                  className="w-full max-w-5xl mx-auto rounded-3xl sm:rounded-[36px] md:rounded-[44px] p-[2.5px] relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.18)] dark:shadow-[0_30px_70px_rgba(0,0,0,0.45)] mt-8 sm:mt-10 group"
+                  className="w-full max-w-5xl mx-auto rounded-3xl sm:rounded-[36px] md:rounded-[44px] p-[3px] relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.18)] dark:shadow-[0_30px_70px_rgba(0,0,0,0.45)] mt-8 sm:mt-10 group"
                 >
                   {/* Dual-Direction Lightsaber Glowing Border Beams (Simultaneous Left & Right from top-center) */}
                   <div
                     className="absolute -inset-[100%] animate-border-beam-cw pointer-events-none"
                     style={{
-                      background: 'conic-gradient(from 0deg, transparent 0 250deg, var(--beam-dim-color) 300deg, var(--beam-active-color) 360deg)',
+                      background: 'conic-gradient(from 0deg, transparent 0 270deg, var(--beam-dim-color) 320deg, var(--beam-active-color) 360deg)',
                       filter: 'var(--beam-glow)'
                     }}
                   />
                   <div
                     className="absolute -inset-[100%] animate-border-beam-ccw pointer-events-none"
                     style={{
-                      background: 'conic-gradient(from 0deg, transparent 0 250deg, var(--beam-dim-color) 300deg, var(--beam-active-color) 360deg)',
+                      background: 'conic-gradient(from 0deg, transparent 0 270deg, var(--beam-dim-color) 320deg, var(--beam-active-color) 360deg)',
                       filter: 'var(--beam-glow)'
                     }}
                   />
 
                   {/* Inner Card Container */}
-                  <div className="w-full h-full rounded-[calc(1.5rem-2px)] sm:rounded-[calc(2.25rem-2px)] md:rounded-[calc(2.75rem-2px)] p-4 sm:p-8 md:p-12 relative z-10 overflow-hidden backdrop-blur-3xl flex flex-col items-center gap-4 sm:gap-6 md:gap-8 bg-gradient-to-br from-white/20 via-white/10 to-white/15 dark:from-[#0b1c15]/98 dark:via-[#071510]/98 dark:to-[#040e0a]/98 border border-white/20 dark:border-white/10">
+                  <div className="w-full h-full rounded-[calc(1.5rem-2.5px)] sm:rounded-[calc(2.25rem-2.5px)] md:rounded-[calc(2.75rem-2.5px)] p-4 sm:p-8 md:p-12 relative z-10 overflow-hidden backdrop-blur-3xl flex flex-col items-center gap-4 sm:gap-6 md:gap-8 bg-gradient-to-br from-white/20 via-white/10 to-white/15 dark:from-[#0b1c15]/98 dark:via-[#071510]/98 dark:to-[#040e0a]/98 border border-white/20 dark:border-white/10">
                     
                     {/* High-Tech Dot Matrix Pattern Overlay */}
                     <div className="absolute inset-0 opacity-[0.20] dark:opacity-[0.15] bg-[radial-gradient(#ffffff_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#10b981_1.2px,transparent_1.2px)] [background-size:24px_24px] pointer-events-none" />
-
-                    {/* Ambient Glow Orbs inside the card */}
-                    <div className="absolute -top-24 -right-24 w-80 h-80 bg-yellow-300/20 dark:bg-emerald-400/20 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
-                    <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-400/20 dark:teal-500/20 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
 
                   {hasTiers ? (
                     <>
