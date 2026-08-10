@@ -65,12 +65,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex bg-[#f5f8f6] dark:bg-[#0a1c15] text-slate-900 dark:text-white transition-colors duration-500 overflow-hidden relative">
+    <div className="min-h-screen w-full flex bg-[#0bb37e] dark:bg-[#0a1c15] text-white transition-colors duration-500 overflow-hidden relative">
       {/* Back Button */}
       <div className="absolute top-8 right-8 z-50">
         <button
           onClick={() => router.back()}
-          className="group flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/10 dark:bg-white/5 border border-slate-900/15 dark:border-white/10 hover:bg-slate-900/20 dark:hover:bg-white/10 transition-all duration-300 text-[13px] font-bold text-slate-700 dark:text-white/70 hover:text-slate-900 dark:hover:text-white cursor-pointer backdrop-blur-md"
+          className="group flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10 transition-all duration-300 text-[13px] font-bold text-white/90 dark:text-white/70 hover:text-white cursor-pointer backdrop-blur-md"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
           {t("visitor.login.back")}
@@ -126,14 +126,17 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-20 relative z-10">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-20 relative z-10 bg-[#0bb37e] dark:bg-[#0a1c15] transition-colors duration-500">
+        {/* Subtle Ambient Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-yellow-300/10 dark:bg-emerald-500/10 blur-[130px] rounded-full pointer-events-none" />
+
         <div className="absolute top-8 left-8 lg:hidden">
           <Link href="/">
             <div className="inline-flex items-center cursor-pointer">
               <img
                 src="/images/logo.png"
                 alt="SRE Logo"
-                className="h-7 w-auto object-contain brightness-0 invert-0 dark:brightness-0 dark:invert opacity-90 transition-all duration-300"
+                className="h-7 w-auto object-contain brightness-0 invert opacity-90 transition-all duration-300"
               />
             </div>
           </Link>
@@ -143,13 +146,13 @@ export default function LoginPage() {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-[420px]"
+          className="w-full max-w-[420px] relative z-10"
         >
           <div className="mb-12">
-            <h1 className="text-[32px] md:text-[40px] font-display font-bold tracking-tight mb-2 text-slate-900 dark:text-white">
+            <h1 className="text-[32px] md:text-[40px] font-display font-bold tracking-tight mb-2 text-white">
               {t("visitor.login.title")}
             </h1>
-            <p className="text-slate-500 dark:text-white/50 text-[14px]">
+            <p className="text-white/75 dark:text-white/50 text-[14px]">
               {t("visitor.login.subtitle")}
             </p>
           </div>
@@ -162,12 +165,12 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder=" "
-                className="block w-full px-0 py-3 text-slate-900 dark:text-white bg-transparent border-0 border-b-2 border-slate-300 dark:border-white/20 appearance-none focus:outline-none focus:ring-0 focus:border-emerald-600 dark:focus:border-[#e8ecc4] peer transition-colors"
+                className="block w-full px-0 py-3 text-white bg-transparent border-0 border-b-2 border-white/30 dark:border-white/20 appearance-none focus:outline-none focus:ring-0 focus:border-yellow-300 dark:focus:border-[#e8ecc4] peer transition-colors"
                 required
               />
               <label
                 htmlFor="email"
-                className="absolute text-[15px] text-slate-500 dark:text-white/50 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-emerald-600 dark:peer-focus:text-[#e8ecc4] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+                className="absolute text-[15px] text-white/70 dark:text-white/50 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-yellow-300 dark:peer-focus:text-[#e8ecc4] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
               >
                 {t("visitor.login.email_label")}
               </label>
@@ -180,19 +183,19 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder=" "
-                className="block w-full px-0 py-3 text-slate-900 dark:text-white bg-transparent border-0 border-b-2 border-slate-300 dark:border-white/20 appearance-none focus:outline-none focus:ring-0 focus:border-emerald-600 dark:focus:border-[#e8ecc4] peer transition-colors pr-10"
+                className="block w-full px-0 py-3 text-white bg-transparent border-0 border-b-2 border-white/30 dark:border-white/20 appearance-none focus:outline-none focus:ring-0 focus:border-yellow-300 dark:focus:border-[#e8ecc4] peer transition-colors pr-10"
                 required
               />
               <label
                 htmlFor="password"
-                className="absolute text-[15px] text-slate-500 dark:text-white/50 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-emerald-600 dark:peer-focus:text-[#e8ecc4] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+                className="absolute text-[15px] text-white/70 dark:text-white/50 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-yellow-300 dark:peer-focus:text-[#e8ecc4] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
               >
                 {t("visitor.login.password_label")}
               </label>
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-0 top-3 text-slate-400 dark:text-white/40 hover:text-slate-900 dark:hover:text-white transition-colors"
+                className="absolute right-0 top-3 text-white/60 dark:text-white/40 hover:text-white transition-colors"
               >
                 {showPassword ? (
                   <EyeOff className="w-5 h-5" />
@@ -207,10 +210,10 @@ export default function LoginPage() {
                 <div className="relative flex items-center justify-center w-4 h-4">
                   <input
                     type="checkbox"
-                    className="peer appearance-none w-4 h-4 border border-slate-400 dark:border-white/30 rounded-[3px] checked:bg-emerald-600 dark:checked:bg-[#e8ecc4] checked:border-emerald-600 dark:checked:border-[#e8ecc4] transition-colors cursor-pointer"
+                    className="peer appearance-none w-4 h-4 border border-white/40 dark:border-white/30 rounded-[3px] checked:bg-yellow-300 dark:checked:bg-[#e8ecc4] checked:border-yellow-300 dark:checked:border-[#e8ecc4] transition-colors cursor-pointer"
                   />
                   <svg
-                    className="absolute w-3 h-3 text-white dark:text-[#0a1c15] opacity-0 peer-checked:opacity-100 pointer-events-none"
+                    className="absolute w-3 h-3 text-[#0a1c15] opacity-0 peer-checked:opacity-100 pointer-events-none"
                     viewBox="0 0 14 14"
                     fill="none"
                   >
@@ -223,14 +226,14 @@ export default function LoginPage() {
                     />
                   </svg>
                 </div>
-                <span className="text-[13px] text-slate-600 dark:text-white/60 group-hover:text-slate-900 dark:group-hover:text-white transition-colors select-none">
+                <span className="text-[13px] text-white/80 dark:text-white/60 group-hover:text-white transition-colors select-none">
                   {t("visitor.login.remember_me")}
                 </span>
               </label>
             </div>
 
             {error && (
-              <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm px-4 py-3 rounded-lg text-center">
+              <div className="bg-red-500/10 border border-red-500/50 text-red-300 dark:text-red-400 text-sm px-4 py-3 rounded-lg text-center">
                 {error}
               </div>
             )}
@@ -238,7 +241,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex items-center justify-center gap-3 bg-emerald-600 dark:bg-[#e8ecc4] text-white dark:text-[#0a1c15] text-[15px] font-bold tracking-widest uppercase rounded-full px-8 py-4 mt-4 overflow-hidden transition-all duration-300 active:scale-95 hover:bg-emerald-700 dark:hover:bg-white disabled:opacity-70 disabled:active:scale-100 shadow-lg dark:shadow-none"
+              className="group relative w-full flex items-center justify-center gap-3 bg-yellow-300 dark:bg-[#e8ecc4] text-[#0a1c15] text-[15px] font-bold tracking-widest uppercase rounded-full px-8 py-4 mt-4 overflow-hidden transition-all duration-300 active:scale-95 hover:bg-yellow-200 dark:hover:bg-white disabled:opacity-70 disabled:active:scale-100 shadow-lg shadow-yellow-300/20 dark:shadow-none cursor-pointer"
             >
               {isLoading ? t("visitor.login.btn_logging_in") : t("visitor.login.btn_login")}
               {!isLoading && (
@@ -248,11 +251,11 @@ export default function LoginPage() {
           </form>
 
           {isPublicRegistrationEnabled && (
-            <div className="mt-10 text-center text-[13px] text-slate-500 dark:text-white/50">
+            <div className="mt-10 text-center text-[13px] text-white/70 dark:text-white/50">
               {t("visitor.login.no_account")}{" "}
               <Link
                 href="/register"
-                className="text-emerald-600 dark:text-[#e8ecc4] hover:text-emerald-700 dark:hover:text-white transition-colors font-bold tracking-wide"
+                className="text-yellow-300 dark:text-[#e8ecc4] hover:text-white transition-colors font-bold tracking-wide"
               >
                 {t("visitor.login.create_account")}
               </Link>
