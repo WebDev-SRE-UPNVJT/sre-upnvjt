@@ -1,6 +1,6 @@
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
-import { HeaderWrapper, FooterWrapper } from "@/components/NavigationWrapper";
+import { HeaderWrapper, FooterWrapper, VisitorTrackerWrapper } from "@/components/NavigationWrapper";
 import { Providers } from "@/components/Providers";
 import { LanguageProvider } from "@/i18n/LanguageProvider";
 import { db } from "@/lib/db";
@@ -46,6 +46,7 @@ export default async function RootLayout({ children }) {
         <Providers>
           <LanguageProvider initialLanguage={appLanguage}>
             <HeaderWrapper />
+            <VisitorTrackerWrapper />
             {children}
             <FooterWrapper />
             <FloatingThemeToggle />

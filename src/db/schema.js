@@ -549,3 +549,22 @@ export const shortlinkRelations = relations(shortlink, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+// 18. Page Views (Visitor Tracking)
+export const pageView = pgTable('pageView', {
+  id: serial('id').primaryKey(),
+  path: text('path').notNull(),
+  visitorId: varchar('visitorId', { length: 36 }).notNull(), // UUID dari cookie sre_vid
+  userId: integer('userId').references(() => user.id),       // nullable — hanya kalau visitor login
+  deviceType: varchar('deviceType', { length: 20 }),         // mobile | desktop | tablet
+  browser: varchar('browser', { length: 100 }),
+  referrer: text('referrer'),
+  createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
+});
+
+export const pageViewRelations = relations(pageView, ({ one }) => ({
+  user: one(user, {
+    fields: [pageView.userId],
+    references: [user.id],
+  }),
+}));

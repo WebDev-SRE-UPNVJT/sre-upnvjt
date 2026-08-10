@@ -29,6 +29,7 @@
     "react-pdf": "^10.4.1",
     "recharts": "^3.9.2",
     "sharp": "^0.35.3",
+    "ua-parser-js": "^2.0.10",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

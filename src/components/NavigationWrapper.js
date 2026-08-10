@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Header from "./Header";
 import Footer from "./Footer";
+import VisitorTracker from "./VisitorTracker";
 
 // Daftar path yang tidak akan menampilkan Header dan Footer publik
 const hiddenHeaderRoutes = [
@@ -52,4 +53,11 @@ export function FooterWrapper() {
   const pathname = usePathname();
   if (isHiddenHeaderRoute(pathname)) return null;
   return <Footer />;
+}
+
+export function VisitorTrackerWrapper() {
+  const pathname = usePathname();
+  // Hanya tracking halaman publik, bukan dashboard/member/staff/login
+  if (isHiddenHeaderRoute(pathname)) return null;
+  return <VisitorTracker />;
 }
