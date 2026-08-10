@@ -46,11 +46,11 @@ export async function getVisitorStats() {
   }
 }
 
-// Daily traffic for the last N days
+// Daily traffic for the last N days (WIB / Asia/Jakarta timezone)
 export async function getDailyTraffic(days = 14) {
   try {
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-    const dayExpr = sql`to_char(${pageView.createdAt}, 'YYYY-MM-DD')`;
+    const dayExpr = sql`to_char((${pageView.createdAt} AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Jakarta'), 'YYYY-MM-DD')`;
 
     const rows = await db
       .select({
@@ -66,8 +66,8 @@ export async function getDailyTraffic(days = 14) {
     const result = [];
     for (let i = days - 1; i >= 0; i--) {
       const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-      const label = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-      const isoDate = d.toISOString().slice(0, 10);
+      const label = d.toLocaleDateString("en-US", { timeZone: "Asia/Jakarta", month: "short", day: "numeric" });
+      const isoDate = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(d);
 
       const found = rows.find((r) => r.date === isoDate);
 
@@ -81,10 +81,10 @@ export async function getDailyTraffic(days = 14) {
   }
 }
 
-// Hourly traffic distribution (0-23)
+// Hourly traffic distribution (0-23 in WIB / Asia/Jakarta timezone)
 export async function getHourlyTraffic() {
   try {
-    const hourExpr = sql`EXTRACT(HOUR FROM ${pageView.createdAt})::int`;
+    const hourExpr = sql`EXTRACT(HOUR FROM (${pageView.createdAt} AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Jakarta'))::int`;
 
     const rows = await db
       .select({
