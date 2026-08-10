@@ -84,58 +84,6 @@ const ARTICLES = [
 
 const PARTNERS = ["SRE Indonesia", "UPN Veteran Jawa Timur", "SRE UPNVJT"];
 
-const DEFAULT_PARTNERS = [
-  {
-    id: "def-1",
-    name: "PT FREEPORT INDONESIA",
-    logoUrl: "",
-    tier: "PLATINUM",
-    websiteUrl: "#",
-  },
-  {
-    id: "def-2",
-    name: "ANTAM",
-    logoUrl: "",
-    tier: "PLATINUM",
-    websiteUrl: "#",
-  },
-  {
-    id: "def-3",
-    name: "PLN NUSANTARA RENEWABLES",
-    logoUrl: "",
-    tier: "GOLD",
-    websiteUrl: "#",
-  },
-  {
-    id: "def-4",
-    name: "PUPUK KALTIM",
-    logoUrl: "",
-    tier: "GOLD",
-    websiteUrl: "#",
-  },
-  {
-    id: "def-5",
-    name: "PLN NUSANTARA POWER",
-    logoUrl: "",
-    tier: "GOLD",
-    websiteUrl: "#",
-  },
-  {
-    id: "def-6",
-    name: "SKK MIGAS PERTAMINA EP",
-    logoUrl: "",
-    tier: "SILVER",
-    websiteUrl: "#",
-  },
-  {
-    id: "def-7",
-    name: "PERTAMINA PHE WMO",
-    logoUrl: "",
-    tier: "SILVER",
-    websiteUrl: "#",
-  },
-];
-
 function PartnerLogoImage({ partner, className }) {
   const [hasError, setHasError] = useState(false);
   const isStockPhoto = partner.logoUrl?.includes("unsplash.com");
@@ -388,18 +336,18 @@ export default function Home() {
           </div>
 
           {/* MAIN GRID — z-10 */}
-          <div className="max-w-7xl mx-auto w-full relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-14 items-center">
+          <div className="max-w-7xl mx-auto w-full relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-14 items-start">
 
             {/* LEFT COLUMN */}
             <div className="flex flex-col w-full">
               <div>
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black uppercase text-white leading-tight">
+                <h2 className="text-2xl sm:text-3xl lg:text-3xl xl:text-4xl font-black uppercase text-white leading-tight">
                   {t("visitor.home.about_sre")}
                 </h2>
               </div>
 
-              {/* 4:3 Landscape Image */}
-              <div className="relative w-full max-w-[500px] mx-auto lg:mx-0 mt-4 sm:mt-5 aspect-[4/3] rounded-2xl overflow-hidden shadow-xl border border-white/20 dark:border-white/10 group">
+              {/* 4:3 Landscape Image (Top-aligned with right paragraph on desktop) */}
+              <div className="relative w-full max-w-[480px] lg:max-w-none mx-auto lg:mx-0 mt-4 sm:mt-5 lg:mt-2.5 aspect-[4/3] rounded-2xl overflow-hidden shadow-xl border border-white/20 dark:border-white/10 group">
                 <img
                   src="/images/about/PanelSurya.jpg"
                   alt="Panel Surya SRE UPN JATIM"
@@ -420,7 +368,7 @@ export default function Home() {
               className="flex flex-col gap-5 sm:gap-6 w-full"
             >
               <div>
-                <h3 className="text-xl sm:text-2xl lg:text-3xl font-black uppercase text-white">SRE INDONESIA</h3>
+                <h3 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-black uppercase text-white leading-tight">SRE INDONESIA</h3>
                 <p className="mt-2 sm:mt-2.5 text-white/95 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed font-normal">
                   {t("visitor.home.about_desc_sre_id")}
                 </p>
@@ -482,10 +430,10 @@ export default function Home() {
         {/* Activity Section */}
         <section
           id="activity"
-          className="scroll-mt-20 bg-[#0cc48a] dark:bg-[#040e0a] py-14 sm:py-20 lg:py-24 px-4 sm:px-6 md:px-12 lg:px-20 border-b-2 border-white/25 dark:border-transparent relative overflow-hidden flex items-center justify-center min-h-fit"
+          className="scroll-mt-20 bg-[#0cc48a] dark:bg-[#040e0a] py-10 sm:py-14 lg:py-12 xl:py-16 min-h-fit lg:min-h-screen px-4 sm:px-6 md:px-12 lg:px-20 border-b-2 border-white/25 dark:border-transparent relative overflow-hidden flex items-center justify-center"
         >
           <div className="w-full relative z-10 flex flex-col items-center">
-            <div className="max-w-7xl mx-auto w-full flex flex-col justify-between items-center gap-4 sm:gap-6">
+            <div className="max-w-7xl mx-auto w-full flex flex-col justify-between items-center gap-3 sm:gap-4 lg:gap-5">
               
               {/* Header */}
               <motion.div
@@ -495,17 +443,17 @@ export default function Home() {
                 transition={{ duration: 0.6 }}
                 className="text-center max-w-2xl mx-auto"
               >
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <span className="text-yellow-300 dark:text-emerald-400 text-base sm:text-xl leading-none select-none font-black">•</span>
-                  <span className="text-xs sm:text-sm md:text-base font-black tracking-[0.2em] text-yellow-300 dark:text-emerald-400 uppercase drop-shadow-md">
+                <div className="flex items-center justify-center gap-2 mb-1 lg:mb-1.5">
+                  <span className="text-yellow-300 dark:text-emerald-400 text-base sm:text-lg leading-none select-none font-black">•</span>
+                  <span className="text-[11px] sm:text-xs md:text-sm font-black tracking-[0.2em] text-yellow-300 dark:text-emerald-400 uppercase drop-shadow-md">
                     {t("visitor.home.what_we_do")}
                   </span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-black tracking-tight text-white dark:text-white uppercase leading-tight">
+                <h2 className="text-2xl sm:text-3xl lg:text-[34px] font-display font-black tracking-tight text-white dark:text-white uppercase leading-tight">
                   {t("visitor.home.our_activity_prefix")}<span className="text-yellow-300 dark:text-emerald-400">{t("visitor.home.our_activity_highlight")}</span>
                 </h2>
-                <div className="h-[3px] sm:h-[4px] w-16 sm:w-20 bg-yellow-300 dark:bg-emerald-400 mx-auto mt-2 sm:mt-2.5 rounded-full" aria-hidden="true" />
-                <p className="text-xs sm:text-sm md:text-base text-white/95 dark:text-gray-300 max-w-xl mx-auto mt-2.5 sm:mt-3 font-normal leading-relaxed">
+                <div className="h-[3px] w-14 sm:w-16 bg-yellow-300 dark:bg-emerald-400 mx-auto mt-1.5 rounded-full" aria-hidden="true" />
+                <p className="text-xs sm:text-sm text-white/95 dark:text-gray-300 max-w-lg mx-auto mt-1.5 sm:mt-2 font-normal leading-relaxed">
                   {t("visitor.home.activity_desc")}
                 </p>
               </motion.div>
@@ -514,7 +462,7 @@ export default function Home() {
               <ActivityCarousel activities={dbActivities.length > 0 ? dbActivities : localActivities} />
 
               {/* SEE ALL ACTIVITIES CTA Button */}
-              <div className="w-full text-center mt-4 sm:mt-6">
+              <div className="w-full text-center mt-2.5 sm:mt-3.5">
                 <motion.div
                   initial={{ opacity: 0, y: 16 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -523,10 +471,10 @@ export default function Home() {
                 >
                   <Link
                     href="/activity"
-                    className="group inline-flex items-center gap-2 border-2 border-yellow-300/60 hover:bg-yellow-300 hover:text-[#0cc48a] text-yellow-300 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#040e0a] font-bold tracking-wider text-xs uppercase px-6 sm:px-8 py-2.5 sm:py-3 rounded-full transition-all duration-300 focus-visible:outline-yellow-300"
+                    className="group inline-flex items-center gap-2 border-2 border-yellow-300/60 hover:bg-yellow-300 hover:text-[#0cc48a] text-yellow-300 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#040e0a] font-bold tracking-wider text-xs uppercase px-6 sm:px-7 py-2 sm:py-2.5 rounded-full transition-all duration-300 focus-visible:outline-yellow-300 shadow-md"
                   >
                     {t("visitor.home.see_all")}
-                    <ArrowUpRight className="w-4 h-4 text-yellow-300 group-hover:text-[#0cc48a] dark:text-emerald-400 dark:group-hover:text-[#040e0a] transition-colors" aria-hidden="true" />
+                    <ArrowUpRight className="w-3.5 h-3.5 text-yellow-300 group-hover:text-[#0cc48a] dark:text-emerald-400 dark:group-hover:text-[#040e0a] transition-colors" aria-hidden="true" />
                   </Link>
                 </motion.div>
               </div>
@@ -587,25 +535,28 @@ export default function Home() {
           </section>
         )}
 
-        {/* Partners Showcase */}
+        {/* Partners Showcase (100% Dynamic from Database) */}
         {(() => {
           const dbPartners = partnersList.filter(p => p.isActive !== false);
-          const allPartners = dbPartners.length > 0 ? dbPartners : DEFAULT_PARTNERS;
+          if (!dbPartners || dbPartners.length === 0) return null;
 
-          const platinumPartners = allPartners.filter(p => {
+          const platinumPartners = dbPartners.filter(p => {
             const t = (p.tier || "").toUpperCase();
             return t === "PLATINUM" || t === "LARGE" || t === "UTAMA";
           });
 
-          const goldPartners = allPartners.filter(p => {
+          const goldPartners = dbPartners.filter(p => {
             const t = (p.tier || "").toUpperCase();
             return t === "GOLD" || t === "MEDIUM";
           });
 
-          const silverPartners = allPartners.filter(p => {
+          const silverPartners = dbPartners.filter(p => {
             const t = (p.tier || "").toUpperCase();
             return t !== "PLATINUM" && t !== "LARGE" && t !== "UTAMA" && t !== "GOLD" && t !== "MEDIUM";
           });
+
+          // If no specific tiers are set, show all in balanced grid
+          const hasTiers = platinumPartners.length > 0 || goldPartners.length > 0;
 
           return (
             <section id="partners" className="scroll-mt-20 relative bg-[#099c6d] dark:bg-[#07130e] py-16 sm:py-24 md:py-32 px-6 sm:px-8 md:px-12 lg:px-20 overflow-hidden transition-colors duration-500">
@@ -657,10 +608,72 @@ export default function Home() {
                   <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-400/20 dark:teal-500/20 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
 
-                  {/* Row 1: Large Logos (Platinum) */}
-                  {(platinumPartners.length > 0 ? platinumPartners : allPartners.slice(0, 2)).length > 0 && (
-                    <div className="w-full flex flex-wrap justify-center items-center gap-3 sm:gap-6 md:gap-10 relative z-10">
-                      {(platinumPartners.length > 0 ? platinumPartners : allPartners.slice(0, 2)).map((partner) => (
+                  {hasTiers ? (
+                    <>
+                      {/* Row 1: Large Logos (Platinum) */}
+                      {platinumPartners.length > 0 && (
+                        <div className="w-full flex flex-wrap justify-center items-center gap-3 sm:gap-6 md:gap-10 relative z-10">
+                          {platinumPartners.map((partner) => (
+                            <a
+                              key={partner.id || partner.name}
+                              href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
+                              target={partner.websiteUrl && partner.websiteUrl !== "#" ? "_blank" : undefined}
+                              rel="noopener noreferrer"
+                              className="group flex items-center justify-center p-1 sm:p-2 transition-transform duration-300 hover:scale-105"
+                            >
+                              <PartnerLogoImage
+                                partner={partner}
+                                className="h-10 sm:h-16 md:h-20 max-w-[180px] sm:max-w-[240px] md:max-w-[300px] object-contain filter drop-shadow-md group-hover:drop-shadow-xl group-hover:scale-105 transition-all duration-300"
+                              />
+                            </a>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Row 2: Medium Logos (Gold) */}
+                      {goldPartners.length > 0 && (
+                        <div className="w-full flex flex-wrap justify-center items-center gap-2.5 sm:gap-5 md:gap-8 relative z-10">
+                          {goldPartners.map((partner) => (
+                            <a
+                              key={partner.id || partner.name}
+                              href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
+                              target={partner.websiteUrl && partner.websiteUrl !== "#" ? "_blank" : undefined}
+                              rel="noopener noreferrer"
+                              className="group flex items-center justify-center p-1 sm:p-2 transition-transform duration-300 hover:scale-105"
+                            >
+                              <PartnerLogoImage
+                                partner={partner}
+                                className="h-8 sm:h-12 md:h-16 max-w-[140px] sm:max-w-[200px] md:max-w-[240px] object-contain filter brightness-95 group-hover:brightness-105 group-hover:scale-105 transition-all duration-300"
+                              />
+                            </a>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Row 3: Smaller Logos (Silver / Other) */}
+                      {silverPartners.length > 0 && (
+                        <div className="w-full flex flex-wrap justify-center items-center gap-2 sm:gap-4 md:gap-6 relative z-10">
+                          {silverPartners.map((partner) => (
+                            <a
+                              key={partner.id || partner.name}
+                              href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
+                              target={partner.websiteUrl && partner.websiteUrl !== "#" ? "_blank" : undefined}
+                              rel="noopener noreferrer"
+                              className="group flex items-center justify-center p-1 transition-transform duration-300 hover:scale-105"
+                            >
+                              <PartnerLogoImage
+                                partner={partner}
+                                className="h-7 sm:h-9 md:h-12 max-w-[110px] sm:max-w-[150px] md:max-w-[180px] object-contain filter opacity-95 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300"
+                              />
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    /* Default Flex Grid if no tiers */
+                    <div className="w-full flex flex-wrap justify-center items-center gap-3 sm:gap-6 md:gap-8 relative z-10">
+                      {dbPartners.map((partner) => (
                         <a
                           key={partner.id || partner.name}
                           href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
@@ -670,47 +683,7 @@ export default function Home() {
                         >
                           <PartnerLogoImage
                             partner={partner}
-                            className="h-10 sm:h-16 md:h-20 max-w-[180px] sm:max-w-[240px] md:max-w-[300px] object-contain filter drop-shadow-md group-hover:drop-shadow-xl group-hover:scale-105 transition-all duration-300"
-                          />
-                        </a>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Row 2: Medium Logos (Gold) */}
-                  {(goldPartners.length > 0 ? goldPartners : allPartners.slice(2, 4)).length > 0 && (
-                    <div className="w-full flex flex-wrap justify-center items-center gap-2.5 sm:gap-5 md:gap-8 relative z-10">
-                      {(goldPartners.length > 0 ? goldPartners : allPartners.slice(2, 4)).map((partner) => (
-                        <a
-                          key={partner.id || partner.name}
-                          href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
-                          target={partner.websiteUrl && partner.websiteUrl !== "#" ? "_blank" : undefined}
-                          rel="noopener noreferrer"
-                          className="group flex items-center justify-center p-1 sm:p-2 transition-transform duration-300 hover:scale-105"
-                        >
-                          <PartnerLogoImage
-                            partner={partner}
-                            className="h-8 sm:h-12 md:h-16 max-w-[140px] sm:max-w-[200px] md:max-w-[240px] object-contain filter brightness-95 group-hover:brightness-105 group-hover:scale-105 transition-all duration-300"
-                          />
-                        </a>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Row 3: Smaller Logos */}
-                  {(silverPartners.length > 0 ? silverPartners : allPartners.slice(4)).length > 0 && (
-                    <div className="w-full flex flex-wrap justify-center items-center gap-2 sm:gap-4 md:gap-6 relative z-10">
-                      {(silverPartners.length > 0 ? silverPartners : allPartners.slice(4)).map((partner) => (
-                        <a
-                          key={partner.id || partner.name}
-                          href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
-                          target={partner.websiteUrl && partner.websiteUrl !== "#" ? "_blank" : undefined}
-                          rel="noopener noreferrer"
-                          className="group flex items-center justify-center p-1 transition-transform duration-300 hover:scale-105"
-                        >
-                          <PartnerLogoImage
-                            partner={partner}
-                            className="h-7 sm:h-9 md:h-12 max-w-[110px] sm:max-w-[150px] md:max-w-[180px] object-contain filter opacity-95 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300"
+                            className="h-8 sm:h-12 md:h-16 max-w-[150px] sm:max-w-[200px] md:max-w-[250px] object-contain filter drop-shadow-md group-hover:drop-shadow-xl group-hover:scale-105 transition-all duration-300"
                           />
                         </a>
                       ))}
