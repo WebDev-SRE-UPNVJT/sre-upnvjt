@@ -322,10 +322,10 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* About Section */}
+        {/* ─── ABOUT SECTION (Emerald Theme) ─── */}
         <section
           id="about"
-          className="scroll-mt-20 relative bg-[#0bb37e] dark:bg-[#07130e] text-white py-14 sm:py-20 lg:py-24 px-6 sm:px-8 md:px-12 lg:px-20 flex items-center border-b-2 border-white/25 dark:border-transparent overflow-hidden"
+          className="scroll-mt-20 relative bg-[#099c6d] dark:bg-[#07130e] py-10 sm:py-16 md:py-24 px-6 sm:px-8 md:px-12 lg:px-20 overflow-hidden border-b-2 border-white/25 dark:border-transparent transition-colors duration-500"
         >
           {/* BACKGROUND ICONS — z-0 */}
           <div className="absolute inset-0 pointer-events-none z-0">
@@ -336,7 +336,7 @@ export default function Home() {
           </div>
 
           {/* MAIN GRID — z-10 */}
-          <div className="site-container relative z-10 w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-stretch">
+          <div className="max-w-7xl mx-auto w-full relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-stretch">
 
             {/* LEFT COLUMN */}
             <div className="flex flex-col w-full">
@@ -347,7 +347,7 @@ export default function Home() {
               </div>
 
               {/* Image — stretches to match right column height */}
-              <div className="relative w-full max-w-[520px] flex-1 mt-6 min-h-[320px]">
+              <div className="relative w-full max-w-[520px] flex-1 mt-6 min-h-[320px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border border-white/20 dark:border-white/10 group">
                 <img
                   src="/images/about/PanelSurya.jpg"
                   alt="Panel Surya SRE UPN JATIM"
@@ -377,8 +377,8 @@ export default function Home() {
               <hr className="border-white/15 dark:border-gray-800" />
               
               <div>
-                <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-yellow-300 dark:text-emerald-400">SRE UPN JATIM</h3>
-                <p className="mt-2 sm:mt-2.5 text-white/95 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed font-normal">
+                <h3 className="text-3xl lg:text-4xl font-black uppercase text-yellow-300 dark:text-emerald-400">SRE UPN JATIM</h3>
+                <p className="mt-3 text-white dark:text-gray-300 text-base leading-relaxed font-medium">
                   {t("visitor.home.about_desc_sre_upnvjt")}
                 </p>
               </div>
@@ -392,13 +392,13 @@ export default function Home() {
                 ].map((stat, idx) => (
                   <div
                     key={idx}
-                    className="rounded-xl p-2.5 sm:p-3.5 border-2 bg-[#099c6d] border-yellow-300/60 dark:bg-[#093021] dark:border-emerald-500/60 flex flex-col items-start gap-1 shadow-md select-none hover:border-yellow-300 hover:bg-[#088c62] dark:hover:bg-[#0d422e] transition-all duration-300"
+                    className="rounded-2xl p-3 sm:p-4 border-2 bg-[#099c6d] border-yellow-300/80 dark:bg-[#093021] dark:border-emerald-500/80 flex flex-col items-start gap-1 shadow-md select-none hover:border-yellow-300 hover:bg-[#088c62] dark:hover:bg-[#0d422e] transition-all duration-300"
                   >
-                    <stat.Icon className="text-yellow-300 dark:text-emerald-400 w-4 h-4 sm:w-5 sm:h-5 mb-0.5 shrink-0 drop-shadow-sm" aria-hidden="true" />
-                    <span className="text-[9px] sm:text-[10px] md:text-[11px] font-black uppercase tracking-wider text-yellow-300 dark:text-emerald-300 leading-tight">
+                    <stat.Icon className="text-yellow-300 dark:text-emerald-400 w-5 h-5 sm:w-6 sm:h-6 mb-0.5 shrink-0 drop-shadow-sm" aria-hidden="true" />
+                    <span className="text-[11px] sm:text-xs md:text-sm font-black uppercase tracking-wider text-yellow-300 dark:text-emerald-300 leading-tight">
                       {stat.text}
                     </span>
-                    <span className="text-[11px] sm:text-xs md:text-sm font-black text-white dark:text-gray-100 leading-tight break-words">
+                    <span className="text-xs sm:text-sm md:text-base font-bold text-white dark:text-gray-100 leading-tight break-words">
                       {stat.value}
                     </span>
                   </div>
@@ -430,10 +430,10 @@ export default function Home() {
         {/* Activity Section */}
         <section
           id="activity"
-          className="scroll-mt-20 bg-[#0cc48a] dark:bg-[#040e0a] py-8 lg:py-12 px-6 lg:px-20 border-b-2 border-white/25 dark:border-transparent relative overflow-hidden flex items-center justify-center lg:h-screen lg:min-h-screen"
+          className="scroll-mt-20 bg-[#0cc48a] dark:bg-[#040e0a] py-6 sm:py-8 lg:py-12 px-6 sm:px-8 md:px-12 lg:px-20 border-b-2 border-white/25 dark:border-transparent relative overflow-hidden flex items-center justify-center lg:h-screen lg:min-h-screen"
         >
           <div className="w-full relative z-10 flex flex-col items-center">
-            <div className="site-container w-full flex flex-col justify-between items-center gap-4">
+            <div className="max-w-7xl mx-auto w-full flex flex-col justify-between items-center gap-3 sm:gap-4">
               
               {/* Header */}
               <motion.div
@@ -443,17 +443,17 @@ export default function Home() {
                 transition={{ duration: 0.6 }}
                 className="text-center max-w-2xl mx-auto"
               >
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <span className="text-yellow-300 dark:text-emerald-400 text-xl leading-none select-none font-black">•</span>
-                  <span className="text-[15px] md:text-[17px] font-black tracking-[0.25em] text-yellow-300 dark:text-emerald-400 uppercase drop-shadow-md">
+                <div className="flex items-center justify-center gap-2 mb-1.5">
+                  <span className="text-yellow-300 dark:text-emerald-400 text-lg leading-none select-none font-black">•</span>
+                  <span className="text-[13px] md:text-[15px] font-black tracking-[0.25em] text-yellow-300 dark:text-emerald-400 uppercase drop-shadow-md">
                     {t("visitor.home.what_we_do")}
                   </span>
                 </div>
-                <h2 className="text-[36px] md:text-[44px] font-display font-black tracking-tight text-white dark:text-white uppercase leading-[1.1]">
+                <h2 className="text-[32px] md:text-[44px] font-display font-black tracking-tight text-white dark:text-white uppercase leading-[1.1]">
                   {t("visitor.home.our_activity_prefix")}<span className="text-yellow-300 dark:text-emerald-400">{t("visitor.home.our_activity_highlight")}</span>
                 </h2>
-                <div className="h-[4px] w-20 bg-yellow-300 dark:bg-emerald-400 mx-auto mt-2 rounded-full" aria-hidden="true" />
-                <p className="text-[15px] md:text-[16px] text-white dark:text-gray-300 max-w-xl mx-auto mt-3 font-bold leading-relaxed">
+                <div className="h-[3.5px] w-16 sm:w-20 bg-yellow-300 dark:bg-emerald-400 mx-auto mt-1.5 rounded-full" aria-hidden="true" />
+                <p className="text-xs sm:text-sm md:text-base text-white/95 dark:text-gray-300 max-w-xl mx-auto mt-2 font-semibold leading-relaxed">
                   {t("visitor.home.activity_desc")}
                 </p>
               </motion.div>
@@ -462,7 +462,7 @@ export default function Home() {
               <ActivityCarousel activities={dbActivities.length > 0 ? dbActivities : localActivities} />
 
               {/* SEE ALL ACTIVITIES CTA Button */}
-              <div className="w-full text-center mt-6">
+              <div className="w-full text-center mt-3 sm:mt-4">
                 <motion.div
                   initial={{ opacity: 0, y: 16 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -471,7 +471,7 @@ export default function Home() {
                 >
                   <Link
                     href="/activity"
-                    className="group inline-flex items-center gap-2 border-2 border-yellow-300/60 hover:bg-yellow-300 hover:text-[#0cc48a] text-yellow-300 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#040e0a] font-bold tracking-wider text-xs uppercase px-8 py-3.5 rounded-full transition-all duration-300 focus-visible:outline-yellow-300"
+                    className="group inline-flex items-center gap-2 border-2 border-yellow-300/60 hover:bg-yellow-300 hover:text-[#0cc48a] text-yellow-300 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#040e0a] font-bold tracking-wider text-[11px] sm:text-xs uppercase px-6 sm:px-7 py-2.5 sm:py-3 rounded-full transition-all duration-300 focus-visible:outline-yellow-300"
                   >
                     {t("visitor.home.see_all")}
                     <ArrowUpRight className="w-3.5 h-3.5 text-yellow-300 group-hover:text-[#0cc48a] dark:text-emerald-400 dark:group-hover:text-[#040e0a] transition-colors" aria-hidden="true" />

@@ -66,8 +66,8 @@ export default function ActivityCarousel({ activities }) {
   const getTitle = (item) => item?.name || item?.title || '';
 
   return (
-    <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} className="w-full relative select-none">
-      <div className="relative overflow-hidden w-full py-2 min-h-[380px] flex items-center justify-center">
+    <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} className="w-full max-w-5xl mx-auto relative select-none">
+      <div className="relative overflow-hidden w-full py-1 sm:py-2 min-h-fit md:min-h-[380px] flex items-center justify-center">
         <AnimatePresence initial={false} custom={direction} mode="popLayout">
           <motion.div
             key={current}
@@ -81,7 +81,7 @@ export default function ActivityCarousel({ activities }) {
               opacity: { duration: 0.35, ease: "easeOut" },
               scale: { duration: 0.35, ease: "easeOut" }
             }}
-            className="flex items-center justify-center gap-4 w-full px-4"
+            className="flex items-center justify-center gap-3 sm:gap-4 w-full"
           >
             {/* LEFT CARD — Inactive, smaller, with matching structural components */}
             <div
@@ -107,8 +107,8 @@ export default function ActivityCarousel({ activities }) {
             </div>
 
             {/* CENTER CARD — featured (Emerald background matching about section cards) */}
-            <div className="w-full md:w-[44%] flex-shrink-0 scale-100 z-10 shadow-2xl shadow-emerald-900/10 dark:shadow-emerald-950/50 transition-all duration-500 rounded-2xl overflow-hidden border-2 border-yellow-300 dark:border-emerald-400/60 bg-[#099c6d] dark:bg-emerald-950">
-              <div className="relative h-[280px]">
+            <div className="w-full md:w-[44%] flex-shrink-0 scale-100 z-10 shadow-2xl shadow-emerald-900/10 dark:shadow-emerald-950/50 transition-all duration-500 rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-yellow-300 dark:border-emerald-400/60 bg-[#099c6d] dark:bg-emerald-950">
+              <div className="relative w-full aspect-[4/3] md:aspect-auto md:h-[280px]">
                 <img
                   src={getImage(activities[current])}
                   alt={getTitle(activities[current])}
@@ -118,12 +118,12 @@ export default function ActivityCarousel({ activities }) {
                 <span className="absolute top-3 right-3 bg-yellow-300 dark:bg-emerald-400 text-slate-900 dark:text-slate-950 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">
                   {activities[current]?.type || "Featured"}
                 </span>
-                <h3 className="absolute bottom-3 left-4 text-white font-black text-base uppercase tracking-wide line-clamp-1">
+                <h3 className="absolute bottom-3 left-4 right-4 text-white font-black text-sm sm:text-base uppercase tracking-wide line-clamp-1">
                   {getTitle(activities[current])}
                 </h3>
               </div>
-              <div className="p-4 transition-colors duration-300">
-                <p className="text-white dark:text-gray-300 text-sm leading-relaxed font-bold line-clamp-2">
+              <div className="p-3 sm:p-4 transition-colors duration-300">
+                <p className="text-white dark:text-gray-300 text-xs sm:text-sm leading-relaxed font-bold line-clamp-2">
                   {activities[current]?.description}
                 </p>
               </div>
@@ -158,13 +158,13 @@ export default function ActivityCarousel({ activities }) {
       </div>
 
       {/* Controls — Pure bright yellow in Light Mode, emerald in Dark Mode */}
-      <div className="flex items-center justify-center gap-4 mt-6">
+      <div className="flex items-center justify-center gap-3.5 sm:gap-4 mt-3 sm:mt-4">
         <button
           onClick={prev}
-          className="w-10 h-10 rounded-full bg-yellow-300 hover:bg-yellow-400 text-slate-950 border border-yellow-400 dark:bg-emerald-600 dark:hover:bg-emerald-500 dark:text-white dark:border-transparent flex items-center justify-center transition-all duration-300 shadow-md transform hover:scale-110 active:scale-95 focus-visible:outline-yellow-300"
+          className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-yellow-300 hover:bg-yellow-400 text-slate-950 border border-yellow-400 dark:bg-emerald-600 dark:hover:bg-emerald-500 dark:text-white dark:border-transparent flex items-center justify-center transition-all duration-300 shadow-md transform hover:scale-110 active:scale-95 focus-visible:outline-yellow-300"
           aria-label="Previous slide"
         >
-          <ChevronLeft className="w-5 h-5 text-slate-950 dark:text-white stroke-[2.5]" />
+          <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-slate-950 dark:text-white stroke-[2.5]" />
         </button>
         <div className="flex gap-1.5 sm:gap-2">
           {activities.map((_, i) => (
@@ -180,10 +180,10 @@ export default function ActivityCarousel({ activities }) {
         </div>
         <button
           onClick={next}
-          className="w-10 h-10 rounded-full bg-yellow-300 hover:bg-yellow-400 text-slate-950 border border-yellow-400 dark:bg-emerald-600 dark:hover:bg-emerald-500 dark:text-white dark:border-transparent flex items-center justify-center transition-all duration-300 shadow-md transform hover:scale-110 active:scale-95 focus-visible:outline-yellow-300"
+          className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-yellow-300 hover:bg-yellow-400 text-slate-950 border border-yellow-400 dark:bg-emerald-600 dark:hover:bg-emerald-500 dark:text-white dark:border-transparent flex items-center justify-center transition-all duration-300 shadow-md transform hover:scale-110 active:scale-95 focus-visible:outline-yellow-300"
           aria-label="Next slide"
         >
-          <ChevronRight className="w-5 h-5 text-slate-950 dark:text-white stroke-[2.5]" />
+          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-950 dark:text-white stroke-[2.5]" />
         </button>
       </div>
     </div>
