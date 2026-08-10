@@ -846,7 +846,7 @@
     "auto_absent_msg": "Automated (System): Did not fill attendance during the active session."
   },
   "staff_dashboard": {
-    "portal": "Staff Portal",
+    "portal": "Officer Portal",
     "welcome": "Welcome,",
     "desc": "Access documents, review literature, and manage SRE operational attendance in real-time.",
     "org": "SRE SC UPNVJT",
