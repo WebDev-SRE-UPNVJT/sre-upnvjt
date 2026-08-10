@@ -1110,9 +1110,6 @@ export default function QuizClient({ initialQuizzes, initialSubmissions, current
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  //  RENDER — LIST & SUBMISSIONS VIEW
-  // ═══════════════════════════════════════════════════════════════════════════
   return (
     <div className="w-full relative">
       {/* Header */}
@@ -1173,9 +1170,7 @@ export default function QuizClient({ initialQuizzes, initialSubmissions, current
         })}
       </div>
 
-      {/* ───────────────────────────────────
-          TAB: QUIZ LIST
-         ─────────────────────────────────── */}
+      {/* Tab: Quizzes */}
       {activeTab === "quizzes" && (
         <div className="bg-white/40 dark:bg-white/[0.02] border border-gray-200/50 dark:border-white/10 rounded-3xl overflow-hidden backdrop-blur-xl shadow-lg">
           <div className="overflow-x-auto w-full">
@@ -1274,9 +1269,7 @@ export default function QuizClient({ initialQuizzes, initialSubmissions, current
         </div>
       )}
 
-      {/* ───────────────────────────────────
-          TAB: SUBMISSIONS LIST (GROUPED BY QUIZ)
-         ─────────────────────────────────── */}
+      {/* Tab: Submissions */}
       {activeTab === "submissions" && (
         <div className="space-y-6">
           {/* Top Filters Bar */}

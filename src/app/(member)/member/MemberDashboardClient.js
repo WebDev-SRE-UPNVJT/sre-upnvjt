@@ -41,9 +41,6 @@ const XP_ICONS = {
   manual: <Award className="w-4 h-4" />,
 };
 
-// ═══════════════════════════════════════════════════════════════════════════
-// MAIN COMPONENT
-// ═══════════════════════════════════════════════════════════════════════════
 export default function MemberDashboardClient({
   user,
   profile,
@@ -123,9 +120,7 @@ export default function MemberDashboardClient({
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/8 dark:bg-primary/5 rounded-full blur-[130px] pointer-events-none mix-blend-multiply dark:mix-blend-screen -z-10" />
       <div className="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-emerald-500/8 dark:bg-emerald-500/5 rounded-full blur-[110px] pointer-events-none mix-blend-multiply dark:mix-blend-screen -z-10" />
 
-      {/* ═══════════════════════════════════════════════════════════════
-          SECTION 1 — HERO: Welcome + Profile Card
-      ═══════════════════════════════════════════════════════════════ */}
+      {/* Hero: Welcome + Profile */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
         {/* ── Welcome + XP Progress (2/3 width) ────────────────────── */}
         <motion.div
@@ -235,9 +230,7 @@ export default function MemberDashboardClient({
         </motion.div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════════
-          SECTION 2 — STATS GRID
-      ═══════════════════════════════════════════════════════════════ */}
+      {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           icon={Trophy}
@@ -277,9 +270,7 @@ export default function MemberDashboardClient({
         />
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════════
-          SECTION 3 — QUEST AKTIF (PPT Materi)
-      ═══════════════════════════════════════════════════════════════ */}
+      {/* Active Quest */}
       {latestPpt && (
         <motion.div
           {...fadeUp(0.35)}
@@ -374,9 +365,7 @@ export default function MemberDashboardClient({
         </motion.div>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════
-          SECTION 4 — TASKS PREVIEW + XP LOG
-      ═══════════════════════════════════════════════════════════════ */}
+      {/* Tasks & XP Logs */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* ── Tasks Preview (2/3) ────────────────────────────────────── */}
         <motion.div {...fadeUp(0.4)} className="xl:col-span-2 space-y-4">
@@ -553,9 +542,7 @@ export default function MemberDashboardClient({
         </motion.div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════════
-          SECTION 5 — QUICK LINKS NAVIGATION
-      ═══════════════════════════════════════════════════════════════ */}
+      {/* Quick Links */}
       <motion.div {...fadeUp(0.5)}>
         <SectionHeader icon={Activity} title="Menu Cepat" className="mb-4" />
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">

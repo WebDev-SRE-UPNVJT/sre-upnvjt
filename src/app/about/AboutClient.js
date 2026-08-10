@@ -9,8 +9,7 @@ import { useLanguage } from "@/i18n/LanguageProvider";
 import { useTheme } from "next-themes";
 import { DepartmentCard } from "@/components/organization/OrgComponents";
 
-// ─── Animation Variants ────────────────────────────────────────────────────────
-
+// Animation variants
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 28 },
   whileInView: { opacity: 1, y: 0 },
@@ -38,8 +37,7 @@ const wordChild = {
   show: { opacity: 1, y: 0, rotateX: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } },
 };
 
-// ─── Data ──────────────────────────────────────────────────────────────────────
-
+// Static data
 const PILLARS = [
   { 
     icon: BookOpen, 
@@ -73,8 +71,6 @@ const MISSION_ITEMS = [
   { desc: "Membangun kolaborasi sinergis lintas sektor: akademisi, industri, dan komunitas." },
 ];
 
-// ─── Main Component ────────────────────────────────────────────────────────────
-
 export default function AboutClient({ departmentsData = [] }) {
   const { t } = useLanguage();
   const { resolvedTheme } = useTheme();
@@ -103,7 +99,7 @@ export default function AboutClient({ departmentsData = [] }) {
   return (
     <div className="min-h-screen bg-[#0bb37e] dark:bg-[#07130e] text-white dark:text-white selection:bg-yellow-300 selection:text-[#07130e] antialiased overflow-hidden">
 
-      {/* ── 1. Hero Section ─────────────────────────────────────────────────── */}
+      {/* Hero Section */}
       <section id="hero" className="scroll-mt-20 relative pt-44 pb-24 px-6 overflow-hidden border-b-2 border-white/25 dark:border-transparent bg-[#0bb37e] dark:bg-[#07130e]">
         {/* Background Image of SRE Meeting */}
         <div 
@@ -236,7 +232,7 @@ export default function AboutClient({ departmentsData = [] }) {
         </div>
       </section>
 
-      {/* ── 4. Structure Section ────────────────────────────────────────────── */}
+      {/* Structure Section */}
        <section id="structure" className="scroll-mt-20 py-24 px-6 md:px-12 lg:px-20 bg-[#0bb37e] dark:bg-[#040e0a] border-b-2 border-white/25 dark:border-transparent transition-colors duration-300">
         <div className="max-w-7xl mx-auto flex flex-col items-center">
           <motion.div 
@@ -280,7 +276,7 @@ export default function AboutClient({ departmentsData = [] }) {
         </div>
       </section>
 
-      {/* ── 5. Get Connected Section ─────────────────────────────────────────── */}
+      {/* Connect Section */}
       <section id="connect" className="scroll-mt-20 py-24 px-6 md:px-12 lg:px-20 bg-[#0aa373] dark:bg-[#030a07] text-white dark:text-white text-center relative overflow-hidden transition-colors duration-300">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/8 rounded-full blur-[120px] pointer-events-none" aria-hidden="true" />
         
@@ -366,7 +362,7 @@ export default function AboutClient({ departmentsData = [] }) {
             Surabaya, Jawa Timur, Indonesia
           </motion.div>
 
-          {/* ── Google Maps Embed ─────────────────────────────────────────────── */}
+          {/* Google Maps Embed */}
           <motion.div
             {...fadeUp(0.15)}
             className="w-full max-w-3xl"

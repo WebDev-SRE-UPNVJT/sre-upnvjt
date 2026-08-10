@@ -250,9 +250,6 @@ function CheckInModal({ session, onClose, onSuccess }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// MAIN COMPONENT
-// ═══════════════════════════════════════════════════════════════════════════
 export default function AbsensiClient({ initialAttendance, validSessions = [], userRoleName = "Member" }) {
   const { t }              = useLanguage();
   const router             = useRouter();
@@ -311,9 +308,7 @@ export default function AbsensiClient({ initialAttendance, validSessions = [], u
       {/* ── Ambient ────────────────────────────────────────────── */}
       <div className="absolute top-0 left-1/3 w-96 h-96 bg-primary/8 dark:bg-primary/5 rounded-full blur-[120px] pointer-events-none -z-10" />
 
-      {/* ══════════════════════════════════════════════════════════
-          HEADER
-      ══════════════════════════════════════════════════════════ */}
+      {/* Header */}
       <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}>
         <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/25 text-[10px] font-black text-primary tracking-widest uppercase mb-3">
           <ClipboardCheck className="w-3 h-3" /> Presensi Member
@@ -326,9 +321,7 @@ export default function AbsensiClient({ initialAttendance, validSessions = [], u
         </p>
       </motion.div>
 
-      {/* ══════════════════════════════════════════════════════════
-          SESI AKTIF BANNER
-      ══════════════════════════════════════════════════════════ */}
+      {/* Active Session Banner */}
       <AnimatePresence>
         {pendingSessions.length > 0 && (
           <motion.div
@@ -373,9 +366,7 @@ export default function AbsensiClient({ initialAttendance, validSessions = [], u
         )}
       </AnimatePresence>
 
-      {/* ══════════════════════════════════════════════════════════
-          STATS GRID
-      ══════════════════════════════════════════════════════════ */}
+      {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={Target}       value={`${attendRate}%`} label="Tingkat Kehadiran"  iconBg="bg-primary/10"    iconColor="text-primary"    iconBorder="border-primary/20"    delay={0.1} />
         <StatCard icon={Flame}        value={streak}           label="Streak Hadir"        iconBg="bg-orange-500/10" iconColor="text-orange-500" iconBorder="border-orange-500/20" delay={0.15} />
@@ -383,9 +374,7 @@ export default function AbsensiClient({ initialAttendance, validSessions = [], u
         <StatCard icon={AlertTriangle} value={getCount("ABSENT")} label="Alpha"           iconBg="bg-red-500/10"    iconColor="text-red-500"    iconBorder="border-red-500/20"    delay={0.25} />
       </div>
 
-      {/* ══════════════════════════════════════════════════════════
-          BREAKDOWN STATUS PILLS
-      ══════════════════════════════════════════════════════════ */}
+      {/* Status Breakdown */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -410,9 +399,7 @@ export default function AbsensiClient({ initialAttendance, validSessions = [], u
         })}
       </motion.div>
 
-      {/* ══════════════════════════════════════════════════════════
-          HISTORY TABLE (ringkas) + LINK KE RIWAYAT LENGKAP
-      ══════════════════════════════════════════════════════════ */}
+      {/* History Table */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
         <SectionHeader
           icon={Calendar}

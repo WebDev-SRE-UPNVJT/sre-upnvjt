@@ -130,9 +130,7 @@ export default function AttendanceClient({ initialAttendance, members, initialSe
     setCollapsedSessions(prev => ({ ...prev, [sessId]: !prev[sessId] }));
   };
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  //  ATTENDANCE SESSION HANDLERS
-  // ═══════════════════════════════════════════════════════════════════════════
+  // Session date formatting
 const formatDateInput = (dStr) => {
   if (!dStr) return new Date().toISOString().slice(0, 10);
   const d = new Date(dStr);
@@ -282,9 +280,7 @@ const formatTimeInput = (dStr) => {
     }
   };
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  //  ATTENDANCE RECORD HANDLERS
-  // ═══════════════════════════════════════════════════════════════════════════
+  // Record handlers
   const handleOpenAttModal = (sessId = "", rec = null) => {
     if (rec) {
       setAttForm({
@@ -369,9 +365,7 @@ const formatTimeInput = (dStr) => {
     }
   };
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  //  EXPORT EXCEL FOR ATTENDANCE SESSION
-  // ═══════════════════════════════════════════════════════════════════════════
+  // Export session to Excel
   const exportSessionToExcel = async (sess, groupRecords) => {
     if (!groupRecords || groupRecords.length === 0) {
       notify("error", "Belum ada catatan presensi untuk diexport");
@@ -508,9 +502,7 @@ const formatTimeInput = (dStr) => {
     }
   };
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  //  GROUPING & FILTERING
-  // ═══════════════════════════════════════════════════════════════════════════
+  // Grouping & filtering
   const sessionMap = useMemo(() => new Map(sessions.map(s => [s.id, s])), [sessions]);
 
   const sessionGroups = useMemo(() => {
@@ -885,9 +877,7 @@ const formatTimeInput = (dStr) => {
         })
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════════════
-          MODAL: TAMBAH / EDIT SESI PRESENSI (attendanceSession)
-         ═══════════════════════════════════════════════════════════════════════════ */}
+      {/* Modal: Session */}
       <AnimatePresence>
         {sessionModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -1021,9 +1011,7 @@ const formatTimeInput = (dStr) => {
         )}
       </AnimatePresence>
 
-      {/* ═══════════════════════════════════════════════════════════════════════════
-          MODAL: CATAT PRESENSI ANGGOTA (attendance)
-         ═══════════════════════════════════════════════════════════════════════════ */}
+      {/* Modal: Attendance Record */}
       <AnimatePresence>
         {attModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">

@@ -259,9 +259,7 @@ export default function EventsAdminClient({ initialEvents, initialRegistrations,
         })}
       </div>
 
-      {/* ───────────────────────────────────
-          TAB: EVENTS LIST
-         ─────────────────────────────────── */}
+      {/* Tab: Events */}
       {activeTab === "events" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           <AnimatePresence>
@@ -349,9 +347,7 @@ export default function EventsAdminClient({ initialEvents, initialRegistrations,
         </div>
       )}
 
-      {/* ───────────────────────────────────
-          TAB: REGISTRATIONS LIST
-         ─────────────────────────────────── */}
+      {/* Tab: Registrations */}
       {activeTab === "registrations" && (
         <div>
           {/* Filters */}

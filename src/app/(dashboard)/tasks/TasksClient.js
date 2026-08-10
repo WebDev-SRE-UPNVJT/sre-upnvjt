@@ -742,9 +742,7 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
         })}
       </div>
 
-      {/* ───────────────────────────────────
-          TAB: TASKS LIST
-         ─────────────────────────────────── */}
+      {/* Tab: Tasks */}
       {activeTab === "tasks" && (
         <div className="bg-white/40 dark:bg-white/[0.02] border border-gray-200/50 dark:border-white/10 rounded-3xl overflow-hidden backdrop-blur-xl shadow-lg">
           <div className="overflow-x-auto w-full">
@@ -845,9 +843,7 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
         </div>
       )}
 
-      {/* ───────────────────────────────────
-          TAB: SUBMISSIONS LIST (GROUPED BY TASK)
-         ─────────────────────────────────── */}
+      {/* Tab: Submissions */}
       {activeTab === "submissions" && (
         <div className="space-y-6">
           {/* Submissions Control Header */}
@@ -1471,9 +1467,7 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
         )}
       </AnimatePresence>
 
-      {/* ───────────────────────────────────
-          MODAL: IMPORT EXCEL SUBMISSIONS
-         ─────────────────────────────────── */}
+      {/* Modal: Import Excel Submissions */}
       <AnimatePresence>
         {importModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">

@@ -5,7 +5,7 @@ import { documentCategory, documentItem } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
-// ─── DOCUMENT CATEGORY ACTIONS ───────────────────────────────────────────────
+// Category actions
 export async function createDocumentCategory(formData) {
   try {
     const name = formData.get("name")?.trim();
@@ -60,7 +60,7 @@ export async function deleteDocumentCategory(id) {
   }
 }
 
-// ─── DOCUMENT ITEM ACTIONS ───────────────────────────────────────────────────
+// Item actions
 export async function createDocumentItem(payload, uploadedById) {
   try {
     const { categoryId, title, description, fileUrl } = payload;

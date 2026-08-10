@@ -1,9 +1,7 @@
 import { pgTable, serial, varchar, text, boolean, integer, timestamp, numeric, jsonb } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
-// ==========================================
-// 1. DYNAMIC RBAC & ORGANIZATION STRUCTURE
-// ==========================================
+// 1. RBAC & Organization Structure
 export const department = pgTable('department', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 255 }).unique().notNull(),
@@ -36,9 +34,7 @@ export const activity = pgTable('activity', {
   updatedAt: timestamp('updatedAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
 
-// ==========================================
-// 2. USER & MEMBER PROFILES
-// ==========================================
+// 2. User & Member Profiles
 export const user = pgTable('user', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
@@ -62,9 +58,7 @@ export const memberProfile = pgTable('memberProfile', {
   level: integer('level').default(1).notNull(),
 });
 
-// ==========================================
-// 3. ANNOUNCEMENTS
-// ==========================================
+// 3. Announcements
 export const announcement = pgTable('announcement', {
   id: serial('id').primaryKey(),
   title: varchar('title', { length: 255 }).notNull(),
@@ -77,9 +71,7 @@ export const announcement = pgTable('announcement', {
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
 
-// ==========================================
-// 4. CONTENTS (Articles)
-// ==========================================
+// 4. Contents (Articles)
 export const content = pgTable('content', {
   id: serial('id').primaryKey(),
   title: varchar('title', { length: 255 }).notNull(),
@@ -91,9 +83,7 @@ export const content = pgTable('content', {
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
 
-// ==========================================
-// 5. TASKS & SUBMISSIONS
-// ==========================================
+// 5. Tasks & Submissions
 export const formTemplate = pgTable('formTemplate', {
   id: serial('id').primaryKey(),
   title: varchar('title', { length: 255 }).notNull(),
@@ -139,9 +129,7 @@ export const taskSubmission = pgTable('taskSubmission', {
   submittedAt: timestamp('submittedAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
 
-// ==========================================
-// 6. ATTENDANCES
-// ==========================================
+// 6. Attendances
 export const attendanceSession = pgTable('attendanceSession', {
   id: serial('id').primaryKey(),
   title: varchar('title', { length: 255 }).notNull(),
@@ -164,9 +152,7 @@ export const attendance = pgTable('attendance', {
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
 
-// ==========================================
-// 7. EVENTS
-// ==========================================
+// 7. Events
 export const event = pgTable('event', {
   id: serial('id').primaryKey(),
   title: varchar('title', { length: 255 }).notNull(),
@@ -179,9 +165,7 @@ export const event = pgTable('event', {
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
 
-// ==========================================
-// 8. PARTNERS
-// ==========================================
+// 8. Partners
 export const partner = pgTable('partner', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
@@ -192,9 +176,7 @@ export const partner = pgTable('partner', {
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
 
-// ==========================================
-// 9. SYSTEM SETTINGS
-// ==========================================
+// 9. System Settings
 export const systemSetting = pgTable('systemSetting', {
   id: serial('id').primaryKey(),
   keyName: varchar('keyName', { length: 255 }).unique().notNull(),
@@ -202,9 +184,7 @@ export const systemSetting = pgTable('systemSetting', {
   updatedAt: timestamp('updatedAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
 
-// ==========================================
-// 10. MERCHANDISE
-// ==========================================
+// 10. Merchandise
 export const merchandise = pgTable('merchandise', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
@@ -297,9 +277,7 @@ export const attendanceRelations = relations(attendance, ({ one }) => ({
   member: one(user, { fields: [attendance.memberId], references: [user.id] }),
 }));
 
-// ==========================================
-// 11. ADDITIONAL TABLES & RELATIONS
-// ==========================================
+// 11. Additional Tables & Relations
 
 export const testimonial = pgTable('testimonial', {
   id: serial('id').primaryKey(),
@@ -349,9 +327,7 @@ export const eventRegistrationRelations = relations(eventRegistration, ({ one })
   }),
 }));
 
-// ==========================================
-// 12. LITERATURE BANK
-// ==========================================
+// 12. Literature Bank
 export const literatureCategory = pgTable('literatureCategory', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
@@ -373,9 +349,7 @@ export const literatureItem = pgTable('literatureItem', {
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()),
 });
 
-// ==========================================
-// 13. PPT MODULES
-// ==========================================
+// 13. PPT Modules
 export const pptModule = pgTable('pptModule', {
   id: serial('id').primaryKey(),
   title: varchar('title', { length: 255 }).notNull(),
@@ -397,9 +371,7 @@ export const pptSlide = pgTable('pptSlide', {
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()),
 });
 
-// ==========================================
-// 14. QUIZ SYSTEM
-// ==========================================
+// 14. Quiz System
 export const quiz = pgTable('quiz', {
   id: serial('id').primaryKey(),
   title: varchar('title', { length: 255 }).notNull(),
@@ -437,9 +409,7 @@ export const quizSubmission = pgTable('quizSubmission', {
   gradedAt: timestamp('gradedAt', { mode: 'date' }),
 });
 
-// ==========================================
-// 15. XP TRANSACTION LOG
-// ==========================================
+// 15. XP Transaction Log
 export const xpTransaction = pgTable('xpTransaction', {
   id: serial('id').primaryKey(),
   userId: integer('userId').references(() => user.id).notNull(),
@@ -451,9 +421,7 @@ export const xpTransaction = pgTable('xpTransaction', {
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()),
 });
 
-// ==========================================
-// 16. DOCUMENTS
-// ==========================================
+// 16. Documents
 export const documentCategory = pgTable('documentCategory', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
@@ -471,9 +439,7 @@ export const documentItem = pgTable('documentItem', {
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()),
 });
 
-// ==========================================
-// 17. SHORTLINKS
-// ==========================================
+// 17. Shortlinks
 export const shortlink = pgTable('shortlink', {
   id: serial('id').primaryKey(),
   slug: varchar('slug', { length: 255 }).unique().notNull(),
@@ -484,9 +450,7 @@ export const shortlink = pgTable('shortlink', {
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
 
-// ==========================================
-// NEW RELATIONS (12–17)
-// ==========================================
+// Relations (12-17)
 
 export const literatureCategoryRelations = relations(literatureCategory, ({ many }) => ({
   items: many(literatureItem),

@@ -38,9 +38,6 @@ const inputCls =
 const textareaCls =
   "w-full p-4 bg-white dark:bg-white/5 shadow-sm dark:shadow-none border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/20 focus:outline-none focus:border-primary/50 transition-all resize-none";
 
-// ═══════════════════════════════════════════════════════════════════════════════
-//  MAIN COMPONENT
-// ═══════════════════════════════════════════════════════════════════════════════
 export default function PptClient({ initialModules, currentUser }) {
   const { data: session } = useSession();
   const user = session?.user ?? currentUser;
@@ -161,9 +158,7 @@ export default function PptClient({ initialModules, currentUser }) {
     }
   };
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  //  NAVIGATE TO SLIDE MANAGER
-  // ═══════════════════════════════════════════════════════════════════════════
+  // Slide manager navigation
   const openSlideManager = async (mod) => {
     setIsLoading(true);
     try {
@@ -188,9 +183,7 @@ export default function PptClient({ initialModules, currentUser }) {
     setSearchQuery("");
   };
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  //  MODULE HANDLERS
-  // ═══════════════════════════════════════════════════════════════════════════
+  // Module handlers
   const openModModal = (mod = null) => {
     setModForm(mod ? { ...mod } : { ...EMPTY_MODULE });
     setTargetMod(mod);
@@ -245,9 +238,7 @@ export default function PptClient({ initialModules, currentUser }) {
     setIsLoading(false);
   };
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  //  SLIDE HANDLERS
-  // ═══════════════════════════════════════════════════════════════════════════
+  // Slide handlers
   const openSlideModal = (slide = null) => {
     setSlideForm(slide ? { ...slide } : { ...EMPTY_SLIDE });
     setTargetSlide(slide);
@@ -323,9 +314,6 @@ export default function PptClient({ initialModules, currentUser }) {
     (m.title || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  //  RENDER — SLIDE MANAGER VIEW
-  // ═══════════════════════════════════════════════════════════════════════════
   if (view === "slides" && activeModule) {
     return (
       <div className="w-full relative">
@@ -590,9 +578,6 @@ export default function PptClient({ initialModules, currentUser }) {
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  //  RENDER — MODULE LIST VIEW
-  // ═══════════════════════════════════════════════════════════════════════════
   return (
     <div className="w-full relative">
       {/* ── Header ── */}

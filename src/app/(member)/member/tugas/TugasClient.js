@@ -495,9 +495,6 @@ function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// MAIN COMPONENT
-// ═══════════════════════════════════════════════════════════════════════════
 export default function TugasClient({ user, initialTasks, initialSubmissions }) {
   const { t }                   = useLanguage();
   const [tasks]                 = useState(initialTasks ?? []);

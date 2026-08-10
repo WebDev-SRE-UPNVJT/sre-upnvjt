@@ -193,9 +193,6 @@ function RecordItem({ rec, index }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// MAIN COMPONENT
-// ═══════════════════════════════════════════════════════════════════════════
 export default function RiwayatAbsensiClient({ records, allSessions }) {
   const [filter, setFilter] = useState("ALL");
 

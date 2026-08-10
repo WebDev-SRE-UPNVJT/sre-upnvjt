@@ -21,7 +21,7 @@ export async function GET(req) {
     let ranked = [];
 
     if (period === "all") {
-      // ─── ALL TIME: pakai memberProfile.xp langsung untuk role MEMBER ──────
+      // All-time leaderboard from memberProfile
       const data = await db
         .select({
           id:                user.id,
@@ -43,7 +43,7 @@ export async function GET(req) {
       ranked = data.map((item, idx) => ({ ...item, rank: idx + 1 }));
 
     } else {
-      // ─── PERIOD-BASED: query dari xpTransaction ─────────────────────
+      // Period-based query from xpTransaction
       const now = new Date();
       let startDate;
 

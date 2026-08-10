@@ -51,11 +51,6 @@ export default function MateriClient({ initialModules }) {
     return `${diffDays} hari lalu`;
   };
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  //  VIEW 1: CARD MODULES GRID
-  // ═══════════════════════════════════════════════════════════════════════════
-
-
   return (
     <div className="w-full relative select-none">
       

@@ -51,7 +51,7 @@ export async function POST(req) {
       return NextResponse.json({ error: "File, kategori, dan judul wajib diisi" }, { status: 400 });
     }
 
-    // ── Upload ke Google Drive ──────────────────────────────────────────
+    // Upload to Google Drive
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
@@ -83,7 +83,7 @@ export async function POST(req) {
       supportsAllDrives: true,
     });
 
-    // ── Simpan ke DB ────────────────────────────────────────────────────
+    // Save to DB
     const [inserted] = await db.insert(documentItem).values({
       categoryId,
       title,

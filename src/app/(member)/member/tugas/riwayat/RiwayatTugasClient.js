@@ -164,9 +164,6 @@ function SubmissionItem({ sub, index }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// MAIN COMPONENT
-// ═══════════════════════════════════════════════════════════════════════════
 export default function RiwayatTugasClient({ submissions }) {
   const [filter, setFilter] = useState("ALL");
 

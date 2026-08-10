@@ -110,9 +110,7 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
     }
   };
 
-  // ══════════════════════════════════════════════════════════════════════════
-  //  CATEGORY HANDLERS
-  // ══════════════════════════════════════════════════════════════════════════
+  // Category handlers
   const openCatModal = (cat = null) => {
     setCatForm(cat ? { ...cat } : { ...EMPTY_CATEGORY });
     setTargetCat(cat);
@@ -159,9 +157,7 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
     setIsLoading(false);
   };
 
-  // ══════════════════════════════════════════════════════════════════════════
-  //  ITEM HANDLERS
-  // ══════════════════════════════════════════════════════════════════════════
+  // Item handlers
   const openItemModal = (item = null) => {
     setItemForm(item
       ? { ...item, categoryId: item.categoryId?.toString() || item.category?.id?.toString() || "" }
@@ -230,9 +226,6 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
   // ── Currently selected category preview (in item modal) ────────────────
   const selectedCatPreview = categories.find(c => c.id?.toString() === itemForm.categoryId);
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  //  RENDER
-  // ═══════════════════════════════════════════════════════════════════════════
   return (
     <div className="w-full relative">
 
@@ -298,9 +291,7 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
         })}
       </div>
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          TAB: ITEM LITERATUR
-         ══════════════════════════════════════════════════════════════════════ */}
+      {/* Tab: Items */}
       {activeTab === "items" && (
         <div>
           {/* Filters */}
@@ -435,9 +426,7 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          TAB: KATEGORI
-         ══════════════════════════════════════════════════════════════════════ */}
+      {/* Tab: Categories */}
       {activeTab === "categories" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           <AnimatePresence>
@@ -511,9 +500,7 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          MODAL: SAVE CATEGORY
-         ══════════════════════════════════════════════════════════════════════ */}
+      {/* Modal: Save Category */}
       <AnimatePresence>
         {catModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -610,9 +597,7 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
         )}
       </AnimatePresence>
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          MODAL: SAVE ITEM
-         ══════════════════════════════════════════════════════════════════════ */}
+      {/* Modal: Save Item */}
       <AnimatePresence>
         {itemModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -762,9 +747,7 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
         )}
       </AnimatePresence>
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          MODAL: DELETE CATEGORY
-         ══════════════════════════════════════════════════════════════════════ */}
+      {/* Modal: Delete Category */}
       <AnimatePresence>
         {catDelModal && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
@@ -805,9 +788,7 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
         )}
       </AnimatePresence>
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          MODAL: DELETE ITEM
-         ══════════════════════════════════════════════════════════════════════ */}
+      {/* Modal: Delete Item */}
       <AnimatePresence>
         {itemDelModal && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">

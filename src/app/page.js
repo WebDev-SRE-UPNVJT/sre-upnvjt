@@ -27,8 +27,7 @@ import { useLanguage } from "@/i18n/LanguageProvider";
 
 export const dynamic = "force-dynamic";
 
-// ── Shared animation primitives ───────────────────────────────────────────────
-// All whileInView uses viewport={{ once: true }} to prevent re-trigger on scroll-up.
+// Shared animation primitives
 const fadeInUp = {
   initial: { opacity: 0, y: 28 },
   whileInView: { opacity: 1, y: 0 },
@@ -299,9 +298,7 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-canvas text-ink antialiased">
       <main className="w-full flex flex-col overflow-hidden">
 
-        {/* ══════════════════════════════════════════════════════════════════════
-            HERO SECTION — DO NOT MODIFY
-            ══════════════════════════════════════════════════════════════════════ */}
+        {/* Hero Section */}
         <section
           id="home"
           className={`relative min-h-screen flex flex-col justify-center items-start py-24 px-8 sm:px-12 md:px-20 lg:px-24 overflow-hidden ${
@@ -359,9 +356,7 @@ export default function Home() {
             isLight ? "bg-yellow-300" : "bg-[#e8ecc4]"
           }`} />
         </section>
-        {/* ══════════════════════════════════════════════════════════════════════
-            END HERO — DO NOT MODIFY ABOVE
-            ══════════════════════════════════════════════════════════════════════ */}
+
 
         {/* Marquee ticker */}
         <div className="bg-[#099c6d] dark:bg-[#050e09] border-y-2 border-white/25 dark:border-transparent py-5 overflow-hidden flex select-none relative z-10" aria-hidden="true">
@@ -379,7 +374,7 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* ── About Section — 2-Column Redesign ── */}
+        {/* About Section */}
         <section
           id="about"
           className="scroll-mt-20 relative bg-[#0bb37e] dark:bg-[#07130e] text-white py-24 px-6 lg:px-20 flex items-center border-b-2 border-white/25 dark:border-transparent overflow-hidden"
@@ -486,7 +481,7 @@ export default function Home() {
         </section>
 
 
-        {/* ── Our Activity Section — 100vh ── */}
+        {/* Activity Section */}
         <section
           id="activity"
           className="scroll-mt-20 bg-[#0cc48a] dark:bg-[#040e0a] py-8 lg:py-12 px-6 lg:px-20 border-b-2 border-white/25 dark:border-transparent relative overflow-hidden flex items-center justify-center lg:h-screen lg:min-h-screen"
@@ -543,7 +538,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── Testimonials Section ──────────────────────────────────────────────── */}
+        {/* Testimonials */}
         {publicTestimonialsList.length > 0 && (
           <section className="bg-[#089668] dark:bg-[#07130e] border-t-2 border-white/25 dark:border-transparent py-24 relative overflow-hidden">
             <div className="site-container flex flex-col items-center">
@@ -595,7 +590,7 @@ export default function Home() {
           </section>
         )}
 
-        {/* ── Partners Section — Redesigned Premium Glassmorphic Showcase ──────── */}
+        {/* Partners Showcase */}
         {(() => {
           const dbPartners = partnersList.filter(p => p.isActive !== false);
           const allPartners = dbPartners.length > 0 ? dbPartners : DEFAULT_PARTNERS;

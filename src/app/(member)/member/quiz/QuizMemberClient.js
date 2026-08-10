@@ -38,9 +38,6 @@ export default function QuizMemberClient({ initialQuizzes, initialSubmissions })
     router.push(`/member/quiz/${qz.id}`);
   };
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  //  LIST OF PUBLISHED QUIZZES (E-LEARNING PORTAL)
-  // ═══════════════════════════════════════════════════════════════════════════
   return (
     <div className="w-full relative select-none">
       {/* Gamified Background Elements */}

@@ -70,9 +70,6 @@ function DocCard({ doc, index }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// MAIN COMPONENT
-// ═══════════════════════════════════════════════════════════════════════════
 export default function DokumenClient({ categories, initialDocuments }) {
   const fileRef  = useRef(null);
   const [docs, setDocs]         = useState(initialDocuments ?? []);

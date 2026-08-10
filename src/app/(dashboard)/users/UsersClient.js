@@ -427,7 +427,6 @@ export default function UsersClient({ initialUsers, roles, departments, division
                     t={t}
                   />
                 </div>
-                {/* --------------------------- */}
 
                 <div className="col-span-full flex items-center gap-3 mt-4">
                   <input type="hidden" name="isActive" value="false" />

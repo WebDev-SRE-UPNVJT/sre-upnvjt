@@ -33,7 +33,7 @@ export default function MerchPublicClient({ merchandise = [] }) {
   return (
     <div className="min-h-screen bg-[#0cc48a] dark:bg-[#07130e] text-white pt-24 select-none font-sans transition-colors duration-300">
       
-      {/* ── 1. Hero Section ── */}
+      {/* Hero Section */}
       <section className="relative bg-[#0cc48a] dark:bg-[#07130e] text-white py-20 px-6 md:px-12 lg:px-20 overflow-hidden border-b border-white/10 dark:border-transparent transition-colors duration-300">
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
         <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-yellow-300/10 dark:bg-emerald-500/10 blur-[100px]" />
@@ -101,7 +101,7 @@ export default function MerchPublicClient({ merchandise = [] }) {
         </div>
       </section>
 
-      {/* ── 2. Our Special Bundle Section (Dinamis) ── */}
+      {/* Special Bundles */}
       {bundles.length > 0 && (
         <section className="py-20 px-6 md:px-12 lg:px-20 bg-[#e8ecc4] dark:bg-[#040e0a] border-b border-white/10 dark:border-transparent transition-colors duration-300">
           <div className="max-w-7xl mx-auto">
@@ -167,7 +167,7 @@ export default function MerchPublicClient({ merchandise = [] }) {
         </section>
       )}
 
-      {/* ── 3. Our Products Section (100% Dinamis) ── */}
+      {/* Products */}
       <section id="catalog" className="scroll-mt-20 py-20 px-6 md:px-12 lg:px-20 border-b border-white/10 dark:border-transparent bg-[#08a270] dark:bg-[#07130e] transition-colors duration-300">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
@@ -252,7 +252,7 @@ export default function MerchPublicClient({ merchandise = [] }) {
         </div>
       </section>
 
-      {/* ── 4. Get Official Merchandise bottom CTA ── */}
+      {/* Bottom CTA */}
       <section className="py-20 px-6 md:px-12 lg:px-20 bg-[#0cc48a] dark:bg-[#030a07] text-white relative overflow-hidden transition-colors duration-300">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-start lg:items-center gap-12 relative z-10">
           <div className="max-w-xl">

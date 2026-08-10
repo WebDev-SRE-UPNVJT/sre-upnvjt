@@ -52,7 +52,7 @@ export default function DocumentsClient({ initialCategories, initialDocuments, c
     setTimeout(() => setNotification(null), 3500);
   };
 
-  // ─── FILE UPLOAD HANDLER ───────────────────────────────────────────────────
+  // Upload handler
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -78,7 +78,7 @@ export default function DocumentsClient({ initialCategories, initialDocuments, c
     }
   };
 
-  // ─── CATEGORY HANDLERS ─────────────────────────────────────────────────────
+  // Category handlers
   const openCatModal = (cat = null) => {
     setTargetCat(cat);
     setCatForm(cat ? { name: cat.name, description: cat.description || "" } : EMPTY_CAT);
@@ -131,7 +131,7 @@ export default function DocumentsClient({ initialCategories, initialDocuments, c
     setIsLoading(false);
   };
 
-  // ─── DOCUMENT HANDLERS ─────────────────────────────────────────────────────
+  // Document handlers
   const openDocModal = (doc = null) => {
     setTargetDoc(doc);
     setDocForm(doc ? {

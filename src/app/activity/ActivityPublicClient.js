@@ -63,7 +63,7 @@ export default function ActivityPublicClient({ activities = [] }) {
 
   return (
     <div className="min-h-screen bg-[#0cc48a] dark:bg-[#07130e] text-white pt-20 font-sans transition-colors duration-300">
-      {/* ── HERO BANNER SECTION ── */}
+      {/* Hero Banner */}
       <section className="relative py-20 md:py-28 px-6 md:px-12 flex items-center overflow-hidden border-b border-white/10 dark:border-transparent bg-[#0cc48a] dark:bg-[#07130e] transition-colors duration-300">
         {/* Background Image of SRE Meeting */}
         <div 
@@ -111,7 +111,7 @@ export default function ActivityPublicClient({ activities = [] }) {
         </div>
       </section>
 
-      {/* ── FEATURED / LATEST ACTIVITY SECTION (100% DINAMIS) ── */}
+      {/* Featured Activity */}
       {featuredActivity && (
         <section className="py-16 md:py-24 px-6 md:px-12 relative overflow-hidden bg-[#e8ecc4] dark:bg-white/[0.01] transition-colors duration-300">
           <div className="max-w-7xl mx-auto">
@@ -204,7 +204,7 @@ export default function ActivityPublicClient({ activities = [] }) {
         </section>
       )}
 
-      {/* ── OTHER ACTIVITIES SECTION ── */}
+      {/* Other Activities */}
       <section className="scroll-mt-20 py-16 md:py-24 px-6 md:px-12 relative border-t border-white/15 dark:border-transparent bg-[#08a270] dark:bg-[#050e0a] transition-colors duration-300">
         <div className="max-w-7xl mx-auto">
           {/* Header & Category Filters */}

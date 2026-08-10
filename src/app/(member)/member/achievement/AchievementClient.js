@@ -110,9 +110,6 @@ function XpLogItem({ log, index }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// MAIN COMPONENT
-// ═══════════════════════════════════════════════════════════════════════════
 export default function AchievementClient({ profile, xpLogs, taskSubs, attendances, quizSubs }) {
   const [activeTab, setTab] = useState("badges");
 
@@ -136,9 +133,7 @@ export default function AchievementClient({ profile, xpLogs, taskSubs, attendanc
       {/* ── Ambient ──────────────────────────────────────────────── */}
       <div className="absolute top-0 right-0 w-[500px] h-[400px] bg-purple-500/8 dark:bg-purple-500/5 rounded-full blur-[130px] pointer-events-none -z-10" />
 
-      {/* ══════════════════════════════════════════════════════════
-          HERO — Profile + XP Card
-      ══════════════════════════════════════════════════════════ */}
+      {/* Hero: Profile + XP */}
       <motion.div
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -188,9 +183,7 @@ export default function AchievementClient({ profile, xpLogs, taskSubs, attendanc
         </div>
       </motion.div>
 
-      {/* ══════════════════════════════════════════════════════════
-          LEVEL ROADMAP
-      ══════════════════════════════════════════════════════════ */}
+      {/* Level Roadmap */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <SectionHeader icon={TrendingUp} title="Level Roadmap" className="mb-4" />
         <div className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-3xl p-6 shadow-xl dark:shadow-2xl">
@@ -233,9 +226,7 @@ export default function AchievementClient({ profile, xpLogs, taskSubs, attendanc
         </div>
       </motion.div>
 
-      {/* ══════════════════════════════════════════════════════════
-          TABS — Badges / XP History
-      ══════════════════════════════════════════════════════════ */}
+      {/* Tabs */}
       <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/8 rounded-2xl w-fit">
         {[
           { key: "badges", label: `Badge (${unlockedBadges.length}/${BADGE_DEFS.length})`, icon: Award },

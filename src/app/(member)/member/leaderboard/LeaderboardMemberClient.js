@@ -75,9 +75,6 @@ function Avatar({ name, url, size = "w-10 h-10", borderCls = "", shadowCls = "",
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// MAIN COMPONENT
-// ═══════════════════════════════════════════════════════════════════════════
 export default function LeaderboardMemberClient({ initialLeaderboard, currentUserId }) {
   const { t } = useLanguage();
   const [period, setPeriod]           = useState("all");
@@ -123,9 +120,7 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-primary/10 dark:bg-primary/8 rounded-[100%] blur-[120px] pointer-events-none -z-10" />
       <div className="absolute top-20 right-0 w-80 h-80 bg-amber-500/8 dark:bg-amber-500/5 rounded-full blur-[100px] pointer-events-none -z-10" />
 
-      {/* ══════════════════════════════════════════════════════════════
-          HEADER
-      ══════════════════════════════════════════════════════════════ */}
+      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -182,9 +177,7 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
         )}
       </AnimatePresence>
 
-      {/* ══════════════════════════════════════════════════════════════
-          PODIUM TOP 3
-      ══════════════════════════════════════════════════════════════ */}
+      {/* Podium Top 3 */}
       {top3.length > 0 && (
         <div className="relative">
           {/* Stage glow */}
@@ -299,9 +292,7 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════════════════
-          RANK LIST (#4 ke bawah)
-      ══════════════════════════════════════════════════════════════ */}
+      {/* Rank List */}
       <div className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-3xl overflow-hidden shadow-xl dark:shadow-2xl">
 
         {/* Table header */}
@@ -404,9 +395,7 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
         </div>
       </div>
 
-      {/* ══════════════════════════════════════════════════════════════
-          FLOATING MY RANK WIDGET (sticky bottom)
-      ══════════════════════════════════════════════════════════════ */}
+      {/* Floating My Rank Widget */}
       <AnimatePresence>
         {currentUser && (
           <motion.div
