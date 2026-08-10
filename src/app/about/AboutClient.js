@@ -207,21 +207,21 @@ export default function AboutClient({ departmentsData = [] }) {
                 <motion.div
                   key={pillar.num}
                   variants={staggerChild}
-                  className="group p-8 rounded-3xl bg-white/15 dark:bg-[#050e0a] border border-white/30 dark:border-white/10 hover:border-yellow-300/50 dark:hover:border-emerald-500/55 transition-all duration-500 hover:shadow-lg flex flex-col justify-between"
+                  className="group p-6 sm:p-8 rounded-3xl bg-white/15 dark:bg-[#050e0a] border border-white/30 dark:border-white/10 hover:border-yellow-300/50 dark:hover:border-emerald-500/55 transition-all duration-500 hover:shadow-lg flex flex-col justify-between"
                 >
                   <div>
-                    <div className="flex items-center justify-between mb-8">
-                      <div className="w-12 h-12 rounded-2xl bg-white/15 dark:bg-emerald-500/10 border border-white/30 dark:border-emerald-500/20 flex items-center justify-center text-yellow-300 dark:text-emerald-400 group-hover:scale-110 transition-transform duration-300">
-                        <IconComp className="w-6 h-6" />
+                    <div className="flex items-center justify-between mb-6 sm:mb-8">
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/15 dark:bg-emerald-500/10 border border-white/30 dark:border-emerald-500/20 flex items-center justify-center text-yellow-300 dark:text-emerald-400 group-hover:scale-110 transition-transform duration-300">
+                        <IconComp className="w-6 h-6 sm:w-7 sm:h-7" />
                       </div>
-                      <span className="text-2xl font-black text-white/50 dark:text-white/20 group-hover:text-yellow-300/80 dark:group-hover:text-emerald-400/80 transition-colors">
+                      <span className="text-2xl sm:text-3xl font-black text-white/50 dark:text-white/20 group-hover:text-yellow-300/80 dark:group-hover:text-emerald-400/80 transition-colors">
                         {pillar.num}
                       </span>
                     </div>
-                    <h3 className="text-xl font-black text-white dark:text-white mb-3 group-hover:text-yellow-300 dark:group-hover:text-emerald-400 transition-colors">
+                    <h3 className="text-xl sm:text-2xl font-black text-white dark:text-white mb-2.5 sm:mb-3 group-hover:text-yellow-300 dark:group-hover:text-emerald-400 transition-colors">
                       {pillar.title}
                     </h3>
-                    <p className="text-xs sm:text-sm font-bold text-white/90 dark:text-gray-300 leading-relaxed">
+                    <p className="text-sm sm:text-base font-normal text-white/95 dark:text-gray-200 leading-relaxed">
                       {pillar.desc}
                     </p>
                   </div>

@@ -336,12 +336,12 @@ export default function Home() {
           </div>
 
           {/* MAIN GRID — z-10 */}
-          <div className="max-w-7xl mx-auto w-full relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-stretch">
+          <div className="max-w-7xl mx-auto w-full relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16">
 
             {/* LEFT COLUMN */}
             <div className="flex flex-col w-full">
               <div>
-                <h2 className="text-3xl lg:text-4xl font-black uppercase text-white leading-none">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-black uppercase text-white tracking-tight leading-tight">
                   {t("visitor.home.about_sre")}
                 </h2>
               </div>
@@ -368,8 +368,8 @@ export default function Home() {
               className="flex flex-col gap-5 sm:gap-6 w-full"
             >
               <div>
-                <h3 className="text-3xl lg:text-4xl font-black uppercase text-white">SRE INDONESIA</h3>
-                <p className="mt-3 text-white dark:text-gray-300 text-base leading-relaxed font-medium">
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-display font-black uppercase text-white tracking-tight">SRE INDONESIA</h3>
+                <p className="mt-2.5 sm:mt-3 text-white/95 dark:text-gray-200 text-sm sm:text-base leading-relaxed font-normal">
                   {t("visitor.home.about_desc_sre_id")}
                 </p>
               </div>
@@ -377,8 +377,8 @@ export default function Home() {
               <hr className="border-white/15 dark:border-gray-800" />
               
               <div>
-                <h3 className="text-3xl lg:text-4xl font-black uppercase text-yellow-300 dark:text-emerald-400">SRE UPN JATIM</h3>
-                <p className="mt-3 text-white dark:text-gray-300 text-base leading-relaxed font-medium">
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-display font-black uppercase text-yellow-300 dark:text-emerald-400 tracking-tight">SRE UPN JATIM</h3>
+                <p className="mt-2.5 sm:mt-3 text-white/95 dark:text-gray-200 text-sm sm:text-base leading-relaxed font-normal">
                   {t("visitor.home.about_desc_sre_upnvjt")}
                 </p>
               </div>
@@ -394,11 +394,11 @@ export default function Home() {
                     key={idx}
                     className="rounded-2xl p-3 sm:p-4 border-2 bg-[#099c6d] border-yellow-300/80 dark:bg-[#093021] dark:border-emerald-500/80 flex flex-col items-start gap-1 shadow-md select-none hover:border-yellow-300 hover:bg-[#088c62] dark:hover:bg-[#0d422e] transition-all duration-300"
                   >
-                    <stat.Icon className="text-yellow-300 dark:text-emerald-400 w-5 h-5 sm:w-6 sm:h-6 mb-0.5 shrink-0 drop-shadow-sm" aria-hidden="true" />
-                    <span className="text-[11px] sm:text-xs md:text-sm font-black uppercase tracking-wider text-yellow-300 dark:text-emerald-300 leading-tight">
+                    <stat.Icon className="text-yellow-300 dark:text-emerald-400 w-5 h-5 mb-0.5 shrink-0 drop-shadow-sm" aria-hidden="true" />
+                    <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-yellow-300 dark:text-emerald-300 leading-tight">
                       {stat.text}
                     </span>
-                    <span className="text-xs sm:text-sm md:text-base font-bold text-white dark:text-gray-100 leading-tight break-words">
+                    <span className="text-sm sm:text-base font-black text-white dark:text-gray-100 leading-snug break-words">
                       {stat.value}
                     </span>
                   </div>
@@ -411,7 +411,7 @@ export default function Home() {
                   href="/about"
                   className="group inline-flex items-center gap-2.5 w-fit focus-visible:outline-emerald-600 focus-visible:outline-offset-4 rounded"
                 >
-                  <span className="relative text-xs sm:text-[13px] md:text-[14px] font-bold tracking-[0.15em] uppercase text-white dark:text-white after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[1.5px] after:w-0 after:bg-yellow-300 dark:after:bg-emerald-400 after:transition-all after:duration-300 group-hover:after:w-full">
+                  <span className="relative text-xs sm:text-sm font-black tracking-[0.15em] uppercase text-white dark:text-white after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-0 after:bg-yellow-300 dark:after:bg-emerald-400 after:transition-all after:duration-300 group-hover:after:w-full">
                     {t("visitor.home.learn_more")}
                   </span>
                   <motion.span
@@ -445,15 +445,15 @@ export default function Home() {
               >
                 <div className="flex items-center justify-center gap-2 mb-1.5">
                   <span className="text-yellow-300 dark:text-emerald-400 text-lg leading-none select-none font-black">•</span>
-                  <span className="text-[13px] md:text-[15px] font-black tracking-[0.25em] text-yellow-300 dark:text-emerald-400 uppercase drop-shadow-md">
+                  <span className="text-xs sm:text-sm font-black tracking-[0.25em] text-yellow-300 dark:text-emerald-400 uppercase drop-shadow-md">
                     {t("visitor.home.what_we_do")}
                   </span>
                 </div>
-                <h2 className="text-[32px] md:text-[44px] font-display font-black tracking-tight text-white dark:text-white uppercase leading-[1.1]">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-black tracking-tight text-white dark:text-white uppercase leading-tight">
                   {t("visitor.home.our_activity_prefix")}<span className="text-yellow-300 dark:text-emerald-400">{t("visitor.home.our_activity_highlight")}</span>
                 </h2>
                 <div className="h-[3.5px] w-16 sm:w-20 bg-yellow-300 dark:bg-emerald-400 mx-auto mt-1.5 rounded-full" aria-hidden="true" />
-                <p className="text-xs sm:text-sm md:text-base text-white/95 dark:text-gray-300 max-w-xl mx-auto mt-2 font-semibold leading-relaxed">
+                <p className="text-sm sm:text-base text-white/95 dark:text-gray-200 max-w-xl mx-auto mt-2 font-normal leading-relaxed">
                   {t("visitor.home.activity_desc")}
                 </p>
               </motion.div>
@@ -471,7 +471,7 @@ export default function Home() {
                 >
                   <Link
                     href="/activity"
-                    className="group inline-flex items-center gap-2 border-2 border-yellow-300/60 hover:bg-yellow-300 hover:text-[#0cc48a] text-yellow-300 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#040e0a] font-bold tracking-wider text-[11px] sm:text-xs uppercase px-6 sm:px-7 py-2.5 sm:py-3 rounded-full transition-all duration-300 focus-visible:outline-yellow-300"
+                    className="group inline-flex items-center gap-2 border-2 border-yellow-300/60 hover:bg-yellow-300 hover:text-[#0cc48a] text-yellow-300 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#040e0a] font-bold tracking-wider text-xs uppercase px-7 py-3 rounded-full transition-all duration-300 focus-visible:outline-yellow-300"
                   >
                     {t("visitor.home.see_all")}
                     <ArrowUpRight className="w-3.5 h-3.5 text-yellow-300 group-hover:text-[#0cc48a] dark:text-emerald-400 dark:group-hover:text-[#040e0a] transition-colors" aria-hidden="true" />
@@ -494,9 +494,9 @@ export default function Home() {
                 transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                 className="mb-10 sm:mb-12 text-center max-w-xl mx-auto"
               >
-                <span className="text-xs sm:text-sm font-bold tracking-widest text-yellow-300 dark:text-emerald-400 uppercase mb-2 block">{t("visitor.home.testimonials")}</span>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-black tracking-tight text-white dark:text-white uppercase leading-tight">{t("visitor.home.testimonials_title")}</h2>
-                <p className="text-xs sm:text-sm md:text-base text-white/90 dark:text-white/60 mt-2.5 font-normal leading-relaxed">
+                <span className="text-xs sm:text-sm font-black tracking-widest text-yellow-300 dark:text-emerald-400 uppercase mb-2 block">{t("visitor.home.testimonials")}</span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-black tracking-tight text-white dark:text-white uppercase leading-tight">{t("visitor.home.testimonials_title")}</h2>
+                <p className="text-sm sm:text-base text-white/90 dark:text-white/70 mt-2.5 font-normal leading-relaxed">
                   {t("visitor.home.testimonials_desc")}
                 </p>
               </motion.div>
@@ -525,7 +525,7 @@ export default function Home() {
                       )}
                       <div>
                         <div className="font-bold text-xs sm:text-sm text-white dark:text-white">{test.authorName}</div>
-                        <div className="text-[10px] sm:text-[11px] text-white/70 dark:text-white/40">{test.authorPosition}</div>
+                        <div className="text-[11px] sm:text-xs text-white/75 dark:text-white/50">{test.authorPosition}</div>
                       </div>
                     </div>
                   </motion.div>
@@ -574,18 +574,18 @@ export default function Home() {
                   transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
                   className="flex flex-col items-center max-w-2xl"
                 >
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 dark:bg-emerald-500/10 border border-white/25 dark:border-emerald-500/20 text-yellow-300 dark:text-emerald-400 text-[11px] sm:text-xs font-black tracking-widest uppercase shadow-md mb-3.5 backdrop-blur-md">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 dark:bg-emerald-500/10 border border-white/25 dark:border-emerald-500/20 text-yellow-300 dark:text-emerald-400 text-xs sm:text-sm font-black tracking-widest uppercase shadow-md mb-3 backdrop-blur-md">
                     <Handshake className="w-3.5 h-3.5 text-yellow-300 dark:text-emerald-400" />
                     <span>{t("visitor.home.partners")}</span>
                   </div>
 
-                  <h2 className="text-3xl sm:text-5xl md:text-6xl font-display font-black tracking-tight text-white uppercase drop-shadow-md">
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-black tracking-tight text-white uppercase drop-shadow-md leading-tight">
                     {t("visitor.home.partners_prefix") || "MITRA "}<span className="text-yellow-300 dark:text-emerald-400">{t("visitor.home.partners_highlight") || "KAMI"}</span>
                   </h2>
 
                   <div className="h-[3px] sm:h-[4px] w-16 sm:w-20 bg-yellow-300 dark:bg-emerald-400 mx-auto mt-3 rounded-full" aria-hidden="true" />
 
-                  <p className="text-xs sm:text-sm md:text-base text-white/90 dark:text-gray-300 mt-3 leading-relaxed font-normal max-w-lg">
+                  <p className="text-sm sm:text-base text-white/90 dark:text-gray-200 mt-2.5 sm:mt-3 leading-relaxed font-normal max-w-lg">
                     {t("visitor.home.partners_desc")}
                   </p>
                 </motion.div>

@@ -115,15 +115,15 @@ export default function ActivityCarousel({ activities }) {
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" aria-hidden="true" />
-                <span className="absolute top-3 right-3 bg-yellow-300 dark:bg-emerald-400 text-slate-900 dark:text-slate-950 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">
+                <span className="absolute top-3 right-3 bg-yellow-300 dark:bg-emerald-400 text-slate-900 dark:text-slate-950 text-[11px] sm:text-xs font-black px-3.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
                   {activities[current]?.type || "Featured"}
                 </span>
-                <h3 className="absolute bottom-3 left-4 right-4 text-white font-black text-sm sm:text-base uppercase tracking-wide line-clamp-1">
+                <h3 className="absolute bottom-3 left-4 right-4 text-white font-black text-sm sm:text-base uppercase tracking-wide line-clamp-1 drop-shadow-sm">
                   {getTitle(activities[current])}
                 </h3>
               </div>
-              <div className="p-3 sm:p-4 transition-colors duration-300">
-                <p className="text-white dark:text-gray-300 text-xs sm:text-sm leading-relaxed font-bold line-clamp-2">
+              <div className="p-3.5 sm:p-4 transition-colors duration-300">
+                <p className="text-white/95 dark:text-gray-200 text-xs sm:text-sm leading-relaxed font-semibold line-clamp-2">
                   {activities[current]?.description}
                 </p>
               </div>
