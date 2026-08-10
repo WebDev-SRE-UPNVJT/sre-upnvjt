@@ -47,15 +47,17 @@ const DEVICE_COLORS = {
 const DEVICE_COLOR_LIST = ["#10b981", "#3b82f6", "#f59e0b", "#6b7280"];
 
 // Stat card - widget style matching DashboardClient
-function StatCard({ title, value, subtitle, icon: Icon, color = "primary", badge }) {
+function StatCard({ title, value, subtitle, icon: Icon, color = "primary", badge, isText = false }) {
+  const isLongText = isText || (typeof value === "string" && value.length > 5 && isNaN(Number(value.replace(/,/g, ""))));
+
   return (
     <motion.div
       variants={item}
-      className="bg-white dark:bg-[#08120e] hover:bg-gray-50 dark:hover:bg-[#0a1611] border border-gray-100 dark:border-white/5 rounded-3xl p-6 relative overflow-hidden group transition-all duration-500 hover:-translate-y-1 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none dark:hover:shadow-[0_10px_40px_rgba(16,185,129,0.1)]"
+      className="bg-white dark:bg-[#08120e] hover:bg-gray-50 dark:hover:bg-[#0a1611] border border-gray-100 dark:border-white/5 rounded-3xl p-6 relative overflow-hidden group transition-all duration-500 hover:-translate-y-1 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none dark:hover:shadow-[0_10px_40px_rgba(16,185,129,0.1)] flex flex-col justify-between"
     >
       <div className={`absolute -right-6 -top-6 w-32 h-32 rounded-full bg-${color}/10 blur-2xl group-hover:bg-${color}/20 group-hover:scale-150 transition-all duration-700`} />
 
-      <div className="flex justify-between items-start mb-8 relative z-10">
+      <div className="flex justify-between items-start mb-6 relative z-10">
         <div className={`p-3.5 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 text-${color} group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-sm dark:shadow-none`}>
           <Icon className="w-6 h-6" />
         </div>
@@ -65,12 +67,18 @@ function StatCard({ title, value, subtitle, icon: Icon, color = "primary", badge
         </div>
       </div>
 
-      <div className="relative z-10">
-        <h3 className="text-4xl md:text-5xl font-display font-black text-gray-900 dark:text-white tracking-tighter mb-2 truncate">
-          {value}
-        </h3>
-        <p className="text-gray-900 dark:text-white font-bold text-sm tracking-wide mb-1">{title}</p>
-        {subtitle && <p className="text-xs text-gray-500 dark:text-white/40 font-medium">{subtitle}</p>}
+      <div className="relative z-10 mb-1">
+        {isLongText ? (
+          <h3 className="text-xl md:text-2xl font-display font-black text-gray-900 dark:text-white tracking-tight line-clamp-2 min-h-[3.25rem] flex items-center leading-tight">
+            {value}
+          </h3>
+        ) : (
+          <h3 className="text-4xl md:text-5xl font-display font-black text-gray-900 dark:text-white tracking-tighter mb-1 truncate leading-none">
+            {value}
+          </h3>
+        )}
+        <p className="text-gray-900 dark:text-white font-bold text-sm tracking-wide mt-2 mb-0.5">{title}</p>
+        {subtitle && <p className="text-xs text-gray-500 dark:text-white/40 font-medium truncate">{subtitle}</p>}
       </div>
 
       {/* Decorative sparkline */}
@@ -96,6 +104,41 @@ function CustomTooltip({ active, payload, label }) {
       ))}
     </div>
   );
+}
+
+// Human-friendly page label formatter
+function formatPageName(rawPath) {
+  if (!rawPath || rawPath === "-" || rawPath === "Unknown") return "-";
+  if (rawPath === "/" || rawPath === "") return "Home Page";
+
+  const KNOWN_PAGES = {
+    "/": "Home Page",
+    "/about": "About Us Page",
+    "/activity": "Activity Gallery Page",
+    "/articles": "Articles Page",
+    "/events": "Events Page",
+    "/merchandise": "Merchandise Page",
+    "/join": "Recruitment Page",
+    "/login": "Login Page",
+  };
+
+  if (KNOWN_PAGES[rawPath]) {
+    return KNOWN_PAGES[rawPath];
+  }
+
+  // Format nested paths (e.g. /articles/transition-green -> Articles: Transition Green Page)
+  const clean = rawPath.replace(/^\/+|\/+$/g, "");
+  const formatted = clean
+    .split("/")
+    .map((seg) =>
+      seg
+        .split(/[-_]/)
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ")
+    )
+    .join(" - ");
+
+  return `${formatted} Page`;
 }
 
 export default function AnalyticsClient({ stats, dailyTraffic, hourlyTraffic, deviceBreakdown, topPages }) {
@@ -151,8 +194,8 @@ export default function AnalyticsClient({ stats, dailyTraffic, hourlyTraffic, de
         />
         <StatCard
           title="Most Visited Page"
-          value={stats?.topPage ?? "-"}
-          subtitle="Highest traffic route"
+          value={formatPageName(stats?.topPage)}
+          subtitle={stats?.topPage && stats.topPage !== "-" ? `Path: ${stats.topPage}` : "Highest traffic route"}
           icon={FileText}
           color="emerald-500"
           badge="Top"
@@ -314,7 +357,7 @@ export default function AnalyticsClient({ stats, dailyTraffic, hourlyTraffic, de
               <thead>
                 <tr className="text-left border-b border-gray-100 dark:border-white/5">
                   <th className="pb-3 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-white/30 w-8">#</th>
-                  <th className="pb-3 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-white/30">Route Path</th>
+                  <th className="pb-3 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-white/30">Page Name & Route</th>
                   <th className="pb-3 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-white/30 text-right">Pageviews</th>
                 </tr>
               </thead>
@@ -322,14 +365,20 @@ export default function AnalyticsClient({ stats, dailyTraffic, hourlyTraffic, de
                 {topPages.map((page, i) => {
                   const maxVisits = topPages[0]?.visits ?? 1;
                   const pct = Math.round((page.visits / maxVisits) * 100);
+                  const pageName = formatPageName(page.path);
                   return (
                     <tr key={page.path} className="group hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
                       <td className="py-3.5 pr-4 text-gray-300 dark:text-white/20 font-bold">{i + 1}</td>
                       <td className="py-3.5 pr-4">
-                        <div className="font-medium text-gray-900 dark:text-white font-mono text-[13px] mb-1.5 truncate max-w-xs">
-                          {page.path}
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="font-bold text-gray-900 dark:text-white text-[13.5px]">
+                            {pageName}
+                          </span>
+                          <span className="text-[11px] text-gray-400 dark:text-white/40 font-mono">
+                            ({page.path})
+                          </span>
                         </div>
-                        <div className="w-full bg-gray-100 dark:bg-white/5 rounded-full h-1">
+                        <div className="w-full bg-gray-100 dark:bg-white/5 rounded-full h-1 mt-1.5">
                           <div
                             className="bg-primary h-1 rounded-full transition-all duration-700"
                             style={{ width: `${pct}%` }}
