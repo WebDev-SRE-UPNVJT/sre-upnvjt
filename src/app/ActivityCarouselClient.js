@@ -67,7 +67,7 @@ export default function ActivityCarousel({ activities }) {
 
   return (
     <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} className="w-full relative select-none">
-      <div className="relative overflow-hidden w-full py-0 sm:py-1 flex items-center justify-center">
+      <div className="relative overflow-hidden w-full py-2 min-h-[380px] flex items-center justify-center">
         <AnimatePresence initial={false} custom={direction} mode="popLayout">
           <motion.div
             key={current}
@@ -81,49 +81,49 @@ export default function ActivityCarousel({ activities }) {
               opacity: { duration: 0.35, ease: "easeOut" },
               scale: { duration: 0.35, ease: "easeOut" }
             }}
-            className="flex items-center justify-center gap-4 w-full px-2 sm:px-4"
+            className="flex items-center justify-center gap-4 w-full px-4"
           >
             {/* LEFT CARD — Inactive, smaller, with matching structural components */}
             <div
-              className="hidden md:block w-[26%] flex-shrink-0 opacity-50 scale-90 transition-all duration-500 rounded-2xl overflow-hidden cursor-pointer border-2 border-yellow-300 dark:border-emerald-500/40 bg-[#099c6d] dark:bg-[#093021] shadow-lg"
+              className="hidden md:block md:w-[28%] md:max-w-[320px] lg:max-w-[340px] xl:max-w-[360px] flex-shrink-0 opacity-50 scale-90 transition-all duration-500 rounded-2xl overflow-hidden cursor-pointer border-2 border-yellow-300 dark:border-emerald-500/40 bg-[#099c6d] dark:bg-[#093021] shadow-lg"
               onClick={prev}
             >
-              <div className="relative aspect-[4/3] w-full">
+              <div className="relative h-[160px]">
                 <img
                   src={getImage(activities[getIndex(-1)])}
                   alt={getTitle(activities[getIndex(-1)])}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" aria-hidden="true" />
-                <h3 className="absolute bottom-2.5 left-3 right-3 text-white font-black text-xs uppercase tracking-wide line-clamp-1">
+                <h3 className="absolute bottom-2.5 left-3 text-white font-black text-xs uppercase tracking-wide line-clamp-1">
                   {getTitle(activities[getIndex(-1)])}
                 </h3>
               </div>
-              <div className="p-2.5 sm:p-3">
-                <p className="text-emerald-50 dark:text-gray-300 text-[11px] leading-relaxed font-semibold line-clamp-2">
+              <div className="p-3">
+                <p className="text-emerald-50 dark:text-gray-300 text-[11px] leading-relaxed font-bold line-clamp-2">
                   {activities[getIndex(-1)]?.description}
                 </p>
               </div>
             </div>
 
             {/* CENTER CARD — featured (Emerald background matching about section cards) */}
-            <div className="w-full max-w-[440px] md:max-w-none md:w-[44%] flex-shrink-0 scale-100 z-10 shadow-xl shadow-emerald-900/10 dark:shadow-emerald-950/50 transition-all duration-500 rounded-2xl overflow-hidden border-2 border-yellow-300 dark:border-emerald-400/60 bg-[#099c6d] dark:bg-emerald-950">
-              <div className="relative aspect-[4/3] w-full">
+            <div className="w-full md:w-[44%] flex-shrink-0 scale-100 z-10 shadow-2xl shadow-emerald-900/10 dark:shadow-emerald-950/50 transition-all duration-500 rounded-2xl overflow-hidden border-2 border-yellow-300 dark:border-emerald-400/60 bg-[#099c6d] dark:bg-emerald-950">
+              <div className="relative h-[280px]">
                 <img
                   src={getImage(activities[current])}
                   alt={getTitle(activities[current])}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" aria-hidden="true" />
-                <span className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 bg-yellow-300 dark:bg-emerald-400 text-slate-900 dark:text-slate-950 text-[9px] sm:text-[10px] font-black px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full uppercase tracking-wider shadow-sm">
+                <span className="absolute top-3 right-3 bg-yellow-300 dark:bg-emerald-400 text-slate-900 dark:text-slate-950 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">
                   {activities[current]?.type || "Featured"}
                 </span>
-                <h3 className="absolute bottom-2.5 left-3 right-3 sm:bottom-3 sm:left-3.5 sm:right-3.5 text-white font-black text-xs sm:text-base uppercase tracking-wide line-clamp-1 leading-snug">
+                <h3 className="absolute bottom-3 left-4 text-white font-black text-base uppercase tracking-wide line-clamp-1">
                   {getTitle(activities[current])}
                 </h3>
               </div>
-              <div className="p-3 sm:p-4 transition-colors duration-300">
-                <p className="text-white/95 dark:text-gray-200 text-[11px] sm:text-sm leading-relaxed font-medium line-clamp-2 sm:line-clamp-3">
+              <div className="p-4 transition-colors duration-300">
+                <p className="text-white dark:text-gray-300 text-sm leading-relaxed font-bold line-clamp-2">
                   {activities[current]?.description}
                 </p>
               </div>
@@ -131,23 +131,24 @@ export default function ActivityCarousel({ activities }) {
 
             {/* RIGHT CARD — Inactive, smaller, with matching structural components */}
             <div
-              className="hidden md:block w-[26%] flex-shrink-0 opacity-50 scale-90 transition-all duration-500 rounded-2xl overflow-hidden cursor-pointer border-2 border-yellow-300 dark:border-emerald-500/40 bg-[#099c6d] dark:bg-[#093021] shadow-lg"
+              className="hidden md:block md:w-[28%] md:max-w-[320px] lg:max-w-[340px] xl:max-w-[360px] flex-shrink-0 opacity-50 scale-90 transition-all duration-500 rounded-2xl overflow-hidden cursor-pointer border-2 border-yellow-300 dark:border-emerald-500/40 bg-[#099c6d] dark:bg-[#093021] shadow-lg"
               onClick={next}
             >
-              <div className="relative aspect-[4/3] w-full">
+              <div className="relative h-[160px]">
                 <img
                   src={getImage(activities[getIndex(1)])}
                   alt={getTitle(activities[getIndex(1)])}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" aria-hidden="true" />
-                <h3 className="absolute bottom-2.5 left-3 right-3 text-white font-black text-xs uppercase tracking-wide line-clamp-1">
-                  {getTitle(activities[getIndex(1)])}
+                <h3 className="absolute bottom-2.5 left-3 text-white font-black text-xs uppercase tracking-wide">
+                  {activities[getIndex(1)].title}
                 </h3>
               </div>
 
-              <div className="p-2.5 sm:p-3">
-                <p className="text-emerald-50 dark:text-gray-300 text-[11px] leading-relaxed font-semibold line-clamp-2">
+
+              <div className="p-3">
+                <p className="text-emerald-50 dark:text-gray-300 text-[11px] leading-relaxed font-bold line-clamp-2">
                   {activities[getIndex(1)].description}
                 </p>
               </div>
@@ -156,14 +157,14 @@ export default function ActivityCarousel({ activities }) {
         </AnimatePresence>
       </div>
 
-      {/* Controls — Compact & Clean Spacing */}
-      <div className="flex items-center justify-center gap-3 sm:gap-4 mt-3 sm:mt-5">
+      {/* Controls — Pure bright yellow in Light Mode, emerald in Dark Mode */}
+      <div className="flex items-center justify-center gap-4 mt-6">
         <button
           onClick={prev}
-          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-yellow-300 hover:bg-yellow-400 text-slate-950 border border-yellow-400 dark:bg-emerald-600 dark:hover:bg-emerald-500 dark:text-white dark:border-transparent flex items-center justify-center transition-all duration-300 shadow-md transform hover:scale-110 active:scale-95 focus-visible:outline-yellow-300"
+          className="w-10 h-10 rounded-full bg-yellow-300 hover:bg-yellow-400 text-slate-950 border border-yellow-400 dark:bg-emerald-600 dark:hover:bg-emerald-500 dark:text-white dark:border-transparent flex items-center justify-center transition-all duration-300 shadow-md transform hover:scale-110 active:scale-95 focus-visible:outline-yellow-300"
           aria-label="Previous slide"
         >
-          <ChevronLeft className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-slate-950 dark:text-white stroke-[2.5]" />
+          <ChevronLeft className="w-5 h-5 text-slate-950 dark:text-white stroke-[2.5]" />
         </button>
         <div className="flex gap-1.5 sm:gap-2">
           {activities.map((_, i) => (
@@ -179,10 +180,10 @@ export default function ActivityCarousel({ activities }) {
         </div>
         <button
           onClick={next}
-          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-yellow-300 hover:bg-yellow-400 text-slate-950 border border-yellow-400 dark:bg-emerald-600 dark:hover:bg-emerald-500 dark:text-white dark:border-transparent flex items-center justify-center transition-all duration-300 shadow-md transform hover:scale-110 active:scale-95 focus-visible:outline-yellow-300"
+          className="w-10 h-10 rounded-full bg-yellow-300 hover:bg-yellow-400 text-slate-950 border border-yellow-400 dark:bg-emerald-600 dark:hover:bg-emerald-500 dark:text-white dark:border-transparent flex items-center justify-center transition-all duration-300 shadow-md transform hover:scale-110 active:scale-95 focus-visible:outline-yellow-300"
           aria-label="Next slide"
         >
-          <ChevronRight className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-slate-950 dark:text-white stroke-[2.5]" />
+          <ChevronRight className="w-5 h-5 text-slate-950 dark:text-white stroke-[2.5]" />
         </button>
       </div>
     </div>

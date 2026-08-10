@@ -53,6 +53,9 @@
   --wave-color-2-end: #e1f5ec;
   --wave-color-3-start: #e1f5ec;
   --wave-color-3-end: #cbebdc;
+  --beam-active-color: #facc15;
+  --beam-dim-color: rgba(250, 204, 21, 0.4);
+  --beam-glow: drop-shadow(0 0 6px rgba(250, 204, 21, 0.8));
 }
 
 .dark {
@@ -66,6 +69,9 @@
   --wave-color-2-end: #0f3036;
   --wave-color-3-start: #0f3036;
   --wave-color-3-end: #07130e;
+  --beam-active-color: #00ff9d;
+  --beam-dim-color: rgba(0, 255, 157, 0.4);
+  --beam-glow: drop-shadow(0 0 6px rgba(0, 255, 157, 0.8));
 }
 
 body {
@@ -277,4 +283,39 @@ h1, h2, h3, h4, h5, h6, .font-display {
 @keyframes expandWidth {
   from { width: 0; }
   to { width: 80px; }
+}
+
+@keyframes borderBeamCW {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes borderBeamCCW {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+
+.animate-border-beam-cw {
+  animation: borderBeamCW 4s linear infinite;
+}
+
+.animate-border-beam-ccw {
+  animation: borderBeamCCW 4s linear infinite;
+}
+
+/* Hide scrollbar for smooth horizontal scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
