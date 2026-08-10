@@ -597,20 +597,20 @@ export default function Home() {
 
         {/* ── Partners Section — Redesigned Premium Glassmorphic Showcase ──────── */}
         {(() => {
-          const activePartners = partnersList.filter(p => p.isActive !== false);
-          if (activePartners.length === 0) return null;
+          const dbPartners = partnersList.filter(p => p.isActive !== false);
+          const allPartners = dbPartners.length > 0 ? dbPartners : DEFAULT_PARTNERS;
 
-          const platinumPartners = activePartners.filter(p => {
+          const platinumPartners = allPartners.filter(p => {
             const t = (p.tier || "").toUpperCase();
             return t === "PLATINUM" || t === "LARGE" || t === "UTAMA";
           });
 
-          const goldPartners = activePartners.filter(p => {
+          const goldPartners = allPartners.filter(p => {
             const t = (p.tier || "").toUpperCase();
             return t === "GOLD" || t === "MEDIUM";
           });
 
-          const silverPartners = activePartners.filter(p => {
+          const silverPartners = allPartners.filter(p => {
             const t = (p.tier || "").toUpperCase();
             return t !== "PLATINUM" && t !== "LARGE" && t !== "UTAMA" && t !== "GOLD" && t !== "MEDIUM";
           });
@@ -660,10 +660,15 @@ export default function Home() {
                   {/* High-Tech Dot Matrix Pattern Overlay */}
                   <div className="absolute inset-0 opacity-[0.20] dark:opacity-[0.15] bg-[radial-gradient(#ffffff_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#10b981_1.2px,transparent_1.2px)] [background-size:24px_24px] pointer-events-none" />
 
+                  {/* Multi-Colored Ambient Glow Orbs inside the card */}
+                  <div className="absolute -top-24 -right-24 w-80 h-80 bg-yellow-300/20 dark:bg-emerald-400/20 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
+                  <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-400/20 dark:bg-teal-500/20 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
+
                   {/* Row 1: Large Logos (Platinum) */}
-                  {(platinumPartners.length > 0 ? platinumPartners : activePartners.slice(0, 2)).length > 0 && (
+                  {(platinumPartners.length > 0 ? platinumPartners : allPartners.slice(0, 2)).length > 0 && (
                     <div className="w-full flex flex-wrap justify-center items-center gap-6 sm:gap-10 md:gap-14 relative z-10 pb-2">
-                      {(platinumPartners.length > 0 ? platinumPartners : activePartners.slice(0, 2)).map((partner) => (
+                      {(platinumPartners.length > 0 ? platinumPartners : allPartners.slice(0, 2)).map((partner) => (
                         <a
                           key={partner.id || partner.name}
                           href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
@@ -681,9 +686,9 @@ export default function Home() {
                   )}
 
                   {/* Row 2: Medium Logos (Gold) */}
-                  {(goldPartners.length > 0 ? goldPartners : activePartners.slice(2, 4)).length > 0 && (
+                  {(goldPartners.length > 0 ? goldPartners : allPartners.slice(2, 4)).length > 0 && (
                     <div className="w-full flex flex-wrap justify-center items-center gap-5 sm:gap-8 md:gap-10 relative z-10 py-1">
-                      {(goldPartners.length > 0 ? goldPartners : activePartners.slice(2, 4)).map((partner) => (
+                      {(goldPartners.length > 0 ? goldPartners : allPartners.slice(2, 4)).map((partner) => (
                         <a
                           key={partner.id || partner.name}
                           href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
@@ -701,9 +706,9 @@ export default function Home() {
                   )}
 
                   {/* Row 3: Smaller Logos */}
-                  {(silverPartners.length > 0 ? silverPartners : activePartners.slice(4)).length > 0 && (
+                  {(silverPartners.length > 0 ? silverPartners : allPartners.slice(4)).length > 0 && (
                     <div className="w-full flex flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-8 relative z-10 pt-1">
-                      {(silverPartners.length > 0 ? silverPartners : activePartners.slice(4)).map((partner) => (
+                      {(silverPartners.length > 0 ? silverPartners : allPartners.slice(4)).map((partner) => (
                         <a
                           key={partner.id || partner.name}
                           href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
