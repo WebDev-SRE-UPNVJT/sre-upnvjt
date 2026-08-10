@@ -453,16 +453,16 @@ export function OrgTreeSection({ dept }) {
     const presidentData = formatUser(president, "President");
 
     return (
-      <div className="w-full flex flex-col items-center animate-fade-in pb-20 space-y-12 sm:space-y-16">
+      <div className="w-full flex flex-col items-center animate-fade-in pb-10 sm:pb-16 space-y-6 sm:space-y-8 md:space-y-10">
         
         {/* ROW 1: PRESIDENT LEVEL */}
         {presidentData && (
           <div className="flex flex-col items-center w-full">
-            <div className="text-center mb-5">
-              <h3 className="text-xs sm:text-sm font-black text-yellow-300 dark:text-emerald-400 tracking-[0.25em] uppercase mb-1">
+            <div className="text-center mb-3 sm:mb-4">
+              <h3 className="text-[11px] sm:text-xs font-black text-yellow-300 dark:text-emerald-400 tracking-[0.2em] uppercase mb-0.5">
                 {t("visitor.org.exec_leader")}
               </h3>
-              <h2 className="text-2xl sm:text-3xl font-display font-black text-white uppercase tracking-tight drop-shadow-md">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-black text-white uppercase tracking-tight drop-shadow-md">
                 {t("visitor.org.president")}
               </h2>
             </div>
@@ -472,8 +472,8 @@ export function OrgTreeSection({ dept }) {
             </div>
 
             {((vps.length > 0) || (secretaries.length > 0)) && (
-              <div className="w-px h-10 bg-gradient-to-b from-yellow-300 to-yellow-300/30 dark:from-emerald-500/80 dark:to-emerald-500/20 mt-6 relative">
-                 <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-yellow-300 dark:bg-emerald-400 shadow-[0_0_10px_rgba(253,224,71,0.6)]"></div>
+              <div className="w-px h-6 sm:h-8 bg-gradient-to-b from-yellow-300 to-yellow-300/30 dark:from-emerald-500/80 dark:to-emerald-500/20 my-2 sm:my-3 relative">
+                 <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-yellow-300 dark:bg-emerald-400 shadow-[0_0_10px_rgba(253,224,71,0.6)]"></div>
               </div>
             )}
           </div>
@@ -482,18 +482,18 @@ export function OrgTreeSection({ dept }) {
         {/* ROW 2: VICE PRESIDENTS LEVEL (Horizontal Scrollable 1 Row) */}
         {vps.length > 0 && (
           <div className="w-full flex flex-col items-center">
-            <div className="text-center mb-4">
-              <span className="text-xs sm:text-sm font-black text-yellow-300 dark:text-emerald-400 tracking-[0.25em] uppercase block mb-1">
+            <div className="text-center mb-2.5 sm:mb-3">
+              <span className="text-[11px] sm:text-xs font-black text-yellow-300 dark:text-emerald-400 tracking-[0.2em] uppercase block mb-0.5">
                 {t("visitor.org.vp")}
               </span>
-              <h2 className="text-2xl sm:text-3xl font-display font-black text-white uppercase tracking-tight drop-shadow-md">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-black text-white uppercase tracking-tight drop-shadow-md">
                 {t("visitor.org.vp")}
               </h2>
             </div>
 
             {/* Horizontal 1-Row Container */}
-            <div className="w-full overflow-x-auto no-scrollbar py-3 px-2 sm:px-4">
-              <div className="flex items-stretch justify-start sm:justify-center gap-4 sm:gap-6 min-w-max mx-auto">
+            <div className="w-full overflow-x-auto no-scrollbar py-1.5 px-2 sm:px-4">
+              <div className="flex items-stretch justify-start sm:justify-center gap-3 sm:gap-4 md:gap-5 min-w-max mx-auto">
                 {vps.map((vp, idx) => (
                   <div key={idx} className="hover:-translate-y-1.5 transition-transform duration-300">
                     <MemberCard member={formatUser(vp, "Vice President")} fallbackRole="Vice President" />
@@ -503,8 +503,8 @@ export function OrgTreeSection({ dept }) {
             </div>
 
             {secretaries.length > 0 && (
-              <div className="w-px h-10 bg-gradient-to-b from-yellow-300 to-yellow-300/30 dark:from-emerald-500/80 dark:to-emerald-500/20 mt-6 relative">
-                 <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-yellow-300 dark:bg-emerald-400 shadow-[0_0_10px_rgba(253,224,71,0.6)]"></div>
+              <div className="w-px h-6 sm:h-8 bg-gradient-to-b from-yellow-300 to-yellow-300/30 dark:from-emerald-500/80 dark:to-emerald-500/20 my-2 sm:my-3 relative">
+                 <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-yellow-300 dark:bg-emerald-400 shadow-[0_0_10px_rgba(253,224,71,0.6)]"></div>
               </div>
             )}
           </div>
@@ -513,18 +513,18 @@ export function OrgTreeSection({ dept }) {
         {/* ROW 3: SECRETARIES LEVEL (Horizontal Scrollable 1 Row) */}
         {secretaries.length > 0 && (
           <div className="w-full flex flex-col items-center">
-            <div className="text-center mb-4">
-              <span className="text-xs sm:text-sm font-black text-yellow-300 dark:text-emerald-400 tracking-[0.25em] uppercase block mb-1">
+            <div className="text-center mb-2.5 sm:mb-3">
+              <span className="text-[11px] sm:text-xs font-black text-yellow-300 dark:text-emerald-400 tracking-[0.2em] uppercase block mb-0.5">
                 {t("visitor.org.secretary")}
               </span>
-              <h2 className="text-2xl sm:text-3xl font-display font-black text-white uppercase tracking-tight drop-shadow-md">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-black text-white uppercase tracking-tight drop-shadow-md">
                 {t("visitor.org.secretary")}
               </h2>
             </div>
 
             {/* Horizontal 1-Row Container */}
-            <div className="w-full overflow-x-auto no-scrollbar py-3 px-2 sm:px-4">
-              <div className="flex items-stretch justify-start sm:justify-center gap-4 sm:gap-6 min-w-max mx-auto">
+            <div className="w-full overflow-x-auto no-scrollbar py-1.5 px-2 sm:px-4">
+              <div className="flex items-stretch justify-start sm:justify-center gap-3 sm:gap-4 md:gap-5 min-w-max mx-auto">
                 {secretaries.map((sec, idx) => (
                   <div key={idx} className="hover:-translate-y-1.5 transition-transform duration-300">
                     <MemberCard member={formatUser(sec, "Secretary")} fallbackRole="Secretary" />
@@ -542,16 +542,16 @@ export function OrgTreeSection({ dept }) {
   const divisionsWithManagers = dept.divisions ? dept.divisions.filter(div => div.manager) : [];
 
   return (
-    <div className="w-full flex flex-col items-center pb-20 space-y-12 sm:space-y-16">
+    <div className="w-full flex flex-col items-center pb-10 sm:pb-16 space-y-6 sm:space-y-8 md:space-y-10">
       
       {/* ROW 1: DIRECTOR LEVEL */}
       {dept.director && (
         <div className="flex flex-col items-center w-full">
-          <div className="text-center mb-5">
-            <h3 className="text-xs sm:text-sm font-black text-yellow-300 dark:text-emerald-400 tracking-[0.25em] uppercase mb-1">
+          <div className="text-center mb-3 sm:mb-4">
+            <h3 className="text-[11px] sm:text-xs font-black text-yellow-300 dark:text-emerald-400 tracking-[0.2em] uppercase mb-0.5">
               {t("visitor.org.dept_leader")}
             </h3>
-            <h2 className="text-2xl sm:text-3xl font-display font-black text-white uppercase tracking-tight drop-shadow-md">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-black text-white uppercase tracking-tight drop-shadow-md">
               {t("visitor.org.director")}
             </h2>
           </div>
@@ -561,8 +561,8 @@ export function OrgTreeSection({ dept }) {
           </div>
           
           {hasDivisions && (
-            <div className="w-px h-10 bg-gradient-to-b from-yellow-300 to-yellow-300/30 dark:from-emerald-500/80 dark:to-emerald-500/20 mt-6 relative">
-               <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-yellow-300 dark:bg-emerald-400 shadow-[0_0_10px_rgba(253,224,71,0.6)]"></div>
+            <div className="w-px h-6 sm:h-8 bg-gradient-to-b from-yellow-300 to-yellow-300/30 dark:from-emerald-500/80 dark:to-emerald-500/20 my-2 sm:my-3 relative">
+               <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-yellow-300 dark:bg-emerald-400 shadow-[0_0_10px_rgba(253,224,71,0.6)]"></div>
             </div>
           )}
         </div>
@@ -571,20 +571,20 @@ export function OrgTreeSection({ dept }) {
       {/* ROW 2: DIVISION MANAGERS (Horizontal Scrollable 1 Row) */}
       {divisionsWithManagers.length > 0 && (
         <div className="w-full flex flex-col items-center">
-          <div className="text-center mb-4">
-            <h3 className="text-xs sm:text-sm font-black text-yellow-300 dark:text-emerald-400 tracking-[0.25em] uppercase mb-1">
+          <div className="text-center mb-2.5 sm:mb-3">
+            <h3 className="text-[11px] sm:text-xs font-black text-yellow-300 dark:text-emerald-400 tracking-[0.2em] uppercase mb-0.5">
               {t("visitor.org.div_managers")}
             </h3>
-            <h2 className="text-2xl sm:text-3xl font-display font-black text-white uppercase tracking-tight drop-shadow-md">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-black text-white uppercase tracking-tight drop-shadow-md">
               {t("visitor.org.div_leadership")}
             </h2>
           </div>
 
-          <div className="w-full overflow-x-auto no-scrollbar py-3 px-2 sm:px-4">
-            <div className="flex items-stretch justify-start sm:justify-center gap-4 sm:gap-6 min-w-max mx-auto">
+          <div className="w-full overflow-x-auto no-scrollbar py-1.5 px-2 sm:px-4">
+            <div className="flex items-stretch justify-start sm:justify-center gap-3 sm:gap-4 md:gap-5 min-w-max mx-auto">
               {divisionsWithManagers.map((div, idx) => (
-                <div key={idx} className="flex flex-col items-center gap-2 hover:-translate-y-1.5 transition-transform duration-300">
-                  <div className="text-[10px] sm:text-[11px] font-black tracking-wider text-yellow-300 dark:text-emerald-400 uppercase text-center bg-black/20 dark:bg-white/5 border border-white/10 px-3 py-1 rounded-full truncate max-w-[200px]">
+                <div key={idx} className="flex flex-col items-center gap-1.5 hover:-translate-y-1.5 transition-transform duration-300">
+                  <div className="text-[10px] sm:text-[11px] font-black tracking-wider text-yellow-300 dark:text-emerald-400 uppercase text-center bg-black/20 dark:bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full truncate max-w-[190px]">
                     {div.name}
                   </div>
                   <MemberCard member={div.manager} fallbackRole="Division Manager" />
@@ -593,30 +593,30 @@ export function OrgTreeSection({ dept }) {
             </div>
           </div>
 
-          <div className="w-px h-10 bg-gradient-to-b from-yellow-300 to-yellow-300/30 dark:from-emerald-500/80 dark:to-emerald-500/20 mt-6 relative">
-             <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-yellow-300 dark:bg-emerald-400 shadow-[0_0_10px_rgba(253,224,71,0.6)]"></div>
+          <div className="w-px h-6 sm:h-8 bg-gradient-to-b from-yellow-300 to-yellow-300/30 dark:from-emerald-500/80 dark:to-emerald-500/20 my-2 sm:my-3 relative">
+             <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-yellow-300 dark:bg-emerald-400 shadow-[0_0_10px_rgba(253,224,71,0.6)]"></div>
           </div>
         </div>
       )}
 
       {/* ROW 3+: DIVISIONS STAFF (Horizontal Scrollable 1 Row per Division) */}
       {hasDivisions && (
-        <div className="w-full flex flex-col items-center space-y-10 sm:space-y-12">
+        <div className="w-full flex flex-col items-center space-y-6 sm:space-y-8">
           {dept.divisions.map((div, idx) => {
             if (!div.staff || div.staff.length === 0) return null;
             return (
               <div key={idx} className="w-full flex flex-col items-center">
-                <div className="text-center mb-4">
-                  <span className="text-[11px] sm:text-xs font-black tracking-widest uppercase text-yellow-300/90 dark:text-emerald-400/90 block mb-1">
+                <div className="text-center mb-2.5 sm:mb-3">
+                  <span className="text-[10px] sm:text-xs font-black tracking-widest uppercase text-yellow-300/90 dark:text-emerald-400/90 block mb-0.5">
                     {div.name}
                   </span>
-                  <h3 className="text-xl sm:text-2xl font-display font-black text-white uppercase tracking-tight">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-display font-black text-white uppercase tracking-tight">
                     {div.name} Staff
                   </h3>
                 </div>
 
-                <div className="w-full overflow-x-auto no-scrollbar py-3 px-2 sm:px-4">
-                  <div className="flex items-stretch justify-start sm:justify-center gap-4 sm:gap-6 min-w-max mx-auto">
+                <div className="w-full overflow-x-auto no-scrollbar py-1.5 px-2 sm:px-4">
+                  <div className="flex items-stretch justify-start sm:justify-center gap-3 sm:gap-4 md:gap-5 min-w-max mx-auto">
                     {div.staff.map((staffMember, sIdx) => (
                       <div key={sIdx} className="hover:-translate-y-1.5 transition-transform duration-300">
                         <MemberCard

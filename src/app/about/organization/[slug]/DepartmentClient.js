@@ -48,12 +48,12 @@ export default function DepartmentClient({ dept }) {
       `}} />
 
       {/* ─── Header Section (Footer Color Background) ─── */}
-      <header className="w-full bg-[#0bb37e] dark:bg-[#07130e] pt-32 pb-16 relative overflow-hidden border-b-2 border-white/20 dark:border-white/10 shadow-md z-10">
+      <header className="w-full bg-[#0bb37e] dark:bg-[#07130e] pt-24 sm:pt-28 md:pt-32 pb-8 sm:pb-12 md:pb-16 relative overflow-hidden border-b-2 border-white/20 dark:border-white/10 shadow-md z-10">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" aria-hidden="true" />
         <div className="w-full max-w-[1800px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-20 relative z-10">
           
           {/* Breadcrumbs & Back Nav (Hidden on Mobile, Visible on Desktop) */}
-          <div className="hidden md:flex flex-wrap items-center gap-2.5 text-xs font-bold uppercase tracking-wider text-emerald-100/60 dark:text-white/30 mb-8">
+          <div className="hidden md:flex flex-wrap items-center gap-2.5 text-xs font-bold uppercase tracking-wider text-emerald-100/60 dark:text-white/30 mb-6">
             <Link href="/" className="hover:text-yellow-300 dark:hover:text-emerald-400 transition-colors">
               {t("visitor.navbar.home")}
             </Link>
@@ -74,20 +74,20 @@ export default function DepartmentClient({ dept }) {
           {/* Back Button */}
           <a
             href="/about#structure"
-            className="inline-flex items-center gap-2 text-xs font-black tracking-widest uppercase text-yellow-300 hover:text-white dark:text-emerald-400 dark:hover:text-white transition-colors duration-300 mb-12"
+            className="inline-flex items-center gap-2 text-xs font-black tracking-widest uppercase text-yellow-300 hover:text-white dark:text-emerald-400 dark:hover:text-white transition-colors duration-300 mb-4 sm:mb-6"
           >
             <ArrowLeft className="w-4 h-4" /> {t("visitor.org.back_depts")}
           </a>
 
           {/* Title block */}
           <div className="max-w-4xl">
-            <span className="inline-block py-1.5 px-4 rounded-full bg-[#099c6d] dark:bg-white/5 border border-yellow-300/40 dark:border-white/10 text-xs font-black tracking-widest uppercase text-yellow-300 dark:text-emerald-400 mb-4 shadow-sm">
+            <span className="inline-block py-1 px-3 sm:py-1.5 sm:px-4 rounded-full bg-[#099c6d] dark:bg-white/5 border border-yellow-300/40 dark:border-white/10 text-[10px] sm:text-xs font-black tracking-widest uppercase text-yellow-300 dark:text-emerald-400 mb-2.5 sm:mb-3 shadow-sm">
               {t("visitor.org.dept_directory")}
             </span>
-            <h1 className="text-4xl sm:text-6xl font-display font-black leading-tight tracking-tight uppercase mb-4 text-white">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-black leading-tight tracking-tight uppercase mb-2 sm:mb-3 text-white">
               {dept.name}
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-emerald-50/90 dark:text-gray-300 leading-relaxed font-bold max-w-3xl">
+            <p className="text-xs sm:text-base md:text-lg text-emerald-50/90 dark:text-gray-300 leading-relaxed font-bold max-w-3xl">
               {dept.description}
             </p>
           </div>
@@ -95,7 +95,7 @@ export default function DepartmentClient({ dept }) {
       </header>
 
       {/* ─── Content Section (Unified Gradient Section) ─── */}
-      <main className="w-full dept-detail-bg py-16 relative z-10">
+      <main className="w-full dept-detail-bg py-8 sm:py-12 md:py-16 relative z-10">
         <div className="w-full max-w-[1800px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-20 relative z-10">
           {isEmpty ? (
             <div className="max-w-xl mx-auto text-center p-12 bg-white/10 dark:bg-emerald-950/20 border border-white/20 dark:border-emerald-500/20 rounded-3xl shadow-lg mt-12">
