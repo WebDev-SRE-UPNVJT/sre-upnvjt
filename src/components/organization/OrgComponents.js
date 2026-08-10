@@ -218,7 +218,7 @@ function getAvatarByName(name) {
   return "/images/about/organization/RobloxMan.png";
 }
 
-// ─── 3. Member Card component (Used for Manager and Staff) ─────────────────────
+// ─── 3. Member Card component (Strict Uniform Dimensions, Square Image) ───────
 export function MemberCard({ member, fallbackRole }) {
   const { t } = useLanguage();
   if (!member) return null;
@@ -232,37 +232,40 @@ export function MemberCard({ member, fallbackRole }) {
   const batch = getAngkatanByNpm(npm);
 
   return (
-    <div className="group relative bg-white/10 dark:bg-gradient-to-br dark:from-[#0a1f15] dark:to-[#05140e] border border-[#e8ecc4] dark:border-emerald-500/30 rounded-3xl overflow-hidden hover:border-yellow-300 dark:hover:border-emerald-400 hover:brightness-[1.03] transition-all duration-500 hover:shadow-[0_0_30px_rgba(245,158,11,0.08)] dark:hover:shadow-[0_0_30px_rgba(16,185,129,0.08)] flex flex-col h-full w-full">
-      <div className="aspect-[3/4] bg-black/40 overflow-hidden relative w-full">
+    <div className="group relative bg-white/10 dark:bg-gradient-to-br dark:from-[#0a1f15] dark:to-[#05140e] border border-[#e8ecc4]/80 dark:border-emerald-500/30 rounded-2xl sm:rounded-3xl overflow-hidden hover:border-yellow-300 dark:hover:border-emerald-400 hover:brightness-[1.03] transition-all duration-300 hover:shadow-xl flex flex-col w-[200px] sm:w-[220px] md:w-[240px] h-[330px] sm:h-[355px] md:h-[375px] shrink-0 select-none">
+      {/* Square Image container (Strict 1:1) */}
+      <div className="w-full aspect-square bg-black/40 overflow-hidden relative shrink-0">
         <Image
           src={photo || getAvatarByName(name)}
           alt={name}
           fill
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 30vw, 15vw"
-          className="object-cover transition-all duration-700 ease-out group-hover:scale-105"
+          sizes="(max-width: 640px) 200px, 240px"
+          className="object-cover object-top transition-all duration-500 ease-out group-hover:scale-105"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#07130e]/90 via-[#07130e]/10 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#07130e]/85 via-transparent to-transparent pointer-events-none" />
       </div>
-      <div className="p-4 h-[148px] flex flex-col justify-between">
-        <div>
-          <span className="text-[10px] sm:text-xs font-black tracking-widest uppercase text-yellow-300 dark:text-emerald-400 block mb-1">
+
+      {/* Card Info Content (Strict Fixed Height Flex-1 Layout) */}
+      <div className="p-3.5 sm:p-4 flex flex-col justify-between flex-1 overflow-hidden">
+        <div className="h-[52px] sm:h-[58px] flex flex-col justify-start overflow-hidden">
+          <span className="text-[10px] sm:text-[11px] font-black tracking-wider uppercase text-yellow-300 dark:text-emerald-400 block mb-0.5 truncate shrink-0">
             {role}
           </span>
-          <h4 className="text-sm sm:text-base font-black text-white dark:text-white group-hover:text-yellow-300 dark:group-hover:text-emerald-400 transition-colors leading-tight break-words mb-1 line-clamp-3">
+          <h4 className="text-xs sm:text-sm font-black text-white group-hover:text-yellow-300 dark:group-hover:text-emerald-400 transition-colors leading-snug line-clamp-2">
             {name}
           </h4>
         </div>
-        <div className="text-[11px] text-[#e8ecc4]/80 dark:text-emerald-300/60 font-medium shrink-0">
-          <div>{major}</div>
-          <div>{t("visitor.org.angkatan").replace("{batch}", batch)}</div>
+        <div className="text-[10px] sm:text-[11px] text-[#e8ecc4]/80 dark:text-emerald-300/70 font-semibold border-t border-white/10 pt-2 shrink-0 flex flex-col gap-0.5">
+          <div className="truncate">{major}</div>
+          <div className="text-white/60 dark:text-gray-400 font-medium">{t("visitor.org.angkatan").replace("{batch}", batch)}</div>
         </div>
       </div>
     </div>
   );
 }
 
-// ─── 4. Director Card component ───────────────────────────────────────────────
+// ─── 4. Director Card component (Strict Uniform Dimensions, Square Image) ─────
 export function DirectorCard({ director, fallbackRole }) {
   const { t } = useLanguage();
   if (!director) {
@@ -286,53 +289,60 @@ export function DirectorCard({ director, fallbackRole }) {
   const batch = getAngkatanByNpm(npm);
 
   return (
-    <div className="max-w-xl mx-auto bg-white/10 dark:bg-gradient-to-br dark:from-[#0a1f15] dark:to-[#05140e] border border-[#e8ecc4] dark:border-emerald-500/30 hover:border-yellow-300 dark:hover:border-emerald-400 hover:brightness-[1.03] transition-all duration-300 rounded-3xl overflow-hidden p-6 sm:p-8 flex flex-col md:flex-row gap-6 items-center shadow-xl">
-      <div className="w-36 h-48 sm:w-42 sm:h-56 rounded-2xl overflow-hidden relative shrink-0 bg-black/40 border border-white/10">
+    <div className="w-[230px] sm:w-[250px] md:w-[270px] h-[385px] sm:h-[415px] md:h-[435px] bg-white/10 dark:bg-gradient-to-br dark:from-[#0a1f15] dark:to-[#05140e] border-2 border-[#e8ecc4] dark:border-emerald-500/40 hover:border-yellow-300 dark:hover:border-emerald-300 hover:brightness-[1.03] transition-all duration-300 rounded-3xl overflow-hidden shadow-2xl flex flex-col mx-auto group select-none shrink-0">
+      {/* Square Image (Strict 1:1) */}
+      <div className="w-full aspect-square bg-black/40 overflow-hidden relative shrink-0">
         <Image
           src={photo || getAvatarByName(name)}
           alt={name}
           fill
-          sizes="(max-width: 640px) 150px, 200px"
-          className="object-cover"
+          sizes="(max-width: 640px) 250px, 270px"
+          className="object-cover object-top transition-all duration-500 ease-out group-hover:scale-105"
           priority
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#07130e]/85 via-transparent to-transparent pointer-events-none" />
       </div>
 
-      <div className="flex-1 text-center md:text-left flex flex-col justify-center h-full">
-        <span className="text-xs sm:text-sm font-black tracking-widest uppercase text-yellow-300 dark:text-emerald-400 block mb-1">
-          {role}
-        </span>
-        <h3 className="text-2xl sm:text-3xl font-black text-white dark:text-white leading-tight break-words mb-2">
-          {name}
-        </h3>
-        <div className="text-xs sm:text-sm text-[#e8ecc4]/80 dark:text-emerald-300/60 font-medium mb-3">
-          <div>{major}</div>
-          <div>{t("visitor.org.angkatan").replace("{batch}", batch)}</div>
+      <div className="p-4 sm:p-5 flex flex-col justify-between flex-1 text-center items-center overflow-hidden">
+        <div className="h-[54px] sm:h-[60px] flex flex-col justify-start overflow-hidden w-full">
+          <span className="text-[11px] sm:text-xs font-black tracking-widest uppercase text-yellow-300 dark:text-emerald-400 block mb-1 truncate shrink-0">
+            {role}
+          </span>
+          <h3 className="text-sm sm:text-base font-black text-white leading-snug line-clamp-2">
+            {name}
+          </h3>
         </div>
-        
+
+        <div className="text-[11px] sm:text-xs text-[#e8ecc4]/90 dark:text-emerald-300/80 font-semibold border-t border-white/10 pt-2.5 w-full shrink-0 flex flex-col gap-0.5">
+          <div className="truncate">{major}</div>
+          <div className="text-white/60 dark:text-gray-400 font-medium">{t("visitor.org.angkatan").replace("{batch}", batch)}</div>
+        </div>
+
         {/* Social Links */}
-        <div className="flex justify-center md:justify-start items-center gap-3 mt-4">
-          {socials.linkedin && (
-            <a
-              href={socials.linkedin}
-              target="_blank"
-              rel="noreferrer noopener"
-              aria-label={`${name}'s LinkedIn`}
-              className="w-8 h-8 rounded-full bg-white/10 border border-white/20 hover:bg-yellow-300 hover:text-slate-950 dark:hover:bg-emerald-400 flex items-center justify-center text-white transition-all duration-300"
-            >
-              <LinkedinIcon className="w-4 h-4" />
-            </a>
-          )}
-          {socials.email && (
-            <a
-              href={socials.email}
-              aria-label={`Email ${name}`}
-              className="w-8 h-8 rounded-full bg-white/10 border border-white/20 hover:bg-yellow-300 hover:text-slate-950 dark:hover:bg-emerald-400 flex items-center justify-center text-white transition-all duration-300"
-            >
-              <Mail className="w-4 h-4" />
-            </a>
-          )}
-        </div>
+        {(socials.linkedin || socials.email) && (
+          <div className="flex justify-center items-center gap-3 pt-1.5 shrink-0">
+            {socials.linkedin && (
+              <a
+                href={socials.linkedin}
+                target="_blank"
+                rel="noreferrer noopener"
+                aria-label={`${name}'s LinkedIn`}
+                className="w-7 h-7 rounded-full bg-white/10 border border-white/20 hover:bg-yellow-300 hover:text-slate-950 dark:hover:bg-emerald-400 flex items-center justify-center text-white transition-all duration-300"
+              >
+                <LinkedinIcon className="w-3.5 h-3.5" />
+              </a>
+            )}
+            {socials.email && (
+              <a
+                href={socials.email}
+                aria-label={`Email ${name}`}
+                className="w-7 h-7 rounded-full bg-white/10 border border-white/20 hover:bg-yellow-300 hover:text-slate-950 dark:hover:bg-emerald-400 flex items-center justify-center text-white transition-all duration-300"
+              >
+                <Mail className="w-3.5 h-3.5" />
+              </a>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -346,25 +356,27 @@ export function ManagerSection({ divisions }) {
   if (divisionsWithManagers.length === 0) return null;
 
   return (
-    <div className="space-y-12">
+    <div className="w-full space-y-6">
       <div className="text-center">
-        <h3 className="text-sm font-black text-yellow-300 dark:text-emerald-400 tracking-[0.25em] uppercase mb-1">
+        <h3 className="text-xs sm:text-sm font-black text-yellow-300 dark:text-emerald-400 tracking-[0.25em] uppercase mb-1">
           {t("visitor.org.div_managers")}
         </h3>
-        <h2 className="text-3xl font-display font-black text-white uppercase tracking-tight">
+        <h2 className="text-2xl sm:text-3xl font-display font-black text-white uppercase tracking-tight">
           {t("visitor.org.div_leadership")}
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-center max-w-5xl mx-auto w-full">
-        {divisionsWithManagers.map((div, idx) => (
-          <div key={idx} className="flex flex-col gap-3">
-            <div className="text-xs font-black tracking-widest text-white/40 uppercase text-center border-b border-white/10 pb-2">
-              {div.name}
+      <div className="w-full overflow-x-auto no-scrollbar py-3 px-2 sm:px-4">
+        <div className="flex items-stretch justify-start sm:justify-center gap-4 sm:gap-6 min-w-max mx-auto">
+          {divisionsWithManagers.map((div, idx) => (
+            <div key={idx} className="flex flex-col items-center gap-2">
+              <div className="text-[10px] sm:text-[11px] font-black tracking-wider text-yellow-300 dark:text-emerald-400 uppercase text-center bg-black/20 dark:bg-white/5 border border-white/10 px-3 py-1 rounded-full truncate max-w-[200px]">
+                {div.name}
+              </div>
+              <MemberCard member={div.manager} fallbackRole="Division Manager" />
             </div>
-            <MemberCard member={div.manager} fallbackRole="Division Manager" />
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -373,7 +385,6 @@ export function ManagerSection({ divisions }) {
 // ─── 6. Staff Grid component ──────────────────────────────────────────────────
 export function StaffGrid({ divisions }) {
   const { t } = useLanguage();
-  // Aggregate all staff across all divisions
   const allStaff = [];
   if (divisions) {
     divisions.forEach(div => {
@@ -391,31 +402,32 @@ export function StaffGrid({ divisions }) {
   if (allStaff.length === 0) return null;
 
   return (
-    <div className="space-y-12">
+    <div className="w-full space-y-6">
       <div className="text-center">
-        <h3 className="text-sm font-black text-yellow-300 dark:text-emerald-400 tracking-[0.25em] uppercase mb-1">
+        <h3 className="text-xs sm:text-sm font-black text-yellow-300 dark:text-emerald-400 tracking-[0.25em] uppercase mb-1">
           {t("visitor.org.staff_title")}
         </h3>
-        <h2 className="text-3xl font-display font-black text-white uppercase tracking-tight">
+        <h2 className="text-2xl sm:text-3xl font-display font-black text-white uppercase tracking-tight">
           {t("visitor.org.all_staff")}
         </h2>
       </div>
 
-      {/* Adaptive responsive grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5 max-w-7xl mx-auto w-full">
-        {allStaff.map((staffMember, idx) => (
-          <MemberCard
-            key={idx}
-            member={staffMember}
-            fallbackRole={`Staff of ${staffMember.divisionName || "Division"}`}
-          />
-        ))}
+      <div className="w-full overflow-x-auto no-scrollbar py-3 px-2 sm:px-4">
+        <div className="flex items-stretch justify-start sm:justify-center gap-4 sm:gap-6 min-w-max mx-auto">
+          {allStaff.map((staffMember, idx) => (
+            <MemberCard
+              key={idx}
+              member={staffMember}
+              fallbackRole={`Staff of ${staffMember.divisionName || "Division"}`}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
 }
 
-// ─── 7. Org Tree Section component (Hierarchical Layout) ────────────────────────
+// ─── 7. Org Tree Section component (Horizontal 1 Row per Position Level) ───────
 export function OrgTreeSection({ dept }) {
   const { t } = useLanguage();
   if (!dept) return null;
@@ -441,71 +453,84 @@ export function OrgTreeSection({ dept }) {
     const presidentData = formatUser(president, "President");
 
     return (
-      <div className="w-full flex flex-col items-center animate-fade-in pb-20">
-        {/* PRESIDENT */}
+      <div className="w-full flex flex-col items-center animate-fade-in pb-20 space-y-12 sm:space-y-16">
+        
+        {/* ROW 1: PRESIDENT LEVEL */}
         {presidentData && (
-          <div className="flex flex-col items-center w-full mt-10">
-            <div className="text-center mb-6">
+          <div className="flex flex-col items-center w-full">
+            <div className="text-center mb-5">
               <h3 className="text-xs sm:text-sm font-black text-yellow-300 dark:text-emerald-400 tracking-[0.25em] uppercase mb-1">
                 {t("visitor.org.exec_leader")}
               </h3>
-              <h2 className="text-3xl sm:text-4xl font-display font-black text-white uppercase tracking-tight drop-shadow-md">
+              <h2 className="text-2xl sm:text-3xl font-display font-black text-white uppercase tracking-tight drop-shadow-md">
                 {t("visitor.org.president")}
               </h2>
             </div>
             
-            <div className="relative z-10 w-full max-w-[550px] hover:-translate-y-2 transition-transform duration-500">
+            <div className="relative z-10 hover:-translate-y-1.5 transition-transform duration-300">
               <DirectorCard director={presidentData} fallbackRole="President" />
             </div>
 
             {((vps.length > 0) || (secretaries.length > 0)) && (
-              <div className="w-px h-12 bg-gradient-to-b from-yellow-300 to-yellow-300/30 dark:from-emerald-500/80 dark:to-emerald-500/20 mt-6 relative">
-                 <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-yellow-300 dark:bg-emerald-400 shadow-[0_0_10px_rgba(253,224,71,0.6)]"></div>
+              <div className="w-px h-10 bg-gradient-to-b from-yellow-300 to-yellow-300/30 dark:from-emerald-500/80 dark:to-emerald-500/20 mt-6 relative">
+                 <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-yellow-300 dark:bg-emerald-400 shadow-[0_0_10px_rgba(253,224,71,0.6)]"></div>
               </div>
             )}
           </div>
         )}
 
-        {/* VICE PRESIDENTS */}
+        {/* ROW 2: VICE PRESIDENTS LEVEL (Horizontal Scrollable 1 Row) */}
         {vps.length > 0 && (
-          <div className="w-full flex flex-col items-center mt-8">
-            <div className="text-center mb-6">
+          <div className="w-full flex flex-col items-center">
+            <div className="text-center mb-4">
+              <span className="text-xs sm:text-sm font-black text-yellow-300 dark:text-emerald-400 tracking-[0.25em] uppercase block mb-1">
+                {t("visitor.org.vp")}
+              </span>
               <h2 className="text-2xl sm:text-3xl font-display font-black text-white uppercase tracking-tight drop-shadow-md">
-                {t("visitor.org.vp")}s
+                {t("visitor.org.vp")}
               </h2>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-8 w-full max-w-4xl px-4 z-10">
-              {vps.map((vp, idx) => (
-                <div key={idx} className="w-full max-w-[280px] hover:-translate-y-1.5 transition-transform duration-300">
-                  <MemberCard member={formatUser(vp, "Vice President")} fallbackRole="Vice President" />
-                </div>
-              ))}
+            {/* Horizontal 1-Row Container */}
+            <div className="w-full overflow-x-auto no-scrollbar py-3 px-2 sm:px-4">
+              <div className="flex items-stretch justify-start sm:justify-center gap-4 sm:gap-6 min-w-max mx-auto">
+                {vps.map((vp, idx) => (
+                  <div key={idx} className="hover:-translate-y-1.5 transition-transform duration-300">
+                    <MemberCard member={formatUser(vp, "Vice President")} fallbackRole="Vice President" />
+                  </div>
+                ))}
+              </div>
             </div>
 
             {secretaries.length > 0 && (
-              <div className="w-px h-12 bg-gradient-to-b from-yellow-300 to-yellow-300/30 dark:from-emerald-500/80 dark:to-emerald-500/20 mt-6 relative">
-                 <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-yellow-300 dark:bg-emerald-400 shadow-[0_0_10px_rgba(253,224,71,0.6)]"></div>
+              <div className="w-px h-10 bg-gradient-to-b from-yellow-300 to-yellow-300/30 dark:from-emerald-500/80 dark:to-emerald-500/20 mt-6 relative">
+                 <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-yellow-300 dark:bg-emerald-400 shadow-[0_0_10px_rgba(253,224,71,0.6)]"></div>
               </div>
             )}
           </div>
         )}
 
-        {/* SECRETARIES */}
+        {/* ROW 3: SECRETARIES LEVEL (Horizontal Scrollable 1 Row) */}
         {secretaries.length > 0 && (
-          <div className="w-full flex flex-col items-center mt-8">
-            <div className="text-center mb-6">
+          <div className="w-full flex flex-col items-center">
+            <div className="text-center mb-4">
+              <span className="text-xs sm:text-sm font-black text-yellow-300 dark:text-emerald-400 tracking-[0.25em] uppercase block mb-1">
+                {t("visitor.org.secretary")}
+              </span>
               <h2 className="text-2xl sm:text-3xl font-display font-black text-white uppercase tracking-tight drop-shadow-md">
-                {t("visitor.org.secretary")}s
+                {t("visitor.org.secretary")}
               </h2>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-8 w-full max-w-4xl px-4 z-10">
-              {secretaries.map((sec, idx) => (
-                <div key={idx} className="w-full max-w-[280px] hover:-translate-y-1.5 transition-transform duration-300">
-                  <MemberCard member={formatUser(sec, "Secretary")} fallbackRole="Secretary" />
-                </div>
-              ))}
+            {/* Horizontal 1-Row Container */}
+            <div className="w-full overflow-x-auto no-scrollbar py-3 px-2 sm:px-4">
+              <div className="flex items-stretch justify-start sm:justify-center gap-4 sm:gap-6 min-w-max mx-auto">
+                {secretaries.map((sec, idx) => (
+                  <div key={idx} className="hover:-translate-y-1.5 transition-transform duration-300">
+                    <MemberCard member={formatUser(sec, "Secretary")} fallbackRole="Secretary" />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -514,88 +539,100 @@ export function OrgTreeSection({ dept }) {
   }
 
   const hasDivisions = dept.divisions && dept.divisions.length > 0;
+  const divisionsWithManagers = dept.divisions ? dept.divisions.filter(div => div.manager) : [];
 
   return (
-    <div className="w-full flex flex-col items-center pb-20">
+    <div className="w-full flex flex-col items-center pb-20 space-y-12 sm:space-y-16">
       
-      {/* DIRECTOR LEVEL */}
+      {/* ROW 1: DIRECTOR LEVEL */}
       {dept.director && (
-        <div className="flex flex-col items-center w-full mt-10">
-          <div className="text-center mb-6">
+        <div className="flex flex-col items-center w-full">
+          <div className="text-center mb-5">
             <h3 className="text-xs sm:text-sm font-black text-yellow-300 dark:text-emerald-400 tracking-[0.25em] uppercase mb-1">
               {t("visitor.org.dept_leader")}
             </h3>
-            <h2 className="text-3xl sm:text-4xl font-display font-black text-white uppercase tracking-tight drop-shadow-md">
+            <h2 className="text-2xl sm:text-3xl font-display font-black text-white uppercase tracking-tight drop-shadow-md">
               {t("visitor.org.director")}
             </h2>
           </div>
           
-          <div className="relative z-10 w-full max-w-[550px] hover:-translate-y-2 transition-transform duration-500">
+          <div className="relative z-10 hover:-translate-y-1.5 transition-transform duration-300">
             <DirectorCard director={dept.director} fallbackRole={`Director of ${dept.name}`} />
           </div>
           
-          {/* Connector Line down from Director to Divisions */}
           {hasDivisions && (
-            <div className="w-px h-16 bg-gradient-to-b from-yellow-300 to-yellow-300/30 dark:from-emerald-500/80 dark:to-emerald-500/20 mt-6 relative">
-               {/* Decorative Dot at connection point */}
-               <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-yellow-300 dark:bg-emerald-400 shadow-[0_0_10px_rgba(253,224,71,0.6)]"></div>
+            <div className="w-px h-10 bg-gradient-to-b from-yellow-300 to-yellow-300/30 dark:from-emerald-500/80 dark:to-emerald-500/20 mt-6 relative">
+               <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-yellow-300 dark:bg-emerald-400 shadow-[0_0_10px_rgba(253,224,71,0.6)]"></div>
             </div>
           )}
         </div>
       )}
 
-      {/* DIVISIONS LEVEL */}
-      {hasDivisions && (
-        <div className="w-full relative mt-1.5">
-          {/* Top Horizontal Connecting Line */}
-          <div className="absolute top-0 left-[10%] right-[10%] h-px bg-yellow-300/80 dark:bg-emerald-500/40 hidden md:block"></div>
-          
-          <div className="flex flex-wrap justify-center gap-x-12 gap-y-16 items-start w-full pt-8">
-            {dept.divisions.map((div, idx) => (
-              <div key={idx} className="flex flex-col items-center w-full sm:w-[300px] shrink-0 relative group/division">
-                
-                {/* Vertical line connecting horizontal bar to Division title (Desktop) */}
-                <div className="hidden md:block absolute -top-10 left-1/2 w-px h-10 bg-yellow-300/80 dark:bg-emerald-500/40 -translate-x-1/2 group-hover/division:bg-yellow-300 transition-colors"></div>
-                
-                {/* Division Header */}
-                <div className="bg-[#099c6d] dark:bg-[#07130e] border border-yellow-300/40 dark:border-emerald-500/40 px-6 py-2.5 rounded-full mb-8 z-10 text-center shadow-lg hover:border-yellow-300 transition-colors">
-                  <span className="text-xs sm:text-sm font-black uppercase tracking-widest text-white dark:text-emerald-400">{div.name}</span>
+      {/* ROW 2: DIVISION MANAGERS (Horizontal Scrollable 1 Row) */}
+      {divisionsWithManagers.length > 0 && (
+        <div className="w-full flex flex-col items-center">
+          <div className="text-center mb-4">
+            <h3 className="text-xs sm:text-sm font-black text-yellow-300 dark:text-emerald-400 tracking-[0.25em] uppercase mb-1">
+              {t("visitor.org.div_managers")}
+            </h3>
+            <h2 className="text-2xl sm:text-3xl font-display font-black text-white uppercase tracking-tight drop-shadow-md">
+              {t("visitor.org.div_leadership")}
+            </h2>
+          </div>
+
+          <div className="w-full overflow-x-auto no-scrollbar py-3 px-2 sm:px-4">
+            <div className="flex items-stretch justify-start sm:justify-center gap-4 sm:gap-6 min-w-max mx-auto">
+              {divisionsWithManagers.map((div, idx) => (
+                <div key={idx} className="flex flex-col items-center gap-2 hover:-translate-y-1.5 transition-transform duration-300">
+                  <div className="text-[10px] sm:text-[11px] font-black tracking-wider text-yellow-300 dark:text-emerald-400 uppercase text-center bg-black/20 dark:bg-white/5 border border-white/10 px-3 py-1 rounded-full truncate max-w-[200px]">
+                    {div.name}
+                  </div>
+                  <MemberCard member={div.manager} fallbackRole="Division Manager" />
                 </div>
+              ))}
+            </div>
+          </div>
 
-                {/* Manager */}
-                {div.manager ? (
-                  <div className="w-full flex flex-col items-center">
-                    <div className="w-full max-w-[190px] z-10 hover:-translate-y-1.5 transition-transform duration-300">
-                      <MemberCard member={div.manager} fallbackRole="Division Manager" />
-                    </div>
-                    {/* Connector to staff */}
-                    {div.staff && div.staff.length > 0 && (
-                      <div className="w-px h-10 bg-yellow-300/80 dark:bg-emerald-500/30 my-4"></div>
-                    )}
-                  </div>
-                ) : (
-                  // If no manager but has staff, still need a line
-                  div.staff && div.staff.length > 0 && (
-                     <div className="w-px h-10 bg-yellow-300/80 dark:bg-emerald-500/30 mb-4 -mt-4"></div>
-                  )
-                )}
-
-                {/* Staff Grid */}
-                {div.staff && div.staff.length > 0 && (
-                  <div className="w-full grid grid-cols-2 gap-3 mt-2 px-1">
-                    {div.staff.map((staffMember, sIdx) => (
-                      <div key={sIdx} className="w-full h-auto flex hover:-translate-y-1 transition-transform duration-300">
-                        <MemberCard member={staffMember} fallbackRole="Staff" />
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-              </div>
-            ))}
+          <div className="w-px h-10 bg-gradient-to-b from-yellow-300 to-yellow-300/30 dark:from-emerald-500/80 dark:to-emerald-500/20 mt-6 relative">
+             <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-yellow-300 dark:bg-emerald-400 shadow-[0_0_10px_rgba(253,224,71,0.6)]"></div>
           </div>
         </div>
       )}
+
+      {/* ROW 3+: DIVISIONS STAFF (Horizontal Scrollable 1 Row per Division) */}
+      {hasDivisions && (
+        <div className="w-full flex flex-col items-center space-y-10 sm:space-y-12">
+          {dept.divisions.map((div, idx) => {
+            if (!div.staff || div.staff.length === 0) return null;
+            return (
+              <div key={idx} className="w-full flex flex-col items-center">
+                <div className="text-center mb-4">
+                  <span className="text-[11px] sm:text-xs font-black tracking-widest uppercase text-yellow-300/90 dark:text-emerald-400/90 block mb-1">
+                    {div.name}
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-display font-black text-white uppercase tracking-tight">
+                    {div.name} Staff
+                  </h3>
+                </div>
+
+                <div className="w-full overflow-x-auto no-scrollbar py-3 px-2 sm:px-4">
+                  <div className="flex items-stretch justify-start sm:justify-center gap-4 sm:gap-6 min-w-max mx-auto">
+                    {div.staff.map((staffMember, sIdx) => (
+                      <div key={sIdx} className="hover:-translate-y-1.5 transition-transform duration-300">
+                        <MemberCard
+                          member={staffMember}
+                          fallbackRole={`Staff of ${div.name}`}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
     </div>
   );
 }

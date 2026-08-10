@@ -52,8 +52,8 @@ export default function DepartmentClient({ dept }) {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" aria-hidden="true" />
         <div className="w-full max-w-[1800px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-20 relative z-10">
           
-          {/* Breadcrumbs & Back Nav */}
-          <div className="flex flex-wrap items-center gap-2.5 text-xs font-bold uppercase tracking-wider text-emerald-100/60 dark:text-white/30 mb-8">
+          {/* Breadcrumbs & Back Nav (Hidden on Mobile, Visible on Desktop) */}
+          <div className="hidden md:flex flex-wrap items-center gap-2.5 text-xs font-bold uppercase tracking-wider text-emerald-100/60 dark:text-white/30 mb-8">
             <Link href="/" className="hover:text-yellow-300 dark:hover:text-emerald-400 transition-colors">
               {t("visitor.navbar.home")}
             </Link>
