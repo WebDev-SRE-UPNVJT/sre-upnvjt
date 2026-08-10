@@ -580,7 +580,7 @@ export default function Home() {
                   </div>
 
                   <h2 className="text-3xl sm:text-5xl md:text-6xl font-display font-black tracking-tight text-white uppercase drop-shadow-md">
-                    {t("visitor.home.partners_title")}
+                    {t("visitor.home.partners_prefix") || "MITRA "}<span className="text-yellow-300 dark:text-emerald-400">{t("visitor.home.partners_highlight") || "KAMI"}</span>
                   </h2>
 
                   <div className="h-[3px] sm:h-[4px] w-16 sm:w-20 bg-yellow-300 dark:bg-emerald-400 mx-auto mt-3 rounded-full" aria-hidden="true" />
@@ -590,84 +590,118 @@ export default function Home() {
                   </p>
                 </motion.div>
 
-                {/* Unified Single Master Sponsor Board Card */}
+                {/* Unified Master Sponsor Board Card with Crisp Dual-Direction Lightsaber Border */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.96, y: 24 }}
                   whileInView={{ opacity: 1, scale: 1, y: 0 }}
                   viewport={{ once: true, margin: "-60px" }}
                   transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                  className="w-full max-w-6xl mx-auto rounded-[36px] md:rounded-[48px] p-6 sm:p-10 md:p-14 shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_30px_70px_rgba(0,0,0,0.35)] border-2 border-white/30 dark:border-emerald-500/30 relative overflow-hidden backdrop-blur-3xl mt-10 flex flex-col items-center gap-6 md:gap-8 bg-gradient-to-br from-white/20 via-white/10 to-white/15 dark:from-[#0b1c15]/95 dark:via-[#071510]/95 dark:to-[#040e0a]/95 group hover:border-yellow-300 dark:hover:border-emerald-400 transition-all duration-700"
+                  className="w-full max-w-5xl mx-auto rounded-3xl sm:rounded-[36px] md:rounded-[44px] p-[3px] relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.18)] dark:shadow-[0_30px_70px_rgba(0,0,0,0.45)] mt-8 sm:mt-10 group"
                 >
-                  {/* Glowing Top Border Accent Sheen */}
-                  <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-transparent via-yellow-300 dark:via-emerald-400 to-transparent opacity-90 z-20" />
+                  {/* Dual-Direction Lightsaber Glowing Border Beams (Simultaneous Left & Right from top-center) */}
+                  <div
+                    className="absolute -inset-[100%] animate-border-beam-cw pointer-events-none"
+                    style={{
+                      background: 'conic-gradient(from 0deg, transparent 0 270deg, var(--beam-dim-color) 320deg, var(--beam-active-color) 360deg)',
+                      filter: 'var(--beam-glow)'
+                    }}
+                  />
+                  <div
+                    className="absolute -inset-[100%] animate-border-beam-ccw pointer-events-none"
+                    style={{
+                      background: 'conic-gradient(from 0deg, transparent 0 270deg, var(--beam-dim-color) 320deg, var(--beam-active-color) 360deg)',
+                      filter: 'var(--beam-glow)'
+                    }}
+                  />
 
-                  {/* High-Tech Dot Matrix Pattern Overlay */}
-                  <div className="absolute inset-0 opacity-[0.20] dark:opacity-[0.15] bg-[radial-gradient(#ffffff_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#10b981_1.2px,transparent_1.2px)] [background-size:24px_24px] pointer-events-none" />
+                  {/* Inner Card Container */}
+                  <div className="w-full h-full rounded-[calc(1.5rem-2.5px)] sm:rounded-[calc(2.25rem-2.5px)] md:rounded-[calc(2.75rem-2.5px)] p-4 sm:p-8 md:p-12 relative z-10 overflow-hidden backdrop-blur-3xl flex flex-col items-center gap-4 sm:gap-6 md:gap-8 bg-gradient-to-br from-white/20 via-white/10 to-white/15 dark:from-[#0b1c15]/98 dark:via-[#071510]/98 dark:to-[#040e0a]/98 border border-white/20 dark:border-white/10">
+                    
+                    {/* High-Tech Dot Matrix Pattern Overlay */}
+                    <div className="absolute inset-0 opacity-[0.20] dark:opacity-[0.15] bg-[radial-gradient(#ffffff_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#10b981_1.2px,transparent_1.2px)] [background-size:24px_24px] pointer-events-none" />
 
-                  {/* Multi-Colored Ambient Glow Orbs inside the card */}
-                  <div className="absolute -top-24 -right-24 w-80 h-80 bg-yellow-300/20 dark:bg-emerald-400/20 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
-                  <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-400/20 dark:bg-teal-500/20 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
+                  {hasTiers ? (
+                    <>
+                      {/* Row 1: Large Logos (Platinum) */}
+                      {platinumPartners.length > 0 && (
+                        <div className="w-full flex flex-wrap justify-center items-center gap-3 sm:gap-6 md:gap-8 relative z-10">
+                          {platinumPartners.map((partner) => (
+                            <a
+                              key={partner.id || partner.name}
+                              href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
+                              target={partner.websiteUrl && partner.websiteUrl !== "#" ? "_blank" : undefined}
+                              rel="noopener noreferrer"
+                              className="group flex items-center justify-center px-6 py-3.5 sm:px-8 sm:py-5 bg-white dark:bg-[#f8fafc] rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-white/20 shadow-md hover:shadow-xl hover:-translate-y-1 hover:border-yellow-400 dark:hover:border-emerald-400 transition-all duration-300"
+                            >
+                              <PartnerLogoImage
+                                partner={partner}
+                                className="h-9 sm:h-14 md:h-16 max-w-[180px] sm:max-w-[220px] md:max-w-[260px] object-contain group-hover:scale-105 transition-transform duration-300"
+                              />
+                            </a>
+                          ))}
+                        </div>
+                      )}
 
-                  {/* Row 1: Large Logos (Platinum) */}
-                  {(platinumPartners.length > 0 ? platinumPartners : allPartners.slice(0, 2)).length > 0 && (
-                    <div className="w-full flex flex-wrap justify-center items-center gap-6 sm:gap-10 md:gap-14 relative z-10 pb-2">
-                      {(platinumPartners.length > 0 ? platinumPartners : allPartners.slice(0, 2)).map((partner) => (
+                      {/* Row 2: Medium Logos (Gold) */}
+                      {goldPartners.length > 0 && (
+                        <div className="w-full flex flex-wrap justify-center items-center gap-2.5 sm:gap-4 md:gap-6 relative z-10">
+                          {goldPartners.map((partner) => (
+                            <a
+                              key={partner.id || partner.name}
+                              href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
+                              target={partner.websiteUrl && partner.websiteUrl !== "#" ? "_blank" : undefined}
+                              rel="noopener noreferrer"
+                              className="group flex items-center justify-center px-5 py-3 sm:px-6 sm:py-4 bg-white dark:bg-[#f8fafc] rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-white/20 shadow-md hover:shadow-xl hover:-translate-y-1 hover:border-yellow-400 dark:hover:border-emerald-400 transition-all duration-300"
+                            >
+                              <PartnerLogoImage
+                                partner={partner}
+                                className="h-7 sm:h-10 md:h-12 max-w-[140px] sm:max-w-[170px] md:max-w-[200px] object-contain group-hover:scale-105 transition-transform duration-300"
+                              />
+                            </a>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Row 3: Smaller Logos (Silver / Other) */}
+                      {silverPartners.length > 0 && (
+                        <div className="w-full flex flex-wrap justify-center items-center gap-2 sm:gap-3 md:gap-4 relative z-10">
+                          {silverPartners.map((partner) => (
+                            <a
+                              key={partner.id || partner.name}
+                              href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
+                              target={partner.websiteUrl && partner.websiteUrl !== "#" ? "_blank" : undefined}
+                              rel="noopener noreferrer"
+                              className="group flex items-center justify-center px-4 py-2.5 sm:px-5 sm:py-3 bg-white dark:bg-[#f8fafc] rounded-lg sm:rounded-xl border border-slate-200/80 dark:border-white/20 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-yellow-400 dark:hover:border-emerald-400 transition-all duration-300"
+                            >
+                              <PartnerLogoImage
+                                partner={partner}
+                                className="h-6 sm:h-8 md:h-9 max-w-[110px] sm:max-w-[130px] md:max-w-[150px] object-contain group-hover:scale-105 transition-transform duration-300"
+                              />
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    /* Default Flex Grid if no tiers */
+                    <div className="w-full flex flex-wrap justify-center items-center gap-3 sm:gap-5 md:gap-6 relative z-10">
+                      {allPartners.map((partner) => (
                         <a
                           key={partner.id || partner.name}
                           href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
                           target={partner.websiteUrl && partner.websiteUrl !== "#" ? "_blank" : undefined}
                           rel="noopener noreferrer"
-                          className="group flex items-center justify-center p-2 transition-transform duration-300 hover:scale-105"
+                          className="group flex items-center justify-center px-6 py-4 sm:px-8 sm:py-5 bg-white dark:bg-[#f8fafc] rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-white/20 shadow-md hover:shadow-xl hover:-translate-y-1 hover:border-yellow-400 dark:hover:border-emerald-400 transition-all duration-300"
                         >
                           <PartnerLogoImage
                             partner={partner}
-                            className="h-16 sm:h-20 md:h-24 max-w-[220px] sm:max-w-[280px] md:max-w-[340px] object-contain filter drop-shadow-md group-hover:drop-shadow-xl group-hover:scale-105 transition-all duration-300"
+                            className="h-8 sm:h-12 md:h-14 max-w-[160px] sm:max-w-[200px] md:max-w-[240px] object-contain group-hover:scale-105 transition-transform duration-300"
                           />
                         </a>
                       ))}
                     </div>
                   )}
-
-                  {/* Row 2: Medium Logos (Gold) */}
-                  {(goldPartners.length > 0 ? goldPartners : allPartners.slice(2, 4)).length > 0 && (
-                    <div className="w-full flex flex-wrap justify-center items-center gap-5 sm:gap-8 md:gap-10 relative z-10 py-1">
-                      {(goldPartners.length > 0 ? goldPartners : allPartners.slice(2, 4)).map((partner) => (
-                        <a
-                          key={partner.id || partner.name}
-                          href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
-                          target={partner.websiteUrl && partner.websiteUrl !== "#" ? "_blank" : undefined}
-                          rel="noopener noreferrer"
-                          className="group flex items-center justify-center p-2 transition-transform duration-300 hover:scale-105"
-                        >
-                          <PartnerLogoImage
-                            partner={partner}
-                            className="h-11 sm:h-15 md:h-18 max-w-[180px] sm:max-w-[230px] md:max-w-[260px] object-contain filter brightness-95 group-hover:brightness-105 group-hover:scale-105 transition-all duration-300"
-                          />
-                        </a>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Row 3: Smaller Logos */}
-                  {(silverPartners.length > 0 ? silverPartners : allPartners.slice(4)).length > 0 && (
-                    <div className="w-full flex flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-8 relative z-10 pt-1">
-                      {(silverPartners.length > 0 ? silverPartners : allPartners.slice(4)).map((partner) => (
-                        <a
-                          key={partner.id || partner.name}
-                          href={partner.websiteUrl && partner.websiteUrl !== "#" ? partner.websiteUrl : undefined}
-                          target={partner.websiteUrl && partner.websiteUrl !== "#" ? "_blank" : undefined}
-                          rel="noopener noreferrer"
-                          className="group flex items-center justify-center p-1.5 transition-transform duration-300 hover:scale-105"
-                        >
-                          <PartnerLogoImage
-                            partner={partner}
-                            className="h-8 sm:h-11 md:h-13 max-w-[120px] sm:max-w-[160px] md:max-w-[190px] object-contain filter opacity-95 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300"
-                          />
-                        </a>
-                      ))}
-                    </div>
-                  )}
+                  </div>
                 </motion.div>
               </div>
             </section>
