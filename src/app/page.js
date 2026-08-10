@@ -612,15 +612,20 @@ export default function Home() {
                   />
 
                   {/* Inner Card Container */}
-                  <div className="w-full h-full rounded-[calc(1.5rem-2px)] sm:rounded-[calc(2.25rem-2px)] md:rounded-[calc(2.75rem-2px)] p-4 sm:p-8 md:p-12 relative z-10 overflow-hidden backdrop-blur-3xl flex flex-col items-center gap-4 sm:gap-6 md:gap-8 bg-gradient-to-br from-white/20 via-white/10 to-white/15 dark:from-[#0b1c15]/98 dark:via-[#071510]/98 dark:to-[#040e0a]/98 border border-white/20 dark:border-white/10">
+                  <div className="w-full h-full rounded-[calc(1.5rem-2px)] sm:rounded-[calc(2.25rem-2px)] md:rounded-[calc(2.75rem-2px)] p-4 sm:p-8 md:p-12 relative z-10 overflow-hidden backdrop-blur-3xl flex flex-col items-center gap-4 sm:gap-6 md:gap-8 bg-gradient-to-br from-white/30 via-white/15 to-white/20 dark:from-[#0d3829]/90 dark:via-[#092b1f]/90 dark:to-[#051a13]/90 border border-white/25 dark:border-emerald-500/30">
                     
                     {/* High-Tech Dot Matrix Pattern Overlay */}
-                    <div className="absolute inset-0 opacity-[0.20] dark:opacity-[0.15] bg-[radial-gradient(#ffffff_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#10b981_1.2px,transparent_1.2px)] [background-size:24px_24px] pointer-events-none" />
+                    <div className="absolute inset-0 opacity-[0.25] dark:opacity-[0.20] bg-[radial-gradient(#ffffff_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#10b981_1.2px,transparent_1.2px)] [background-size:24px_24px] pointer-events-none" />
 
-                    {/* Multi-Colored Ambient Glow Orbs inside the card */}
-                    <div className="absolute -top-24 -right-24 w-80 h-80 bg-yellow-300/20 dark:bg-emerald-400/20 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
-                    <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-400/20 dark:teal-500/20 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
+                    {/* Light Mode Pure Yellow Interior Ambient Glow */}
+                    <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[320px] bg-yellow-300/45 rounded-full blur-[100px] pointer-events-none dark:hidden" />
+                    <div className="absolute -bottom-20 right-10 w-72 h-72 bg-yellow-400/25 rounded-full blur-3xl pointer-events-none dark:hidden" />
+
+                    {/* Dark Mode Pure Vibrant Emerald Interior Ambient Glow */}
+                    <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[320px] bg-emerald-400/45 dark:bg-emerald-500/40 rounded-full blur-[100px] pointer-events-none hidden dark:block" />
+                    <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-emerald-500/30 via-emerald-500/10 to-transparent blur-xl pointer-events-none hidden dark:block" />
+                    <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-teal-400/30 rounded-full blur-3xl pointer-events-none hidden dark:block" />
+                    <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-emerald-400/30 rounded-full blur-3xl pointer-events-none hidden dark:block" />
 
                   {hasTiers ? (
                     <>
