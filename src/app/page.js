@@ -540,6 +540,7 @@ export default function Home() {
           const dbPartners = partnersList.filter(p => p.isActive !== false);
           if (!dbPartners || dbPartners.length === 0) return null;
 
+          const allPartners = dbPartners;
           const platinumPartners = dbPartners.filter(p => {
             const t = (p.tier || "").toUpperCase();
             return t === "PLATINUM" || t === "LARGE" || t === "UTAMA";
