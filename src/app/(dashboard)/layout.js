@@ -151,24 +151,8 @@ export default function DashboardLayout({ children }) {
         })}
       </nav>
 
-      {/* Footer Tools: Theme Toggle & Logout */}
-      <div className={`mt-auto pt-4 border-t border-gray-200 dark:border-white/5 relative z-10 flex flex-col gap-2`}>
-        <div className={`flex items-center gap-3 py-2 ${isSidebarCollapsed ? 'justify-center px-0' : 'px-4'}`}>
-          <ThemeToggle />
-          <AnimatePresence>
-            {!isSidebarCollapsed && (
-              <motion.span
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: "auto" }}
-                exit={{ opacity: 0, width: 0 }}
-                className="text-[13px] font-medium text-gray-600 dark:text-white/60 whitespace-nowrap cursor-pointer"
-              >
-                Tema Tampilan
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </div>
-
+      {/* Footer Tools: Logout */}
+      <div className="mt-auto pt-4 border-t border-gray-200 dark:border-white/5 relative z-10">
         <button 
           onClick={() => signOut({ callbackUrl: '/login' })}
           className={`flex items-center gap-4 py-3.5 rounded-xl text-[14px] font-medium text-red-500/80 dark:text-red-400/80 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-300 group ${isSidebarCollapsed ? 'w-12 h-12 justify-center px-0 mx-auto' : 'w-full px-4'}`}
@@ -193,16 +177,16 @@ export default function DashboardLayout({ children }) {
   );
 
   return (
-    <div className="flex h-[100dvh] bg-gray-50 dark:bg-[#020806] text-gray-900 dark:text-white overflow-hidden relative selection:bg-primary/30 transition-colors duration-500">
+    <div className="fixed inset-0 w-screen h-screen bg-gray-50 dark:bg-[#020806] text-gray-900 dark:text-white overflow-hidden selection:bg-primary/30 transition-colors duration-500 flex overscroll-none">
       <div className="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="fixed bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
       
-      {/* Desktop Sidebar (Floating & Collapsible) */}
+      {/* Desktop Sidebar (Floating & Fixed Height) */}
       <motion.aside 
         initial={false}
         animate={{ width: isSidebarCollapsed ? 96 : 300 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="hidden lg:block shrink-0 h-[calc(100vh-32px)] sticky top-4 z-40 shadow-[20px_0_40px_rgba(0,0,0,0.05)] dark:shadow-[20px_0_40px_rgba(0,0,0,0.5)] m-4 rounded-3xl"
+        className="hidden lg:block shrink-0 h-[calc(100vh-32px)] my-4 ml-4 mr-2 z-40 shadow-[20px_0_40px_rgba(0,0,0,0.05)] dark:shadow-[20px_0_40px_rgba(0,0,0,0.5)] rounded-3xl"
       >
         <SidebarContent />
         
@@ -265,14 +249,9 @@ export default function DashboardLayout({ children }) {
                 })}
               </nav>
 
-              {/* Footer Tools: Theme Toggle & Logout */}
-              <div className="mt-4 pt-6 border-t border-gray-200 dark:border-white/5 relative z-10 shrink-0 pb-6 flex flex-col gap-2">
-                <div className="flex items-center gap-3 px-4 py-2">
-                  <ThemeToggle />
-                  <span className="text-[13px] font-medium text-gray-600 dark:text-white/60">Tema Tampilan</span>
-                </div>
-                {/* Logout */}
-                <div className="p-2 border-t border-gray-100 dark:border-white/5">
+              {/* Footer Tools: Logout */}
+              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-white/5 relative z-10 shrink-0 pb-6 flex flex-col gap-2">
+                <div className="p-2">
                   <button 
                     onClick={() => signOut({ callbackUrl: '/login' })}
                     className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 font-bold transition-all text-sm"
@@ -301,22 +280,38 @@ export default function DashboardLayout({ children }) {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col h-screen overflow-y-auto relative">
+      <main className="flex-1 flex flex-col h-full overflow-y-auto overscroll-contain relative">
+        {/* Top Action Bar (Desktop Theme Toggle on Top-Right Corner) */}
+        <div className="hidden lg:flex justify-end items-center px-6 md:px-10 pt-5 pb-1 sticky top-0 z-30 pointer-events-none">
+          <div className="pointer-events-auto flex items-center gap-2.5 px-3 py-1.5 rounded-2xl bg-white/80 dark:bg-[#08120e]/80 backdrop-blur-xl border border-gray-200 dark:border-white/10 shadow-sm hover:border-primary/30 transition-all duration-300">
+            <ThemeToggle />
+            <span className="text-[13px] font-medium text-gray-700 dark:text-white/80 select-none pr-1">
+              Tema Tampilan
+            </span>
+          </div>
+        </div>
+
         {/* Mobile Header */}
-        <div className="md:hidden flex items-center justify-between p-4 bg-white/80 dark:bg-[#050e0a]/80 backdrop-blur-xl border-b border-gray-200 dark:border-white/10 sticky top-0 z-[60] transition-colors duration-500">
+        <div className="lg:hidden flex items-center justify-between p-4 bg-white/80 dark:bg-[#050e0a]/80 backdrop-blur-xl border-b border-gray-200 dark:border-white/10 sticky top-0 z-[60] transition-colors duration-500">
           <div className="font-display font-bold text-xl tracking-tight flex items-center gap-1 text-gray-900 dark:text-white">
             <div className="h-16 w-48 bg-primary dark:bg-white transition-all duration-300" style={{ WebkitMaskImage: "url(/images/logo.png)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", WebkitMaskPosition: "left center", maskImage: "url(/images/logo.png)", maskSize: "contain", maskRepeat: "no-repeat", maskPosition: "left center" }}></div>
           </div>
-          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-gray-500 dark:text-white/70">
-            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 px-2 py-1 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
+              <ThemeToggle />
+            </div>
+            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-gray-500 dark:text-white/70">
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
 
         {/* Page Content */}
-        <div className="p-6 md:p-10 flex-1">
+        <div className="p-6 md:p-10 pt-2 md:pt-4 flex-1">
           {children}
         </div>
       </main>
     </div>
   );
 }
+
