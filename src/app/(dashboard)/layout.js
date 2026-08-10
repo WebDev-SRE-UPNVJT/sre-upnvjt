@@ -48,7 +48,7 @@ export default function DashboardLayout({ children }) {
     
     // Public & Media
     { name: t("sidebar.articles") || "Content / Berita", icon: Newspaper, href: "/content", module: "content" },
-    { name: t("sidebar.analytics") || "Statistik Pengunjung", icon: BarChart2, href: "/dashboard/analytics", module: "analytics" },
+    { name: t("sidebar.analytics") || "Analytics", icon: BarChart2, href: "/dashboard/analytics", module: "analytics" },
     { name: "Testimonials", icon: Star, href: "/testimonials", module: "content" },
     { name: t("sidebar.merch"), icon: ShoppingBag, href: "/merch", module: "merchandise" },
     { name: t("sidebar.partners"), icon: Handshake, href: "/partners", module: "partners" },
