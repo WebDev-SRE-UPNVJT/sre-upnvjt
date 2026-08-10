@@ -121,7 +121,7 @@ export default function ProfilStaffClient({ user }) {
                 </span>
               )}
               <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-primary/10 text-primary border border-primary/20">
-                Role: {user.roleName || "Staff"}
+                Role: {user.roleName === "STAFF" ? "Officer" : (user.roleName || "Officer")}
               </span>
               <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20">
                 Dept: {user.departmentName || "General"}

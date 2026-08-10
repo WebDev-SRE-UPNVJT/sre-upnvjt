@@ -19,7 +19,7 @@ export async function createDocumentCategory(formData) {
     }).returning();
 
     revalidatePath("/documents");
-    revalidatePath("/staff/dokumen");
+    revalidatePath("/officer/dokumen");
     return { success: true, category: newCat };
   } catch (err) {
     return { error: err.message || "Gagal membuat kategori" };
@@ -39,7 +39,7 @@ export async function updateDocumentCategory(id, formData) {
     }).where(eq(documentCategory.id, id)).returning();
 
     revalidatePath("/documents");
-    revalidatePath("/staff/dokumen");
+    revalidatePath("/officer/dokumen");
     return { success: true, category: updated };
   } catch (err) {
     return { error: err.message || "Gagal mengupdate kategori" };
@@ -53,7 +53,7 @@ export async function deleteDocumentCategory(id) {
     await db.delete(documentCategory).where(eq(documentCategory.id, id));
 
     revalidatePath("/documents");
-    revalidatePath("/staff/dokumen");
+    revalidatePath("/officer/dokumen");
     return { success: true };
   } catch (err) {
     return { error: err.message || "Gagal menghapus kategori" };
@@ -86,7 +86,7 @@ export async function createDocumentItem(payload, uploadedById) {
     });
 
     revalidatePath("/documents");
-    revalidatePath("/staff/dokumen");
+    revalidatePath("/officer/dokumen");
     return { success: true, item: fullItem };
   } catch (err) {
     return { error: err.message || "Gagal membuat dokumen" };
@@ -117,7 +117,7 @@ export async function updateDocumentItem(id, payload) {
     });
 
     revalidatePath("/documents");
-    revalidatePath("/staff/dokumen");
+    revalidatePath("/officer/dokumen");
     return { success: true, item: fullItem };
   } catch (err) {
     return { error: err.message || "Gagal mengupdate dokumen" };
@@ -129,7 +129,7 @@ export async function deleteDocumentItem(id) {
     await db.delete(documentItem).where(eq(documentItem.id, id));
 
     revalidatePath("/documents");
-    revalidatePath("/staff/dokumen");
+    revalidatePath("/officer/dokumen");
     return { success: true };
   } catch (err) {
     return { error: err.message || "Gagal menghapus dokumen" };

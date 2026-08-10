@@ -52,10 +52,10 @@ export default function StaffNavbarClient({ user }) {
   }, [pathname]);
 
   const navLinks = [
-    { name: "Beranda", href: "/staff", icon: LayoutDashboard },
-    { name: "SRE Links", href: "/staff/links", icon: LinkIcon },
-    { name: "Literatur", href: "/staff/literatur", icon: BookOpen },
-    { name: "Dokumen", href: "/staff/dokumen", icon: FileText },
+    { name: "Beranda", href: "/officer", icon: LayoutDashboard },
+    { name: "SRE Links", href: "/officer/links", icon: LinkIcon },
+    { name: "Literatur", href: "/officer/literatur", icon: BookOpen },
+    { name: "Dokumen", href: "/officer/dokumen", icon: FileText },
   ];
 
   return (
@@ -71,7 +71,7 @@ export default function StaffNavbarClient({ user }) {
           <div className="flex items-center justify-between h-20">
             {/* Logo Section */}
             <div className="flex-shrink-0 flex items-center">
-              <Link href="/staff" className="flex items-center gap-2 group">
+              <Link href="/officer" className="flex items-center gap-2 group">
                 <div
                   className="h-12 w-36 bg-primary dark:bg-white transition-all duration-300"
                   style={{
@@ -86,7 +86,7 @@ export default function StaffNavbarClient({ user }) {
                   }}
                 />
                 <span className="hidden sm:inline-block text-[10px] uppercase tracking-widest bg-blue-500/10 border border-blue-500/25 text-blue-500 font-bold px-2 py-0.5 rounded-md">
-                  Staff
+                  Officer
                 </span>
               </Link>
             </div>
@@ -94,9 +94,9 @@ export default function StaffNavbarClient({ user }) {
             {/* Center Navigation Links (Desktop) */}
             <div className="hidden lg:flex items-center space-x-1">
               {navLinks.map((link) => {
-                // Determine if active. If it's "/staff", strictly match. Otherwise startsWith.
-                const isActive = link.href === "/staff" 
-                  ? pathname === "/staff" 
+                // Determine if active. If it's "/officer", strictly match. Otherwise startsWith.
+                const isActive = link.href === "/officer" 
+                  ? pathname === "/officer" 
                   : pathname.startsWith(link.href);
                   
                 return (
@@ -161,8 +161,8 @@ export default function StaffNavbarClient({ user }) {
                     <p className="text-xs font-black text-slate-900 dark:text-white truncate">
                       {user?.name?.split(" ")[0]}
                     </p>
-                    <p className="text-[9px] font-bold text-primary tracking-wide">
-                      {user?.roleName || "Staff"}
+                    <p className="text-[9px] font-bold text-primary tracking-wide uppercase">
+                      {user?.roleName === "STAFF" ? "Officer" : (user?.roleName || "Officer")}
                     </p>
                   </div>
                   <ChevronDown className="w-3.5 h-3.5 text-slate-400 dark:text-white/50" />
@@ -202,7 +202,7 @@ export default function StaffNavbarClient({ user }) {
                       {/* Links */}
                       <div className="flex flex-col gap-1 mb-4">
                         <Link
-                          href="/staff/profil"
+                          href="/officer/profil"
                           className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-all"
                         >
                           <User className="w-4 h-4 text-primary" />
@@ -299,8 +299,8 @@ export default function StaffNavbarClient({ user }) {
               {/* Navigation Links */}
               <div className="flex-1 px-4 py-6 flex flex-col gap-2">
                 {navLinks.map((link) => {
-                  const isActive = link.href === "/staff" 
-                    ? pathname === "/staff" 
+                  const isActive = link.href === "/officer" 
+                    ? pathname === "/officer" 
                     : pathname.startsWith(link.href);
                   const Icon = link.icon;
                   return (
@@ -344,14 +344,14 @@ export default function StaffNavbarClient({ user }) {
                       {user?.name}
                     </h4>
                     <p className="text-[10px] font-bold text-primary uppercase tracking-wider mt-0.5">
-                      {user?.roleName || "Staff"}
+                      {user?.roleName === "STAFF" ? "Officer" : (user?.roleName || "Officer")}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex gap-2">
                   <Link
-                    href="/staff/profil"
+                    href="/officer/profil"
                     onClick={() => setIsOpen(false)}
                     className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold text-slate-600 dark:text-white bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 transition-all"
                   >

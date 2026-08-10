@@ -16,7 +16,7 @@ export default function FloatingThemeToggle() {
   }, []);
 
   const hiddenPrefixes = [
-    "/login", "/dashboard", "/member", "/staff", "/users", "/roles",
+    "/login", "/dashboard", "/member", "/officer", "/users", "/roles",
     "/tasks", "/departments", "/forms", "/content", "/testimonials",
     "/merch", "/partners", "/literature", "/ppt", "/quiz", "/activities",
     "/leaderboard", "/attendance", "/events-admin", "/applications", "/settings"
