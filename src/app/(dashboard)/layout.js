@@ -22,6 +22,12 @@ export default function DashboardLayout({ children }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
+  React.useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status, router]);
+
   if (status === "loading") {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-[#07130e] flex items-center justify-center">
@@ -31,7 +37,6 @@ export default function DashboardLayout({ children }) {
   }
 
   if (status === "unauthenticated") {
-    router.push("/login");
     return null;
   }
 
