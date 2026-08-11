@@ -84,6 +84,15 @@ const ARTICLES = [
 
 const PARTNERS = ["SRE Indonesia", "UPN Veteran Jawa Timur", "SRE UPNVJT"];
 
+function resolveLogoUrl(url) {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/")) {
+    return url;
+  }
+  const baseUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL || "https://cdn.webly.biz.id/";
+  return `${baseUrl.replace(/\/+$/, "")}/${url.replace(/^\/+/, "")}`;
+}
+
 function PartnerLogoImage({ partner, className }) {
   const [hasError, setHasError] = useState(false);
   const isStockPhoto = partner.logoUrl?.includes("unsplash.com");
@@ -99,7 +108,7 @@ function PartnerLogoImage({ partner, className }) {
 
   return (
     <img
-      src={partner.logoUrl}
+      src={resolveLogoUrl(partner.logoUrl)}
       alt={partner.name}
       onError={() => setHasError(true)}
       className={className}
