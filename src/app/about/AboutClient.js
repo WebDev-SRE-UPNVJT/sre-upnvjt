@@ -306,7 +306,7 @@ export default function AboutClient({ departmentsData = [] }) {
           >
             {[
               {
-                href: "https://instagram.com/sre.upnvjt",
+                href: "https://www.instagram.com/sre.upnjatim/",
                 label: "Instagram",
                 aria: "Follow SRE UPNVJT on Instagram",
                 icon: (
@@ -316,7 +316,7 @@ export default function AboutClient({ departmentsData = [] }) {
                 )
               },
               {
-                href: "https://linkedin.com/company/sre-upnvjt",
+                href: "https://www.linkedin.com/company/sreupnjatim/",
                 label: "LinkedIn",
                 aria: "SRE UPNVJT on LinkedIn",
                 icon: (
