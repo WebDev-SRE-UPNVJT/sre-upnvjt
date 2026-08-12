@@ -14,7 +14,7 @@ export default async function middleware(req, event) {
       if (isMemberRole) {
         return NextResponse.redirect(new URL("/member", req.url));
       } else if (isStaffRole) {
-        return NextResponse.redirect(new URL("/staff", req.url));
+        return NextResponse.redirect(new URL("/officer", req.url));
       }
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
@@ -26,9 +26,9 @@ export default async function middleware(req, event) {
     if (isMemberRole && !req.nextUrl.pathname.startsWith("/member")) {
       return NextResponse.redirect(new URL("/member", req.url));
     }
-    // Redirect STAFFs trying to access non-staff protected routes to /staff
-    if (isStaffRole && !req.nextUrl.pathname.startsWith("/staff")) {
-      return NextResponse.redirect(new URL("/staff", req.url));
+    // Redirect STAFFs trying to access non-staff protected routes to /officer
+    if (isStaffRole && !req.nextUrl.pathname.startsWith("/officer")) {
+      return NextResponse.redirect(new URL("/officer", req.url));
     }
   }
 
@@ -64,7 +64,7 @@ export const config = {
     "/attendance/:path*",
     "/events-admin/:path*",
     "/member/:path*",
-    "/staff/:path*",
+    "/officer/:path*",
   ],
 };
 

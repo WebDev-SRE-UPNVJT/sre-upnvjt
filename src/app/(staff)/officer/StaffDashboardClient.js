@@ -126,7 +126,7 @@ export default function StaffDashboardClient({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <Link href="/staff/dokumen" className="block h-full">
+          <Link href="/officer/dokumen" className="block h-full">
             <div className="group relative h-full">
               <div className="absolute inset-0 bg-emerald-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="h-full bg-white/80 dark:bg-[#08120e]/80 backdrop-blur-md border border-slate-200 dark:border-white/5 rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-none transition-all duration-500 group-hover:border-emerald-500/30">
@@ -154,7 +154,7 @@ export default function StaffDashboardClient({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.5 }}
         >
-          <Link href="/staff/literatur" className="block h-full">
+          <Link href="/officer/literatur" className="block h-full">
             <div className="group relative h-full">
               <div className="absolute inset-0 bg-emerald-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="h-full bg-white/80 dark:bg-[#08120e]/80 backdrop-blur-md border border-slate-200 dark:border-white/5 rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-none transition-all duration-500 group-hover:border-emerald-500/30">
@@ -182,7 +182,7 @@ export default function StaffDashboardClient({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.6 }}
         >
-          <Link href="/staff/links" className="block h-full">
+          <Link href="/officer/links" className="block h-full">
             <div className="group relative h-full">
               <div className="absolute inset-0 bg-emerald-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="h-full bg-white/80 dark:bg-[#08120e]/80 backdrop-blur-md border border-slate-200 dark:border-white/5 rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-none transition-all duration-500 group-hover:border-emerald-500/30">
@@ -222,7 +222,7 @@ export default function StaffDashboardClient({
           {latestLiterature && latestLiterature.length > 0 ? (
             <div className="flex flex-col gap-3">
               {latestLiterature.map((lit) => (
-                <Link key={lit.id} href={`/staff/literatur/${lit.id}`} className="block">
+                <Link key={lit.id} href={`/officer/literatur/${lit.id}`} className="block">
                   <div className="group cursor-pointer p-4 rounded-2xl bg-white dark:bg-white/5 border border-slate-100 dark:border-white/10 hover:border-emerald-500/50 transition-colors h-full">
                     <h4 className="font-bold text-slate-900 dark:text-white truncate mb-1 group-hover:text-emerald-500 transition-colors">{lit.title}</h4>
                     <p className="text-xs text-slate-500 dark:text-white/50 mb-3">{t('staff_dashboard.by')} {lit.author}</p>

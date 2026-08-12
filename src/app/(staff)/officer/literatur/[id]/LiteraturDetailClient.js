@@ -55,7 +55,7 @@ export default function LiteraturDetailClient({ item }) {
       <motion.button
         whileHover={{ scale: 1.05, x: -5 }}
         whileTap={{ scale: 0.95 }}
-        onClick={() => router.push("/staff/literatur")}
+        onClick={() => router.push("/officer/literatur")}
         className="relative z-20 group flex items-center gap-3 mb-8 text-slate-500 dark:text-white/50 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors font-bold text-sm tracking-wide"
       >
         <div className="w-10 h-10 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 flex items-center justify-center group-hover:bg-emerald-500 group-hover:border-emerald-500 group-hover:text-white transition-all shadow-sm">

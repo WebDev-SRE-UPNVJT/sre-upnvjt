@@ -79,6 +79,10 @@ export default function DashboardLayout({ children }) {
     if (item.module === "partners") return role === "SUPER_ADMIN";
     if (item.module === "documents") return hasAccess(session?.user, "documents", "read") || role === "SUPER_ADMIN" || role === "ADMIN";
     return hasAccess(session?.user, item.module, "read");
+  }).sort((a, b) => {
+    if (a.module === "overview") return -1;
+    if (b.module === "overview") return 1;
+    return a.name.localeCompare(b.name);
   });
 
   const SidebarContent = () => (
@@ -191,7 +195,7 @@ export default function DashboardLayout({ children }) {
         initial={false}
         animate={{ width: isSidebarCollapsed ? 96 : 300 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="hidden lg:block shrink-0 h-[calc(100vh-32px)] my-4 ml-4 mr-2 z-40 shadow-[20px_0_40px_rgba(0,0,0,0.05)] dark:shadow-[20px_0_40px_rgba(0,0,0,0.5)] rounded-3xl"
+        className="hidden lg:block shrink-0 h-[calc(100vh-32px)] my-4 ml-4 mr-2 relative z-40 shadow-[20px_0_40px_rgba(0,0,0,0.05)] dark:shadow-[20px_0_40px_rgba(0,0,0,0.5)] rounded-3xl"
       >
         <SidebarContent />
         

@@ -846,7 +846,7 @@
     "auto_absent_msg": "Otomatis (Sistem): Tidak mengisi presensi selama sesi aktif."
   },
   "staff_dashboard": {
-    "portal": "Staff Portal",
+    "portal": "Officer Portal",
     "welcome": "Selamat datang,",
     "desc": "Akses dokumen, periksa literatur, dan kelola presensi operasional SRE secara real-time.",
     "org": "SRE SC UPNVJT",

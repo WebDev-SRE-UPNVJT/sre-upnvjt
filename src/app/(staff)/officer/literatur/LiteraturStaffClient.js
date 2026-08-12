@@ -335,7 +335,7 @@ export default function LiteraturStaffClient({ initialItems, categories }) {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: (index % 4) * 0.05 }}
                   key={item.id}
-                  href={`/staff/literatur/${item.id}`}
+                  href={`/officer/literatur/${item.id}`}
                   className="relative bg-white dark:bg-[#090d14] border border-slate-200/60 dark:border-white/5 rounded-3xl overflow-hidden cursor-pointer group hover:border-emerald-500/30 transition-all duration-500 transform-gpu hover:-translate-y-2 flex flex-col h-full shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(16,185,129,0.1)]"
                 >
                   {/* Category Cover */}

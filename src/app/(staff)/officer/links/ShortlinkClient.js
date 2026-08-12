@@ -307,8 +307,8 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                   <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-white/80">{t('shortlinks.slug')} *</label>
                   <div className="flex relative rounded-2xl overflow-hidden border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-black/50">
-                    <span className="inline-flex items-center px-4 bg-slate-100 dark:bg-white/5 border-r border-slate-200 dark:border-white/10 text-slate-500 dark:text-white/40 font-mono text-sm">
-                      sreupnjatim.com/s/
+                    <span className="inline-flex items-center px-4 bg-slate-100 dark:bg-white/5 border-r border-slate-200 dark:border-white/10 text-slate-500 dark:text-white/40 font-mono text-sm whitespace-nowrap">
+                      {typeof window !== "undefined" ? `${window.location.host}/s/` : "sreupnjatim.com/s/"}
                     </span>
                     <input
                       type="text"
