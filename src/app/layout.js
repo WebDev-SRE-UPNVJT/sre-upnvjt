@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { systemSetting } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import FloatingThemeToggle from "@/components/FloatingThemeToggle";
+import { cookies } from "next/headers";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -36,6 +37,17 @@ export default async function RootLayout({ children }) {
     // ignore
   }
 
+  // Site Gate Check to hide Header & Footer
+  const cookieStore = await cookies();
+  const siteStatus = (process.env.SITE_STATUS || process.env.COMING_SOON_MODE || "off").toLowerCase();
+  const siteSecret = process.env.SITE_GATE_SECRET || process.env.COMING_SOON_SECRET || "secret123";
+
+  const isGateActive = siteStatus === "coming-soon" || siteStatus === "maintenance" || siteStatus === "true";
+  const cookieSecret = cookieStore.get("team_access")?.value;
+  const hasValidCookie = cookieSecret === siteSecret || cookieSecret === "granted";
+
+  const isGateShowing = isGateActive && !hasValidCookie;
+
   return (
     <html
       lang={appLanguage}
@@ -45,14 +57,15 @@ export default async function RootLayout({ children }) {
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-canvas text-ink font-sans">
         <Providers>
           <LanguageProvider initialLanguage={appLanguage}>
-            <HeaderWrapper />
-            <VisitorTrackerWrapper />
+            {!isGateShowing && <HeaderWrapper />}
+            {!isGateShowing && <VisitorTrackerWrapper />}
             {children}
-            <FooterWrapper />
-            <FloatingThemeToggle />
+            {!isGateShowing && <FooterWrapper />}
+            {!isGateShowing && <FloatingThemeToggle />}
           </LanguageProvider>
         </Providers>
       </body>
     </html>
   );
 }
+

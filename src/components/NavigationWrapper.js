@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 import VisitorTracker from "./VisitorTracker";
@@ -36,6 +37,8 @@ const hiddenHeaderRoutes = [
   "/applications",
   "/testimonials",
   "/officer",
+  "/coming-soon",
+  "/maintenance",
 ];
 
 function isHiddenHeaderRoute(pathname) {
@@ -43,21 +46,39 @@ function isHiddenHeaderRoute(pathname) {
   return hiddenHeaderRoutes.some(route => pathname === route || pathname.startsWith(`${route}/`));
 }
 
+function useGateCheck(pathname) {
+  const [isGateHidden, setIsGateHidden] = useState(false);
+
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      const cookies = document.cookie;
+      const isGateCookie = cookies.includes("site_gate_active=true");
+      const hasTeamCookie = cookies.includes("team_access=");
+      setIsGateHidden(isGateCookie && !hasTeamCookie);
+    }
+  }, [pathname]);
+
+  return isGateHidden || isHiddenHeaderRoute(pathname);
+}
+
 export function HeaderWrapper() {
   const pathname = usePathname();
-  if (isHiddenHeaderRoute(pathname)) return null;
+  const shouldHide = useGateCheck(pathname);
+  if (shouldHide) return null;
   return <Header />;
 }
 
 export function FooterWrapper() {
   const pathname = usePathname();
-  if (isHiddenHeaderRoute(pathname)) return null;
+  const shouldHide = useGateCheck(pathname);
+  if (shouldHide) return null;
   return <Footer />;
 }
 
 export function VisitorTrackerWrapper() {
   const pathname = usePathname();
-  // Hanya tracking halaman publik, bukan dashboard/member/staff/login
-  if (isHiddenHeaderRoute(pathname)) return null;
+  const shouldHide = useGateCheck(pathname);
+  if (shouldHide) return null;
   return <VisitorTracker />;
 }
+
