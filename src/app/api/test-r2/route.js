@@ -13,9 +13,9 @@ export async function GET() {
       key,
       uploadResult,
       config: {
-        accountId: process.env.R2_ACCOUNT_ID ? "Loaded (length: " + process.env.R2_ACCOUNT_ID.length + ")" : "Missing",
-        accessKeyId: process.env.R2_ACCESS_KEY_ID ? "Loaded (length: " + process.env.R2_ACCESS_KEY_ID.length + ")" : "Missing",
-        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY ? "Loaded (length: " + process.env.R2_SECRET_ACCESS_KEY.length + ")" : "Missing",
+        accountId: process.env.R2_ACCOUNT_ID ? process.env.R2_ACCOUNT_ID.substring(0, 4) + "..." + process.env.R2_ACCOUNT_ID.substring(process.env.R2_ACCOUNT_ID.length - 4) : "Missing",
+        accessKeyId: process.env.R2_ACCESS_KEY_ID ? process.env.R2_ACCESS_KEY_ID.substring(0, 4) + "..." + process.env.R2_ACCESS_KEY_ID.substring(process.env.R2_ACCESS_KEY_ID.length - 4) : "Missing",
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY ? process.env.R2_SECRET_ACCESS_KEY.substring(0, 4) + "..." + process.env.R2_SECRET_ACCESS_KEY.substring(process.env.R2_SECRET_ACCESS_KEY.length - 4) : "Missing",
         bucketName: process.env.R2_BUCKET_NAME || "sre-upnvjt (default)",
         publicUrl: process.env.R2_PUBLIC_URL || "default cdn",
       }
@@ -26,9 +26,9 @@ export async function GET() {
       error: error.message,
       stack: error.stack,
       config: {
-        accountId: process.env.R2_ACCOUNT_ID ? "Loaded (length: " + process.env.R2_ACCOUNT_ID.length + ")" : "Missing",
-        accessKeyId: process.env.R2_ACCESS_KEY_ID ? "Loaded (length: " + process.env.R2_ACCESS_KEY_ID.length + ")" : "Missing",
-        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY ? "Loaded (length: " + process.env.R2_SECRET_ACCESS_KEY.length + ")" : "Missing",
+        accountId: process.env.R2_ACCOUNT_ID ? process.env.R2_ACCOUNT_ID.substring(0, 4) + "..." + process.env.R2_ACCOUNT_ID.substring(process.env.R2_ACCOUNT_ID.length - 4) : "Missing",
+        accessKeyId: process.env.R2_ACCESS_KEY_ID ? process.env.R2_ACCESS_KEY_ID.substring(0, 4) + "..." + process.env.R2_ACCESS_KEY_ID.substring(process.env.R2_ACCESS_KEY_ID.length - 4) : "Missing",
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY ? process.env.R2_SECRET_ACCESS_KEY.substring(0, 4) + "..." + process.env.R2_SECRET_ACCESS_KEY.substring(process.env.R2_SECRET_ACCESS_KEY.length - 4) : "Missing",
         bucketName: process.env.R2_BUCKET_NAME || "sre-upnvjt (default)",
         publicUrl: process.env.R2_PUBLIC_URL || "default cdn",
       }
