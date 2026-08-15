@@ -619,7 +619,7 @@ export default function Home() {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 dark:bg-emerald-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-300 dark:bg-emerald-400"></span>
                   </span>
-                  Coming Soon
+                  {t("visitor.home.coming_soon")}
                 </div>
               </motion.div>
             ) : (
