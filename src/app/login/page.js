@@ -87,12 +87,9 @@ export default function LoginPage() {
       </div>
       <div className="hidden lg:flex w-1/2 relative flex-col justify-between p-12 lg:p-20 overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <video
-            src="/video/hero.mp4"
-            autoPlay
-            loop
-            muted
-            playsInline
+          <img
+            src="/images/hero/gambar2.jpg"
+            alt="SRE Background"
             className="w-full h-full object-cover"
           />
           {isLight ? (
