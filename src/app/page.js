@@ -142,13 +142,7 @@ const MOCK_ACTIVITIES = [
   }
 ];
 
-const ACTIVITIES = [
-  { id: 0, title: 'Campus Energy Audit', description: 'Conducting electrical consumption analysis and building-level energy efficiency studies.', image: '/images/about/PanelSurya.jpg' },
-  { id: 1, title: 'Renewable Energy Project', description: 'Hands-on solar and wind energy installation projects for communities.', image: '/images/about/PanelSurya.jpg' },
-  { id: 2, title: 'Study & Discussion', description: 'Weekly internal knowledge-sharing sessions on renewable energy topics.', image: '/images/about/PanelSurya.jpg' },
-  { id: 3, title: 'Social Project', description: 'Community service initiatives focused on energy access for underserved areas.', image: '/images/about/PanelSurya.jpg' },
-  { id: 4, title: 'External Events', description: 'Participating in national and international renewable energy competitions and conferences.', image: '/images/about/PanelSurya.jpg' },
-];
+
 
 const HERO_IMAGES = [
   "/images/hero/gambar1.jpg",
@@ -195,16 +189,7 @@ export default function Home() {
   const [publicTestimonialsList, setPublicTestimonialsList] = useState([]);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  const localActivities = ACTIVITIES.map((act) => {
-    switch(act.id) {
-      case 0: return { ...act, date: new Date('2026-06-12'), title: t("visitor.home.campus_audit_title"), description: t("visitor.home.campus_audit_desc") };
-      case 1: return { ...act, date: new Date('2026-05-20'), title: t("visitor.home.re_project_title"), description: t("visitor.home.re_project_desc") };
-      case 2: return { ...act, date: new Date('2026-07-04'), title: t("visitor.home.study_discussion_title"), description: t("visitor.home.study_discussion_desc") };
-      case 3: return { ...act, date: new Date('2026-04-15'), title: t("visitor.home.social_project_title"), description: t("visitor.home.social_project_desc") };
-      case 4: return { ...act, date: new Date('2026-03-30'), title: t("visitor.home.external_events_title"), description: t("visitor.home.external_events_desc") };
-      default: return { ...act, date: new Date() };
-    }
-  });
+
 
   useEffect(() => {
     fetch('/api/partners')
@@ -514,79 +499,81 @@ export default function Home() {
         </section>
 
         {/* ─── Events & Programs Section ──────────────────────────────── */}
-        <section
-          id="activity"
-          className="scroll-mt-20 bg-[#0bb882] dark:bg-[#031f16] py-12 sm:py-16 px-6 sm:px-8 md:px-12 lg:px-20 border-t-2 border-white/20 dark:border-white/5 relative overflow-hidden flex items-center justify-center"
-        >
-          {/* faint dot-matrix texture */}
-          <div className="absolute inset-0 pointer-events-none opacity-[0.04] bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px]" />
-          {/* ambient glow */}
-          <div className="absolute -top-32 right-0 w-[420px] h-[420px] bg-yellow-300/8 dark:bg-emerald-500/8 rounded-full blur-[120px] pointer-events-none" />
+        {dbActivities.length > 0 && (
+          <section
+            id="activity"
+            className="scroll-mt-20 bg-[#0bb882] dark:bg-[#031f16] py-12 sm:py-16 px-6 sm:px-8 md:px-12 lg:px-20 border-t-2 border-white/20 dark:border-white/5 relative overflow-hidden flex items-center justify-center"
+          >
+            {/* faint dot-matrix texture */}
+            <div className="absolute inset-0 pointer-events-none opacity-[0.04] bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px]" />
+            {/* ambient glow */}
+            <div className="absolute -top-32 right-0 w-[420px] h-[420px] bg-yellow-300/8 dark:bg-emerald-500/8 rounded-full blur-[120px] pointer-events-none" />
 
-          <div className="w-full relative z-10 flex flex-col items-center">
-            <div className="max-w-7xl mx-auto w-full flex flex-col justify-between items-center gap-6">
+            <div className="w-full relative z-10 flex flex-col items-center">
+              <div className="max-w-7xl mx-auto w-full flex flex-col justify-between items-center gap-6">
 
-              {/* Header — centered, exactly like original Our Activity */}
-              <motion.div
-                initial={{ opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-                className="text-center max-w-2xl mx-auto"
-              >
-                {/* Eyebrow */}
-                <div className="flex items-center justify-center mb-2">
-                  <span className="text-xs sm:text-sm md:text-base font-black tracking-[0.28em] text-yellow-300 dark:text-emerald-400 uppercase">
-                    {t("visitor.home.events_programs_eyebrow")}
-                  </span>
-                </div>
-
-                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-black tracking-tight text-white dark:text-white uppercase leading-tight">
-                  {t("visitor.home.our_activity_prefix")}
-                  <span className="text-yellow-300 dark:text-emerald-400">
-                    {t("visitor.home.our_activity_highlight")}
-                  </span>
-                </h2>
-
-                <div className="h-[3.5px] w-16 sm:w-20 bg-yellow-300 dark:bg-emerald-400 mx-auto mt-2 rounded-full" aria-hidden="true" />
-
-                <p className="text-sm sm:text-base text-white/90 dark:text-gray-200 max-w-xl mx-auto mt-2.5 font-normal leading-relaxed">
-                  {t("visitor.home.events_programs_desc")}
-                </p>
-              </motion.div>
-
-              {/* Full-width Carousel — exactly like original */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.96, y: 28 }}
-                whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                viewport={{ once: true, margin: "-45px" }}
-                transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
-                className="w-full"
-              >
-                <ActivityCarousel activities={dbActivities.length > 0 ? dbActivities : localActivities} />
-              </motion.div>
-
-              {/* CTA button — centered */}
-              <div className="w-full text-center mt-2">
+                {/* Header — centered, exactly like original Our Activity */}
                 <motion.div
-                  initial={{ opacity: 0, y: 14 }}
+                  initial={{ opacity: 0, y: 18 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.6 }}
+                  transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+                  className="text-center max-w-2xl mx-auto"
                 >
-                  <Link
-                    href="/activity"
-                    className="group inline-flex items-center gap-2 border-2 border-yellow-300/60 hover:bg-yellow-300 hover:text-[#0bb882] text-yellow-300 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#031f16] font-bold tracking-wider text-xs uppercase px-7 py-3 rounded-full transition-all duration-300 focus-visible:outline-yellow-300"
-                  >
-                    {t("visitor.home.events_programs_cta")}
-                    <ArrowUpRight className="w-3.5 h-3.5 text-yellow-300 group-hover:text-[#0bb882] dark:text-emerald-400 dark:group-hover:text-[#031f16] transition-colors" aria-hidden="true" />
-                  </Link>
-                </motion.div>
-              </div>
+                  {/* Eyebrow */}
+                  <div className="flex items-center justify-center mb-2">
+                    <span className="text-xs sm:text-sm md:text-base font-black tracking-[0.28em] text-yellow-300 dark:text-emerald-400 uppercase">
+                      {t("visitor.home.events_programs_eyebrow")}
+                    </span>
+                  </div>
 
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-black tracking-tight text-white dark:text-white uppercase leading-tight">
+                    {t("visitor.home.our_activity_prefix")}
+                    <span className="text-yellow-300 dark:text-emerald-400">
+                      {t("visitor.home.our_activity_highlight")}
+                    </span>
+                  </h2>
+
+                  <div className="h-[3.5px] w-16 sm:w-20 bg-yellow-300 dark:bg-emerald-400 mx-auto mt-2 rounded-full" aria-hidden="true" />
+
+                  <p className="text-sm sm:text-base text-white/90 dark:text-gray-200 max-w-xl mx-auto mt-2.5 font-normal leading-relaxed">
+                    {t("visitor.home.events_programs_desc")}
+                  </p>
+                </motion.div>
+
+                {/* Full-width Carousel — exactly like original */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.96, y: 28 }}
+                  whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-45px" }}
+                  transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+                  className="w-full"
+                >
+                  <ActivityCarousel activities={dbActivities} />
+                </motion.div>
+
+                {/* CTA button — centered */}
+                <div className="w-full text-center mt-2">
+                  <motion.div
+                    initial={{ opacity: 0, y: 14 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <Link
+                      href="/activity"
+                      className="group inline-flex items-center gap-2 border-2 border-yellow-300/60 hover:bg-yellow-300 hover:text-[#0bb882] text-yellow-300 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#031f16] font-bold tracking-wider text-xs uppercase px-7 py-3 rounded-full transition-all duration-300 focus-visible:outline-yellow-300"
+                    >
+                      {t("visitor.home.events_programs_cta")}
+                      <ArrowUpRight className="w-3.5 h-3.5 text-yellow-300 group-hover:text-[#0bb882] dark:text-emerald-400 dark:group-hover:text-[#031f16] transition-colors" aria-hidden="true" />
+                    </Link>
+                  </motion.div>
+                </div>
+
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* ─── Featured Projects Section ──────────────────────────────── */}
         <section
