@@ -389,8 +389,8 @@ export default function Home() {
               {/* Image — stretches to match right column height */}
               <div className="relative w-full max-w-[520px] flex-1 mt-6 min-h-[320px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border border-white/20 dark:border-white/10 group">
                 <img
-                  src="/images/about/PanelSurya.jpg"
-                  alt="Panel Surya SRE UPN JATIM"
+                  src="/images/about/sre indonesia 2025.png"
+                  alt="SRE Indonesia 2025"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
