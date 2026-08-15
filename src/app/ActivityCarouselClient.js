@@ -1,12 +1,50 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageProvider";
 
 export default function ActivityCarousel({ activities }) {
+  const { t, language } = useLanguage();
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(0); // -1 for left, 1 for right
   const [touchStart, setTouchStart] = useState(null);
+
+  const getBadgeText = (type) => {
+    if (!type) return t("visitor.home.activity_badge_default") || "Aktivitas";
+    const typeUpper = type.toUpperCase();
+    if (typeUpper === "FEATURED") {
+      return t("visitor.home.activity_badge_highlight") || "Sorotan";
+    }
+    if (typeUpper === "INTERNAL") {
+      return t("visitor.home.activity_badge_internal") || "Internal";
+    }
+    if (typeUpper === "EXTERNAL") {
+      return t("visitor.home.activity_badge_external") || "Eksternal";
+    }
+    if (typeUpper === "WORKSHOP") {
+      return t("visitor.home.activity_badge_workshop") || "Workshop";
+    }
+    if (typeUpper === "MEETING") {
+      return t("visitor.home.activity_badge_meeting") || "Rapat";
+    }
+    return type;
+  };
+
+  const formatDate = (dateVal) => {
+    if (!dateVal) return "";
+    try {
+      const d = new Date(dateVal);
+      if (isNaN(d.getTime())) return "";
+      return d.toLocaleDateString(language === "id" ? "id-ID" : "en-US", {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+      });
+    } catch {
+      return "";
+    }
+  };
 
   const prev = () => {
     setDirection(-1);
@@ -84,8 +122,10 @@ export default function ActivityCarousel({ activities }) {
             className="flex items-center justify-center gap-3 sm:gap-4 w-full"
           >
             {/* LEFT CARD — Inactive, smaller, with matching structural components */}
-            <div
-              className="hidden md:block md:w-[28%] md:max-w-[320px] lg:max-w-[340px] xl:max-w-[360px] flex-shrink-0 opacity-50 scale-90 transition-all duration-500 rounded-2xl overflow-hidden cursor-pointer border-2 border-yellow-300 dark:border-emerald-500/40 bg-[#099c6d] dark:bg-[#093021] shadow-lg"
+            <motion.div
+              whileHover={{ y: -4, scale: 0.92, opacity: 0.8 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="hidden md:block md:w-[28%] md:max-w-[320px] lg:max-w-[340px] xl:max-w-[360px] flex-shrink-0 opacity-50 scale-90 rounded-2xl overflow-hidden cursor-pointer border-2 border-yellow-300 dark:border-emerald-500/40 bg-[#099c6d] dark:bg-[#093021] shadow-lg"
               onClick={prev}
             >
               <div className="relative h-[160px]">
@@ -99,15 +139,25 @@ export default function ActivityCarousel({ activities }) {
                   {getTitle(activities[getIndex(-1)])}
                 </h3>
               </div>
-              <div className="p-3">
+              <div className="p-3 flex flex-col gap-1.5">
+                {activities[getIndex(-1)]?.date && (
+                  <div className="flex items-center text-[9px] text-yellow-300 dark:text-emerald-400 font-bold uppercase tracking-wider">
+                    <Calendar className="w-3 h-3 mr-1 text-yellow-300 dark:text-emerald-400" />
+                    {formatDate(activities[getIndex(-1)]?.date)}
+                  </div>
+                )}
                 <p className="text-emerald-50 dark:text-gray-300 text-[11px] leading-relaxed font-bold line-clamp-2">
                   {activities[getIndex(-1)]?.description}
                 </p>
               </div>
-            </div>
+            </motion.div>
 
             {/* CENTER CARD — featured (Emerald background matching about section cards) */}
-            <div className="w-full md:w-[44%] flex-shrink-0 scale-100 z-10 shadow-2xl shadow-emerald-900/10 dark:shadow-emerald-950/50 transition-all duration-500 rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-yellow-300 dark:border-emerald-400/60 bg-[#099c6d] dark:bg-emerald-950">
+            <motion.div
+              whileHover={{ y: -8, scale: 1.02 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="w-full md:w-[44%] flex-shrink-0 scale-100 z-10 shadow-2xl shadow-emerald-900/10 dark:shadow-emerald-950/50 rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-yellow-300 dark:border-emerald-400/60 bg-[#099c6d] dark:bg-emerald-950"
+            >
               <div className="relative w-full aspect-[4/3] md:aspect-auto md:h-[280px]">
                 <img
                   src={getImage(activities[current])}
@@ -116,22 +166,30 @@ export default function ActivityCarousel({ activities }) {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" aria-hidden="true" />
                 <span className="absolute top-3 right-3 bg-yellow-300 dark:bg-emerald-400 text-slate-900 dark:text-slate-950 text-[11px] sm:text-xs font-black px-3.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
-                  {activities[current]?.type || "Featured"}
+                  {getBadgeText(activities[current]?.type)}
                 </span>
                 <h3 className="absolute bottom-3 left-4 right-4 text-white font-black text-sm sm:text-base uppercase tracking-wide line-clamp-1 drop-shadow-sm">
                   {getTitle(activities[current])}
                 </h3>
               </div>
-              <div className="p-3.5 sm:p-4 transition-colors duration-300">
+              <div className="p-3.5 sm:p-4 transition-colors duration-300 flex flex-col gap-2">
+                {activities[current]?.date && (
+                  <div className="flex items-center text-[10px] sm:text-xs text-yellow-300 dark:text-emerald-400 font-bold uppercase tracking-wider">
+                    <Calendar className="w-3.5 h-3.5 mr-1 text-yellow-300 dark:text-emerald-400" />
+                    {formatDate(activities[current]?.date)}
+                  </div>
+                )}
                 <p className="text-white/95 dark:text-gray-200 text-xs sm:text-sm leading-relaxed font-semibold line-clamp-2">
                   {activities[current]?.description}
                 </p>
               </div>
-            </div>
+            </motion.div>
 
             {/* RIGHT CARD — Inactive, smaller, with matching structural components */}
-            <div
-              className="hidden md:block md:w-[28%] md:max-w-[320px] lg:max-w-[340px] xl:max-w-[360px] flex-shrink-0 opacity-50 scale-90 transition-all duration-500 rounded-2xl overflow-hidden cursor-pointer border-2 border-yellow-300 dark:border-emerald-500/40 bg-[#099c6d] dark:bg-[#093021] shadow-lg"
+            <motion.div
+              whileHover={{ y: -4, scale: 0.92, opacity: 0.8 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="hidden md:block md:w-[28%] md:max-w-[320px] lg:max-w-[340px] xl:max-w-[360px] flex-shrink-0 opacity-50 scale-90 rounded-2xl overflow-hidden cursor-pointer border-2 border-yellow-300 dark:border-emerald-500/40 bg-[#099c6d] dark:bg-[#093021] shadow-lg"
               onClick={next}
             >
               <div className="relative h-[160px]">
@@ -145,14 +203,18 @@ export default function ActivityCarousel({ activities }) {
                   {activities[getIndex(1)].title}
                 </h3>
               </div>
-
-
-              <div className="p-3">
+              <div className="p-3 flex flex-col gap-1.5">
+                {activities[getIndex(1)]?.date && (
+                  <div className="flex items-center text-[9px] text-yellow-300 dark:text-emerald-400 font-bold uppercase tracking-wider">
+                    <Calendar className="w-3 h-3 mr-1 text-yellow-300 dark:text-emerald-400" />
+                    {formatDate(activities[getIndex(1)]?.date)}
+                  </div>
+                )}
                 <p className="text-emerald-50 dark:text-gray-300 text-[11px] leading-relaxed font-bold line-clamp-2">
                   {activities[getIndex(1)].description}
                 </p>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         </AnimatePresence>
       </div>

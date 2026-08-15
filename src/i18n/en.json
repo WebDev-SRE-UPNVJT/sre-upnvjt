@@ -1016,7 +1016,13 @@
       "status_planned": "Planned",
       "projects_coming_soon_title": "Initiatives on the Horizon",
       "projects_coming_soon_desc": "Our team is designing sustainable energy projects to empower our community. Stay tuned!",
-      "coming_soon": "Coming Soon"
+      "coming_soon": "Coming Soon",
+      "activity_badge_default": "Activity",
+      "activity_badge_highlight": "Highlight",
+      "activity_badge_internal": "Internal",
+      "activity_badge_external": "External",
+      "activity_badge_workshop": "Workshop",
+      "activity_badge_meeting": "Meeting"
     },
     "about": {
       "title_badge": "About SRE UPNVJT",

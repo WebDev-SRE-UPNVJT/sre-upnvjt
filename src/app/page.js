@@ -183,12 +183,12 @@ export default function Home() {
 
   const localActivities = ACTIVITIES.map((act) => {
     switch(act.id) {
-      case 0: return { ...act, title: t("visitor.home.campus_audit_title"), description: t("visitor.home.campus_audit_desc") };
-      case 1: return { ...act, title: t("visitor.home.re_project_title"), description: t("visitor.home.re_project_desc") };
-      case 2: return { ...act, title: t("visitor.home.study_discussion_title"), description: t("visitor.home.study_discussion_desc") };
-      case 3: return { ...act, title: t("visitor.home.social_project_title"), description: t("visitor.home.social_project_desc") };
-      case 4: return { ...act, title: t("visitor.home.external_events_title"), description: t("visitor.home.external_events_desc") };
-      default: return act;
+      case 0: return { ...act, date: new Date('2026-06-12'), title: t("visitor.home.campus_audit_title"), description: t("visitor.home.campus_audit_desc") };
+      case 1: return { ...act, date: new Date('2026-05-20'), title: t("visitor.home.re_project_title"), description: t("visitor.home.re_project_desc") };
+      case 2: return { ...act, date: new Date('2026-07-04'), title: t("visitor.home.study_discussion_title"), description: t("visitor.home.study_discussion_desc") };
+      case 3: return { ...act, date: new Date('2026-04-15'), title: t("visitor.home.social_project_title"), description: t("visitor.home.social_project_desc") };
+      case 4: return { ...act, date: new Date('2026-03-30'), title: t("visitor.home.external_events_title"), description: t("visitor.home.external_events_desc") };
+      default: return { ...act, date: new Date() };
     }
   });
 
@@ -526,7 +526,15 @@ export default function Home() {
               </motion.div>
 
               {/* Full-width Carousel — exactly like original */}
-              <ActivityCarousel activities={dbActivities.length > 0 ? dbActivities : localActivities} />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96, y: 28 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                viewport={{ once: true, margin: "-45px" }}
+                transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+                className="w-full"
+              >
+                <ActivityCarousel activities={dbActivities.length > 0 ? dbActivities : localActivities} />
+              </motion.div>
 
               {/* CTA button — centered */}
               <div className="w-full text-center mt-2">
