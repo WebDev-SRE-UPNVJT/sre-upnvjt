@@ -1016,7 +1016,13 @@
       "status_planned": "Direncanakan",
       "projects_coming_soon_title": "Inisiatif Sedang Bersiap",
       "projects_coming_soon_desc": "Tim kami sedang merancang proyek energi bersih berkelanjutan untuk memberdayakan masyarakat. Tetap pantau!",
-      "coming_soon": "Segera Hadir"
+      "coming_soon": "Segera Hadir",
+      "activity_badge_default": "Aktivitas",
+      "activity_badge_highlight": "Sorotan",
+      "activity_badge_internal": "Internal",
+      "activity_badge_external": "Eksternal",
+      "activity_badge_workshop": "Workshop",
+      "activity_badge_meeting": "Rapat"
     },
     "about": {
       "title_badge": "Tentang SRE UPNVJT",
