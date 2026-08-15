@@ -1001,7 +1001,21 @@
       "social_project_title": "Social Project",
       "social_project_desc": "Community service initiatives focused on energy access for underserved areas.",
       "external_events_title": "External Events",
-      "external_events_desc": "Participating in national and international renewable energy competitions and conferences."
+      "external_events_desc": "Participating in national and international renewable energy competitions and conferences.",
+      "events_programs_eyebrow": "EVENTS & PROGRAMS",
+      "events_programs_title": "What We Do",
+      "events_programs_desc": "From workshops and seminars to field campaigns — explore the initiatives SRE UPN JATIM runs on the ground.",
+      "events_programs_cta": "SEE ALL ACTIVITIES",
+      "featured_projects_eyebrow": "FEATURED PROJECTS",
+      "featured_projects_title_prefix": "Real ",
+      "featured_projects_title_highlight": "Impact",
+      "featured_projects_desc": "Tangible initiatives tackling renewable energy challenges — from campus infrastructure to community electrification.",
+      "featured_projects_cta": "Learn More",
+      "status_ongoing": "Ongoing",
+      "status_completed": "Completed",
+      "status_planned": "Planned",
+      "projects_coming_soon_title": "Initiatives on the Horizon",
+      "projects_coming_soon_desc": "Our team is designing sustainable energy projects to empower our community. Stay tuned!"
     },
     "about": {
       "title_badge": "About SRE UPNVJT",
