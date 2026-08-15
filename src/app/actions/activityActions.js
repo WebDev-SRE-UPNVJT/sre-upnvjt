@@ -5,19 +5,25 @@ import { activityService } from "@/lib/services/activityService";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { hasAccess } from "@/lib/permissions";
-import path from "path";
-import { promises as fs } from "fs";
 import sharp from "sharp";
 
-async function processImage(file) {
+const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || "https://cdn.webly.biz.id/";
+
+async function processAndUploadImage(file) {
   if (!file || file.size === 0) return null;
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
-  const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'activity');
-  await fs.mkdir(uploadDir, { recursive: true });
-  const filepath = path.join(uploadDir, filename);
-  await sharp(buffer).webp({ quality: 80 }).toFile(filepath);
-  return `/uploads/activity/${filename}`;
+  try {
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const filename = `activity/${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
+    const processedBuffer = await sharp(buffer).webp({ quality: 80 }).toBuffer();
+    const { uploadToR2 } = await import("@/lib/r2");
+    const key = await uploadToR2(processedBuffer, filename, "image/webp");
+    // Build full public URL
+    const base = R2_PUBLIC_URL.endsWith("/") ? R2_PUBLIC_URL : R2_PUBLIC_URL + "/";
+    return `${base}${key}`;
+  } catch (err) {
+    console.error("Image upload to R2 failed:", err);
+    throw new Error("Gagal mengupload gambar. Pastikan konfigurasi R2 sudah benar.");
+  }
 }
 
 // Action for fetching activities is often done server-side on the page directly, 
@@ -50,7 +56,7 @@ export async function createActivityAction(formData) {
 
     const imageFile = formData.get("image");
     if (imageFile && imageFile.size > 0) {
-      data.imageUrl = await processImage(imageFile);
+      data.imageUrl = await processAndUploadImage(imageFile);
     }
 
     if (!data.name || !data.date || !data.type) {
@@ -84,7 +90,7 @@ export async function updateActivityAction(id, formData) {
 
     const imageFile = formData.get("image");
     if (imageFile && imageFile.size > 0) {
-      data.imageUrl = await processImage(imageFile);
+      data.imageUrl = await processAndUploadImage(imageFile);
     }
 
     if (!data.name || !data.date || !data.type) {
