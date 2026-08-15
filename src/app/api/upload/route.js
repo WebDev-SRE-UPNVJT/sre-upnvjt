@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 import sharp from "sharp";
+import path from 'path';
+
+const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || "https://cdn.webly.biz.id/";
 
 export async function POST(req) {
   try {
@@ -26,14 +27,6 @@ export async function POST(req) {
     const folder = data.get('folder') || '';
     const safeFolder = folder.split('/').map(part => part.replace(/[^a-zA-Z0-9_-]/g, '')).filter(Boolean).join('/');
 
-    // Create uploads directory if it doesn't exist
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', safeFolder);
-    try {
-      await mkdir(uploadDir, { recursive: true });
-    } catch (err) {
-      if (err.code !== 'EEXIST') throw err;
-    }
-
     const prefix = safeFolder ? safeFolder.toUpperCase() : "FILE";
     const randomStr = Math.random().toString(36).substring(2, 8);
     const isImage = file.type?.startsWith("image/") || /\.(jpg|jpeg|png|webp|gif|avif)$/i.test(file.name);
@@ -53,34 +46,16 @@ export async function POST(req) {
       contentType = file.type || "application/octet-stream";
     }
 
-    // For ppt-covers (or explicit local folders), save directly to local disk
-    if (safeFolder === 'ppt-covers') {
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads', safeFolder);
-      await mkdir(uploadDir, { recursive: true });
-      const filepath = path.join(uploadDir, filename);
-      await writeFile(filepath, processedBuffer);
-      const publicUrl = `/uploads/${safeFolder}/${filename}`;
-      return NextResponse.json({ success: true, url: publicUrl });
-    }
-
     const r2Key = safeFolder ? `${safeFolder}/${filename}` : filename;
 
     // Upload to Cloudflare R2
-    let publicUrl;
-    try {
-      const { uploadToR2 } = await import("@/lib/r2");
-      publicUrl = await uploadToR2(processedBuffer, r2Key, contentType);
-    } catch (r2Error) {
-      console.warn("Cloudflare R2 Upload failed, falling back to local disk storage:", r2Error);
-      // Local fallback
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads', safeFolder);
-      await mkdir(uploadDir, { recursive: true });
-      const filepath = path.join(uploadDir, filename);
-      await writeFile(filepath, processedBuffer);
-      publicUrl = safeFolder ? `/uploads/${safeFolder}/${filename}` : `/uploads/${filename}`;
-    }
+    const { uploadToR2 } = await import("@/lib/r2");
+    const key = await uploadToR2(processedBuffer, r2Key, contentType);
 
-    // Return the URL/key
+    // Build full public URL
+    const base = R2_PUBLIC_URL.endsWith("/") ? R2_PUBLIC_URL : R2_PUBLIC_URL + "/";
+    const publicUrl = `${base}${key}`;
+
     return NextResponse.json({ success: true, url: publicUrl });
   } catch (error) {
     console.error("Upload error:", error);
