@@ -557,8 +557,6 @@ export default function Home() {
           id="projects"
           className="scroll-mt-20 bg-[#087a58] dark:bg-[#020d09] py-14 sm:py-20 lg:py-24 px-6 sm:px-8 md:px-12 lg:px-20 border-t-2 border-black/10 dark:border-white/5 relative overflow-hidden"
         >
-          {/* Subtle grid texture */}
-          <div className="absolute inset-0 pointer-events-none opacity-[0.04] bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:44px_44px]" />
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-yellow-300/5 dark:bg-emerald-500/8 rounded-full blur-[100px] pointer-events-none" />
           <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-emerald-300/8 dark:bg-emerald-700/10 rounded-full blur-[80px] pointer-events-none" />
 
