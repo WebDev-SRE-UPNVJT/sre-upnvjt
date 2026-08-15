@@ -252,7 +252,7 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="bg-red-500/10 border border-red-500/50 text-red-300 dark:text-red-400 text-sm px-4 py-3 rounded-lg text-center">
+              <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-500/40 text-red-700 dark:text-red-400 text-sm px-4 py-3 rounded-lg text-center font-medium shadow-md">
                 {error}
               </div>
             )}
