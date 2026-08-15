@@ -150,6 +150,12 @@ const ACTIVITIES = [
   { id: 4, title: 'External Events', description: 'Participating in national and international renewable energy competitions and conferences.', image: '/images/about/PanelSurya.jpg' },
 ];
 
+const HERO_IMAGES = [
+  "/images/hero/gambar1.jpg",
+  "/images/hero/gambar2.jpg",
+  "/images/hero/gambar3.jpg"
+];
+
 const PROJECT_STATUS_CONFIG = {
   ONGOING:   { label: "status_ongoing",   icon: Clock,         cls: "bg-yellow-300/20 text-yellow-300 dark:bg-yellow-400/15 dark:text-yellow-300" },
   COMPLETED: { label: "status_completed", icon: CheckCircle2,   cls: "bg-emerald-300/20 text-white dark:bg-emerald-400/15 dark:text-emerald-300" },
@@ -162,6 +168,7 @@ export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [dbActivities, setDbActivities] = useState([]);
   const [featuredProjectsList, setFeaturedProjectsList] = useState([]);
+  const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
 
   useEffect(() => {
     setMounted(true);
@@ -170,6 +177,13 @@ export default function Home() {
         setDbActivities(res.data);
       }
     });
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentHeroIndex((prev) => (prev + 1) % HERO_IMAGES.length);
+    }, 5000);
+    return () => clearInterval(timer);
   }, []);
 
   const isLight = mounted && (theme === "light" || resolvedTheme === "light");
@@ -278,16 +292,18 @@ export default function Home() {
             isLight ? "bg-white" : "bg-[#0a1c15]"
           }`}
         >
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            poster="https://images.unsplash.com/photo-1466611653911-95081537e5b7?q=80&w=1920&auto=format&fit=crop"
-            className="absolute inset-0 w-full h-full object-cover z-0"
-          >
-            <source src="/video/hero.mp4" type="video/mp4" />
-          </video>
+          <AnimatePresence initial={false}>
+            <motion.img
+              key={currentHeroIndex}
+              src={HERO_IMAGES[currentHeroIndex]}
+              alt="SRE Hero background"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.2, ease: "easeInOut" }}
+              className="absolute inset-0 w-full h-full object-cover z-0"
+            />
+          </AnimatePresence>
           
           {isLight ? (
             <div className="absolute inset-0 bg-black/45 z-0 pointer-events-none" style={{ backgroundColor: "rgba(0, 0, 0, 0.45)" }} />
@@ -315,6 +331,20 @@ export default function Home() {
               <div className="text-[#e8ecc4] drop-shadow-md">RENEWABLE</div>
               <div className={isLight ? "text-white" : "text-white drop-shadow-md"}>ENERGY</div>
             </motion.h1>
+          </div>
+
+          {/* Slide Indicators — Custom indicators mirroring user attachment */}
+          <div className="absolute bottom-6 sm:bottom-10 left-6 sm:left-12 md:left-20 lg:left-24 z-10 flex gap-2 items-center">
+            {HERO_IMAGES.map((_, idx) => (
+              <div
+                key={idx}
+                className={`h-2 rounded-full transition-all duration-500 ease-out ${
+                  idx === currentHeroIndex 
+                    ? "w-6 bg-yellow-300 dark:bg-emerald-400 shadow-[0_0_10px_rgba(253,224,71,0.5)]" 
+                    : "w-2 bg-white/40"
+                }`}
+              />
+            ))}
           </div>
 
           <div className="absolute bottom-6 sm:bottom-10 right-6 sm:right-12 md:right-16 lg:right-24 z-10 flex flex-col items-end pr-14 sm:pr-0">
