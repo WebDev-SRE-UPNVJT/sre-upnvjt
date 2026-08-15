@@ -507,7 +507,7 @@ export default function Home() {
                 {/* Eyebrow */}
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <div className="h-px w-6 bg-yellow-300 dark:bg-emerald-400" />
-                  <span className="text-[10px] sm:text-xs font-black tracking-[0.28em] text-yellow-300 dark:text-emerald-400 uppercase">
+                  <span className="text-xs sm:text-sm md:text-base font-black tracking-[0.28em] text-yellow-300 dark:text-emerald-400 uppercase">
                     {t("visitor.home.events_programs_eyebrow")}
                   </span>
                   <div className="h-px w-6 bg-yellow-300 dark:bg-emerald-400" />
