@@ -505,12 +505,10 @@ export default function Home() {
                 className="text-center max-w-2xl mx-auto"
               >
                 {/* Eyebrow */}
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <div className="h-px w-6 bg-yellow-300 dark:bg-emerald-400" />
+                <div className="flex items-center justify-center mb-2">
                   <span className="text-xs sm:text-sm md:text-base font-black tracking-[0.28em] text-yellow-300 dark:text-emerald-400 uppercase">
                     {t("visitor.home.events_programs_eyebrow")}
                   </span>
-                  <div className="h-px w-6 bg-yellow-300 dark:bg-emerald-400" />
                 </div>
 
                 <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-black tracking-tight text-white dark:text-white uppercase leading-tight">
@@ -570,12 +568,10 @@ export default function Home() {
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
               className="text-center mb-12 sm:mb-14 max-w-2xl mx-auto"
             >
-              <div className="flex items-center justify-center gap-2 mb-3">
-                <div className="h-px w-6 bg-yellow-300 dark:bg-emerald-400" />
-                <span className="text-[10px] sm:text-xs font-black tracking-[0.28em] text-yellow-300 dark:text-emerald-400 uppercase">
+              <div className="flex items-center justify-center mb-3">
+                <span className="text-xs sm:text-sm md:text-base font-black tracking-[0.28em] text-yellow-300 dark:text-emerald-400 uppercase">
                   {t("visitor.home.featured_projects_eyebrow")}
                 </span>
-                <div className="h-px w-6 bg-yellow-300 dark:bg-emerald-400" />
               </div>
 
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-black tracking-tight text-white dark:text-white uppercase leading-tight">
