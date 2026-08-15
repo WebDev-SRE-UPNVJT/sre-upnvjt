@@ -16,6 +16,10 @@ import {
   Handshake,
   Sparkles,
   Crown,
+  Rocket,
+  CheckCircle2,
+  Clock,
+  CalendarClock,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -84,6 +88,15 @@ const ARTICLES = [
 
 const PARTNERS = ["SRE Indonesia", "UPN Veteran Jawa Timur", "SRE UPNVJT"];
 
+function resolveLogoUrl(url) {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/")) {
+    return url;
+  }
+  const baseUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL || "https://cdn.webly.biz.id/";
+  return `${baseUrl.replace(/\/+$/, "")}/${url.replace(/^\/+/, "")}`;
+}
+
 function PartnerLogoImage({ partner, className }) {
   const [hasError, setHasError] = useState(false);
   const isStockPhoto = partner.logoUrl?.includes("unsplash.com");
@@ -99,7 +112,7 @@ function PartnerLogoImage({ partner, className }) {
 
   return (
     <img
-      src={partner.logoUrl}
+      src={resolveLogoUrl(partner.logoUrl)}
       alt={partner.name}
       onError={() => setHasError(true)}
       className={className}
@@ -137,11 +150,18 @@ const ACTIVITIES = [
   { id: 4, title: 'External Events', description: 'Participating in national and international renewable energy competitions and conferences.', image: '/images/about/PanelSurya.jpg' },
 ];
 
+const PROJECT_STATUS_CONFIG = {
+  ONGOING:   { label: "status_ongoing",   icon: Clock,         cls: "bg-yellow-300/20 text-yellow-300 dark:bg-yellow-400/15 dark:text-yellow-300" },
+  COMPLETED: { label: "status_completed", icon: CheckCircle2,   cls: "bg-emerald-300/20 text-white dark:bg-emerald-400/15 dark:text-emerald-300" },
+  PLANNED:   { label: "status_planned",   icon: CalendarClock,  cls: "bg-white/15 text-white dark:bg-white/10 dark:text-gray-300" },
+};
+
 export default function Home() {
   const { theme, resolvedTheme } = useTheme();
   const { t } = useLanguage();
   const [mounted, setMounted] = useState(false);
   const [dbActivities, setDbActivities] = useState([]);
+  const [featuredProjectsList, setFeaturedProjectsList] = useState([]);
 
   useEffect(() => {
     setMounted(true);
@@ -198,6 +218,11 @@ export default function Home() {
     fetch('/api/testimonials')
       .then(res => res.json())
       .then(data => { if (Array.isArray(data)) setPublicTestimonialsList(data); })
+      .catch(console.error);
+
+    fetch('/api/featured-projects/public')
+      .then(res => res.json())
+      .then(data => { if (Array.isArray(data)) setFeaturedProjectsList(data); })
       .catch(console.error);
     
     getPublicContent().then(res => {
@@ -322,10 +347,10 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* About Section */}
+        {/* ─── ABOUT SECTION (Emerald Theme) ─── */}
         <section
           id="about"
-          className="scroll-mt-20 relative bg-[#0bb37e] dark:bg-[#07130e] text-white py-14 sm:py-20 lg:py-24 px-6 sm:px-8 md:px-12 lg:px-20 flex items-center border-b-2 border-white/25 dark:border-transparent overflow-hidden"
+          className="scroll-mt-20 relative bg-[#099c6d] dark:bg-[#07130e] py-10 sm:py-16 md:py-24 px-6 sm:px-8 md:px-12 lg:px-20 overflow-hidden border-b-2 border-white/25 dark:border-transparent transition-colors duration-500"
         >
           {/* BACKGROUND ICONS — z-0 */}
           <div className="absolute inset-0 pointer-events-none z-0">
@@ -336,18 +361,18 @@ export default function Home() {
           </div>
 
           {/* MAIN GRID — z-10 */}
-          <div className="site-container relative z-10 w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-stretch">
+          <div className="max-w-7xl mx-auto w-full relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16">
 
             {/* LEFT COLUMN */}
             <div className="flex flex-col w-full">
               <div>
-                <h2 className="text-3xl lg:text-4xl font-black uppercase text-white leading-none">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-black uppercase text-white tracking-tight leading-tight">
                   {t("visitor.home.about_sre")}
                 </h2>
               </div>
 
               {/* Image — stretches to match right column height */}
-              <div className="relative w-full max-w-[520px] flex-1 mt-6 min-h-[320px]">
+              <div className="relative w-full max-w-[520px] flex-1 mt-6 min-h-[320px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border border-white/20 dark:border-white/10 group">
                 <img
                   src="/images/about/PanelSurya.jpg"
                   alt="Panel Surya SRE UPN JATIM"
@@ -368,8 +393,8 @@ export default function Home() {
               className="flex flex-col gap-5 sm:gap-6 w-full"
             >
               <div>
-                <h3 className="text-3xl lg:text-4xl font-black uppercase text-white">SRE INDONESIA</h3>
-                <p className="mt-3 text-white dark:text-gray-300 text-base leading-relaxed font-medium">
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-display font-black uppercase text-white tracking-tight">SRE INDONESIA</h3>
+                <p className="mt-2.5 sm:mt-3 text-white/95 dark:text-gray-200 text-sm sm:text-base leading-relaxed font-normal">
                   {t("visitor.home.about_desc_sre_id")}
                 </p>
               </div>
@@ -377,33 +402,64 @@ export default function Home() {
               <hr className="border-white/15 dark:border-gray-800" />
               
               <div>
-                <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-yellow-300 dark:text-emerald-400">SRE UPN JATIM</h3>
-                <p className="mt-2 sm:mt-2.5 text-white/95 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed font-normal">
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-display font-black uppercase text-yellow-300 dark:text-emerald-400 tracking-tight">SRE UPN JATIM</h3>
+                <p className="mt-2.5 sm:mt-3 text-white/95 dark:text-gray-200 text-sm sm:text-base leading-relaxed font-normal">
                   {t("visitor.home.about_desc_sre_upnvjt")}
                 </p>
               </div>
 
-              {/* Badge Row (Fully readable stat cards without truncation) */}
-              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              {/* Stat Row */}
+              <motion.div
+                variants={{
+                  hidden: {},
+                  show: { transition: { staggerChildren: 0.1, delayChildren: 0.15 } }
+                }}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, margin: "-60px" }}
+                className="flex items-stretch rounded-xl overflow-hidden border sm:border-2 border-yellow-300/60 dark:border-emerald-500/50"
+              >
                 {[
-                  { text: t("visitor.home.founded"), value: "Est. 2021", Icon: Sprout },
-                  { text: t("visitor.home.network"), value: "SRE Indonesia", Icon: Globe },
-                  { text: t("visitor.home.campus"), value: "UPN Veteran Jatim", Icon: Building2 }
-                ].map((stat, idx) => (
-                  <div
+                  { label: t("visitor.home.founded"), value: "Est. 2021", Icon: Sprout },
+                  { label: t("visitor.home.network"), value: "SRE Indonesia", Icon: Globe },
+                  { label: t("visitor.home.campus"), value: "UPN Veteran Jatim", Icon: Building2 }
+                ].map((stat, idx, arr) => (
+                  <motion.div
                     key={idx}
-                    className="rounded-xl p-2.5 sm:p-3.5 border-2 bg-[#099c6d] border-yellow-300/60 dark:bg-[#093021] dark:border-emerald-500/60 flex flex-col items-start gap-1 shadow-md select-none hover:border-yellow-300 hover:bg-[#088c62] dark:hover:bg-[#0d422e] transition-all duration-300"
+                    variants={{
+                      hidden: { opacity: 0, y: 12 },
+                      show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] } }
+                    }}
+                    whileHover={{ backgroundColor: "rgba(0,0,0,0.12)" }}
+                    transition={{ duration: 0.2 }}
+                    className={[
+                      "flex-1 flex flex-col gap-1.5 px-3 sm:px-4 py-3 sm:py-3.5 cursor-default select-none",
+                      idx < arr.length - 1
+                        ? "border-r border-yellow-300/40 dark:border-emerald-500/40"
+                        : ""
+                    ].join(" ")}
                   >
-                    <stat.Icon className="text-yellow-300 dark:text-emerald-400 w-4 h-4 sm:w-5 sm:h-5 mb-0.5 shrink-0 drop-shadow-sm" aria-hidden="true" />
-                    <span className="text-[9px] sm:text-[10px] md:text-[11px] font-black uppercase tracking-wider text-yellow-300 dark:text-emerald-300 leading-tight">
-                      {stat.text}
-                    </span>
-                    <span className="text-[11px] sm:text-xs md:text-sm font-black text-white dark:text-gray-100 leading-tight break-words">
+                    <div className="flex items-center gap-1.5">
+                      <motion.span
+                        whileHover={{ scale: 1.2, rotate: 8 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                        className="inline-flex shrink-0"
+                      >
+                        <stat.Icon
+                          className="w-3.5 h-3.5 text-yellow-300 dark:text-emerald-400"
+                          aria-hidden="true"
+                        />
+                      </motion.span>
+                      <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50 dark:text-white/40 leading-none">
+                        {stat.label}
+                      </span>
+                    </div>
+                    <span className="text-[13px] sm:text-sm font-bold text-white dark:text-gray-100 leading-snug">
                       {stat.value}
                     </span>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
 
               {/* CTA Link */}
               <div className="pt-1 sm:pt-2">
@@ -411,7 +467,7 @@ export default function Home() {
                   href="/about"
                   className="group inline-flex items-center gap-2.5 w-fit focus-visible:outline-emerald-600 focus-visible:outline-offset-4 rounded"
                 >
-                  <span className="relative text-xs sm:text-[13px] md:text-[14px] font-bold tracking-[0.15em] uppercase text-white dark:text-white after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[1.5px] after:w-0 after:bg-yellow-300 dark:after:bg-emerald-400 after:transition-all after:duration-300 group-hover:after:w-full">
+                  <span className="relative text-xs sm:text-sm font-black tracking-[0.15em] uppercase text-white dark:text-white after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-0 after:bg-yellow-300 dark:after:bg-emerald-400 after:transition-all after:duration-300 group-hover:after:w-full">
                     {t("visitor.home.learn_more")}
                   </span>
                   <motion.span
@@ -427,54 +483,67 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Activity Section */}
+        {/* ─── Events & Programs Section ──────────────────────────────── */}
         <section
           id="activity"
-          className="scroll-mt-20 bg-[#0cc48a] dark:bg-[#040e0a] py-8 lg:py-12 px-6 lg:px-20 border-b-2 border-white/25 dark:border-transparent relative overflow-hidden flex items-center justify-center lg:h-screen lg:min-h-screen"
+          className="scroll-mt-20 bg-[#0bb882] dark:bg-[#031f16] py-12 sm:py-16 px-6 sm:px-8 md:px-12 lg:px-20 border-t-2 border-white/20 dark:border-white/5 relative overflow-hidden flex items-center justify-center"
         >
+          {/* faint dot-matrix texture */}
+          <div className="absolute inset-0 pointer-events-none opacity-[0.04] bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px]" />
+          {/* ambient glow */}
+          <div className="absolute -top-32 right-0 w-[420px] h-[420px] bg-yellow-300/8 dark:bg-emerald-500/8 rounded-full blur-[120px] pointer-events-none" />
+
           <div className="w-full relative z-10 flex flex-col items-center">
-            <div className="site-container w-full flex flex-col justify-between items-center gap-4">
-              
-              {/* Header */}
+            <div className="max-w-7xl mx-auto w-full flex flex-col justify-between items-center gap-6">
+
+              {/* Header — centered, exactly like original Our Activity */}
               <motion.div
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 18 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
+                transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
                 className="text-center max-w-2xl mx-auto"
               >
+                {/* Eyebrow */}
                 <div className="flex items-center justify-center gap-2 mb-2">
-                  <span className="text-yellow-300 dark:text-emerald-400 text-xl leading-none select-none font-black">•</span>
-                  <span className="text-[15px] md:text-[17px] font-black tracking-[0.25em] text-yellow-300 dark:text-emerald-400 uppercase drop-shadow-md">
-                    {t("visitor.home.what_we_do")}
+                  <div className="h-px w-6 bg-yellow-300 dark:bg-emerald-400" />
+                  <span className="text-[10px] sm:text-xs font-black tracking-[0.28em] text-yellow-300 dark:text-emerald-400 uppercase">
+                    {t("visitor.home.events_programs_eyebrow")}
                   </span>
+                  <div className="h-px w-6 bg-yellow-300 dark:bg-emerald-400" />
                 </div>
-                <h2 className="text-[36px] md:text-[44px] font-display font-black tracking-tight text-white dark:text-white uppercase leading-[1.1]">
-                  {t("visitor.home.our_activity_prefix")}<span className="text-yellow-300 dark:text-emerald-400">{t("visitor.home.our_activity_highlight")}</span>
+
+                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-black tracking-tight text-white dark:text-white uppercase leading-tight">
+                  {t("visitor.home.our_activity_prefix")}
+                  <span className="text-yellow-300 dark:text-emerald-400">
+                    {t("visitor.home.our_activity_highlight")}
+                  </span>
                 </h2>
-                <div className="h-[4px] w-20 bg-yellow-300 dark:bg-emerald-400 mx-auto mt-2 rounded-full" aria-hidden="true" />
-                <p className="text-[15px] md:text-[16px] text-white dark:text-gray-300 max-w-xl mx-auto mt-3 font-bold leading-relaxed">
-                  {t("visitor.home.activity_desc")}
+
+                <div className="h-[3.5px] w-16 sm:w-20 bg-yellow-300 dark:bg-emerald-400 mx-auto mt-2 rounded-full" aria-hidden="true" />
+
+                <p className="text-sm sm:text-base text-white/90 dark:text-gray-200 max-w-xl mx-auto mt-2.5 font-normal leading-relaxed">
+                  {t("visitor.home.events_programs_desc")}
                 </p>
               </motion.div>
 
-              {/* 3 Cards Carousel Row */}
+              {/* Full-width Carousel — exactly like original */}
               <ActivityCarousel activities={dbActivities.length > 0 ? dbActivities : localActivities} />
 
-              {/* SEE ALL ACTIVITIES CTA Button */}
-              <div className="w-full text-center mt-6">
+              {/* CTA button — centered */}
+              <div className="w-full text-center mt-2">
                 <motion.div
-                  initial={{ opacity: 0, y: 16 }}
+                  initial={{ opacity: 0, y: 14 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.6 }}
                 >
                   <Link
                     href="/activity"
-                    className="group inline-flex items-center gap-2 border-2 border-yellow-300/60 hover:bg-yellow-300 hover:text-[#0cc48a] text-yellow-300 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#040e0a] font-bold tracking-wider text-xs uppercase px-8 py-3.5 rounded-full transition-all duration-300 focus-visible:outline-yellow-300"
+                    className="group inline-flex items-center gap-2 border-2 border-yellow-300/60 hover:bg-yellow-300 hover:text-[#0bb882] text-yellow-300 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#031f16] font-bold tracking-wider text-xs uppercase px-7 py-3 rounded-full transition-all duration-300 focus-visible:outline-yellow-300"
                   >
-                    {t("visitor.home.see_all")}
-                    <ArrowUpRight className="w-3.5 h-3.5 text-yellow-300 group-hover:text-[#0cc48a] dark:text-emerald-400 dark:group-hover:text-[#040e0a] transition-colors" aria-hidden="true" />
+                    {t("visitor.home.events_programs_cta")}
+                    <ArrowUpRight className="w-3.5 h-3.5 text-yellow-300 group-hover:text-[#0bb882] dark:text-emerald-400 dark:group-hover:text-[#031f16] transition-colors" aria-hidden="true" />
                   </Link>
                 </motion.div>
               </div>
@@ -482,6 +551,143 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* ─── Featured Projects Section ──────────────────────────────── */}
+        <section
+          id="projects"
+          className="scroll-mt-20 bg-[#087a58] dark:bg-[#020d09] py-14 sm:py-20 lg:py-24 px-6 sm:px-8 md:px-12 lg:px-20 border-t-2 border-black/10 dark:border-white/5 relative overflow-hidden"
+        >
+          {/* Subtle grid texture */}
+          <div className="absolute inset-0 pointer-events-none opacity-[0.04] bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:44px_44px]" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-yellow-300/5 dark:bg-emerald-500/8 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-emerald-300/8 dark:bg-emerald-700/10 rounded-full blur-[80px] pointer-events-none" />
+
+          <div className="max-w-7xl mx-auto w-full relative z-10">
+
+            {/* Section Header */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              className="text-center mb-12 sm:mb-14 max-w-2xl mx-auto"
+            >
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <div className="h-px w-6 bg-yellow-300 dark:bg-emerald-400" />
+                <span className="text-[10px] sm:text-xs font-black tracking-[0.28em] text-yellow-300 dark:text-emerald-400 uppercase">
+                  {t("visitor.home.featured_projects_eyebrow")}
+                </span>
+                <div className="h-px w-6 bg-yellow-300 dark:bg-emerald-400" />
+              </div>
+
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-black tracking-tight text-white dark:text-white uppercase leading-tight">
+                {t("visitor.home.featured_projects_title_prefix")}
+                <span className="text-yellow-300 dark:text-emerald-400">
+                  {t("visitor.home.featured_projects_title_highlight")}
+                </span>
+              </h2>
+
+              <div className="h-[3.5px] w-16 sm:w-20 bg-yellow-300 dark:bg-emerald-400 mx-auto mt-2 rounded-full" aria-hidden="true" />
+
+              <p className="text-sm sm:text-base text-white/75 dark:text-gray-400 mt-3 leading-relaxed">
+                {t("visitor.home.featured_projects_desc")}
+              </p>
+            </motion.div>
+
+            {featuredProjectsList.length === 0 ? (
+              /* Stunning Coming Soon Placeholder */
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="w-full max-w-xl mx-auto rounded-3xl p-8 sm:p-10 border border-white/20 dark:border-white/10 bg-white/10 dark:bg-white/[0.03] backdrop-blur-md text-center flex flex-col items-center gap-5 relative overflow-hidden shadow-2xl"
+              >
+                {/* Glowing animated background circle */}
+                <div className="absolute -top-12 -right-12 w-32 h-32 bg-yellow-300/10 dark:bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
+                
+                <div className="p-4 sm:p-5 rounded-full bg-yellow-300/20 text-yellow-300 dark:bg-[#0bb882]/20 dark:text-emerald-300 animate-pulse">
+                  <Rocket className="w-8 h-8 sm:w-10 sm:h-10" />
+                </div>
+                
+                <div className="flex flex-col gap-2">
+                  <h3 className="text-xl sm:text-2xl font-bold text-white dark:text-gray-100 tracking-tight">
+                    {t("visitor.home.projects_coming_soon_title")}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-white/70 dark:text-gray-400 leading-relaxed max-w-md">
+                    {t("visitor.home.projects_coming_soon_desc")}
+                  </p>
+                </div>
+
+                {/* Pulsing indicator light */}
+                <div className="flex items-center gap-2 mt-2 px-3.5 py-1.5 rounded-full bg-black/25 text-yellow-300 dark:text-emerald-400 text-xs font-semibold select-none border border-white/5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 dark:bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-300 dark:bg-emerald-400"></span>
+                  </span>
+                  Coming Soon
+                </div>
+              </motion.div>
+            ) : (
+              /* Project Cards Grid */
+              <motion.div
+                variants={staggerParent}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, margin: "-60px" }}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6"
+              >
+                {featuredProjectsList.map((project) => {
+                  const cfg = PROJECT_STATUS_CONFIG[project.status] || PROJECT_STATUS_CONFIG.ONGOING;
+                  const StatusIcon = cfg.icon;
+                  return (
+                    <motion.div
+                      key={project.id}
+                      variants={staggerChild}
+                      whileHover={{ y: -6, transition: { duration: 0.22, ease: "easeOut" } }}
+                      className="group relative bg-white/10 dark:bg-white/[0.05] border border-white/20 dark:border-white/8 rounded-2xl sm:rounded-3xl overflow-hidden flex flex-col shadow-md hover:shadow-2xl hover:shadow-black/30 transition-shadow duration-300"
+                    >
+                      {/* Image */}
+                      <div className="relative w-full aspect-[16/9] overflow-hidden flex-shrink-0">
+                        {project.imageUrl ? (
+                          <img
+                            src={project.imageUrl}
+                            alt={project.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-emerald-800/55 to-teal-950/60 flex items-center justify-center">
+                            <Rocket className="w-10 h-10 text-white/25" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+                        {/* Status badge */}
+                        <div className={`absolute top-3 right-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold backdrop-blur-md ${cfg.cls}`}>
+                          <StatusIcon className="w-3 h-3" aria-hidden="true" />
+                          {t(`visitor.home.${cfg.label}`)}
+                        </div>
+                      </div>
+
+                      {/* Card Content */}
+                      <div className="flex flex-col gap-2 p-4 sm:p-5 flex-1">
+                        <span className="text-[10px] font-black uppercase tracking-[0.22em] text-yellow-300/80 dark:text-emerald-400/70">
+                          {project.category}
+                        </span>
+                        <h3 className="text-base sm:text-[17px] font-bold text-white dark:text-gray-100 leading-snug line-clamp-2">
+                          {project.title}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-white/60 dark:text-gray-400 leading-relaxed line-clamp-3 flex-1">
+                          {project.description}
+                        </p>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            )}
+          </div>
+        </section>
+
 
         {/* Testimonials */}
         {publicTestimonialsList.length > 0 && (
@@ -494,9 +700,9 @@ export default function Home() {
                 transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                 className="mb-10 sm:mb-12 text-center max-w-xl mx-auto"
               >
-                <span className="text-xs sm:text-sm font-bold tracking-widest text-yellow-300 dark:text-emerald-400 uppercase mb-2 block">{t("visitor.home.testimonials")}</span>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-black tracking-tight text-white dark:text-white uppercase leading-tight">{t("visitor.home.testimonials_title")}</h2>
-                <p className="text-xs sm:text-sm md:text-base text-white/90 dark:text-white/60 mt-2.5 font-normal leading-relaxed">
+                <span className="text-xs sm:text-sm font-black tracking-widest text-yellow-300 dark:text-emerald-400 uppercase mb-2 block">{t("visitor.home.testimonials")}</span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-black tracking-tight text-white dark:text-white uppercase leading-tight">{t("visitor.home.testimonials_title")}</h2>
+                <p className="text-sm sm:text-base text-white/90 dark:text-white/70 mt-2.5 font-normal leading-relaxed">
                   {t("visitor.home.testimonials_desc")}
                 </p>
               </motion.div>
@@ -525,7 +731,7 @@ export default function Home() {
                       )}
                       <div>
                         <div className="font-bold text-xs sm:text-sm text-white dark:text-white">{test.authorName}</div>
-                        <div className="text-[10px] sm:text-[11px] text-white/70 dark:text-white/40">{test.authorPosition}</div>
+                        <div className="text-[11px] sm:text-xs text-white/75 dark:text-white/50">{test.authorPosition}</div>
                       </div>
                     </div>
                   </motion.div>
@@ -574,18 +780,18 @@ export default function Home() {
                   transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
                   className="flex flex-col items-center max-w-2xl"
                 >
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 dark:bg-emerald-500/10 border border-white/25 dark:border-emerald-500/20 text-yellow-300 dark:text-emerald-400 text-[11px] sm:text-xs font-black tracking-widest uppercase shadow-md mb-3.5 backdrop-blur-md">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 dark:bg-emerald-500/10 border border-white/25 dark:border-emerald-500/20 text-yellow-300 dark:text-emerald-400 text-xs sm:text-sm font-black tracking-widest uppercase shadow-md mb-3 backdrop-blur-md">
                     <Handshake className="w-3.5 h-3.5 text-yellow-300 dark:text-emerald-400" />
                     <span>{t("visitor.home.partners")}</span>
                   </div>
 
-                  <h2 className="text-3xl sm:text-5xl md:text-6xl font-display font-black tracking-tight text-white uppercase drop-shadow-md">
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-black tracking-tight text-white uppercase drop-shadow-md leading-tight">
                     {t("visitor.home.partners_prefix") || "MITRA "}<span className="text-yellow-300 dark:text-emerald-400">{t("visitor.home.partners_highlight") || "KAMI"}</span>
                   </h2>
 
                   <div className="h-[3px] sm:h-[4px] w-16 sm:w-20 bg-yellow-300 dark:bg-emerald-400 mx-auto mt-3 rounded-full" aria-hidden="true" />
 
-                  <p className="text-xs sm:text-sm md:text-base text-white/90 dark:text-gray-300 mt-3 leading-relaxed font-normal max-w-lg">
+                  <p className="text-sm sm:text-base text-white/90 dark:text-gray-200 mt-2.5 sm:mt-3 leading-relaxed font-normal max-w-lg">
                     {t("visitor.home.partners_desc")}
                   </p>
                 </motion.div>

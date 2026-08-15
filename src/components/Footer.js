@@ -29,13 +29,13 @@ const TikTokIcon = (props) => (
 const SOCIAL_LINKS = [
   {
     label: "Instagram",
-    href: "https://instagram.com/sre.upnvjt",
+    href: "https://www.instagram.com/sre.upnjatim/",
     Icon: InstagramIcon,
     aria: "Follow SRE UPNVJT on Instagram",
   },
   {
     label: "LinkedIn",
-    href: "https://linkedin.com/company/sre-upnvjt",
+    href: "https://www.linkedin.com/company/sreupnjatim/",
     Icon: LinkedinIcon,
     aria: "SRE UPNVJT on LinkedIn",
   },

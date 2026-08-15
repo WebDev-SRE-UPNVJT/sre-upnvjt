@@ -1001,7 +1001,21 @@
       "social_project_title": "Proyek Sosial",
       "social_project_desc": "Inisiatif pengabdian masyarakat yang berfokus pada akses energi untuk daerah tertinggal.",
       "external_events_title": "Acara Eksternal",
-      "external_events_desc": "Berpartisipasi dalam kompetisi dan konferensi energi terbarukan nasional dan internasional."
+      "external_events_desc": "Berpartisipasi dalam kompetisi dan konferensi energi terbarukan nasional dan internasional.",
+      "events_programs_eyebrow": "EVENTS & PROGRAMS",
+      "events_programs_title": "Yang Kami Lakukan",
+      "events_programs_desc": "Dari workshop dan seminar hingga kampanye lapangan — jelajahi inisiatif yang dijalankan SRE UPN JATIM.",
+      "events_programs_cta": "LIHAT SEMUA AKTIVITAS",
+      "featured_projects_eyebrow": "PROYEK UNGGULAN",
+      "featured_projects_title_prefix": "Dampak ",
+      "featured_projects_title_highlight": "Nyata",
+      "featured_projects_desc": "Inisiatif nyata yang mengatasi tantangan energi terbarukan — dari infrastruktur kampus hingga elektrifikasi komunitas.",
+      "featured_projects_cta": "Pelajari Lebih",
+      "status_ongoing": "Berjalan",
+      "status_completed": "Selesai",
+      "status_planned": "Direncanakan",
+      "projects_coming_soon_title": "Inisiatif Sedang Bersiap",
+      "projects_coming_soon_desc": "Tim kami sedang merancang proyek energi bersih berkelanjutan untuk memberdayakan masyarakat. Tetap pantau!"
     },
     "about": {
       "title_badge": "Tentang SRE UPNVJT",

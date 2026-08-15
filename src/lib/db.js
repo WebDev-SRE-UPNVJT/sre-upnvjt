@@ -14,12 +14,19 @@ if (!process.env.DATABASE_URL) {
 let client;
 let db;
 
+const dbConfig = {
+  max: 20,
+  idle_timeout: 30,
+  connect_timeout: 10,
+  prepare: false,
+};
+
 if (process.env.NODE_ENV === 'production') {
-  client = postgres(process.env.DATABASE_URL, { max: 5, prepare: false });
+  client = postgres(process.env.DATABASE_URL, dbConfig);
   db = drizzle(client, { schema });
 } else {
   if (!globalThis.globalDbClient) {
-    globalThis.globalDbClient = postgres(process.env.DATABASE_URL, { max: 5, prepare: false });
+    globalThis.globalDbClient = postgres(process.env.DATABASE_URL, dbConfig);
   }
   client = globalThis.globalDbClient;
   

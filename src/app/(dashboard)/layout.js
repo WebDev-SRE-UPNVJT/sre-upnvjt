@@ -7,7 +7,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   LayoutDashboard, Users, FileText, CheckSquare, Shield,
-  Settings, LogOut, Menu, X, CreditCard, Box, ChevronLeft, ChevronRight, FolderKanban, ClipboardCheck, FolderOpen, Newspaper, Presentation, ShoppingBag, Handshake, Activity, Trophy, Star, Target, ShieldCheck, Link2, BarChart2
+  Settings, LogOut, Menu, X, CreditCard, Box, ChevronLeft, ChevronRight, FolderKanban, ClipboardCheck, FolderOpen, Newspaper, Presentation, ShoppingBag, Handshake, Activity, Trophy, Star, Target, ShieldCheck, Link2, BarChart2, Rocket
 } from "lucide-react";
 
 import { hasAccess } from "@/lib/permissions";
@@ -22,6 +22,12 @@ export default function DashboardLayout({ children }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
+  React.useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status, router]);
+
   if (status === "loading") {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-[#07130e] flex items-center justify-center">
@@ -31,7 +37,6 @@ export default function DashboardLayout({ children }) {
   }
 
   if (status === "unauthenticated") {
-    router.push("/login");
     return null;
   }
 
@@ -52,6 +57,7 @@ export default function DashboardLayout({ children }) {
     { name: "Testimonials", icon: Star, href: "/testimonials", module: "content" },
     { name: t("sidebar.merch"), icon: ShoppingBag, href: "/merch", module: "merchandise" },
     { name: t("sidebar.partners"), icon: Handshake, href: "/partners", module: "partners" },
+    { name: "Featured Projects", icon: Rocket, href: "/featured-projects", module: "featured-projects" },
 
     // Member Operations
     { name: "Literature Bank", icon: FolderOpen, href: "/literature", module: "literature" },
@@ -72,6 +78,7 @@ export default function DashboardLayout({ children }) {
   const allowedNavItems = navItems.filter(item => {
     if (item.module === "overview" || item.module === "settings") return true;
     if (item.module === "partners") return role === "SUPER_ADMIN";
+    if (item.module === "featured-projects") return role === "SUPER_ADMIN" || role === "ADMIN";
     if (item.module === "documents") return hasAccess(session?.user, "documents", "read") || role === "SUPER_ADMIN" || role === "ADMIN";
     return hasAccess(session?.user, item.module, "read");
   }).sort((a, b) => {

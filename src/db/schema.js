@@ -568,3 +568,26 @@ export const pageViewRelations = relations(pageView, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+// 19. Featured Projects
+export const featuredProject = pgTable('featuredProject', {
+  id: serial('id').primaryKey(),
+  title: varchar('title', { length: 255 }).notNull(),
+  category: varchar('category', { length: 100 }).notNull(), // e.g., Infrastructure, Research, Social Impact
+  status: varchar('status', { length: 50 }).notNull().default('ONGOING'), // ONGOING | COMPLETED | PLANNED
+  description: text('description').notNull(),
+  imageUrl: varchar('imageUrl', { length: 1000 }),
+  isPublished: boolean('isPublished').default(false).notNull(),
+  order: integer('order').default(0).notNull(), // display ordering
+  createdById: integer('createdById').references(() => user.id).notNull(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
+});
+
+export const featuredProjectRelations = relations(featuredProject, ({ one }) => ({
+  createdBy: one(user, {
+    fields: [featuredProject.createdById],
+    references: [user.id],
+  }),
+}));
+

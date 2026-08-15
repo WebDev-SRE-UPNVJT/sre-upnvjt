@@ -10,6 +10,15 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageProvider";
 
+function resolveLogoUrl(url) {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/")) {
+    return url;
+  }
+  const baseUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL || "https://cdn.webly.biz.id/";
+  return `${baseUrl.replace(/\/+$/, "")}/${url.replace(/^\/+/, "")}`;
+}
+
 const EMPTY_PARTNER = {
   name: "",
   logoUrl: "",
@@ -218,7 +227,7 @@ export default function PartnerClient({ initialPartners }) {
                   <div className="relative aspect-video w-full overflow-hidden bg-white dark:bg-white/5 shadow-sm dark:shadow-none flex items-center justify-center p-4 border-b border-gray-200 dark:border-white/5">
                     {partner.logoUrl ? (
                       <img
-                        src={partner.logoUrl}
+                        src={resolveLogoUrl(partner.logoUrl)}
                         alt={partner.name}
                         className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-500"
                       />
@@ -337,7 +346,7 @@ export default function PartnerClient({ initialPartners }) {
                     </div>
                     {currentPartner.logoUrl && (
                       <div className="w-full h-32 rounded-lg overflow-hidden shrink-0 border border-gray-200 dark:border-white/10 bg-white dark:bg-white/10 shadow-sm dark:shadow-none flex items-center justify-center p-4">
-                        <img src={currentPartner.logoUrl} alt="Preview" className="max-w-full max-h-full object-contain" />
+                        <img src={resolveLogoUrl(currentPartner.logoUrl)} alt="Preview" className="max-w-full max-h-full object-contain" />
                       </div>
                     )}
                   </div>
