@@ -779,8 +779,8 @@ export default function Home() {
                         
                         {/* Priority Badge */}
                         {isPriorityOrAnnouncement && (
-                          <div className="absolute top-3 left-3 z-20 flex items-center gap-1 px-2.5 py-1 rounded-full bg-yellow-300 text-slate-950 shadow-lg text-[9px] font-black uppercase tracking-wider">
-                            <Sparkles className="w-3 h-3 text-slate-950" />
+                          <div className="absolute top-3 left-3 z-20 flex items-center gap-1 px-2.5 py-1 rounded-full bg-yellow-300 dark:bg-emerald-400 text-slate-950 dark:text-[#0b120f] shadow-lg text-[9px] font-black uppercase tracking-wider">
+                            <Sparkles className="w-3 h-3 text-slate-950 dark:text-[#0b120f]" />
                             <span>{t("visitor.home.priority_activity_badge") || "SEDANG DIBUKA"}</span>
                           </div>
                         )}
