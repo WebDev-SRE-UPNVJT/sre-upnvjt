@@ -332,7 +332,7 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="absolute bottom-6 sm:bottom-10 right-6 sm:right-12 md:right-16 lg:right-24 z-10 flex flex-col items-end pr-14 sm:pr-0">
+          <div className="absolute bottom-6 sm:bottom-10 right-6 sm:right-12 md:right-16 lg:right-24 z-10 flex flex-col items-end">
             <span className={`text-[12px] sm:text-[13px] md:text-[14px] font-medium tracking-wide text-right ${
               isLight ? "text-white" : "text-white/90 drop-shadow-md"
             }`}>
