@@ -6,26 +6,42 @@ import { eq, count, desc } from "drizzle-orm";
 
 export async function getDashboardStats(role, departmentId, userId) {
   try {
-    const [{ value: totalUsers }] = await db.select({ value: count() }).from(user).where(eq(user.isActive, true));
-    const [{ value: publishedArticles }] = await db.select({ value: count() }).from(content).where(eq(content.isPublished, true));
-    const [{ value: totalDepartments }] = await db.select({ value: count() }).from(department);
-    const [{ value: totalActivities }] = await db.select({ value: count() }).from(event);
+    // Run all 7 database queries in parallel
+    const [
+      uCountRes,
+      cCountRes,
+      dCountRes,
+      eCountRes,
+      recentArticles,
+      recentSubmissions,
+      publishedList
+    ] = await Promise.all([
+      db.select({ value: count() }).from(user).where(eq(user.isActive, true)),
+      db.select({ value: count() }).from(content).where(eq(content.isPublished, true)),
+      db.select({ value: count() }).from(department),
+      db.select({ value: count() }).from(event),
+      db.query.content.findMany({
+        orderBy: [desc(content.createdAt)],
+        limit: 5,
+      }),
+      db.query.taskSubmission.findMany({
+        orderBy: [desc(taskSubmission.submittedAt)],
+        limit: 5,
+        with: {
+          member: { columns: { name: true } },
+          task: { columns: { title: true } },
+        },
+      }),
+      db.query.content.findMany({
+        where: eq(content.isPublished, true),
+        columns: { createdAt: true },
+      })
+    ]);
 
-    // Fetch last 5 articles
-    const recentArticles = await db.query.content.findMany({
-      orderBy: [desc(content.createdAt)],
-      limit: 5,
-    });
-
-    // Fetch last 5 task submissions
-    const recentSubmissions = await db.query.taskSubmission.findMany({
-      orderBy: [desc(taskSubmission.submittedAt)],
-      limit: 5,
-      with: {
-        member: { columns: { name: true } },
-        task: { columns: { title: true } },
-      },
-    });
+    const totalUsers = uCountRes[0]?.value || 0;
+    const publishedArticles = cCountRes[0]?.value || 0;
+    const totalDepartments = dCountRes[0]?.value || 0;
+    const totalActivities = eCountRes[0]?.value || 0;
 
     // Format and combine
     const formattedArticles = recentArticles.map(art => ({
@@ -47,12 +63,6 @@ export async function getDashboardStats(role, departmentId, userId) {
     const recentActivities = [...formattedArticles, ...formattedSubmissions]
       .sort((a, b) => new Date(b.date) - new Date(a.date))
       .slice(0, 5);
-
-    // Get 12-month publish counts
-    const publishedList = await db.query.content.findMany({
-      where: eq(content.isPublished, true),
-      columns: { createdAt: true },
-    });
 
     const chartData = Array(12).fill(0);
     publishedList.forEach(art => {
