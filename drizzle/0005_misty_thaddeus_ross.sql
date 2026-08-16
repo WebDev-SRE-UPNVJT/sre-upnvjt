@@ -1,0 +1,1 @@
+ALTER TABLE "activity" ADD COLUMN "isPriority" boolean DEFAULT false NOT NULL;

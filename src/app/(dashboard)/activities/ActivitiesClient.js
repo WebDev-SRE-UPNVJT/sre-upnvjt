@@ -320,6 +320,23 @@ export default function ActivitiesClient({ initialActivities, currentUser }) {
                 />
               </div>
 
+              {/* Priority Activity toggle */}
+              <div className="flex items-center justify-between p-4 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 rounded-xl">
+                <div>
+                  <div className="text-gray-900 dark:text-white font-medium text-[14px]">Priority Activity</div>
+                  <div className="text-gray-500 dark:text-white/40 text-[12px]">Tampilkan kegiatan ini di bagian utama (Featured Section)</div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    name="isPriority" 
+                    className="sr-only peer" 
+                    defaultChecked={currentActivity?.isPriority || false} 
+                  />
+                  <div className="w-11 h-6 bg-gray-200 dark:bg-white/10 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary" />
+                </label>
+              </div>
+
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-white/70 uppercase tracking-wider mb-2">
                   Image (Optional)

@@ -22,6 +22,7 @@ export const activityService = {
       type: data.type,
       link: data.link || null,
       linkType: data.linkType || 'detail',
+      isPriority: data.isPriority ?? false,
     }).returning();
     return newActivity;
   },
@@ -33,6 +34,7 @@ export const activityService = {
     };
     if (data.location !== undefined) updateData.location = data.location;
     if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl;
+    if (data.isPriority !== undefined) updateData.isPriority = data.isPriority;
     if (data.date) {
       updateData.date = new Date(data.date);
     }
