@@ -54,6 +54,7 @@ export async function createActivityAction(formData) {
       type: formData.get("type"),
       link: formData.get("link") || null,
       linkType: formData.get("linkType") || "detail",
+      isPriority: formData.get("isPriority") === "true" || formData.get("isPriority") === "on",
     };
 
     const imageFile = formData.get("image");
@@ -90,6 +91,7 @@ export async function updateActivityAction(id, formData) {
       type: formData.get("type"),
       link: formData.get("link") || null,
       linkType: formData.get("linkType") || "detail",
+      isPriority: formData.get("isPriority") === "true" || formData.get("isPriority") === "on",
     };
 
     const imageFile = formData.get("image");

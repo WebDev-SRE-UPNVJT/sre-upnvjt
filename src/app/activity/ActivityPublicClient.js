@@ -25,11 +25,19 @@ export default function ActivityPublicClient({ activities = [] }) {
 
   const sortedActivities = [...activities].sort((a, b) => new Date(b.date) - new Date(a.date)); // Most recent first
 
+  const priorityActivities = activities
+    .filter(a => a.isPriority)
+    .sort((a, b) => new Date(b.date) - new Date(a.date)); // Most recent priority first
+
   let featuredActivity = null;
   let remainingActivities = [];
   let isUpcomingFeatured = false;
 
-  if (upcomingActivities.length > 0) {
+  if (priorityActivities.length > 0) {
+    featuredActivity = priorityActivities[0];
+    isUpcomingFeatured = new Date(featuredActivity.date) >= now;
+    remainingActivities = sortedActivities; // Do not filter out the featured activity
+  } else if (upcomingActivities.length > 0) {
     featuredActivity = upcomingActivities[0];
     isUpcomingFeatured = true;
     remainingActivities = sortedActivities; // Do not filter out the featured activity
@@ -116,14 +124,14 @@ export default function ActivityPublicClient({ activities = [] }) {
 
       {/* Featured Activity */}
       {featuredActivity && (
-        <section className="py-16 md:py-24 px-6 md:px-12 relative overflow-hidden bg-[#e8ecc4] dark:bg-white/[0.01] transition-colors duration-300">
+        <section className="py-16 md:py-24 px-6 md:px-12 relative overflow-hidden bg-[#0aa373] dark:bg-white/[0.01] transition-colors duration-300">
           <div className="max-w-7xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
-              className="bg-white border border-[#d0d6a8] dark:bg-white/[0.02] dark:border-white/10 rounded-3xl p-6 md:p-10 shadow-lg backdrop-blur-2xl hover:border-[#0cc48a]/40 dark:hover:border-emerald-500/30 transition-all duration-500 group relative overflow-hidden"
+              className="bg-[#e8ecc4] border border-[#d0d6a8]/60 dark:bg-white/[0.02] dark:border-white/10 rounded-3xl p-6 md:p-10 shadow-lg backdrop-blur-2xl hover:border-[#0cc48a]/40 dark:hover:border-emerald-500/30 transition-all duration-500 group relative overflow-hidden"
             >
               {/* Background Glow */}
               <div className="absolute -top-32 -right-32 w-80 h-80 bg-[#0cc48a]/10 dark:bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-[#0cc48a]/20 dark:group-hover:bg-emerald-500/20 transition-all duration-500" />
@@ -158,10 +166,10 @@ export default function ActivityPublicClient({ activities = [] }) {
                   <div className="flex items-center gap-3">
                     <span className={`inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-widest shadow-sm ${
                       isUpcomingFeatured 
-                        ? "bg-amber-500/10 text-amber-800 border border-amber-500/20 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30" 
+                        ? "bg-amber-500/10 text-amber-800 border border-amber-500/20 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30" 
                         : "bg-[#0cc48a]/10 text-[#07130e] border border-[#0cc48a]/20 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30"
                     }`}>
-                      <span className={`w-2 h-2 rounded-full ${isUpcomingFeatured ? "bg-amber-500 animate-ping" : "bg-[#0cc48a] dark:bg-emerald-400 animate-pulse"}`} />
+                      <span className={`w-2 h-2 rounded-full ${isUpcomingFeatured ? "bg-amber-500 dark:bg-emerald-400 animate-ping" : "bg-[#0cc48a] dark:bg-emerald-400 animate-pulse"}`} />
                       {isUpcomingFeatured ? t("visitor.activity.upcoming") : t("visitor.activity.latest")}
                     </span>
                   </div>
