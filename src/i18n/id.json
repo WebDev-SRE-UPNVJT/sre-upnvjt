@@ -1022,7 +1022,13 @@
       "activity_badge_internal": "Internal",
       "activity_badge_external": "Eksternal",
       "activity_badge_workshop": "Workshop",
-      "activity_badge_meeting": "Rapat"
+      "activity_badge_meeting": "Rapat",
+      "priority_activity_badge": "KEGIATAN UTAMA",
+      "announcement_modal_title": "PENGUMUMAN KEGIATAN UTAMA",
+      "announcement_modal_eyebrow": "AGENDA PRIORITAS TERDEKAT",
+      "announcement_modal_close": "Tutup Pengumuman",
+      "announcement_modal_action_register": "Daftar Acara Sekarang",
+      "announcement_modal_action_detail": "Lihat Detail Acara"
     },
     "about": {
       "title_badge": "Tentang SRE UPNVJT",

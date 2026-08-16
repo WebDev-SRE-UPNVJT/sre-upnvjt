@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronRight,
@@ -21,6 +22,8 @@ import {
   Clock,
   CalendarClock,
   MapPin,
+  X,
+  Tag,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -98,6 +101,15 @@ function resolveLogoUrl(url) {
   return `${baseUrl.replace(/\/+$/, "")}/${url.replace(/^\/+/, "")}`;
 }
 
+function resolveImageUrl(url) {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/")) {
+    return url;
+  }
+  const baseUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL || "https://cdn.webly.biz.id/";
+  return `${baseUrl.replace(/\/+$/, "")}/${url.replace(/^\/+/, "")}`;
+}
+
 function PartnerLogoImage({ partner, className }) {
   const [hasError, setHasError] = useState(false);
   const isStockPhoto = partner.logoUrl?.includes("unsplash.com");
@@ -166,6 +178,9 @@ export default function Home() {
   const [upcomingActivities, setUpcomingActivities] = useState([]);
   const [featuredProjectsList, setFeaturedProjectsList] = useState([]);
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
+  const [priorityModalOpen, setPriorityModalOpen] = useState(false);
+  const [modalActivity, setModalActivity] = useState(null);
+  const [modalImageLoaded, setModalImageLoaded] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -182,8 +197,52 @@ export default function Home() {
           const past = data.filter((a) => a.date && new Date(a.date) < now);
           const upcoming = data.filter((a) => a.date && new Date(a.date) >= now);
 
+          // Priority sorting for upcoming activities (isAnnouncementModal -> isPriority -> date)
+          upcoming.sort((a, b) => {
+            if (a.isAnnouncementModal !== b.isAnnouncementModal) {
+              return a.isAnnouncementModal ? -1 : 1;
+            }
+            if (a.isPriority !== b.isPriority) {
+              return a.isPriority ? -1 : 1;
+            }
+            return new Date(a.date) - new Date(b.date);
+          });
+
           setPastActivities(past);
           setUpcomingActivities(upcoming);
+
+          // Find priority/announcement activity for Modal popup
+          const priorityEvent = upcoming.find((a) => a.isAnnouncementModal || a.isPriority) ||
+                                data.find((a) => a.isAnnouncementModal || a.isPriority);
+
+          if (priorityEvent) {
+            const triggerModalOpen = () => {
+              setModalActivity(priorityEvent);
+              const hasShown = sessionStorage.getItem("sre_priority_modal_shown");
+              if (!hasShown) {
+                setPriorityModalOpen(true);
+                sessionStorage.setItem("sre_priority_modal_shown", "true");
+              }
+            };
+
+            if (priorityEvent.imageUrl) {
+              const fullUrl = resolveImageUrl(priorityEvent.imageUrl);
+              if (typeof window !== "undefined" && window.Image) {
+                const img = new window.Image();
+                img.src = fullUrl;
+                if (img.complete) {
+                  triggerModalOpen();
+                } else {
+                  img.onload = () => triggerModalOpen();
+                  img.onerror = () => triggerModalOpen();
+                }
+              } else {
+                triggerModalOpen();
+              }
+            } else {
+              triggerModalOpen();
+            }
+          }
         }
       })
       .catch((err) => console.error("Failed to fetch activities:", err));
@@ -680,12 +739,13 @@ export default function Home() {
               </div>
             ) : (
               /* Upcoming Events Flex Layout - Professional Instagram-like 4:5 Poster Layout */
-              <div className="flex flex-wrap justify-center gap-6 sm:gap-8 w-full">
+              <div className="flex overflow-x-auto pb-6 gap-5 scrollbar-none snap-x snap-mandatory flex-nowrap justify-start max-w-full px-4 sm:px-0 sm:flex-wrap sm:justify-center sm:gap-6 md:gap-8 sm:overflow-visible sm:pb-0 sm:snap-none w-full">
                 {upcomingActivities.map((activity) => {
                   const { day, month } = getEventDateParts(activity.date);
                   const isExternal = !!activity.link;
                   const href = activity.link || "/activity";
                   const isRegister = activity.linkType === "register";
+                  const isPriorityOrAnnouncement = activity.isAnnouncementModal || activity.isPriority;
                   
                   const buttonText = isRegister 
                     ? (language === "id" ? "Daftar Acara" : "Register Event")
@@ -694,10 +754,14 @@ export default function Home() {
                   return (
                     <div
                       key={activity.id}
-                      className="group relative flex flex-col bg-[#056349] border border-white/20 dark:bg-black/35 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-full max-w-[280px]"
+                      className={`group relative flex flex-col bg-[#058562] border dark:bg-black/35 rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-[260px] sm:w-full sm:max-w-[280px] shrink-0 sm:shrink snap-center ${
+                        isPriorityOrAnnouncement
+                          ? "border-yellow-300 dark:border-yellow-400/80 shadow-[0_0_25px_rgba(253,224,71,0.25)] ring-2 ring-yellow-300/40"
+                          : "border-white/20 dark:border-white/5"
+                      }`}
                     >
-                      {/* Portrait Poster Image (Aspect Ratio 4:5) */}
-                      <div className="relative w-full aspect-[4/5] overflow-hidden flex-shrink-0 bg-slate-900/40">
+                      {/* Portrait Poster Image (Aspect Ratio 4:4 on Mobile, 4:5 on Desktop) */}
+                      <div className="relative w-full aspect-[4/4] sm:aspect-[4/5] overflow-hidden flex-shrink-0 bg-slate-900/40">
                         {activity.imageUrl ? (
                           <img
                             src={activity.imageUrl}
@@ -713,6 +777,14 @@ export default function Home() {
                         {/* Dark Vignette Overlay */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
                         
+                        {/* Priority Badge */}
+                        {isPriorityOrAnnouncement && (
+                          <div className="absolute top-3 left-3 z-20 flex items-center gap-1 px-2.5 py-1 rounded-full bg-yellow-300 text-slate-950 shadow-lg text-[9px] font-black uppercase tracking-wider">
+                            <Sparkles className="w-3 h-3 text-slate-950" />
+                            <span>{t("visitor.home.priority_activity_badge") || "KEGIATAN UTAMA"}</span>
+                          </div>
+                        )}
+
                         {/* Calendar Date Badge */}
                         <div className="absolute top-3 right-3 z-20 flex flex-col items-center justify-center w-12 h-14 bg-white dark:bg-slate-900 rounded-xl shadow-xl overflow-hidden border border-slate-100 dark:border-white/10 select-none">
                           <div className="w-full bg-red-500 dark:bg-emerald-500 text-[9px] font-black uppercase text-center py-0.5 text-white dark:text-slate-950 tracking-wider">
@@ -753,14 +825,14 @@ export default function Home() {
                             href={href}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-full py-2.5 bg-transparent text-yellow-300 border border-yellow-300 hover:bg-yellow-300 hover:text-[#056349] dark:text-emerald-400 dark:border-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#0b120f] rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase"
+                            className="w-full py-2.5 bg-transparent text-yellow-300 border border-yellow-300 hover:bg-yellow-300 hover:text-[#058562] dark:text-emerald-400 dark:border-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#0b120f] rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase shadow-md"
                           >
                             {buttonText}
                           </a>
                         ) : (
                           <Link
                             href={href}
-                            className="w-full py-2.5 bg-transparent text-yellow-300 border border-yellow-300 hover:bg-yellow-300 hover:text-[#056349] dark:text-emerald-400 dark:border-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#0b120f] rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase"
+                            className="w-full py-2.5 bg-transparent text-yellow-300 border border-yellow-300 hover:bg-yellow-300 hover:text-[#058562] dark:text-emerald-400 dark:border-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#0b120f] rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase shadow-md"
                           >
                             {buttonText}
                           </Link>
@@ -772,9 +844,9 @@ export default function Home() {
 
                 {/* Render Companion Card if there are less than 4 upcoming events */}
                 {upcomingActivities.length < 4 && (
-                  <div className="group relative flex flex-col bg-[#056349] border border-white/20 dark:bg-black/35 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-full max-w-[280px]">
-                    {/* 4:5 Aspect Ratio Decorative Header */}
-                    <div className="relative w-full aspect-[4/5] flex flex-col items-center justify-center p-5 text-center bg-gradient-to-b from-yellow-300/10 to-transparent dark:from-emerald-500/10 dark:to-transparent">
+                  <div className="group relative flex flex-col bg-[#058562] border border-white/20 dark:bg-black/35 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-[260px] sm:w-full sm:max-w-[280px] shrink-0 sm:shrink snap-center">
+                    {/* 4:4 Aspect Ratio on Mobile, 4:5 on Desktop */}
+                    <div className="relative w-full aspect-[4/4] sm:aspect-[4/5] flex flex-col items-center justify-center p-5 text-center bg-gradient-to-b from-yellow-300/10 to-transparent dark:from-emerald-500/10 dark:to-transparent">
                       {/* Floating Glowing Orbs */}
                       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-yellow-300/20 dark:bg-emerald-500/20 rounded-full blur-2xl pointer-events-none animate-pulse" />
                       
@@ -805,7 +877,7 @@ export default function Home() {
                         href="https://www.instagram.com/sre.upnjatim/"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-full py-2.5 bg-yellow-300 hover:bg-yellow-400 text-[#056349] hover:text-black dark:bg-emerald-400 dark:hover:bg-emerald-300 dark:text-slate-950 font-black rounded-xl text-[11px] text-center block transition-all duration-300 tracking-wider uppercase shadow-md hover:shadow-xl hover:-translate-y-0.5"
+                        className="w-full py-2.5 bg-yellow-300 hover:bg-yellow-400 text-[#058562] hover:text-black dark:bg-emerald-400 dark:hover:bg-emerald-300 dark:text-slate-950 font-black rounded-xl text-[11px] text-center block transition-all duration-300 tracking-wider uppercase shadow-md hover:shadow-xl hover:-translate-y-0.5"
                       >
                         {language === "id" ? "Ikuti Instagram Kami" : "Follow Our Instagram"}
                       </a>
@@ -1043,6 +1115,97 @@ export default function Home() {
           );
         })()}
       </main>
+
+      {/* ─── VISITOR POPUP ANNOUNCEMENT MODAL (Poster Only - Rendered into document.body via Portal) ─── */}
+      {mounted && typeof document !== "undefined" && createPortal(
+        <AnimatePresence>
+          {priorityModalOpen && modalActivity && (
+            <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md select-none">
+              {/* Backdrop Click */}
+              <div
+                onClick={() => setPriorityModalOpen(false)}
+                className="fixed inset-0 z-0 cursor-pointer"
+              />
+
+              {/* Poster Popup Box */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.85, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.85, y: 20 }}
+                transition={{ type: "spring", damping: 25, stiffness: 350 }}
+                className="relative z-10 max-w-[90vw] max-h-[85vh] w-auto h-auto rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.9)] border-2 border-yellow-300/80 dark:border-emerald-400/80 group flex flex-col items-center bg-[#071d15]"
+              >
+                {/* Close Button X Floating Outside Top-Right */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPriorityModalOpen(false);
+                  }}
+                  className="absolute -top-3.5 -right-3.5 sm:-top-4 sm:-right-4 z-40 p-2.5 rounded-full bg-[#071d15] text-white hover:text-yellow-300 hover:scale-110 transition-all border-2 border-yellow-300/80 dark:border-emerald-400/80 shadow-2xl cursor-pointer flex items-center justify-center"
+                  aria-label="Close Announcement"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+
+                {/* Inner Poster Wrapper with Rounded Corners */}
+                <div className="relative w-full h-full rounded-[22px] overflow-hidden flex flex-col items-center">
+                  {/* Clickable Full Poster Image */}
+                  {modalActivity.link ? (
+                    <a
+                      href={modalActivity.link}
+                      target={modalActivity.link.startsWith("http") ? "_blank" : undefined}
+                      rel="noopener noreferrer"
+                      className="relative block w-full h-full cursor-pointer overflow-hidden group"
+                    >
+                      {modalActivity.imageUrl ? (
+                        <img
+                          src={resolveImageUrl(modalActivity.imageUrl)}
+                          alt={modalActivity.name}
+                          className="max-h-[80vh] w-auto max-w-full object-contain group-hover:scale-[1.02] transition-transform duration-300 block"
+                        />
+                      ) : (
+                        <div className="p-10 sm:p-14 flex flex-col items-center justify-center gap-4 text-center bg-gradient-to-br from-emerald-900 via-teal-950 to-slate-950 min-w-[280px]">
+                          <Crown className="w-14 h-14 text-yellow-300 animate-bounce" />
+                          <h3 className="text-lg font-black text-white uppercase tracking-tight">{modalActivity.name}</h3>
+                          <span className="px-4 py-2 rounded-full bg-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg flex items-center gap-1.5">
+                            <span>Daftar / Lihat Detail</span>
+                            <ArrowUpRight className="w-4 h-4" />
+                          </span>
+                        </div>
+                      )}
+                    </a>
+                  ) : (
+                    <Link
+                      href="/activity"
+                      onClick={() => setPriorityModalOpen(false)}
+                      className="relative block w-full h-full cursor-pointer overflow-hidden group"
+                    >
+                      {modalActivity.imageUrl ? (
+                        <img
+                          src={resolveImageUrl(modalActivity.imageUrl)}
+                          alt={modalActivity.name}
+                          className="max-h-[80vh] w-auto max-w-full object-contain group-hover:scale-[1.02] transition-transform duration-300 block"
+                        />
+                      ) : (
+                        <div className="p-10 sm:p-14 flex flex-col items-center justify-center gap-4 text-center bg-gradient-to-br from-emerald-900 via-teal-950 to-slate-950 min-w-[280px]">
+                          <Crown className="w-14 h-14 text-yellow-300 animate-bounce" />
+                          <h3 className="text-lg font-black text-white uppercase tracking-tight">{modalActivity.name}</h3>
+                          <span className="px-4 py-2 rounded-full bg-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg flex items-center gap-1.5">
+                            <span>Lihat Detail Kegiatan</span>
+                            <ArrowUpRight className="w-4 h-4" />
+                          </span>
+                        </div>
+                      )}
+                    </Link>
+                  )}
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }

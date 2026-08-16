@@ -1022,7 +1022,13 @@
       "activity_badge_internal": "Internal",
       "activity_badge_external": "External",
       "activity_badge_workshop": "Workshop",
-      "activity_badge_meeting": "Meeting"
+      "activity_badge_meeting": "Meeting",
+      "priority_activity_badge": "PRIORITY ACTIVITY",
+      "announcement_modal_title": "FEATURED PRIORITY ANNOUNCEMENT",
+      "announcement_modal_eyebrow": "UPCOMING PRIORITY EVENT",
+      "announcement_modal_close": "Dismiss Announcement",
+      "announcement_modal_action_register": "Register for Event Now",
+      "announcement_modal_action_detail": "View Event Details"
     },
     "about": {
       "title_badge": "About SRE UPNVJT",
