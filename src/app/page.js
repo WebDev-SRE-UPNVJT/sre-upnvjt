@@ -203,6 +203,19 @@ export default function Home() {
     }
   };
 
+  const getEventDateParts = (dateStr) => {
+    if (!dateStr) return { day: "", month: "", year: "" };
+    try {
+      const d = new Date(dateStr);
+      const day = d.getDate();
+      const month = d.toLocaleDateString(language === "id" ? "id-ID" : "en-US", { month: 'short' }).toUpperCase();
+      const year = d.getFullYear();
+      return { day, month, year };
+    } catch {
+      return { day: "", month: "", year: "" };
+    }
+  };
+
   const [activeSection, setActiveSection] = useState("home");
   const [partnersList, setPartnersList] = useState([]);
   const [publicArticlesList, setPublicArticlesList] = useState([]);
@@ -608,11 +621,11 @@ export default function Home() {
 
             {/* Section Header */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-              className="text-center mb-12 sm:mb-14 max-w-2xl mx-auto"
+              viewport={{ once: true, amount: 0.1 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="text-center mb-12 sm:mb-16 max-w-2xl mx-auto"
             >
               <div className="flex items-center justify-center mb-3">
                 <span className="text-xs sm:text-sm md:text-base font-black tracking-[0.28em] text-yellow-300 dark:text-emerald-400 uppercase">
@@ -637,10 +650,10 @@ export default function Home() {
             {upcomingActivities.length === 0 ? (
               /* Stunning Coming Soon Placeholder */
               <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
                 whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                viewport={{ once: true, amount: 0.1 }}
+                transition={{ duration: 0.5 }}
                 className="w-full max-w-xl mx-auto rounded-3xl p-8 sm:p-10 border border-white/20 dark:border-white/10 bg-white/10 dark:bg-white/[0.03] backdrop-blur-md text-center flex flex-col items-center gap-5 relative overflow-hidden shadow-2xl"
               >
                 {/* Glowing animated background circle */}
@@ -669,66 +682,85 @@ export default function Home() {
                 </div>
               </motion.div>
             ) : (
-              /* Upcoming Events Grid */
+              /* Upcoming Events Grid - Professional 4:5 Poster Layout */
               <motion.div
                 variants={staggerParent}
                 initial="hidden"
                 whileInView="show"
-                viewport={{ once: true, margin: "-60px" }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6"
+                viewport={{ once: true, amount: 0.05 }}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
               >
-                {upcomingActivities.map((activity) => (
-                  <motion.div
-                    key={activity.id}
-                    variants={staggerChild}
-                    whileHover={{ y: -6, transition: { duration: 0.22, ease: "easeOut" } }}
-                    className="group relative bg-white/10 dark:bg-white/[0.05] border border-white/20 dark:border-white/8 rounded-2xl sm:rounded-3xl overflow-hidden flex flex-col shadow-md hover:shadow-2xl hover:shadow-black/30 transition-shadow duration-300"
-                  >
-                    {/* Image */}
-                    <div className="relative w-full aspect-[16/9] overflow-hidden flex-shrink-0">
-                      {activity.imageUrl ? (
-                        <img
-                          src={activity.imageUrl}
-                          alt={activity.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-emerald-800/55 to-teal-950/60 flex items-center justify-center">
-                          <Rocket className="w-10 h-10 text-white/25" />
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-                      
-                      {/* Date badge */}
-                      <div className="absolute top-3 right-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-yellow-300 text-slate-900 dark:bg-emerald-400 dark:text-black backdrop-blur-md shadow-sm">
-                        <CalendarClock className="w-3 h-3" aria-hidden="true" />
-                        {formatEventDate(activity.date)}
-                      </div>
-                    </div>
-
-                    {/* Card Content */}
-                    <div className="flex flex-col gap-2 p-4 sm:p-5 flex-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black uppercase tracking-[0.22em] text-yellow-300/80 dark:text-emerald-400/70">
-                          {activity.type || "EVENT"}
-                        </span>
-                        {activity.location && (
-                          <span className="text-[10px] font-medium text-white/70 dark:text-gray-400 flex items-center gap-1">
-                            <MapPin className="w-3 h-3 text-yellow-300 dark:text-emerald-400" />
-                            {activity.location}
-                          </span>
+                {upcomingActivities.map((activity) => {
+                  const { day, month } = getEventDateParts(activity.date);
+                  return (
+                    <motion.div
+                      key={activity.id}
+                      variants={staggerChild}
+                      whileHover={{ y: -8, transition: { duration: 0.3, ease: "easeOut" } }}
+                      className="group relative flex flex-col bg-white/5 border border-white/10 dark:bg-black/20 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-black/40 transition-all duration-500"
+                    >
+                      {/* Portrait Poster Image (Aspect Ratio 4:5) */}
+                      <div className="relative w-full aspect-[4/5] overflow-hidden flex-shrink-0 bg-slate-900/40">
+                        {activity.imageUrl ? (
+                          <img
+                            src={activity.imageUrl}
+                            alt={activity.name}
+                            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-emerald-800/40 to-teal-950/60 flex flex-col items-center justify-center gap-3">
+                            <Rocket className="w-12 h-12 text-white/20" />
+                            <span className="text-[10px] uppercase font-bold tracking-widest text-white/40">No Poster Image</span>
+                          </div>
                         )}
+                        
+                        {/* Dark Vignette Overlay for Premium Contrast */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+                        
+                        {/* Premium Physical Calendar Date Badge overlay */}
+                        <div className="absolute top-4 right-4 z-20 flex flex-col items-center justify-center w-14 h-16 bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden border border-slate-100 dark:border-white/10 select-none">
+                          <div className="w-full bg-red-500 dark:bg-emerald-500 text-[10px] font-black uppercase text-center py-1 text-white dark:text-slate-950 tracking-wider">
+                            {month}
+                          </div>
+                          <div className="flex-1 flex items-center justify-center text-lg font-extrabold text-slate-900 dark:text-white leading-none">
+                            {day}
+                          </div>
+                        </div>
+
+                        {/* Event Tags inside Image Overlay */}
+                        <div className="absolute bottom-4 left-4 right-4 z-10 flex flex-wrap gap-2 items-center">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider bg-black/50 text-yellow-300 dark:text-emerald-400 border border-white/10 backdrop-blur-md">
+                            {activity.type || "EVENT"}
+                          </span>
+                          {activity.location && (
+                            <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold bg-white/15 text-white border border-white/5 backdrop-blur-md">
+                              <MapPin className="w-3.5 h-3.5 text-yellow-300 dark:text-emerald-400" />
+                              <span className="truncate max-w-[140px]">{activity.location}</span>
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      
-                      <h3 className="text-base sm:text-[17px] font-bold text-white dark:text-gray-100 leading-snug line-clamp-2">
-                        {activity.name}
-                      </h3>
-                      <p className="text-xs sm:text-sm text-white/60 dark:text-gray-400 leading-relaxed line-clamp-3 flex-1">
-                        {activity.description}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))}
+
+                      {/* Content Section */}
+                      <div className="p-6 flex flex-col flex-1 bg-white/5 dark:bg-black/20">
+                        <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-yellow-300 dark:group-hover:text-emerald-400 transition-colors duration-300 line-clamp-2 mb-3">
+                          {activity.name}
+                        </h3>
+                        <p className="text-sm text-white/70 dark:text-gray-400 leading-relaxed line-clamp-4 flex-1 mb-5">
+                          {activity.description}
+                        </p>
+                        
+                        {/* Call to Action Button */}
+                        <Link
+                          href="/activity"
+                          className="w-full py-3.5 bg-white/5 hover:bg-yellow-300 hover:text-slate-950 dark:bg-white/5 dark:hover:bg-emerald-400 dark:hover:text-black border border-white/15 dark:border-white/5 rounded-2xl text-xs font-bold text-center block transition-all duration-300 tracking-wider uppercase"
+                        >
+                          {language === "id" ? "Lihat Detail Acara" : "View Event Details"}
+                        </Link>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </motion.div>
             )}
           </div>
