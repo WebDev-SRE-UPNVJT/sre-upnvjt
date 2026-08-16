@@ -75,6 +75,17 @@ export default function AboutClient({ departmentsData = [] }) {
   const { t } = useLanguage();
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
+  const [activeSlide, setActiveSlide] = React.useState(0);
+  const sliderRef = React.useRef(null);
+
+  const handleScroll = () => {
+    if (!sliderRef.current) return;
+    const container = sliderRef.current;
+    const scrollPosition = container.scrollLeft;
+    const index = Math.round(scrollPosition / 300); // 280px card + 20px gap
+    setActiveSlide(Math.max(0, Math.min(index, 4)));
+  };
+
   React.useEffect(() => {
     setMounted(true);
   }, []);
@@ -262,12 +273,42 @@ export default function AboutClient({ departmentsData = [] }) {
                 {/* Spacing between Executive and departments grid */}
                 <div className="w-full h-12" />
 
-                {/* Remaining 5 departments stay in the grid below */}
-                <div className="flex flex-wrap justify-center gap-6 w-full mt-2 lg:mt-0">
+                {/* Remaining 5 departments stay in the grid below / slideable on mobile */}
+                <div 
+                  ref={sliderRef}
+                  onScroll={handleScroll}
+                  className="flex overflow-x-auto pb-6 gap-5 scrollbar-none snap-x snap-mandatory flex-nowrap justify-start w-[calc(100%+1.5rem)] -mr-6 pr-6 max-w-none sm:max-w-full sm:w-full sm:mr-0 sm:pr-0 sm:flex-wrap sm:justify-center sm:gap-6 lg:gap-6 mt-2 lg:mt-0"
+                >
                   {otherDepts.map((dept, idx) => (
-                    <div key={dept.slug || dept.id} className="w-full sm:w-[48%] lg:w-[31.5%] flex">
+                    <div 
+                      key={dept.slug || dept.id} 
+                      className="w-[280px] shrink-0 snap-center sm:w-[48%] lg:w-[31.5%] flex"
+                    >
                       <DepartmentCard key={dept.slug || dept.id} dept={dept} index={idx} />
                     </div>
+                  ))}
+                </div>
+
+                {/* Slider Indicators (dashes / dots) - Mobile Only */}
+                <div className="flex items-center justify-center gap-2 mt-4 sm:hidden">
+                  {otherDepts.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        if (sliderRef.current) {
+                          sliderRef.current.scrollTo({
+                            left: idx * 300,
+                            behavior: "smooth"
+                          });
+                        }
+                      }}
+                      aria-label={`Go to slide ${idx + 1}`}
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        activeSlide === idx 
+                          ? "w-6 bg-yellow-300 dark:bg-emerald-400" 
+                          : "w-2 bg-white/30 dark:bg-white/10"
+                      }`}
+                    />
                   ))}
                 </div>
               </div>
