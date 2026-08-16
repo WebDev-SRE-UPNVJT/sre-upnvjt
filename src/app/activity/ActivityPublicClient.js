@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, MapPin, Sparkles, Filter, Activity as ActivityIcon, ArrowUpRight, Tag, Search } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageProvider";
 import { useTheme } from "next-themes";
+import Link from "next/link";
 
 export default function ActivityPublicClient({ activities = [] }) {
   const { language, t } = useLanguage();
@@ -69,6 +70,18 @@ export default function ActivityPublicClient({ activities = [] }) {
       });
     } catch {
       return dateStr;
+    }
+  };
+
+  const getEventDateParts = (dateStr) => {
+    if (!dateStr) return { day: "", month: "" };
+    try {
+      const d = new Date(dateStr);
+      const day = d.getDate().toString();
+      const month = d.toLocaleDateString(language === "id" ? "id-ID" : "en-US", { month: 'short' });
+      return { day, month };
+    } catch {
+      return { day: "", month: "" };
     }
   };
 
@@ -257,68 +270,100 @@ export default function ActivityPublicClient({ activities = [] }) {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredRemaining.map((act, idx) => (
-                <motion.div
-                  key={act.id || idx}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: idx * 0.08 }}
-                  className="group flex flex-col bg-white/10 border border-white/20 hover:border-yellow-300/40 dark:bg-white/[0.02] dark:border-white/10 dark:hover:border-emerald-500/40 rounded-3xl overflow-hidden shadow-xl hover:-translate-y-1 hover:shadow-2xl hover:shadow-yellow-300/10 dark:hover:shadow-emerald-500/10 transition-all duration-500 backdrop-blur-xl"
-                >
-                  {/* Image Top */}
-                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#07130e]/40 dark:bg-emerald-950/40">
-                    {act.imageUrl ? (
-                      <img
-                        src={act.imageUrl}
-                        alt={act.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-white/50 bg-[#07130e]/20 dark:bg-emerald-950/20">
-                        <ActivityIcon className="w-10 h-10 text-yellow-300/30 dark:text-emerald-500/20" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 justify-items-center">
+              {filteredRemaining.map((act, idx) => {
+                const { day, month } = getEventDateParts(act.date);
+                const isExternal = !!act.link;
+                const href = act.link || "/activity";
+                const isRegister = act.linkType === "register";
+                
+                const buttonText = isRegister 
+                  ? (language === "id" ? "Daftar Acara" : "Register Event")
+                  : (language === "id" ? "Lihat Detail" : "View Details");
+
+                return (
+                  <motion.div
+                    key={act.id || idx}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: idx * 0.08 }}
+                    className="group relative flex flex-col bg-[#e8ecc4] border border-[#d0d6a8]/60 dark:bg-black/35 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-full max-w-[280px]"
+                  >
+                    {/* Portrait Poster Image (Aspect Ratio 4:5) */}
+                    <div className="relative w-full aspect-[4/5] overflow-hidden flex-shrink-0 bg-slate-900/40">
+                      {act.imageUrl ? (
+                        <img
+                          src={act.imageUrl}
+                          alt={act.name}
+                          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-emerald-800/40 to-teal-950/60 flex flex-col items-center justify-center gap-3">
+                          <Sparkles className="w-10 h-10 text-white/20" />
+                          <span className="text-[10px] uppercase font-bold tracking-widest text-white/40">Belum Ada Poster</span>
+                        </div>
+                      )}
+                      {/* Dark Vignette Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+                      
+                      {/* Bottom Info Overlay on Poster */}
+                      <div className="absolute bottom-4 left-4 right-4 z-20 flex items-center justify-between">
+                        {/* Category Tag Badge */}
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider bg-black/50 text-yellow-300 dark:text-emerald-400 border border-white/10 backdrop-blur-md">
+                          {act.type || "EVENT"}
+                        </span>
+
+                        {/* Date Badge */}
+                        {day && (
+                          <div className="flex flex-col items-center justify-center bg-red-500 dark:bg-emerald-400 text-white dark:text-slate-950 px-2.5 py-1.5 rounded-xl shadow-md min-w-[42px] border border-white/10 dark:border-emerald-300/30">
+                            <span className="text-xs font-black leading-none tracking-tight">{day}</span>
+                            <span className="text-[8px] font-black uppercase tracking-wider mt-0.5 leading-none">{month}</span>
+                          </div>
+                        )}
                       </div>
-                    )}
-                    
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#07130e] via-transparent to-transparent opacity-60" />
-
-                    <div className="absolute top-3 left-3">
-                      <span className="px-3 py-1 rounded-xl bg-black/60 text-yellow-300 dark:text-emerald-400 border border-white/10 text-[10px] font-black uppercase tracking-wider backdrop-blur-md">
-                        {act.type || "EVENT"}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Body Content */}
-                  <div className="p-6 flex-1 flex flex-col justify-between">
-                    <div>
-                      <h3 className="text-xl font-bold text-white group-hover:text-yellow-300 dark:group-hover:text-emerald-400 transition-colors duration-300 mb-3 line-clamp-1">
-                        {act.name}
-                      </h3>
-                      <p className="text-white/90 dark:text-gray-300 text-xs leading-relaxed mb-6 line-clamp-3">
-                        {act.description || t("visitor.activity.no_desc")}
-                      </p>
                     </div>
 
-                    {/* Metadata */}
-                    <div className="pt-4 border-t border-white/15 dark:border-white/10 flex flex-col gap-2">
-                      {act.date && (
-                        <div className="flex items-center gap-2.5 text-xs text-white/90 dark:text-gray-400 font-semibold">
-                          <Calendar className="w-3.5 h-3.5 text-yellow-300 dark:text-emerald-400 shrink-0" />
-                          <span>{formatDate(act.date)}</span>
-                        </div>
-                      )}
+                    {/* Body Content below poster */}
+                    <div className="p-5 flex-1 flex flex-col justify-between">
+                      <div className="mb-4">
+                        <h3 className="text-sm sm:text-base font-bold text-[#07130e] dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300 line-clamp-2 mb-1.5">
+                          {act.name}
+                        </h3>
+                        <p className="text-xs text-[#07130e]/70 dark:text-gray-400 leading-relaxed line-clamp-2">
+                          {act.description || t("visitor.activity.no_desc")}
+                        </p>
+                      </div>
+
+                      {/* Location Details (if present) */}
                       {act.location && (
-                        <div className="flex items-center gap-2.5 text-xs text-white/90 dark:text-gray-400 font-semibold">
-                          <MapPin className="w-3.5 h-3.5 text-yellow-300 dark:text-emerald-400 shrink-0" />
-                          <span className="truncate">{act.location}</span>
+                        <div className="flex items-center gap-2 mt-2 px-3 py-1.5 rounded-full bg-black/5 text-[#07130e]/60 dark:bg-black/25 dark:text-gray-400 text-[10px] font-bold select-none border border-black/5 dark:border-white/5 w-fit mb-4">
+                          <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <span className="truncate max-w-[150px]">{act.location}</span>
                         </div>
                       )}
+
+                      {isExternal ? (
+                        <a
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-upcoming-event"
+                        >
+                          {buttonText}
+                        </a>
+                      ) : (
+                        <Link
+                          href={href}
+                          className="btn-upcoming-event"
+                        >
+                          {buttonText}
+                        </Link>
+                      )}
                     </div>
-                  </div>
-                </motion.div>
-              ))}
+                  </motion.div>
+                );
+              })}
             </div>
           )}
         </div>
