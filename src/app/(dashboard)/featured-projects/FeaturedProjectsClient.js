@@ -140,10 +140,10 @@ export default function FeaturedProjectsClient({ initialProjects, currentUser })
             <div className="p-2 rounded-xl bg-primary/10 dark:bg-primary/20">
               <Rocket className="w-5 h-5 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Featured Projects</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Featured Events</h1>
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400 ml-11">
-            Manage projects displayed on the public home page ({projects.length} total)
+            Manage featured events/projects displayed on the public home page ({projects.length} total)
           </p>
         </div>
         <button
@@ -151,7 +151,7 @@ export default function FeaturedProjectsClient({ initialProjects, currentUser })
           className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg active:scale-95 text-sm"
         >
           <Plus className="w-4 h-4" />
-          Add Project
+          Add Event
         </button>
       </div>
 
@@ -160,7 +160,7 @@ export default function FeaturedProjectsClient({ initialProjects, currentUser })
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         <input
           type="text"
-          placeholder="Search projects..."
+          placeholder="Search events..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 transition"
