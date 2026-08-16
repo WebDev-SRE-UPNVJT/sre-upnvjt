@@ -15,7 +15,7 @@ let client;
 let db;
 
 const dbConfig = {
-  max: process.env.NODE_ENV === 'production' ? 1 : 20,
+  max: process.env.NODE_ENV === 'production' ? 10 : 20,
   idle_timeout: 30,
   connect_timeout: 10,
   prepare: false,
