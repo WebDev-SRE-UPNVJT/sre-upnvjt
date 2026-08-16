@@ -199,7 +199,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                     </span>
                   </div>
 
-                  <h2 className="text-3xl md:text-4xl font-display font-black text-[#07130e] dark:text-white tracking-tight leading-tight group-hover:text-[#0cc48a] dark:group-hover:text-emerald-400 transition-colors duration-300">
+                  <h2 className="text-2xl md:text-3xl font-display font-black text-[#07130e] dark:text-white tracking-tight leading-tight group-hover:text-[#0cc48a] dark:group-hover:text-emerald-400 transition-colors duration-300">
                     {featuredActivity.name}
                   </h2>
 
