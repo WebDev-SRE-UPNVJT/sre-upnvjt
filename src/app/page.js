@@ -162,6 +162,8 @@ export default function Home() {
   const { t, language } = useLanguage();
   const [mounted, setMounted] = useState(false);
   const [dbActivities, setDbActivities] = useState([]);
+  const [pastActivities, setPastActivities] = useState([]);
+  const [upcomingActivities, setUpcomingActivities] = useState([]);
   const [featuredProjectsList, setFeaturedProjectsList] = useState([]);
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
 
@@ -170,6 +172,15 @@ export default function Home() {
     getActivities().then((res) => {
       if (res?.success && res?.data && res.data.length > 0) {
         setDbActivities(res.data);
+        
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        
+        const past = res.data.filter(a => a.date && new Date(a.date) < now);
+        const upcoming = res.data.filter(a => a.date && new Date(a.date) >= now);
+        
+        setPastActivities(past);
+        setUpcomingActivities(upcoming);
       }
     });
   }, []);
@@ -182,13 +193,6 @@ export default function Home() {
   }, []);
 
   const isLight = mounted && (theme === "light" || resolvedTheme === "light");
-
-  // Determine current date and categorize activities
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const pastActivities = dbActivities.filter(a => a.date && new Date(a.date) < today);
-  const upcomingActivities = dbActivities.filter(a => a.date && new Date(a.date) >= today);
 
   const formatEventDate = (dateStr) => {
     if (!dateStr) return "";
