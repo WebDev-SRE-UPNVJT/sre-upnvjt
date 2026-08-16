@@ -738,8 +738,8 @@ export default function Home() {
                       </div>
 
                       {/* Content Section - Adjusted Padding and height to avoid cramped margins */}
-                      <div className="p-5 flex flex-col h-[200px] bg-white/[0.03] dark:bg-black/20 justify-between">
-                        <div className="space-y-2">
+                      <div className="p-5 flex flex-col bg-white/[0.03] dark:bg-black/20 rounded-b-[2rem]">
+                        <div className="h-[96px] flex flex-col justify-between mb-4">
                           <h3 className="text-sm sm:text-base font-bold text-white group-hover:text-yellow-300 dark:group-hover:text-emerald-400 transition-colors duration-300 line-clamp-2">
                             {activity.name}
                           </h3>
@@ -753,14 +753,14 @@ export default function Home() {
                             href={href}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-full py-2.5 bg-transparent text-yellow-300 hover:bg-yellow-300 hover:text-slate-950 dark:text-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-slate-950 border border-yellow-300 dark:border-emerald-400 rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase"
+                            className="w-full py-2.5 bg-transparent text-yellow-300 hover:bg-yellow-300 hover:text-black dark:text-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-black border border-yellow-300 dark:border-emerald-400 rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase"
                           >
                             {buttonText}
                           </a>
                         ) : (
                           <Link
                             href={href}
-                            className="w-full py-2.5 bg-transparent text-yellow-300 hover:bg-yellow-300 hover:text-slate-950 dark:text-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-slate-950 border border-yellow-300 dark:border-emerald-400 rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase"
+                            className="w-full py-2.5 bg-transparent text-yellow-300 hover:bg-yellow-300 hover:text-black dark:text-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-black border border-yellow-300 dark:border-emerald-400 rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase"
                           >
                             {buttonText}
                           </Link>
