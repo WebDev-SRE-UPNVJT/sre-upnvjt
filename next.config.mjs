@@ -2,6 +2,11 @@
 const nextConfig = {
   reactCompiler: true,
   serverExternalPackages: ["canvas", "pdfjs-dist"],
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "10mb",
+    },
+  },
   images: {
     remotePatterns: [
       {
