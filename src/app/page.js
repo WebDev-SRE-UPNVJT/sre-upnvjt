@@ -743,7 +743,7 @@ export default function Home() {
                           <h3 className="text-sm sm:text-base font-bold text-white group-hover:text-yellow-300 dark:group-hover:text-emerald-400 transition-colors duration-300 line-clamp-2">
                             {activity.name}
                           </h3>
-                          <p className="text-xs text-white/70 dark:text-gray-400 leading-relaxed line-clamp-3">
+                          <p className="text-xs text-white/70 dark:text-gray-400 leading-relaxed line-clamp-2">
                             {activity.description}
                           </p>
                         </div>
@@ -753,14 +753,14 @@ export default function Home() {
                             href={href}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-full py-2.5 bg-white/5 hover:bg-yellow-300 hover:text-slate-950 dark:bg-white/5 dark:hover:bg-emerald-400 dark:hover:text-black border border-white/30 dark:border-white/10 rounded-xl text-[11px] font-bold text-center block transition-all duration-300 tracking-wider uppercase"
+                            className="w-full py-2.5 bg-transparent text-yellow-300 hover:bg-yellow-300 hover:text-slate-950 dark:text-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-slate-950 border border-yellow-300 dark:border-emerald-400 rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase"
                           >
                             {buttonText}
                           </a>
                         ) : (
                           <Link
                             href={href}
-                            className="w-full py-2.5 bg-white/5 hover:bg-yellow-300 hover:text-slate-950 dark:bg-white/5 dark:hover:bg-emerald-400 dark:hover:text-black border border-white/30 dark:border-white/10 rounded-xl text-[11px] font-bold text-center block transition-all duration-300 tracking-wider uppercase"
+                            className="w-full py-2.5 bg-transparent text-yellow-300 hover:bg-yellow-300 hover:text-slate-950 dark:text-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-slate-950 border border-yellow-300 dark:border-emerald-400 rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase"
                           >
                             {buttonText}
                           </Link>
