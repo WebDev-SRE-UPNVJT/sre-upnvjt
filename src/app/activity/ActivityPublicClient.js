@@ -284,14 +284,16 @@ export default function ActivityPublicClient({ activities = [] }) {
               {/* ─── SECTION 1: UPCOMING ACTIVITIES (ASPECT RATIO 4:5) ─── */}
               {filteredUpcoming.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-2.5 sm:gap-3 mb-8 max-w-full">
-                    <span className="relative flex h-3 w-3 shrink-0">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 dark:bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-yellow-300 dark:bg-emerald-400"></span>
-                    </span>
-                    <h3 className="text-[17px] xs:text-lg sm:text-2xl font-display font-black text-white uppercase tracking-tight whitespace-nowrap">
-                      {language === "id" ? "Kegiatan Mendatang" : "Upcoming Events"}
-                    </h3>
+                  <div className="flex items-center justify-between mb-8 max-w-full">
+                    <div className="flex items-center gap-2">
+                      <span className="relative flex h-3 w-3 shrink-0">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 dark:bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-yellow-300 dark:bg-emerald-400"></span>
+                      </span>
+                      <h3 className="text-[17px] xs:text-lg sm:text-2xl font-display font-black text-white uppercase tracking-tight whitespace-nowrap">
+                        {language === "id" ? "Kegiatan Mendatang" : "Upcoming Events"}
+                      </h3>
+                    </div>
                     <span className="px-2.5 py-1 rounded-full bg-yellow-300/20 text-yellow-300 dark:bg-emerald-400/20 dark:text-emerald-300 text-[10px] sm:text-xs font-black border border-yellow-300/30 dark:border-emerald-400/30 whitespace-nowrap shrink-0">
                       {filteredUpcoming.length} {language === "id" ? "Acara" : "Events"}
                     </span>
@@ -412,15 +414,17 @@ export default function ActivityPublicClient({ activities = [] }) {
               {/* ─── SECTION 2: PAST ACTIVITIES (ASPECT RATIO 4:3) ─── */}
               {filteredPast.length > 0 && (
                 <div className="pt-8 border-t border-white/15 dark:border-white/10">
-                  <div className="flex items-center gap-2.5 sm:gap-3 mb-8 max-w-full">
-                    <div className="w-3 h-3 rounded-full bg-emerald-400/80 shrink-0" />
-                    <h3 className="text-[17px] xs:text-lg sm:text-2xl font-display font-black text-white uppercase tracking-tight whitespace-nowrap">
-                      {language === "id" ? "Kegiatan Terlaksana" : "Past Activities"}
-                    </h3>
-                    <span className="px-2.5 py-1 rounded-full bg-white/10 text-white/90 text-[10px] sm:text-xs font-black border border-white/10 whitespace-nowrap shrink-0">
-                      {filteredPast.length} {language === "id" ? "Kegiatan" : "Activities"}
-                    </span>
-                  </div>
+                    <div className="flex items-center justify-between mb-8 max-w-full">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-3 h-3 rounded-full bg-emerald-400/80 shrink-0" />
+                        <h3 className="text-[17px] xs:text-lg sm:text-2xl font-display font-black text-white uppercase tracking-tight whitespace-nowrap">
+                          {language === "id" ? "Kegiatan Terlaksana" : "Past Activities"}
+                        </h3>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-full bg-white/10 text-white/90 text-[10px] sm:text-xs font-black border border-white/10 whitespace-nowrap shrink-0">
+                        {filteredPast.length} {language === "id" ? "Kegiatan" : "Activities"}
+                      </span>
+                    </div>
 
                   <div className="flex overflow-x-auto pb-6 gap-5 scrollbar-none snap-x snap-mandatory flex-nowrap justify-start w-[calc(100%+1.5rem)] -mr-6 pr-6 max-w-none sm:max-w-full sm:w-full sm:mr-0 sm:pr-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6 justify-items-center">
                     {filteredPast.map((act, idx) => {
@@ -434,7 +438,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                           whileInView={{ opacity: 1, y: 0 }}
                           viewport={{ once: true }}
                           transition={{ duration: 0.4, delay: idx * 0.06 }}
-                          className="group relative flex flex-col bg-[#058562] dark:bg-slate-950/75 border-2 border-white/35 dark:border-white/10 rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-[260px] sm:w-full sm:max-w-[280px] shrink-0 sm:shrink snap-center"
+                          className="group relative flex flex-col bg-[#058562] dark:bg-slate-950/75 border-2 border-white/35 dark:border-emerald-500/25 rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-[260px] sm:w-full sm:max-w-[280px] shrink-0 sm:shrink snap-center"
                         >
                           {/* Landscape Photo (Aspect Ratio 4:3) */}
                           <div className="relative w-full aspect-[4/3] overflow-hidden flex-shrink-0 bg-slate-900/40">
@@ -490,14 +494,14 @@ export default function ActivityPublicClient({ activities = [] }) {
                                   href={href}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="w-full py-2.5 bg-transparent text-white border-2 border-white/50 hover:bg-white hover:text-[#058562] dark:text-gray-300 dark:border-white/10 dark:hover:bg-white dark:hover:text-black rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase px-1 truncate shadow-sm"
+                                  className="w-full py-2.5 bg-transparent text-white border-2 border-white/50 hover:bg-white hover:text-[#058562] dark:text-emerald-400 dark:border-emerald-400/50 dark:hover:bg-emerald-400 dark:hover:text-[#0b120f] rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase px-1 truncate shadow-sm"
                                 >
                                   {language === "id" ? "Detail" : "Details"}
                                 </a>
                               ) : (
                                 <Link
                                   href={href}
-                                  className="w-full py-2.5 bg-transparent text-white border-2 border-white/50 hover:bg-white hover:text-[#058562] dark:text-gray-300 dark:border-white/10 dark:hover:bg-white dark:hover:text-black rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase px-1 truncate shadow-sm"
+                                  className="w-full py-2.5 bg-transparent text-white border-2 border-white/50 hover:bg-white hover:text-[#058562] dark:text-emerald-400 dark:border-emerald-400/50 dark:hover:bg-emerald-400 dark:hover:text-[#0b120f] rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase px-1 truncate shadow-sm"
                                 >
                                   {language === "id" ? "Detail" : "Details"}
                                 </Link>
