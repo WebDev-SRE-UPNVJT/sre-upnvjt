@@ -739,7 +739,7 @@ export default function Home() {
               </div>
             ) : (
               /* Upcoming Events Flex Layout - Professional Instagram-like 4:5 Poster Layout */
-              <div className="flex flex-wrap justify-center gap-6 sm:gap-8 w-full">
+              <div className="flex overflow-x-auto pb-6 gap-5 scrollbar-none snap-x snap-mandatory flex-nowrap justify-start max-w-full px-4 sm:px-0 sm:flex-wrap sm:justify-center sm:gap-6 md:gap-8 sm:overflow-visible sm:pb-0 sm:snap-none w-full">
                 {upcomingActivities.map((activity) => {
                   const { day, month } = getEventDateParts(activity.date);
                   const isExternal = !!activity.link;
@@ -754,14 +754,14 @@ export default function Home() {
                   return (
                     <div
                       key={activity.id}
-                      className={`group relative flex flex-col bg-[#056349] border dark:bg-black/35 rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-full max-w-[280px] ${
+                      className={`group relative flex flex-col bg-[#058562] border dark:bg-black/35 rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-[260px] sm:w-full sm:max-w-[280px] shrink-0 sm:shrink snap-center ${
                         isPriorityOrAnnouncement
                           ? "border-yellow-300 dark:border-yellow-400/80 shadow-[0_0_25px_rgba(253,224,71,0.25)] ring-2 ring-yellow-300/40"
                           : "border-white/20 dark:border-white/5"
                       }`}
                     >
-                      {/* Portrait Poster Image (Aspect Ratio 4:5) */}
-                      <div className="relative w-full aspect-[4/5] overflow-hidden flex-shrink-0 bg-slate-900/40">
+                      {/* Portrait Poster Image (Aspect Ratio 4:4 on Mobile, 4:5 on Desktop) */}
+                      <div className="relative w-full aspect-[4/4] sm:aspect-[4/5] overflow-hidden flex-shrink-0 bg-slate-900/40">
                         {activity.imageUrl ? (
                           <img
                             src={activity.imageUrl}
@@ -825,14 +825,14 @@ export default function Home() {
                             href={href}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-full py-2.5 bg-transparent text-yellow-300 border border-yellow-300 hover:bg-yellow-300 hover:text-[#058562] dark:text-emerald-400 dark:border-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#0b120f] rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase"
+                            className="w-full py-2.5 bg-transparent text-yellow-300 border border-yellow-300 hover:bg-yellow-300 hover:text-[#058562] dark:text-emerald-400 dark:border-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#0b120f] rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase shadow-md"
                           >
                             {buttonText}
                           </a>
                         ) : (
                           <Link
                             href={href}
-                            className="w-full py-2.5 bg-transparent text-yellow-300 border border-yellow-300 hover:bg-yellow-300 hover:text-[#058562] dark:text-emerald-400 dark:border-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#0b120f] rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase"
+                            className="w-full py-2.5 bg-transparent text-yellow-300 border border-yellow-300 hover:bg-yellow-300 hover:text-[#058562] dark:text-emerald-400 dark:border-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#0b120f] rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase shadow-md"
                           >
                             {buttonText}
                           </Link>
@@ -844,9 +844,9 @@ export default function Home() {
 
                 {/* Render Companion Card if there are less than 4 upcoming events */}
                 {upcomingActivities.length < 4 && (
-                  <div className="group relative flex flex-col bg-[#058562] border border-white/20 dark:bg-black/35 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-full max-w-[280px]">
-                    {/* 4:5 Aspect Ratio Decorative Header */}
-                    <div className="relative w-full aspect-[4/5] flex flex-col items-center justify-center p-5 text-center bg-gradient-to-b from-yellow-300/10 to-transparent dark:from-emerald-500/10 dark:to-transparent">
+                  <div className="group relative flex flex-col bg-[#058562] border border-white/20 dark:bg-black/35 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-[260px] sm:w-full sm:max-w-[280px] shrink-0 sm:shrink snap-center">
+                    {/* 4:4 Aspect Ratio on Mobile, 4:5 on Desktop */}
+                    <div className="relative w-full aspect-[4/4] sm:aspect-[4/5] flex flex-col items-center justify-center p-5 text-center bg-gradient-to-b from-yellow-300/10 to-transparent dark:from-emerald-500/10 dark:to-transparent">
                       {/* Floating Glowing Orbs */}
                       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-yellow-300/20 dark:bg-emerald-500/20 rounded-full blur-2xl pointer-events-none animate-pulse" />
                       

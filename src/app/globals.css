@@ -353,3 +353,12 @@ h1, h2, h3, h4, h5, h6, .font-display {
   color: #0b120f !important; /* black/dark green text on green background */
   border-color: #34d399 !important;
 }
+
+/* Hide scrollbars but keep functionality */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
