@@ -553,7 +553,7 @@ export default function Home() {
                 </motion.div>
 
                 {/* CTA button — centered */}
-                <div className="w-full text-center mt-6 sm:mt-8">
+                <div className="w-full text-center mt-3 sm:mt-4">
                   <motion.div
                     initial={{ opacity: 0, y: 14 }}
                     whileInView={{ opacity: 1, y: 0 }}
