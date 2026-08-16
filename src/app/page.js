@@ -756,7 +756,7 @@ export default function Home() {
                       key={activity.id}
                       className={`group relative flex flex-col bg-[#058562] border dark:bg-black/35 rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-[260px] sm:w-full sm:max-w-[280px] shrink-0 sm:shrink snap-center ${
                         isPriorityOrAnnouncement
-                          ? "border-yellow-300 dark:border-yellow-400/80 shadow-[0_0_25px_rgba(253,224,71,0.25)] ring-2 ring-yellow-300/40"
+                          ? "border-yellow-300 dark:border-emerald-400/80 shadow-[0_0_25px_rgba(253,224,71,0.25)] dark:shadow-[0_0_25px_rgba(52,211,153,0.25)] ring-2 ring-yellow-300/40 dark:ring-emerald-400/40"
                           : "border-white/20 dark:border-white/5"
                       }`}
                     >
@@ -781,7 +781,7 @@ export default function Home() {
                         {isPriorityOrAnnouncement && (
                           <div className="absolute top-3 left-3 z-20 flex items-center gap-1 px-2.5 py-1 rounded-full bg-yellow-300 text-slate-950 shadow-lg text-[9px] font-black uppercase tracking-wider">
                             <Sparkles className="w-3 h-3 text-slate-950" />
-                            <span>{t("visitor.home.priority_activity_badge") || "KEGIATAN UTAMA"}</span>
+                            <span>{t("visitor.home.priority_activity_badge") || "SEDANG DIBUKA"}</span>
                           </div>
                         )}
 
