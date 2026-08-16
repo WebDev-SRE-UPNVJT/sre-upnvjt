@@ -166,12 +166,24 @@ export default function ActivitiesClient({ initialActivities, currentUser }) {
               )}
               
               <div className="flex justify-between items-start mb-4">
-                {!activity.imageUrl && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-primary/10 text-primary">
-                    <Type className="w-3 h-3" />
-                    {activity.type}
-                  </span>
-                )}
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {!activity.imageUrl && (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-primary/10 text-primary">
+                      <Type className="w-3 h-3" />
+                      {activity.type}
+                    </span>
+                  )}
+                  {activity.isPriority && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-600 dark:text-amber-300 border border-amber-500/30">
+                      Priority
+                    </span>
+                  )}
+                  {activity.isAnnouncementModal && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-purple-500/15 text-purple-600 dark:text-purple-300 border border-purple-500/30">
+                      Modal Pengumuman
+                    </span>
+                  )}
+                </div>
                 
                 {(canUpdate || canDelete) && (
                   <div className={`flex items-center gap-1 ${activity.imageUrl ? 'absolute top-4 right-4 z-20 bg-white/20 dark:bg-black/40 backdrop-blur-md rounded-xl p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg' : ''}`}>
@@ -321,10 +333,10 @@ export default function ActivitiesClient({ initialActivities, currentUser }) {
               </div>
 
               {/* Priority Activity toggle */}
-              <div className="flex items-center justify-between p-4 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 rounded-xl">
+              <div className="flex items-center justify-between p-4 bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 rounded-xl">
                 <div>
                   <div className="text-gray-900 dark:text-white font-medium text-[14px]">Priority Activity</div>
-                  <div className="text-gray-500 dark:text-white/40 text-[12px]">Tampilkan kegiatan ini di bagian utama (Featured Section)</div>
+                  <div className="text-gray-500 dark:text-white/50 text-[12px]">Tampilkan kegiatan ini di bagian utama (Featured Section)</div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input 
@@ -333,7 +345,27 @@ export default function ActivitiesClient({ initialActivities, currentUser }) {
                     className="sr-only peer" 
                     defaultChecked={currentActivity?.isPriority || false} 
                   />
-                  <div className="w-11 h-6 bg-gray-200 dark:bg-white/10 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary" />
+                  <div className="w-11 h-6 bg-gray-200 dark:bg-white/10 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500" />
+                </label>
+              </div>
+
+              {/* Visitor Announcement Modal toggle */}
+              <div className="flex items-center justify-between p-4 bg-purple-500/5 dark:bg-purple-500/10 border border-purple-500/20 rounded-xl">
+                <div>
+                  <div className="text-gray-900 dark:text-white font-medium text-[14px] flex items-center gap-1.5">
+                    <span>Modal Pengumuman Visitor</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-purple-500/20 text-purple-600 dark:text-purple-300 font-bold uppercase">Popup</span>
+                  </div>
+                  <div className="text-gray-500 dark:text-white/50 text-[12px]">Tampilkan kegiatan ini sebagai popup pengumuman di halaman visitor (1x per sesi)</div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    name="isAnnouncementModal" 
+                    className="sr-only peer" 
+                    defaultChecked={currentActivity?.isAnnouncementModal || false} 
+                  />
+                  <div className="w-11 h-6 bg-gray-200 dark:bg-white/10 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600" />
                 </label>
               </div>
 

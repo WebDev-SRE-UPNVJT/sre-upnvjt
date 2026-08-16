@@ -33,6 +33,7 @@ export const activity = pgTable('activity', {
   link: varchar('link', { length: 1000 }),
   linkType: varchar('linkType', { length: 50 }).default('detail').notNull(),
   isPriority: boolean('isPriority').default(false).notNull(),
+  isAnnouncementModal: boolean('isAnnouncementModal').default(false).notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
   updatedAt: timestamp('updatedAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });

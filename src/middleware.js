@@ -10,6 +10,8 @@ export default async function middleware(req, event) {
   const isAuthPage = req.nextUrl.pathname.startsWith("/login");
   const isMemberRole = token?.roleName === "MEMBER";
   const isStaffRole = token?.roleName === "STAFF";
+  const isAdminRole = token?.roleName === "SUPER_ADMIN" || token?.roleName === "ADMIN";
+  
 
   if (isAuthPage) {
     if (isAuth) {
@@ -31,6 +33,10 @@ export default async function middleware(req, event) {
     // Redirect STAFFs trying to access non-staff protected routes to /officer
     if (isStaffRole && !req.nextUrl.pathname.startsWith("/officer")) {
       return NextResponse.redirect(new URL("/officer", req.url));
+    }
+    // Redirect SUPER_ADMINs trying to access /member or /officer to /dashboard
+    if (isAdminRole && (req.nextUrl.pathname.startsWith("/member") || req.nextUrl.pathname.startsWith("/officer"))) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
     }
   }
 
