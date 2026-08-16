@@ -7,6 +7,15 @@ import { useLanguage } from "@/i18n/LanguageProvider";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 
+function resolveImageUrl(url) {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/")) {
+    return url;
+  }
+  const baseUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL || "https://cdn.webly.biz.id/";
+  return `${baseUrl.replace(/\/+$/, "")}/${url.replace(/^\/+/, "")}`;
+}
+
 export default function ActivityPublicClient({ activities = [] }) {
   const { language, t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
@@ -24,6 +33,10 @@ export default function ActivityPublicClient({ activities = [] }) {
     .filter(a => new Date(a.date) >= now)
     .sort((a, b) => new Date(a.date) - new Date(b.date)); // Closest upcoming first
 
+  const pastActivities = activities
+    .filter(a => new Date(a.date) < now)
+    .sort((a, b) => new Date(b.date) - new Date(a.date)); // Most recent past first
+
   const sortedActivities = [...activities].sort((a, b) => new Date(b.date) - new Date(a.date)); // Most recent first
 
   const priorityActivities = activities
@@ -31,25 +44,21 @@ export default function ActivityPublicClient({ activities = [] }) {
     .sort((a, b) => new Date(b.date) - new Date(a.date)); // Most recent priority first
 
   let featuredActivity = null;
-  let remainingActivities = [];
   let isUpcomingFeatured = false;
 
   if (priorityActivities.length > 0) {
     featuredActivity = priorityActivities[0];
     isUpcomingFeatured = new Date(featuredActivity.date) >= now;
-    remainingActivities = sortedActivities; // Do not filter out the featured activity
   } else if (upcomingActivities.length > 0) {
     featuredActivity = upcomingActivities[0];
     isUpcomingFeatured = true;
-    remainingActivities = sortedActivities; // Do not filter out the featured activity
   } else if (sortedActivities.length > 0) {
     featuredActivity = sortedActivities[0];
     isUpcomingFeatured = false;
-    remainingActivities = sortedActivities; // Do not slice(1)
   }
 
-  // Filter remaining activities by real-time search query
-  const filteredRemaining = remainingActivities.filter(a => {
+  // Filter activities by real-time search query
+  const filterFn = (a) => {
     if (!searchQuery.trim()) return true;
     const query = searchQuery.toLowerCase();
     return (
@@ -58,7 +67,10 @@ export default function ActivityPublicClient({ activities = [] }) {
       (a.location || "").toLowerCase().includes(query) ||
       (a.type || "").toLowerCase().includes(query)
     );
-  });
+  };
+
+  const filteredUpcoming = upcomingActivities.filter(filterFn);
+  const filteredPast = pastActivities.filter(filterFn);
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
@@ -154,7 +166,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                 <div className="lg:col-span-6 relative rounded-2xl overflow-hidden shadow-xl aspect-[16/10] bg-[#07130e]/40 dark:bg-emerald-950/40 border border-[#d0d6a8] dark:border-white/10 group-hover:scale-[1.01] transition-transform duration-500">
                   {featuredActivity.imageUrl ? (
                     <img
-                      src={featuredActivity.imageUrl}
+                      src={resolveImageUrl(featuredActivity.imageUrl)}
                       alt={featuredActivity.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     />
@@ -244,7 +256,6 @@ export default function ActivityPublicClient({ activities = [] }) {
 
             {/* Interactive Search Bar */}
             <div className="relative w-full md:w-80 group">
-              {/* Soft Ambient Neon Glow on Hover */}
               <div className="absolute inset-0 bg-yellow-300/10 dark:bg-emerald-500/10 rounded-2xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
               
               <input
@@ -258,8 +269,7 @@ export default function ActivityPublicClient({ activities = [] }) {
             </div>
           </div>
 
-          {/* Cards Grid */}
-          {filteredRemaining.length === 0 ? (
+          {filteredUpcoming.length === 0 && filteredPast.length === 0 ? (
             <div className="text-center py-20 bg-white/10 dark:bg-white/[0.01] border border-dashed border-white/20 dark:border-white/10 rounded-3xl">
               <ActivityIcon className="w-12 h-12 text-yellow-300/60 dark:text-gray-600 mx-auto mb-4" />
               <h3 className="text-lg font-bold text-white mb-1">{t("visitor.activity.no_act_found")}</h3>
@@ -270,100 +280,228 @@ export default function ActivityPublicClient({ activities = [] }) {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 justify-items-center">
-              {filteredRemaining.map((act, idx) => {
-                const { day, month } = getEventDateParts(act.date);
-                const isExternal = !!act.link;
-                const href = act.link || "/activity";
-                const isRegister = act.linkType === "register";
-                
-                const buttonText = isRegister 
-                  ? (language === "id" ? "Daftar Acara" : "Register Event")
-                  : (language === "id" ? "Lihat Detail" : "View Details");
+            <div className="space-y-16">
+              {/* ─── SECTION 1: UPCOMING ACTIVITIES (ASPECT RATIO 4:5) ─── */}
+              {filteredUpcoming.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-3 mb-8">
+                    <span className="relative flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 dark:bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-yellow-300 dark:bg-emerald-400"></span>
+                    </span>
+                    <h3 className="text-xl sm:text-2xl font-display font-black text-white uppercase tracking-tight">
+                      {language === "id" ? "Kegiatan Mendatang" : "Upcoming Events"}
+                    </h3>
+                    <span className="px-3 py-1 rounded-full bg-yellow-300/20 text-yellow-300 dark:bg-emerald-400/20 dark:text-emerald-300 text-xs font-black border border-yellow-300/30 dark:border-emerald-400/30">
+                      {filteredUpcoming.length} {language === "id" ? "Acara" : "Events"}
+                    </span>
+                  </div>
 
-                return (
-                  <motion.div
-                    key={act.id || idx}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: idx * 0.08 }}
-                    className="group relative flex flex-col bg-[#058562] border border-white/20 dark:bg-black/35 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-full max-w-[280px]"
-                  >
-                    {/* Portrait Poster Image (Aspect Ratio 4:5) */}
-                    <div className="relative w-full aspect-[4/5] overflow-hidden flex-shrink-0 bg-slate-900/40">
-                      {act.imageUrl ? (
-                        <img
-                          src={act.imageUrl}
-                          alt={act.name}
-                          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-emerald-800/40 to-teal-950/60 flex flex-col items-center justify-center gap-3">
-                          <Sparkles className="w-10 h-10 text-white/20" />
-                          <span className="text-[10px] uppercase font-bold tracking-widest text-white/40">Belum Ada Poster</span>
-                        </div>
-                      )}
-                      {/* Dark Vignette Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 justify-items-center">
+                    {filteredUpcoming.map((act, idx) => {
+                      const { day, month } = getEventDateParts(act.date);
+                      const isExternal = !!act.link;
+                      const href = act.link || "/activity";
+                      const isRegister = act.linkType === "register";
                       
-                      {/* Bottom Info Overlay on Poster */}
-                      <div className="absolute bottom-4 left-4 right-4 z-20 flex items-center justify-between">
-                        {/* Category Tag Badge */}
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider bg-black/50 text-yellow-300 dark:text-emerald-400 border border-white/10 backdrop-blur-md">
-                          {act.type || "EVENT"}
-                        </span>
+                      const buttonText = isRegister 
+                        ? (language === "id" ? "Daftar" : "Register")
+                        : (language === "id" ? "Detail" : "Details");
 
-                        {/* Date Badge */}
-                        {day && (
-                          <div className="flex flex-col items-center justify-center bg-red-500 dark:bg-emerald-400 text-white dark:text-slate-950 px-2.5 py-1.5 rounded-xl shadow-md min-w-[42px] border border-white/10 dark:border-emerald-300/30">
-                            <span className="text-xs font-black leading-none tracking-tight">{day}</span>
-                            <span className="text-[8px] font-black uppercase tracking-wider mt-0.5 leading-none">{month}</span>
+                      return (
+                        <motion.div
+                          key={act.id || idx}
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 0.4, delay: idx * 0.06 }}
+                          className={`group relative flex flex-col bg-[#056349] border dark:bg-black/35 rounded-2xl sm:rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-full max-w-full sm:max-w-[310px]` + (
+                            act.isPriority || act.isAnnouncementModal
+                              ? " border-yellow-300 dark:border-yellow-400/80 shadow-[0_0_20px_rgba(253,224,71,0.2)] ring-1 ring-yellow-300/40"
+                              : " border-white/20 dark:border-white/5"
+                          )}
+                        >
+                          {/* Portrait Poster Image (Aspect Ratio 4:5) */}
+                          <div className="relative w-full aspect-[4/5] overflow-hidden flex-shrink-0 bg-slate-900/40">
+                            {act.imageUrl ? (
+                              <img
+                                src={resolveImageUrl(act.imageUrl)}
+                                alt={act.name}
+                                className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gradient-to-br from-emerald-800/40 to-teal-950/60 flex flex-col items-center justify-center gap-2">
+                                <Sparkles className="w-8 h-8 text-white/20" />
+                                <span className="text-[9px] uppercase font-bold tracking-widest text-white/40">Poster 4:5</span>
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+                            
+                            {(act.isPriority || act.isAnnouncementModal) && (
+                              <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-20 flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-yellow-300 text-slate-950 shadow-lg text-[8px] sm:text-[9px] font-black uppercase tracking-wider">
+                                <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-950" />
+                                <span className="hidden xs:inline">UTAMA</span>
+                                <span className="xs:hidden">★</span>
+                              </div>
+                            )}
+
+                            <div className="absolute bottom-2 left-2 right-2 sm:bottom-3 sm:left-3 sm:right-3 z-20 flex items-center justify-between">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-wider bg-black/60 text-yellow-300 dark:text-emerald-400 border border-white/10 backdrop-blur-md">
+                                {act.type || "EVENT"}
+                              </span>
+
+                              {day && (
+                                <div className="flex flex-col items-center justify-center bg-red-600 dark:bg-emerald-400 text-white dark:text-slate-950 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg sm:rounded-xl shadow-md min-w-[36px] sm:min-w-[42px] border border-white/10">
+                                  <span className="text-[10px] sm:text-xs font-black leading-none">{day}</span>
+                                  <span className="text-[7px] sm:text-[8px] font-black uppercase tracking-wider mt-0.5 leading-none">{month}</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        )}
-                      </div>
-                    </div>
 
-                    {/* Body Content below poster */}
-                    <div className="p-5 flex-1 flex flex-col justify-between">
-                      <div className="h-[74px] flex flex-col justify-start mb-3">
-                        <h3 className="text-sm sm:text-base font-bold text-white group-hover:text-yellow-300 dark:group-hover:text-emerald-400 transition-colors duration-300 line-clamp-2 mb-1.5">
-                          {act.name}
-                        </h3>
-                        <p className="text-xs text-white/80 dark:text-gray-400 leading-relaxed line-clamp-2">
-                          {act.description || t("visitor.activity.no_desc")}
-                        </p>
-                      </div>
+                          {/* Body Content */}
+                          <div className="p-3.5 sm:p-5 flex-1 flex flex-col justify-between">
+                            <div className="mb-2">
+                              <h3 className="text-xs sm:text-base font-bold text-white group-hover:text-yellow-300 dark:group-hover:text-emerald-400 transition-colors duration-300 line-clamp-2 leading-snug mb-1.5">
+                                {act.name}
+                              </h3>
+                              <p className="text-[10px] sm:text-xs text-white/80 dark:text-gray-400 font-medium leading-normal line-clamp-2 sm:line-clamp-3">
+                                {act.description || t("visitor.activity.no_desc")}
+                              </p>
+                            </div>
 
-                      {/* Location Details (if present) */}
-                      {act.location && (
-                        <div className="flex items-center gap-2 mt-2 px-3 py-1.5 rounded-full bg-black/25 text-white/95 border border-white/5 dark:bg-black/25 dark:text-gray-400 text-[10px] font-bold select-none w-fit mb-4">
-                          <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                          <span className="truncate max-w-[150px]">{act.location}</span>
-                        </div>
-                      )}
+                            {/* Bottom Card Controls */}
+                            <div className="mt-auto pt-2 flex flex-col gap-2">
+                              {/* Uniform Full-Width Location Pill Badge */}
+                              <div className="w-full flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-black/30 text-white/95 border border-white/10 text-[9px] sm:text-[10px] font-bold select-none shadow-sm">
+                                <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400 shrink-0" />
+                                <span className="truncate max-w-[110px] sm:max-w-[200px]">{act.location || "Lokasi TBD"}</span>
+                              </div>
 
-                      {isExternal ? (
-                        <a
-                          href={href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-full py-2.5 bg-transparent text-yellow-300 border border-yellow-300 hover:bg-yellow-300 hover:text-[#058562] dark:text-emerald-400 dark:border-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#0b120f] rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase"
+                              {isExternal ? (
+                                <a
+                                  href={href}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="w-full py-1.5 sm:py-2.5 bg-transparent text-yellow-300 border border-yellow-300 hover:bg-yellow-300 hover:text-[#056349] dark:text-emerald-400 dark:border-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#0b120f] rounded-lg sm:rounded-xl text-[9px] sm:text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase px-1 truncate shadow-md"
+                                >
+                                  {buttonText}
+                                </a>
+                              ) : (
+                                <Link
+                                  href={href}
+                                  className="w-full py-1.5 sm:py-2.5 bg-transparent text-yellow-300 border border-yellow-300 hover:bg-yellow-300 hover:text-[#056349] dark:text-emerald-400 dark:border-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#0b120f] rounded-lg sm:rounded-xl text-[9px] sm:text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase px-1 truncate shadow-md"
+                                >
+                                  {buttonText}
+                                </Link>
+                              )}
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* ─── SECTION 2: PAST ACTIVITIES (ASPECT RATIO 4:3) ─── */}
+              {filteredPast.length > 0 && (
+                <div className="pt-8 border-t border-white/15 dark:border-white/10">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-3 h-3 rounded-full bg-emerald-400/80" />
+                    <h3 className="text-xl sm:text-2xl font-display font-black text-white uppercase tracking-tight">
+                      {language === "id" ? "Kegiatan Terlaksana" : "Past Activities"}
+                    </h3>
+                    <span className="px-3 py-1 rounded-full bg-white/10 text-white/90 text-xs font-black border border-white/10">
+                      {filteredPast.length} {language === "id" ? "Kegiatan" : "Activities"}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 justify-items-center">
+                    {filteredPast.map((act, idx) => {
+                      const isExternal = !!act.link;
+                      const href = act.link || "/activity";
+
+                      return (
+                        <motion.div
+                          key={act.id || idx}
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 0.4, delay: idx * 0.06 }}
+                          className="group relative flex flex-col bg-[#056349] border border-white/20 dark:bg-black/35 dark:border-white/5 rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 w-full max-w-full sm:max-w-[310px]"
                         >
-                          {buttonText}
-                        </a>
-                      ) : (
-                        <Link
-                          href={href}
-                          className="w-full py-2.5 bg-transparent text-yellow-300 border border-yellow-300 hover:bg-yellow-300 hover:text-[#058562] dark:text-emerald-400 dark:border-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#0b120f] rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase"
-                        >
-                          {buttonText}
-                        </Link>
-                      )}
-                    </div>
-                  </motion.div>
-                );
-              })}
+                          {/* Landscape Photo (Aspect Ratio 4:3) */}
+                          <div className="relative w-full aspect-[4/3] overflow-hidden flex-shrink-0 bg-slate-900/40">
+                            {act.imageUrl ? (
+                              <img
+                                src={resolveImageUrl(act.imageUrl)}
+                                alt={act.name}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gradient-to-br from-teal-900/40 to-emerald-950/60 flex flex-col items-center justify-center gap-2 text-white/30">
+                                <ActivityIcon className="w-8 h-8" />
+                                <span className="text-[9px] uppercase font-bold tracking-widest">Foto 4:3</span>
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />
+
+                            <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-wider bg-black/60 text-yellow-300 dark:text-emerald-400 border border-white/10 backdrop-blur-md">
+                                {act.type || "EVENT"}
+                              </span>
+                            </div>
+
+                            <div className="absolute bottom-2 left-2 right-2 sm:bottom-3 sm:left-3 sm:right-3 z-10 flex flex-wrap gap-2 items-center justify-between text-[9px] sm:text-[11px] text-white/90">
+                              <span className="font-semibold">{formatDate(act.date)}</span>
+                            </div>
+                          </div>
+
+                          {/* Content */}
+                          <div className="p-3.5 sm:p-5 flex-1 flex flex-col justify-between">
+                            <div className="mb-2">
+                              <h4 className="text-xs sm:text-base font-bold text-white group-hover:text-yellow-300 dark:group-hover:text-emerald-400 transition-colors duration-300 line-clamp-2 leading-snug mb-1.5">
+                                {act.name}
+                              </h4>
+                              <p className="text-[10px] sm:text-xs text-white/80 dark:text-gray-400 font-medium leading-normal line-clamp-2 sm:line-clamp-3">
+                                {act.description || t("visitor.activity.no_desc")}
+                              </p>
+                            </div>
+
+                            {/* Bottom Card Controls */}
+                            <div className="mt-auto pt-2 flex flex-col gap-2">
+                              {/* Uniform Full-Width Location Pill Badge */}
+                              <div className="w-full flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-black/30 text-white/95 border border-white/10 text-[9px] sm:text-[10px] font-bold select-none shadow-sm">
+                                <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400 shrink-0" />
+                                <span className="truncate max-w-[110px] sm:max-w-[200px]">{act.location || "Lokasi TBD"}</span>
+                              </div>
+
+                              {isExternal ? (
+                                <a
+                                  href={href}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="w-full py-1.5 sm:py-2.5 bg-white/10 border border-white/15 hover:bg-yellow-300 hover:text-slate-950 text-white rounded-lg sm:rounded-xl text-[9px] sm:text-[11px] font-bold text-center block transition-all duration-300 tracking-wider uppercase px-1 truncate shadow-md"
+                                >
+                                  {language === "id" ? "Detail" : "Details"}
+                                </a>
+                              ) : (
+                                <Link
+                                  href={href}
+                                  className="w-full py-1.5 sm:py-2.5 bg-white/10 border border-white/15 hover:bg-yellow-300 hover:text-slate-950 text-white rounded-lg sm:rounded-xl text-[9px] sm:text-[11px] font-bold text-center block transition-all duration-300 tracking-wider uppercase px-1 truncate shadow-md"
+                                >
+                                  {language === "id" ? "Detail" : "Details"}
+                                </Link>
+                              )}
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
