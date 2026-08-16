@@ -295,6 +295,33 @@ export default function ActivitiesClient({ initialActivities, currentUser }) {
 
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-white/70 uppercase tracking-wider mb-2">
+                  Action Button Type
+                </label>
+                <select
+                  name="linkType"
+                  defaultValue={currentActivity?.linkType || "detail"}
+                  className="w-full bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary transition-colors"
+                >
+                  <option value="detail" className="bg-white dark:bg-slate-900 text-gray-900 dark:text-white">Lihat Detail (View Detail)</option>
+                  <option value="register" className="bg-white dark:bg-slate-900 text-gray-900 dark:text-white">Daftar (Register)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-white/70 uppercase tracking-wider mb-2">
+                  Action Link URL (Optional)
+                </label>
+                <input
+                  name="link"
+                  type="url"
+                  defaultValue={currentActivity?.link || ""}
+                  className="w-full bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary transition-colors"
+                  placeholder="E.g. https://bit.ly/register-sre or https://forms.gle/..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-white/70 uppercase tracking-wider mb-2">
                   Image (Optional)
                 </label>
                 <div className="relative group">

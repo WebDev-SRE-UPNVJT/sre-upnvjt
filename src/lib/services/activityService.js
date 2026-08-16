@@ -20,6 +20,8 @@ export const activityService = {
       imageUrl: data.imageUrl || null,
       date: new Date(data.date),
       type: data.type,
+      link: data.link || null,
+      linkType: data.linkType || 'detail',
     }).returning();
     return newActivity;
   },
