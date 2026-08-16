@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, MapPin, Sparkles, Filter, Activity as ActivityIcon, ArrowUpRight, Tag } from "lucide-react";
+import { Calendar, MapPin, Sparkles, Filter, Activity as ActivityIcon, ArrowUpRight, Tag, Search } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageProvider";
 import { useTheme } from "next-themes";
 
 export default function ActivityPublicClient({ activities = [] }) {
   const { language, t } = useLanguage();
-  const [selectedType, setSelectedType] = useState("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -32,20 +32,23 @@ export default function ActivityPublicClient({ activities = [] }) {
   if (upcomingActivities.length > 0) {
     featuredActivity = upcomingActivities[0];
     isUpcomingFeatured = true;
-    remainingActivities = sortedActivities.filter(a => a.id !== featuredActivity.id);
+    remainingActivities = sortedActivities; // Do not filter out the featured activity
   } else if (sortedActivities.length > 0) {
     featuredActivity = sortedActivities[0];
     isUpcomingFeatured = false;
-    remainingActivities = sortedActivities.slice(1);
+    remainingActivities = sortedActivities; // Do not slice(1)
   }
 
-  // Categories extracted dynamically from activities
-  const types = ["ALL", ...Array.from(new Set(activities.map(a => a.type.toUpperCase()).filter(Boolean)))];
-
-  // Filter remaining activities by selected type tab
+  // Filter remaining activities by real-time search query
   const filteredRemaining = remainingActivities.filter(a => {
-    if (selectedType === "ALL") return true;
-    return (a.type || "").toUpperCase() === selectedType;
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      (a.name || "").toLowerCase().includes(query) ||
+      (a.description || "").toLowerCase().includes(query) ||
+      (a.location || "").toLowerCase().includes(query) ||
+      (a.type || "").toLowerCase().includes(query)
+    );
   });
 
   const formatDate = (dateStr) => {
@@ -218,24 +221,20 @@ export default function ActivityPublicClient({ activities = [] }) {
               </h2>
             </div>
 
-            {/* Filter Tabs */}
-            {types.length > 1 && (
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
-                {types.map(tabType => (
-                  <button
-                    key={tabType}
-                    onClick={() => setSelectedType(tabType)}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 border ${
-                      selectedType === tabType
-                        ? "bg-yellow-300 text-[#07130e] border-yellow-300 shadow-lg shadow-yellow-300/20 dark:bg-emerald-500 dark:text-black dark:border-emerald-500 dark:shadow-emerald-500/20"
-                        : "bg-white/10 hover:bg-white/20 text-white border-white/10 hover:text-yellow-300 dark:bg-white/5 dark:hover:bg-white/10 dark:text-gray-300 dark:hover:text-white dark:border-white/5"
-                    }`}
-                  >
-                    {tabType === "ALL" ? t("visitor.articles.all_topics") : tabType}
-                  </button>
-                ))}
-              </div>
-            )}
+            {/* Interactive Search Bar */}
+            <div className="relative w-full md:w-80 group">
+              {/* Soft Ambient Neon Glow on Hover */}
+              <div className="absolute inset-0 bg-yellow-300/10 dark:bg-emerald-500/10 rounded-2xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+              
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={language === "id" ? "Cari kegiatan, topik..." : "Search events, topics..."}
+                className="w-full px-5 py-3 pl-12 text-sm rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:bg-white focus:text-slate-900 focus:placeholder-slate-400 dark:focus:bg-[#07130e] dark:focus:text-white dark:focus:border-emerald-500/40 focus:ring-2 focus:ring-yellow-300 dark:focus:ring-emerald-500/30 transition-all duration-300 shadow-inner"
+              />
+              <Search className="absolute left-4 top-3.5 w-4.5 h-4.5 text-white/50 group-focus-within:text-slate-900 dark:group-focus-within:text-emerald-400 transition-colors pointer-events-none" />
+            </div>
           </div>
 
           {/* Cards Grid */}
