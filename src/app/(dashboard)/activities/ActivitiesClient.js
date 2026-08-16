@@ -225,8 +225,8 @@ export default function ActivitiesClient({ initialActivities, currentUser }) {
       {/* Add/Edit Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 dark:bg-[#07130e]/80 backdrop-blur-sm">
-          <div className="bg-white dark:bg-[#07130e] rounded-3xl w-full max-w-lg shadow-2xl border border-gray-200 dark:border-white/10 overflow-hidden">
-            <div className="px-8 py-5 border-b border-gray-200 dark:border-white/10 flex justify-between items-center bg-gray-50/50 dark:bg-white/[0.02]">
+          <div className="bg-white dark:bg-[#07130e] rounded-3xl w-full max-w-lg shadow-2xl border border-gray-200 dark:border-white/10 overflow-hidden max-h-[85vh] flex flex-col">
+            <div className="px-8 py-5 border-b border-gray-200 dark:border-white/10 flex justify-between items-center bg-gray-50/50 dark:bg-white/[0.02] shrink-0">
               <h2 className="text-xl font-display font-bold text-gray-900 dark:text-white">
                 {currentActivity ? "Edit Activity" : "Add Activity"}
               </h2>
@@ -238,7 +238,7 @@ export default function ActivitiesClient({ initialActivities, currentUser }) {
               </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-8 space-y-5">
+            <form onSubmit={handleSubmit} className="p-8 space-y-5 overflow-y-auto flex-1">
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-white/70 uppercase tracking-wider mb-2">
                   Name *
