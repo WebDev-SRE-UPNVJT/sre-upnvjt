@@ -629,12 +629,12 @@ export default function Home() {
 
             {/* Section Header */}
             <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.1 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="text-center mb-12 sm:mb-16 max-w-2xl mx-auto"
-            >
+               initial={{ opacity: 0, y: 15 }}
+               whileInView={{ opacity: 1, y: 0 }}
+               viewport={{ once: true, amount: 0.1 }}
+               transition={{ duration: 0.6, ease: "easeOut" }}
+               className="text-center mb-8 sm:mb-10 max-w-2xl mx-auto"
+             >
               <div className="flex items-center justify-center mb-3">
                 <span className="text-xs sm:text-sm md:text-base font-black tracking-[0.28em] text-yellow-300 dark:text-emerald-400 uppercase">
                   {t("visitor.home.featured_projects_eyebrow")}
@@ -694,7 +694,7 @@ export default function Home() {
                   return (
                     <div
                       key={activity.id}
-                      className="group relative flex flex-col bg-white/5 border border-white/10 dark:bg-black/20 dark:border-white/5 rounded-[1.75rem] overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-full max-w-[280px]"
+                      className="group relative flex flex-col bg-white/[0.07] border border-white/20 dark:bg-black/20 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-full max-w-[280px]"
                     >
                       {/* Portrait Poster Image (Aspect Ratio 4:5) */}
                       <div className="relative w-full aspect-[4/5] overflow-hidden flex-shrink-0 bg-slate-900/40">
@@ -737,9 +737,9 @@ export default function Home() {
                         </div>
                       </div>
 
-                      {/* Content Section - Fixed Height for exact visual alignment */}
-                      <div className="p-4 flex flex-col h-[180px] bg-white/5 dark:bg-black/20 justify-between">
-                        <div className="space-y-1.5">
+                      {/* Content Section - Adjusted Padding and height to avoid cramped margins */}
+                      <div className="p-5 flex flex-col h-[200px] bg-white/[0.03] dark:bg-black/20 justify-between">
+                        <div className="space-y-2">
                           <h3 className="text-sm sm:text-base font-bold text-white group-hover:text-yellow-300 dark:group-hover:text-emerald-400 transition-colors duration-300 line-clamp-2">
                             {activity.name}
                           </h3>
@@ -753,14 +753,14 @@ export default function Home() {
                             href={href}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-full py-2.5 bg-white/5 hover:bg-yellow-300 hover:text-slate-950 dark:bg-white/5 dark:hover:bg-emerald-400 dark:hover:text-black border border-white/15 dark:border-white/5 rounded-xl text-[11px] font-bold text-center block transition-all duration-300 tracking-wider uppercase"
+                            className="w-full py-2.5 bg-white/5 hover:bg-yellow-300 hover:text-slate-950 dark:bg-white/5 dark:hover:bg-emerald-400 dark:hover:text-black border border-white/30 dark:border-white/10 rounded-xl text-[11px] font-bold text-center block transition-all duration-300 tracking-wider uppercase"
                           >
                             {buttonText}
                           </a>
                         ) : (
                           <Link
                             href={href}
-                            className="w-full py-2.5 bg-white/5 hover:bg-yellow-300 hover:text-slate-950 dark:bg-white/5 dark:hover:bg-emerald-400 dark:hover:text-black border border-white/15 dark:border-white/5 rounded-xl text-[11px] font-bold text-center block transition-all duration-300 tracking-wider uppercase"
+                            className="w-full py-2.5 bg-white/5 hover:bg-yellow-300 hover:text-slate-950 dark:bg-white/5 dark:hover:bg-emerald-400 dark:hover:text-black border border-white/30 dark:border-white/10 rounded-xl text-[11px] font-bold text-center block transition-all duration-300 tracking-wider uppercase"
                           >
                             {buttonText}
                           </Link>
@@ -772,7 +772,7 @@ export default function Home() {
 
                 {/* Render Companion Card if there are less than 4 upcoming events */}
                 {upcomingActivities.length < 4 && (
-                  <div className="group relative flex flex-col bg-white/5 border border-white/10 dark:bg-black/20 dark:border-white/5 rounded-[1.75rem] overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-full max-w-[280px]">
+                  <div className="group relative flex flex-col bg-white/[0.07] border border-white/20 dark:bg-black/20 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-full max-w-[280px]">
                     {/* 4:5 Aspect Ratio Decorative Header */}
                     <div className="relative w-full aspect-[4/5] flex flex-col items-center justify-center p-5 text-center bg-gradient-to-b from-yellow-300/10 to-transparent dark:from-emerald-500/10 dark:to-transparent">
                       {/* Floating Glowing Orbs */}
@@ -799,8 +799,8 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* Bottom Action Footer - styled with local color theme matching the SRE standard */}
-                    <div className="p-4 pt-0 mt-auto bg-transparent">
+                    {/* Bottom Action Footer - styled with local color theme matching SRE standard */}
+                    <div className="p-5 pt-0 mt-auto bg-transparent">
                       <a
                         href="https://www.instagram.com/sre.upnvjt/"
                         target="_blank"
