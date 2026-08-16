@@ -315,10 +315,10 @@ export default function ActivityPublicClient({ activities = [] }) {
                           whileInView={{ opacity: 1, y: 0 }}
                           viewport={{ once: true }}
                           transition={{ duration: 0.4, delay: idx * 0.06 }}
-                          className={`group relative flex flex-col bg-[#058562] border dark:bg-black/35 rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-[260px] sm:w-full sm:max-w-[280px] shrink-0 sm:shrink snap-center` + (
+                          className={`group relative flex flex-col bg-[#058562] dark:bg-slate-950/75 border rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-[260px] sm:w-full sm:max-w-[280px] shrink-0 sm:shrink snap-center` + (
                             act.isPriority || act.isAnnouncementModal
                               ? " border-yellow-300 dark:border-emerald-400/80 shadow-[0_0_20px_rgba(253,224,71,0.2)] dark:shadow-[0_0_20px_rgba(52,211,153,0.2)] ring-1 ring-yellow-300/40 dark:ring-emerald-400/40"
-                              : " border-white/20 dark:border-white/5"
+                              : " border-white/20 dark:border-white/10"
                           )}
                         >
                           {/* Portrait Poster Image (Aspect Ratio 4:4 on Mobile, 4:5 on Desktop) */}
@@ -434,7 +434,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                           whileInView={{ opacity: 1, y: 0 }}
                           viewport={{ once: true }}
                           transition={{ duration: 0.4, delay: idx * 0.06 }}
-                          className="group relative flex flex-col bg-[#058562] border-2 border-white/35 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-[260px] sm:w-full sm:max-w-[280px] shrink-0 sm:shrink snap-center"
+                          className="group relative flex flex-col bg-[#058562] dark:bg-slate-950/75 border-2 border-white/35 dark:border-white/10 rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-[260px] sm:w-full sm:max-w-[280px] shrink-0 sm:shrink snap-center"
                         >
                           {/* Landscape Photo (Aspect Ratio 4:3) */}
                           <div className="relative w-full aspect-[4/3] overflow-hidden flex-shrink-0 bg-slate-900/40">
