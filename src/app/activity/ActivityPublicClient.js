@@ -297,7 +297,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                     </span>
                   </div>
 
-                  <div className="flex overflow-x-auto pb-6 gap-5 scrollbar-none snap-x snap-mandatory flex-nowrap justify-start max-w-full px-4 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6 justify-items-center w-full">
+                  <div className="flex overflow-x-auto pb-6 gap-5 scrollbar-none snap-x snap-mandatory flex-nowrap justify-start max-w-full -mx-6 px-6 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6 justify-items-center w-full">
                     {filteredUpcoming.map((act, idx) => {
                       const { day, month } = getEventDateParts(act.date);
                       const isExternal = !!act.link;
@@ -422,7 +422,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                     </span>
                   </div>
 
-                  <div className="flex overflow-x-auto pb-6 gap-5 scrollbar-none snap-x snap-mandatory flex-nowrap justify-start max-w-full px-4 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6 justify-items-center w-full">
+                  <div className="flex overflow-x-auto pb-6 gap-5 scrollbar-none snap-x snap-mandatory flex-nowrap justify-start max-w-full -mx-6 px-6 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6 justify-items-center w-full">
                     {filteredPast.map((act, idx) => {
                       const isExternal = !!act.link;
                       const href = act.link || "/activity";
