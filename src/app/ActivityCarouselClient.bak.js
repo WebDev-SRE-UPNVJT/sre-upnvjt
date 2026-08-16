@@ -121,14 +121,14 @@ export default function ActivityCarousel({ activities }) {
             }}
             className="flex items-center justify-center gap-3 sm:gap-4 w-full"
           >
-            {/* CARD 1 (Left, Inactive) */}
+            {/* LEFT CARD — Inactive, smaller, with matching structural components */}
             <motion.div
-              whileHover={{ y: -4, scale: 0.95, opacity: 0.8 }}
+              whileHover={{ y: -4, scale: 0.92, opacity: 0.8 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="hidden md:block md:w-[28%] lg:w-[22%] flex-shrink-0 opacity-50 scale-90 rounded-2xl overflow-hidden cursor-pointer border-2 border-yellow-300 dark:border-emerald-500/40 bg-[#099c6d] dark:bg-[#093021] shadow-lg"
+              className="hidden md:block md:w-[28%] md:max-w-[320px] lg:max-w-[340px] xl:max-w-[360px] flex-shrink-0 opacity-50 scale-90 rounded-2xl overflow-hidden cursor-pointer border-2 border-yellow-300 dark:border-emerald-500/40 bg-[#099c6d] dark:bg-[#093021] shadow-lg"
               onClick={prev}
             >
-              <div className="relative w-full aspect-[4/3]">
+              <div className="relative h-[160px]">
                 <img
                   src={getImage(activities[getIndex(-1)])}
                   alt={getTitle(activities[getIndex(-1)])}
@@ -152,13 +152,13 @@ export default function ActivityCarousel({ activities }) {
               </div>
             </motion.div>
 
-            {/* CARD 2 (Center-Left, Active) */}
+            {/* CENTER CARD — featured (Emerald background matching about section cards) */}
             <motion.div
               whileHover={{ y: -8, scale: 1.02 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="w-full md:w-[44%] lg:w-[34%] flex-shrink-0 scale-100 z-10 shadow-2xl shadow-emerald-900/10 dark:shadow-emerald-950/50 rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-yellow-300 dark:border-emerald-400/60 bg-[#099c6d] dark:bg-emerald-950"
+              className="w-full md:w-[44%] flex-shrink-0 scale-100 z-10 shadow-2xl shadow-emerald-900/10 dark:shadow-emerald-950/50 rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-yellow-300 dark:border-emerald-400/60 bg-[#099c6d] dark:bg-emerald-950"
             >
-              <div className="relative w-full aspect-[4/3]">
+              <div className="relative w-full aspect-[4/3] md:aspect-auto md:h-[280px]">
                 <img
                   src={getImage(activities[current])}
                   alt={getTitle(activities[current])}
@@ -185,64 +185,33 @@ export default function ActivityCarousel({ activities }) {
               </div>
             </motion.div>
 
-            {/* CARD 3 (Center-Right, Inactive) */}
+            {/* RIGHT CARD — Inactive, smaller, with matching structural components */}
             <motion.div
-              whileHover={{ y: -4, scale: 0.95, opacity: 0.8 }}
+              whileHover={{ y: -4, scale: 0.92, opacity: 0.8 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="hidden md:block md:w-[28%] lg:w-[22%] flex-shrink-0 opacity-50 scale-90 rounded-2xl overflow-hidden cursor-pointer border-2 border-yellow-300 dark:border-emerald-500/40 bg-[#099c6d] dark:bg-[#093021] shadow-lg"
+              className="hidden md:block md:w-[28%] md:max-w-[320px] lg:max-w-[340px] xl:max-w-[360px] flex-shrink-0 opacity-50 scale-90 rounded-2xl overflow-hidden cursor-pointer border-2 border-yellow-300 dark:border-emerald-500/40 bg-[#099c6d] dark:bg-[#093021] shadow-lg"
               onClick={next}
             >
-              <div className="relative w-full aspect-[4/3]">
+              <div className="relative h-[160px]">
                 <img
                   src={getImage(activities[getIndex(1)])}
                   alt={getTitle(activities[getIndex(1)])}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" aria-hidden="true" />
-                <h3 className="absolute bottom-2.5 left-3 text-white font-black text-xs uppercase tracking-wide line-clamp-1">
-                  {getTitle(activities[getIndex(1)])}
+                <h3 className="absolute bottom-2.5 left-3 text-white font-black text-xs uppercase tracking-wide">
+                  {activities[getIndex(1)].title}
                 </h3>
               </div>
               <div className="p-3 flex flex-col gap-1.5">
                 {activities[getIndex(1)]?.date && (
                   <div className="flex items-center text-[9px] text-yellow-300 dark:text-emerald-400 font-bold uppercase tracking-wider">
-                    <Calendar className="w-3.5 h-3.5 mr-1 text-yellow-300 dark:text-emerald-400" />
+                    <Calendar className="w-3 h-3 mr-1 text-yellow-300 dark:text-emerald-400" />
                     {formatDate(activities[getIndex(1)]?.date)}
                   </div>
                 )}
                 <p className="text-emerald-50 dark:text-gray-300 text-[11px] leading-relaxed font-bold line-clamp-2">
-                  {getTitle(activities[getIndex(1)]) ? activities[getIndex(1)]?.description : ''}
-                </p>
-              </div>
-            </motion.div>
-
-            {/* CARD 4 (Right, Inactive) */}
-            <motion.div
-              whileHover={{ y: -4, scale: 0.95, opacity: 0.8 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="hidden lg:block lg:w-[22%] flex-shrink-0 opacity-50 scale-90 rounded-2xl overflow-hidden cursor-pointer border-2 border-yellow-300 dark:border-emerald-500/40 bg-[#099c6d] dark:bg-[#093021] shadow-lg"
-              onClick={() => goTo(getIndex(2))}
-            >
-              <div className="relative w-full aspect-[4/3]">
-                <img
-                  src={getImage(activities[getIndex(2)])}
-                  alt={getTitle(activities[getIndex(2)])}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" aria-hidden="true" />
-                <h3 className="absolute bottom-2.5 left-3 text-white font-black text-xs uppercase tracking-wide line-clamp-1">
-                  {getTitle(activities[getIndex(2)])}
-                </h3>
-              </div>
-              <div className="p-3 flex flex-col gap-1.5">
-                {activities[getIndex(2)]?.date && (
-                  <div className="flex items-center text-[9px] text-yellow-300 dark:text-emerald-400 font-bold uppercase tracking-wider">
-                    <Calendar className="w-3 h-3 mr-1 text-yellow-300 dark:text-emerald-400" />
-                    {formatDate(activities[getIndex(2)]?.date)}
-                  </div>
-                )}
-                <p className="text-emerald-50 dark:text-gray-300 text-[11px] leading-relaxed font-bold line-clamp-2">
-                  {activities[getIndex(2)]?.description}
+                  {activities[getIndex(1)].description}
                 </p>
               </div>
             </motion.div>
