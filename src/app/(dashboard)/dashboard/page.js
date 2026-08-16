@@ -18,17 +18,8 @@ export const metadata = {
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   
-  console.log("=== DashboardPage Server-side Debug ===");
-  console.log("Session:", JSON.stringify(session));
-
   if (!session) {
-    return (
-      <div className="p-8 bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/40 rounded-xl m-8 relative z-50">
-        <h2 className="text-xl font-bold mb-4">Debug: No Session Found</h2>
-        <p className="mb-4">getServerSession returned null on /dashboard/page.js.</p>
-        <a href="/login" className="bg-red-700 text-white px-4 py-2 rounded">Go to Login</a>
-      </div>
-    );
+    redirect("/login");
   }
 
   const usersResult = await db.select({
@@ -43,19 +34,7 @@ export default async function DashboardPage() {
   .where(eq(user.email, session.user.email))
   .limit(1);
 
-  console.log("usersResult:", JSON.stringify(usersResult));
-
-  if (!usersResult || usersResult.length === 0) {
-    return (
-      <div className="p-8 bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/40 rounded-xl m-8 relative z-50">
-        <h2 className="text-xl font-bold mb-4">Debug: usersResult Empty</h2>
-        <p className="mb-2">No user found in database for email: <strong>{session.user?.email || "undefined"}</strong></p>
-        <p className="mb-4">Session info:</p>
-        <pre className="p-4 bg-black/10 rounded overflow-auto text-xs mb-4">{JSON.stringify(session, null, 2)}</pre>
-        <a href="/login" className="bg-amber-700 text-white px-4 py-2 rounded inline-block">Go to Login</a>
-      </div>
-    );
-  }
+  if (!usersResult || usersResult.length === 0) redirect("/login");
 
   const currentUser = {
     ...usersResult[0],
