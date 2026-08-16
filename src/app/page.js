@@ -656,20 +656,12 @@ export default function Home() {
             </motion.div>
 
             {upcomingActivities.length === 0 ? (
-              /* Stunning Coming Soon Placeholder */
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={mounted ? { opacity: 1, scale: 1, y: 0 } : {}}
-                transition={{ duration: 0.5 }}
-                className="w-full max-w-xl mx-auto rounded-3xl p-8 sm:p-10 border border-white/20 dark:border-white/10 bg-white/10 dark:bg-white/[0.03] backdrop-blur-md text-center flex flex-col items-center gap-5 relative overflow-hidden shadow-2xl"
-              >
-                {/* Glowing animated background circle */}
+              /* Coming Soon Placeholder */
+              <div className="w-full max-w-xl mx-auto rounded-3xl p-8 sm:p-10 border border-white/20 dark:border-white/10 bg-white/10 dark:bg-white/[0.03] backdrop-blur-md text-center flex flex-col items-center gap-5 relative overflow-hidden shadow-2xl">
                 <div className="absolute -top-12 -right-12 w-32 h-32 bg-yellow-300/10 dark:bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
-                
                 <div className="p-4 sm:p-5 rounded-full bg-yellow-300/20 text-yellow-300 dark:bg-[#0bb882]/20 dark:text-emerald-300 animate-pulse">
                   <Rocket className="w-8 h-8 sm:w-10 sm:h-10" />
                 </div>
-                
                 <div className="flex flex-col gap-2">
                   <h3 className="text-xl sm:text-2xl font-bold text-white dark:text-gray-100 tracking-tight">
                     {t("visitor.home.projects_coming_soon_title")}
@@ -678,8 +670,6 @@ export default function Home() {
                     {t("visitor.home.projects_coming_soon_desc")}
                   </p>
                 </div>
-
-                {/* Pulsing indicator light */}
                 <div className="flex items-center gap-2 mt-2 px-3.5 py-1.5 rounded-full bg-black/25 text-yellow-300 dark:text-emerald-400 text-xs font-semibold select-none border border-white/5">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 dark:bg-emerald-400 opacity-75"></span>
@@ -687,23 +677,16 @@ export default function Home() {
                   </span>
                   {t("visitor.home.coming_soon")}
                 </div>
-              </motion.div>
+              </div>
             ) : (
               /* Upcoming Events Grid - Professional 4:5 Poster Layout */
-              <motion.div
-                variants={staggerParent}
-                initial="hidden"
-                animate={mounted ? "show" : "hidden"}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-              >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {upcomingActivities.map((activity) => {
                   const { day, month } = getEventDateParts(activity.date);
                   return (
-                    <motion.div
+                    <div
                       key={activity.id}
-                      variants={staggerChild}
-                      whileHover={{ y: -8, transition: { duration: 0.3, ease: "easeOut" } }}
-                      className="group relative flex flex-col bg-white/5 border border-white/10 dark:bg-black/20 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-black/40 transition-all duration-500"
+                      className="group relative flex flex-col bg-white/5 border border-white/10 dark:bg-black/20 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-black/40 hover:-translate-y-2 transition-all duration-500"
                     >
                       {/* Portrait Poster Image (Aspect Ratio 4:5) */}
                       <div className="relative w-full aspect-[4/5] overflow-hidden flex-shrink-0 bg-slate-900/40">
@@ -716,14 +699,12 @@ export default function Home() {
                         ) : (
                           <div className="w-full h-full bg-gradient-to-br from-emerald-800/40 to-teal-950/60 flex flex-col items-center justify-center gap-3">
                             <Rocket className="w-12 h-12 text-white/20" />
-                            <span className="text-[10px] uppercase font-bold tracking-widest text-white/40">No Poster Image</span>
+                            <span className="text-[10px] uppercase font-bold tracking-widest text-white/40">Belum Ada Poster</span>
                           </div>
                         )}
-                        
-                        {/* Dark Vignette Overlay for Premium Contrast */}
+                        {/* Dark Vignette Overlay */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
-                        
-                        {/* Premium Physical Calendar Date Badge overlay */}
+                        {/* Calendar Date Badge */}
                         <div className="absolute top-4 right-4 z-20 flex flex-col items-center justify-center w-14 h-16 bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden border border-slate-100 dark:border-white/10 select-none">
                           <div className="w-full bg-red-500 dark:bg-emerald-500 text-[10px] font-black uppercase text-center py-1 text-white dark:text-slate-950 tracking-wider">
                             {month}
@@ -732,8 +713,7 @@ export default function Home() {
                             {day}
                           </div>
                         </div>
-
-                        {/* Event Tags inside Image Overlay */}
+                        {/* Event Tags */}
                         <div className="absolute bottom-4 left-4 right-4 z-10 flex flex-wrap gap-2 items-center">
                           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider bg-black/50 text-yellow-300 dark:text-emerald-400 border border-white/10 backdrop-blur-md">
                             {activity.type || "EVENT"}
@@ -746,7 +726,6 @@ export default function Home() {
                           )}
                         </div>
                       </div>
-
                       {/* Content Section */}
                       <div className="p-6 flex flex-col flex-1 bg-white/5 dark:bg-black/20">
                         <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-yellow-300 dark:group-hover:text-emerald-400 transition-colors duration-300 line-clamp-2 mb-3">
@@ -755,8 +734,6 @@ export default function Home() {
                         <p className="text-sm text-white/70 dark:text-gray-400 leading-relaxed line-clamp-4 flex-1 mb-5">
                           {activity.description}
                         </p>
-                        
-                        {/* Call to Action Button */}
                         <Link
                           href="/activity"
                           className="w-full py-3.5 bg-white/5 hover:bg-yellow-300 hover:text-slate-950 dark:bg-white/5 dark:hover:bg-emerald-400 dark:hover:text-black border border-white/15 dark:border-white/5 rounded-2xl text-xs font-bold text-center block transition-all duration-300 tracking-wider uppercase"
@@ -764,10 +741,10 @@ export default function Home() {
                           {language === "id" ? "Lihat Detail Acara" : "View Event Details"}
                         </Link>
                       </div>
-                    </motion.div>
+                    </div>
                   );
                 })}
-              </motion.div>
+              </div>
             )}
           </div>
         </section>
