@@ -106,7 +106,7 @@ export default function ActivityCarousel({ activities }) {
 
   return (
     <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} className="w-full max-w-6xl mx-auto relative select-none">
-      <div className="relative overflow-hidden w-full py-8 min-h-fit md:min-h-[420px] flex items-center justify-center">
+      <div className="relative overflow-hidden w-full pt-4 pb-2 min-h-fit md:min-h-[370px] flex items-center justify-center">
         <AnimatePresence initial={false} custom={direction} mode="popLayout">
           <motion.div
             key={current}
@@ -462,7 +462,7 @@ export default function ActivityCarousel({ activities }) {
 
       {/* Controls — Pure bright yellow in Light Mode, emerald in Dark Mode */}
       {count > 1 && (
-        <div className="flex items-center justify-center gap-3.5 sm:gap-4 mt-3 sm:mt-4">
+        <div className="flex items-center justify-center gap-3.5 sm:gap-4 mt-1 sm:mt-2">
           <button
             onClick={prev}
             className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-yellow-300 hover:bg-yellow-400 text-slate-950 border border-yellow-400 dark:bg-emerald-600 dark:hover:bg-emerald-500 dark:text-white dark:border-transparent flex items-center justify-center transition-all duration-300 shadow-md transform hover:scale-110 active:scale-95 focus-visible:outline-yellow-300"

@@ -502,7 +502,7 @@ export default function Home() {
         {dbActivities.length > 0 && (
           <section
             id="activity"
-            className="scroll-mt-20 bg-[#0bb882] dark:bg-[#031f16] py-12 sm:py-16 px-6 sm:px-8 md:px-12 lg:px-20 border-t-2 border-white/20 dark:border-white/5 relative overflow-hidden flex items-center justify-center"
+            className="scroll-mt-20 bg-[#0bb882] dark:bg-[#031f16] py-8 sm:py-12 px-6 sm:px-8 md:px-12 lg:px-20 border-t-2 border-white/20 dark:border-white/5 relative overflow-hidden flex items-center justify-center"
           >
             {/* faint dot-matrix texture */}
             <div className="absolute inset-0 pointer-events-none opacity-[0.04] bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px]" />
@@ -510,7 +510,7 @@ export default function Home() {
             <div className="absolute -top-32 right-0 w-[420px] h-[420px] bg-yellow-300/8 dark:bg-emerald-500/8 rounded-full blur-[120px] pointer-events-none" />
 
             <div className="w-full relative z-10 flex flex-col items-center">
-              <div className="max-w-7xl mx-auto w-full flex flex-col justify-between items-center gap-6">
+              <div className="max-w-7xl mx-auto w-full flex flex-col justify-between items-center gap-3 sm:gap-4">
 
                 {/* Header — centered, exactly like original Our Activity */}
                 <motion.div
@@ -553,7 +553,7 @@ export default function Home() {
                 </motion.div>
 
                 {/* CTA button — centered */}
-                <div className="w-full text-center mt-2">
+                <div className="w-full text-center mt-0.5">
                   <motion.div
                     initial={{ opacity: 0, y: 14 }}
                     whileInView={{ opacity: 1, y: 0 }}
