@@ -273,7 +273,7 @@ export default function Home() {
         {/* Hero Section */}
         <section
           id="home"
-          className={`relative min-h-[90vh] sm:min-h-screen flex flex-col justify-center items-start py-16 sm:py-24 px-6 sm:px-12 md:px-20 lg:px-24 overflow-hidden ${
+          className={`relative min-h-[100dvh] sm:min-h-screen flex flex-col justify-center items-start py-16 sm:py-24 px-6 sm:px-12 md:px-20 lg:px-24 overflow-hidden ${
             isLight ? "bg-white" : "bg-[#0a1c15]"
           }`}
         >
