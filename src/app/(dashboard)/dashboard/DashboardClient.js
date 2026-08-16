@@ -28,7 +28,10 @@ export default function DashboardClient({ stats, user }) {
   const [greeting, setGreeting] = useState("Welcome");
   const [currentDate, setCurrentDate] = useState("");
 
+  const [isClient, setIsClient] = useState(false);
+
   useEffect(() => {
+    setIsClient(true);
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 12) setGreeting(t("dashboard.greeting.morning"));
     else if (hour >= 12 && hour < 18)
@@ -215,7 +218,7 @@ export default function DashboardClient({ stats, user }) {
       </motion.div>
 
       <div className="mt-10 grid grid-col-1">
-        <ChartActivity />
+        {isClient && <ChartActivity />}
       </div>
 
       {/* Main Content Area */}
