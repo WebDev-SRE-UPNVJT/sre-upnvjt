@@ -46,7 +46,7 @@ function EmptyState({ query }) {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-      className="text-center py-24 flex flex-col items-center gap-6"
+      className="text-center py-12 sm:py-24 flex flex-col items-center gap-6"
     >
       {/* Brand illustration — leaf/solar motif */}
       <div className="relative">
@@ -96,7 +96,7 @@ export default function ContentPublicClient({ initialArticles }) {
     <div className="min-h-screen bg-[#0bb37e] dark:bg-[#07130e] text-white dark:text-white font-sans selection:bg-yellow-300">
       
       {/* ── Hero / Filter Section ──────────────────────────────────────────── */}
-      <section id="hero" className="scroll-mt-20 pt-40 pb-20 px-6 relative overflow-hidden bg-[#0bb37e] dark:bg-[#07130e]">
+      <section id="hero" className="scroll-mt-20 pt-24 pb-12 sm:pt-40 sm:pb-20 px-6 relative overflow-hidden bg-[#0bb37e] dark:bg-[#07130e]">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary/15 blur-[140px] rounded-full pointer-events-none" aria-hidden="true" />
         
         <div className="max-w-7xl mx-auto px-0 md:px-6 relative z-10 text-center">
@@ -136,7 +136,7 @@ export default function ContentPublicClient({ initialArticles }) {
         aria-live="polite"
         aria-atomic="false"
         aria-label="Articles grid"
-        className="scroll-mt-20 py-20 px-6 bg-[#0aa373] dark:bg-[#050e0a] border-t-2 border-white/25 dark:border-transparent relative z-10"
+        className="scroll-mt-20 py-10 sm:py-20 px-6 bg-[#0aa373] dark:bg-[#050e0a] border-t-2 border-white/25 dark:border-transparent relative z-10"
       >
         <div className="max-w-7xl mx-auto px-0 md:px-6">
           <AnimatePresence mode="wait">
