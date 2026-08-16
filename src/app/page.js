@@ -802,7 +802,7 @@ export default function Home() {
                     {/* Bottom Action Footer - styled with local color theme matching SRE standard */}
                     <div className="p-5 pt-0 mt-auto bg-transparent">
                       <a
-                        href="https://www.instagram.com/sre.upnvjt/"
+                        href="https://www.instagram.com/sre.upnjatim/"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="w-full py-2.5 bg-yellow-300 hover:bg-yellow-400 text-slate-950 dark:bg-emerald-400 dark:hover:bg-emerald-300 dark:text-slate-950 font-black rounded-xl text-[11px] text-center block transition-all duration-300 tracking-wider uppercase shadow-md hover:shadow-xl hover:-translate-y-0.5"
