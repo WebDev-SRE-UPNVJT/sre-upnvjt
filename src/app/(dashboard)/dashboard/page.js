@@ -18,7 +18,11 @@ export const metadata = {
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   
+  console.log("=== DashboardPage Server-side Debug ===");
+  console.log("Session:", JSON.stringify(session));
+
   if (!session) {
+    console.log("Redirecting to /login: No session found");
     redirect("/login");
   }
 
@@ -34,7 +38,12 @@ export default async function DashboardPage() {
   .where(eq(user.email, session.user.email))
   .limit(1);
 
-  if (!usersResult || usersResult.length === 0) redirect("/login");
+  console.log("usersResult:", JSON.stringify(usersResult));
+
+  if (!usersResult || usersResult.length === 0) {
+    console.log("Redirecting to /login: usersResult is empty or null for email", session.user.email);
+    redirect("/login");
+  }
 
   const currentUser = {
     ...usersResult[0],
@@ -44,7 +53,9 @@ export default async function DashboardPage() {
   const roleName = currentUser.role?.name || "";
   const departmentId = currentUser.departmentId;
 
+  console.log("Calling getDashboardStats with role:", currentUser.role.name, "dept:", currentUser.departmentId, "id:", currentUser.id);
   const statsResponse = await getDashboardStats(currentUser.role.name, currentUser.departmentId, currentUser.id);
+  console.log("statsResponse:", JSON.stringify(statsResponse));
   const stats = statsResponse.success ? statsResponse.data : null;
 
   return <DashboardClient stats={stats} user={currentUser} />;
