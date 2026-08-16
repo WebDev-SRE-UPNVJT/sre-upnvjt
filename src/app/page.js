@@ -651,8 +651,7 @@ export default function Home() {
               /* Stunning Coming Soon Placeholder */
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.1 }}
+                animate={mounted ? { opacity: 1, scale: 1, y: 0 } : {}}
                 transition={{ duration: 0.5 }}
                 className="w-full max-w-xl mx-auto rounded-3xl p-8 sm:p-10 border border-white/20 dark:border-white/10 bg-white/10 dark:bg-white/[0.03] backdrop-blur-md text-center flex flex-col items-center gap-5 relative overflow-hidden shadow-2xl"
               >
@@ -686,8 +685,7 @@ export default function Home() {
               <motion.div
                 variants={staggerParent}
                 initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, amount: 0.05 }}
+                animate={mounted ? "show" : "hidden"}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
               >
                 {upcomingActivities.map((activity) => {
