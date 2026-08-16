@@ -856,14 +856,14 @@ export default function Home() {
                       </div>
 
                       {/* Title & Desc */}
-                      <div className="relative z-10 flex flex-col gap-2 px-3">
-                        <span className="text-[9px] font-black uppercase tracking-[0.25em] text-yellow-300 dark:text-emerald-400">
+                      <div className="relative z-10 flex flex-col gap-3.5 px-3">
+                        <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.25em] text-yellow-300 dark:text-emerald-400">
                           {language === "id" ? "KOLABORASI & AKSI" : "COLLABORATION & ACTION"}
                         </span>
-                        <h3 className="text-base font-bold text-white leading-snug">
+                        <h3 className="text-lg sm:text-xl font-extrabold text-white leading-snug">
                           {language === "id" ? "Lebih Banyak Event Segera Hadir!" : "More Events Coming Soon!"}
                         </h3>
-                        <p className="text-[11px] text-white/80 dark:text-gray-400 leading-relaxed max-w-[220px] mx-auto">
+                        <p className="text-[13px] sm:text-sm text-white/90 dark:text-gray-200 font-medium leading-relaxed max-w-[240px] mx-auto">
                           {language === "id" 
                             ? "Ikuti media sosial kami untuk mendapatkan pembaruan langsung tentang pendaftaran webinar, proyek riset, dan kegiatan sosial kami."
                             : "Follow our social media to get instant updates on webinar registrations, research projects, and community activities."}
