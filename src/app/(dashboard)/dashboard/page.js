@@ -1,7 +1,7 @@
 import React from "react";
 import DashboardClient from "./DashboardClient";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getDashboardStats } from "@/app/actions/dashboardActions";
