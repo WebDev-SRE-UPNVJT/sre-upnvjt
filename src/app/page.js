@@ -739,7 +739,7 @@ export default function Home() {
               </div>
             ) : (
               /* Upcoming Events Flex Layout - Professional Instagram-like 4:5 Poster Layout */
-              <div className="flex overflow-x-auto pb-6 gap-5 scrollbar-none snap-x snap-mandatory flex-nowrap justify-start max-w-full -mx-6 px-6 sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-center sm:gap-6 md:gap-8 sm:overflow-visible sm:pb-0 sm:snap-none w-full">
+              <div className="flex overflow-x-auto pb-6 gap-5 scrollbar-none snap-x snap-mandatory flex-nowrap justify-start max-w-full -mr-6 pr-6 sm:mr-0 sm:pr-0 sm:flex-wrap sm:justify-center sm:gap-6 md:gap-8 sm:overflow-visible sm:pb-0 sm:snap-none w-full">
                 {upcomingActivities.map((activity) => {
                   const { day, month } = getEventDateParts(activity.date);
                   const isExternal = !!activity.link;
