@@ -679,14 +679,14 @@ export default function Home() {
                 </div>
               </div>
             ) : (
-              /* Upcoming Events Grid - Professional 4:5 Poster Layout */
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              /* Upcoming Events Flex Layout - Professional Instagram-like 4:5 Poster Layout */
+              <div className="flex flex-wrap justify-center gap-8 w-full">
                 {upcomingActivities.map((activity) => {
                   const { day, month } = getEventDateParts(activity.date);
                   return (
                     <div
                       key={activity.id}
-                      className="group relative flex flex-col bg-white/5 border border-white/10 dark:bg-black/20 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-black/40 hover:-translate-y-2 transition-all duration-500"
+                      className="group relative flex flex-col bg-white/5 border border-white/10 dark:bg-black/20 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-black/40 hover:-translate-y-2 transition-all duration-500 w-full max-w-[350px]"
                     >
                       {/* Portrait Poster Image (Aspect Ratio 4:5) */}
                       <div className="relative w-full aspect-[4/5] overflow-hidden flex-shrink-0 bg-slate-900/40">
@@ -744,6 +744,49 @@ export default function Home() {
                     </div>
                   );
                 })}
+
+                {/* Render Companion Card if there are less than 3 upcoming events */}
+                {upcomingActivities.length < 3 && (
+                  <div className="group relative flex flex-col bg-white/5 border border-white/10 dark:bg-black/20 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-black/40 hover:-translate-y-2 transition-all duration-500 w-full max-w-[350px]">
+                    {/* 4:5 Aspect Ratio Decorative Header */}
+                    <div className="relative w-full aspect-[4/5] flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-yellow-300/10 to-transparent dark:from-emerald-500/10 dark:to-transparent">
+                      {/* Floating Glowing Orbs */}
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 bg-yellow-300/20 dark:bg-emerald-500/20 rounded-full blur-2xl pointer-events-none animate-pulse" />
+                      
+                      {/* Decorative Icon */}
+                      <div className="relative z-10 p-5 rounded-3xl bg-white/10 dark:bg-white/[0.05] border border-white/20 dark:border-white/10 mb-6 text-yellow-300 dark:text-emerald-400">
+                        <Sparkles className="w-10 h-10 animate-bounce" style={{ animationDuration: '3s' }} />
+                      </div>
+
+                      {/* Title & Desc */}
+                      <div className="relative z-10 flex flex-col gap-3 px-4">
+                        <span className="text-[10px] font-black uppercase tracking-[0.25em] text-yellow-300 dark:text-emerald-400">
+                          {language === "id" ? "KOLABORASI & AKSI" : "COLLABORATION & ACTION"}
+                        </span>
+                        <h3 className="text-xl font-bold text-white leading-snug">
+                          {language === "id" ? "Lebih Banyak Event Segera Hadir!" : "More Events Coming Soon!"}
+                        </h3>
+                        <p className="text-xs text-white/70 dark:text-gray-400 leading-relaxed max-w-xs">
+                          {language === "id" 
+                            ? "Ikuti media sosial kami untuk mendapatkan pembaruan langsung tentang pendaftaran webinar, proyek riset, dan kegiatan sosial kami."
+                            : "Follow our social media to get instant updates on webinar registrations, research projects, and community activities."}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Bottom Action Footer */}
+                    <div className="p-6 pt-0 mt-auto bg-transparent">
+                      <a
+                        href="https://www.instagram.com/sre.upnvjt/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full py-3.5 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-white rounded-2xl text-xs font-black text-center block transition-all duration-300 tracking-wider uppercase shadow-md hover:shadow-xl hover:brightness-110"
+                      >
+                        {language === "id" ? "Ikuti Instagram Kami" : "Follow Our Instagram"}
+                      </a>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
