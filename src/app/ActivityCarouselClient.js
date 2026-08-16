@@ -104,8 +104,8 @@ export default function ActivityCarousel({ activities }) {
   const getTitle = (item) => item?.name || item?.title || '';
 
   return (
-    <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} className="w-full max-w-5xl mx-auto relative select-none">
-      <div className="relative overflow-hidden w-full py-1 sm:py-2 min-h-fit md:min-h-[380px] flex items-center justify-center">
+    <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} className="w-full max-w-6xl mx-auto relative select-none">
+      <div className="relative overflow-hidden w-full py-8 min-h-fit md:min-h-[420px] flex items-center justify-center">
         <AnimatePresence initial={false} custom={direction} mode="popLayout">
           <motion.div
             key={current}
@@ -125,7 +125,7 @@ export default function ActivityCarousel({ activities }) {
             <motion.div
               whileHover={{ y: -4, scale: 0.95, opacity: 0.8 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="hidden md:block md:w-[28%] lg:w-[22%] flex-shrink-0 opacity-50 scale-90 rounded-2xl overflow-hidden cursor-pointer border-2 border-yellow-300 dark:border-emerald-500/40 bg-[#099c6d] dark:bg-[#093021] shadow-lg"
+              className="hidden md:block md:w-[26%] lg:w-[20.5%] flex-shrink-0 opacity-50 scale-90 rounded-2xl overflow-hidden cursor-pointer border-2 border-yellow-300 dark:border-emerald-500/40 bg-[#099c6d] dark:bg-[#093021] shadow-lg"
               onClick={prev}
             >
               <div className="relative w-full aspect-[4/3]">
@@ -156,7 +156,7 @@ export default function ActivityCarousel({ activities }) {
             <motion.div
               whileHover={{ y: -8, scale: 1.02 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="w-full md:w-[44%] lg:w-[34%] flex-shrink-0 scale-100 z-10 shadow-2xl shadow-emerald-900/10 dark:shadow-emerald-950/50 rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-yellow-300 dark:border-emerald-400/60 bg-[#099c6d] dark:bg-emerald-950"
+              className="w-full md:w-[40%] lg:w-[32%] flex-shrink-0 scale-100 z-10 shadow-2xl shadow-emerald-900/10 dark:shadow-emerald-950/50 rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-yellow-300 dark:border-emerald-400/60 bg-[#099c6d] dark:bg-emerald-950"
             >
               <div className="relative w-full aspect-[4/3]">
                 <img
@@ -189,7 +189,7 @@ export default function ActivityCarousel({ activities }) {
             <motion.div
               whileHover={{ y: -4, scale: 0.95, opacity: 0.8 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="hidden md:block md:w-[28%] lg:w-[22%] flex-shrink-0 opacity-50 scale-90 rounded-2xl overflow-hidden cursor-pointer border-2 border-yellow-300 dark:border-emerald-500/40 bg-[#099c6d] dark:bg-[#093021] shadow-lg"
+              className="hidden md:block md:w-[26%] lg:w-[20.5%] flex-shrink-0 opacity-50 scale-90 rounded-2xl overflow-hidden cursor-pointer border-2 border-yellow-300 dark:border-emerald-500/40 bg-[#099c6d] dark:bg-[#093021] shadow-lg"
               onClick={next}
             >
               <div className="relative w-full aspect-[4/3]">
@@ -220,7 +220,7 @@ export default function ActivityCarousel({ activities }) {
             <motion.div
               whileHover={{ y: -4, scale: 0.95, opacity: 0.8 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="hidden lg:block lg:w-[22%] flex-shrink-0 opacity-50 scale-90 rounded-2xl overflow-hidden cursor-pointer border-2 border-yellow-300 dark:border-emerald-500/40 bg-[#099c6d] dark:bg-[#093021] shadow-lg"
+              className="hidden lg:block lg:w-[20.5%] flex-shrink-0 opacity-50 scale-90 rounded-2xl overflow-hidden cursor-pointer border-2 border-yellow-300 dark:border-emerald-500/40 bg-[#099c6d] dark:bg-[#093021] shadow-lg"
               onClick={() => goTo(getIndex(2))}
             >
               <div className="relative w-full aspect-[4/3]">
