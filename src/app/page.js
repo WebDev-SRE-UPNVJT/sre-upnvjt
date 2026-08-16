@@ -754,10 +754,10 @@ export default function Home() {
                   return (
                     <div
                       key={activity.id}
-                      className={`group relative flex flex-col bg-[#058562] border dark:bg-black/35 rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-[260px] sm:w-full sm:max-w-[280px] shrink-0 sm:shrink snap-center ${
+                      className={`group relative flex flex-col bg-[#058562] dark:bg-slate-950/75 border rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-[260px] sm:w-full sm:max-w-[280px] shrink-0 sm:shrink snap-center ${
                         isPriorityOrAnnouncement
                           ? "border-yellow-300 dark:border-emerald-400/80 shadow-[0_0_25px_rgba(253,224,71,0.25)] dark:shadow-[0_0_25px_rgba(52,211,153,0.25)] ring-2 ring-yellow-300/40 dark:ring-emerald-400/40"
-                          : "border-white/20 dark:border-white/5"
+                          : "border-white/20 dark:border-white/10"
                       }`}
                     >
                       {/* Portrait Poster Image (Aspect Ratio 4:4 on Mobile, 4:5 on Desktop) */}
