@@ -297,7 +297,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 justify-items-center">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center">
                     {filteredUpcoming.map((act, idx) => {
                       const { day, month } = getEventDateParts(act.date);
                       const isExternal = !!act.link;
@@ -315,7 +315,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                           whileInView={{ opacity: 1, y: 0 }}
                           viewport={{ once: true }}
                           transition={{ duration: 0.4, delay: idx * 0.06 }}
-                          className={`group relative flex flex-col bg-[#056349] border dark:bg-black/35 rounded-2xl sm:rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-full max-w-full sm:max-w-[310px]` + (
+                          className={`group relative flex flex-col bg-[#056349] border dark:bg-black/35 rounded-2xl sm:rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-full max-w-[280px]` + (
                             act.isPriority || act.isAnnouncementModal
                               ? " border-yellow-300 dark:border-yellow-400/80 shadow-[0_0_20px_rgba(253,224,71,0.2)] ring-1 ring-yellow-300/40"
                               : " border-white/20 dark:border-white/5"
@@ -417,7 +417,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 justify-items-center">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center">
                     {filteredPast.map((act, idx) => {
                       const isExternal = !!act.link;
                       const href = act.link || "/activity";
@@ -429,7 +429,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                           whileInView={{ opacity: 1, y: 0 }}
                           viewport={{ once: true }}
                           transition={{ duration: 0.4, delay: idx * 0.06 }}
-                          className="group relative flex flex-col bg-[#056349] border border-white/20 dark:bg-black/35 dark:border-white/5 rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 w-full max-w-full sm:max-w-[310px]"
+                          className="group relative flex flex-col bg-[#056349] border border-white/20 dark:bg-black/35 dark:border-white/5 rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 w-full max-w-[280px]"
                         >
                           {/* Landscape Photo (Aspect Ratio 4:3) */}
                           <div className="relative w-full aspect-[4/3] overflow-hidden flex-shrink-0 bg-slate-900/40">
