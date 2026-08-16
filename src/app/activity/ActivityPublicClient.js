@@ -297,7 +297,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center">
+                  <div className="flex overflow-x-auto pb-6 gap-5 scrollbar-none snap-x snap-mandatory flex-nowrap justify-start max-w-full px-4 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6 justify-items-center w-full">
                     {filteredUpcoming.map((act, idx) => {
                       const { day, month } = getEventDateParts(act.date);
                       const isExternal = !!act.link;
@@ -315,14 +315,14 @@ export default function ActivityPublicClient({ activities = [] }) {
                           whileInView={{ opacity: 1, y: 0 }}
                           viewport={{ once: true }}
                           transition={{ duration: 0.4, delay: idx * 0.06 }}
-                          className={`group relative flex flex-col bg-[#056349] border dark:bg-black/35 rounded-2xl sm:rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-full max-w-[280px]` + (
+                          className={`group relative flex flex-col bg-[#058562] border dark:bg-black/35 rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-[260px] sm:w-full sm:max-w-[280px] shrink-0 sm:shrink snap-center` + (
                             act.isPriority || act.isAnnouncementModal
                               ? " border-yellow-300 dark:border-yellow-400/80 shadow-[0_0_20px_rgba(253,224,71,0.2)] ring-1 ring-yellow-300/40"
                               : " border-white/20 dark:border-white/5"
                           )}
                         >
-                          {/* Portrait Poster Image (Aspect Ratio 4:5) */}
-                          <div className="relative w-full aspect-[4/5] overflow-hidden flex-shrink-0 bg-slate-900/40">
+                          {/* Portrait Poster Image (Aspect Ratio 4:4 on Mobile, 4:5 on Desktop) */}
+                          <div className="relative w-full aspect-[4/4] sm:aspect-[4/5] overflow-hidden flex-shrink-0 bg-slate-900/40">
                             {act.imageUrl ? (
                               <img
                                 src={resolveImageUrl(act.imageUrl)}
@@ -338,59 +338,64 @@ export default function ActivityPublicClient({ activities = [] }) {
                             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
                             
                             {(act.isPriority || act.isAnnouncementModal) && (
-                              <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-20 flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-yellow-300 text-slate-950 shadow-lg text-[8px] sm:text-[9px] font-black uppercase tracking-wider">
-                                <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-950" />
-                                <span className="hidden xs:inline">UTAMA</span>
-                                <span className="xs:hidden">★</span>
+                              <div className="absolute top-3 left-3 z-20 flex items-center gap-1 px-2.5 py-1 rounded-full bg-yellow-300 text-slate-950 shadow-lg text-[9px] font-black uppercase tracking-wider">
+                                <Sparkles className="w-3 h-3 text-slate-950" />
+                                <span>UTAMA</span>
                               </div>
                             )}
 
-                            <div className="absolute bottom-2 left-2 right-2 sm:bottom-3 sm:left-3 sm:right-3 z-20 flex items-center justify-between">
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-wider bg-black/60 text-yellow-300 dark:text-emerald-400 border border-white/10 backdrop-blur-md">
+                            {/* Calendar Date Badge on Top-Right */}
+                            {day && (
+                              <div className="absolute top-3 right-3 z-20 flex flex-col items-center justify-center w-12 h-14 bg-white dark:bg-slate-900 rounded-xl shadow-xl overflow-hidden border border-slate-100 dark:border-white/10 select-none">
+                                <div className="w-full bg-red-500 dark:bg-emerald-500 text-[9px] font-black uppercase text-center py-0.5 text-white dark:text-slate-950 tracking-wider">
+                                  {month}
+                                </div>
+                                <div className="flex-1 flex items-center justify-center text-base font-extrabold text-slate-900 dark:text-white leading-none">
+                                  {day}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Event Tags Overlay (Category Tag + Floating Location) */}
+                            <div className="absolute bottom-3 left-3 right-3 z-10 flex flex-wrap gap-1.5 items-center">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider bg-black/50 text-yellow-300 dark:text-emerald-400 border border-white/10 backdrop-blur-md">
                                 {act.type || "EVENT"}
                               </span>
-
-                              {day && (
-                                <div className="flex flex-col items-center justify-center bg-red-600 dark:bg-emerald-400 text-white dark:text-slate-950 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg sm:rounded-xl shadow-md min-w-[36px] sm:min-w-[42px] border border-white/10">
-                                  <span className="text-[10px] sm:text-xs font-black leading-none">{day}</span>
-                                  <span className="text-[7px] sm:text-[8px] font-black uppercase tracking-wider mt-0.5 leading-none">{month}</span>
-                                </div>
+                              {act.location && (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-bold bg-white/15 text-white border border-white/5 backdrop-blur-md">
+                                  <MapPin className="w-3 h-3 text-yellow-300 dark:text-emerald-400" />
+                                  <span className="truncate max-w-[110px]">{act.location}</span>
+                                </span>
                               )}
                             </div>
                           </div>
 
                           {/* Body Content */}
-                          <div className="p-3.5 sm:p-5 flex-1 flex flex-col justify-between">
-                            <div className="mb-2">
-                              <h3 className="text-xs sm:text-base font-bold text-white group-hover:text-yellow-300 dark:group-hover:text-emerald-400 transition-colors duration-300 line-clamp-2 leading-snug mb-1.5">
+                          <div className="p-5 flex-1 flex flex-col justify-between">
+                            <div className="h-[90px] sm:h-[96px] flex flex-col justify-start mb-3">
+                              <h3 className="text-sm sm:text-base font-bold text-white group-hover:text-yellow-300 dark:group-hover:text-emerald-400 transition-colors duration-300 line-clamp-2 leading-snug mb-1.5">
                                 {act.name}
                               </h3>
-                              <p className="text-[10px] sm:text-xs text-white/80 dark:text-gray-400 font-medium leading-normal line-clamp-2 sm:line-clamp-3">
+                              <p className="text-xs text-white/80 dark:text-gray-400 font-medium leading-normal line-clamp-2">
                                 {act.description || t("visitor.activity.no_desc")}
                               </p>
                             </div>
 
                             {/* Bottom Card Controls */}
                             <div className="mt-auto pt-2 flex flex-col gap-2">
-                              {/* Uniform Full-Width Location Pill Badge */}
-                              <div className="w-full flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-black/30 text-white/95 border border-white/10 text-[9px] sm:text-[10px] font-bold select-none shadow-sm">
-                                <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400 shrink-0" />
-                                <span className="truncate max-w-[110px] sm:max-w-[200px]">{act.location || "Lokasi TBD"}</span>
-                              </div>
-
                               {isExternal ? (
                                 <a
                                   href={href}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="w-full py-1.5 sm:py-2.5 bg-transparent text-yellow-300 border border-yellow-300 hover:bg-yellow-300 hover:text-[#056349] dark:text-emerald-400 dark:border-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#0b120f] rounded-lg sm:rounded-xl text-[9px] sm:text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase px-1 truncate shadow-md"
+                                  className="w-full py-2.5 bg-transparent text-yellow-300 border border-yellow-300 hover:bg-yellow-300 hover:text-[#058562] dark:text-emerald-400 dark:border-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#0b120f] rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase px-1 truncate shadow-md"
                                 >
                                   {buttonText}
                                 </a>
                               ) : (
                                 <Link
                                   href={href}
-                                  className="w-full py-1.5 sm:py-2.5 bg-transparent text-yellow-300 border border-yellow-300 hover:bg-yellow-300 hover:text-[#056349] dark:text-emerald-400 dark:border-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#0b120f] rounded-lg sm:rounded-xl text-[9px] sm:text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase px-1 truncate shadow-md"
+                                  className="w-full py-2.5 bg-transparent text-yellow-300 border border-yellow-300 hover:bg-yellow-300 hover:text-[#058562] dark:text-emerald-400 dark:border-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#0b120f] rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase px-1 truncate shadow-md"
                                 >
                                   {buttonText}
                                 </Link>
@@ -417,7 +422,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center">
+                  <div className="flex overflow-x-auto pb-6 gap-5 scrollbar-none snap-x snap-mandatory flex-nowrap justify-start max-w-full px-4 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6 justify-items-center w-full">
                     {filteredPast.map((act, idx) => {
                       const isExternal = !!act.link;
                       const href = act.link || "/activity";
@@ -429,7 +434,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                           whileInView={{ opacity: 1, y: 0 }}
                           viewport={{ once: true }}
                           transition={{ duration: 0.4, delay: idx * 0.06 }}
-                          className="group relative flex flex-col bg-[#056349] border border-white/20 dark:bg-black/35 dark:border-white/5 rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 w-full max-w-[280px]"
+                          className="group relative flex flex-col bg-[#058562] border border-white/20 dark:bg-black/35 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-[260px] sm:w-full sm:max-w-[280px] shrink-0 sm:shrink snap-center"
                         >
                           {/* Landscape Photo (Aspect Ratio 4:3) */}
                           <div className="relative w-full aspect-[4/3] overflow-hidden flex-shrink-0 bg-slate-900/40">
@@ -447,49 +452,52 @@ export default function ActivityPublicClient({ activities = [] }) {
                             )}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />
 
-                            <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10">
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-wider bg-black/60 text-yellow-300 dark:text-emerald-400 border border-white/10 backdrop-blur-md">
+                            <div className="absolute top-3 left-3 z-10">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider bg-black/60 text-yellow-300 dark:text-emerald-400 border border-white/10 backdrop-blur-md">
                                 {act.type || "EVENT"}
                               </span>
                             </div>
 
-                            <div className="absolute bottom-2 left-2 right-2 sm:bottom-3 sm:left-3 sm:right-3 z-10 flex flex-wrap gap-2 items-center justify-between text-[9px] sm:text-[11px] text-white/90">
-                              <span className="font-semibold">{formatDate(act.date)}</span>
+                            {/* Event Tags Overlay (Date + Location) */}
+                            <div className="absolute bottom-3 left-3 right-3 z-10 flex flex-wrap gap-1.5 items-center">
+                              <span className="text-[10px] font-semibold text-white bg-black/55 px-2.5 py-1 rounded-lg border border-white/10 backdrop-blur-md">
+                                {formatDate(act.date)}
+                              </span>
+                              {act.location && (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-bold bg-white/15 text-white border border-white/5 backdrop-blur-md">
+                                  <MapPin className="w-3 h-3 text-yellow-300 dark:text-emerald-400" />
+                                  <span className="truncate max-w-[110px]">{act.location}</span>
+                                </span>
+                              )}
                             </div>
                           </div>
 
                           {/* Content */}
-                          <div className="p-3.5 sm:p-5 flex-1 flex flex-col justify-between">
-                            <div className="mb-2">
-                              <h4 className="text-xs sm:text-base font-bold text-white group-hover:text-yellow-300 dark:group-hover:text-emerald-400 transition-colors duration-300 line-clamp-2 leading-snug mb-1.5">
+                          <div className="p-5 flex-1 flex flex-col justify-between">
+                            <div className="h-[90px] sm:h-[96px] flex flex-col justify-start mb-3">
+                              <h4 className="text-sm sm:text-base font-bold text-white group-hover:text-yellow-300 dark:group-hover:text-emerald-400 transition-colors duration-300 line-clamp-2 leading-snug mb-1.5">
                                 {act.name}
                               </h4>
-                              <p className="text-[10px] sm:text-xs text-white/80 dark:text-gray-400 font-medium leading-normal line-clamp-2 sm:line-clamp-3">
+                              <p className="text-xs text-white/80 dark:text-gray-400 font-medium leading-normal line-clamp-2">
                                 {act.description || t("visitor.activity.no_desc")}
                               </p>
                             </div>
 
                             {/* Bottom Card Controls */}
                             <div className="mt-auto pt-2 flex flex-col gap-2">
-                              {/* Uniform Full-Width Location Pill Badge */}
-                              <div className="w-full flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-black/30 text-white/95 border border-white/10 text-[9px] sm:text-[10px] font-bold select-none shadow-sm">
-                                <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400 shrink-0" />
-                                <span className="truncate max-w-[110px] sm:max-w-[200px]">{act.location || "Lokasi TBD"}</span>
-                              </div>
-
                               {isExternal ? (
                                 <a
                                   href={href}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="w-full py-1.5 sm:py-2.5 bg-white/10 border border-white/15 hover:bg-yellow-300 hover:text-slate-950 text-white rounded-lg sm:rounded-xl text-[9px] sm:text-[11px] font-bold text-center block transition-all duration-300 tracking-wider uppercase px-1 truncate shadow-md"
+                                  className="w-full py-2.5 bg-transparent text-white border border-white/30 hover:bg-white hover:text-[#058562] dark:text-gray-300 dark:border-white/10 dark:hover:bg-white dark:hover:text-black rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase px-1 truncate shadow-sm"
                                 >
                                   {language === "id" ? "Detail" : "Details"}
                                 </a>
                               ) : (
                                 <Link
                                   href={href}
-                                  className="w-full py-1.5 sm:py-2.5 bg-white/10 border border-white/15 hover:bg-yellow-300 hover:text-slate-950 text-white rounded-lg sm:rounded-xl text-[9px] sm:text-[11px] font-bold text-center block transition-all duration-300 tracking-wider uppercase px-1 truncate shadow-md"
+                                  className="w-full py-2.5 bg-transparent text-white border border-white/30 hover:bg-white hover:text-[#058562] dark:text-gray-300 dark:border-white/10 dark:hover:bg-white dark:hover:text-black rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase px-1 truncate shadow-sm"
                                 >
                                   {language === "id" ? "Detail" : "Details"}
                                 </Link>
