@@ -288,7 +288,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.5, delay: idx * 0.08 }}
-                    className="group relative flex flex-col bg-[#e8ecc4] border border-[#d0d6a8]/60 dark:bg-black/35 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-full max-w-[280px]"
+                    className="group relative flex flex-col bg-[#056349] border border-white/20 dark:bg-black/35 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-full max-w-[280px]"
                   >
                     {/* Portrait Poster Image (Aspect Ratio 4:5) */}
                     <div className="relative w-full aspect-[4/5] overflow-hidden flex-shrink-0 bg-slate-900/40">
@@ -327,17 +327,17 @@ export default function ActivityPublicClient({ activities = [] }) {
                     {/* Body Content below poster */}
                     <div className="p-5 flex-1 flex flex-col justify-between">
                       <div className="mb-4">
-                        <h3 className="text-sm sm:text-base font-bold text-[#07130e] dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300 line-clamp-2 mb-1.5">
+                        <h3 className="text-sm sm:text-base font-bold text-white group-hover:text-yellow-300 dark:group-hover:text-emerald-400 transition-colors duration-300 line-clamp-2 mb-1.5">
                           {act.name}
                         </h3>
-                        <p className="text-xs text-[#07130e]/70 dark:text-gray-400 leading-relaxed line-clamp-2">
+                        <p className="text-xs text-white/80 dark:text-gray-400 leading-relaxed line-clamp-2">
                           {act.description || t("visitor.activity.no_desc")}
                         </p>
                       </div>
 
                       {/* Location Details (if present) */}
                       {act.location && (
-                        <div className="flex items-center gap-2 mt-2 px-3 py-1.5 rounded-full bg-black/5 text-[#07130e]/60 dark:bg-black/25 dark:text-gray-400 text-[10px] font-bold select-none border border-black/5 dark:border-white/5 w-fit mb-4">
+                        <div className="flex items-center gap-2 mt-2 px-3 py-1.5 rounded-full bg-black/25 text-white/95 border border-white/5 dark:bg-black/25 dark:text-gray-400 text-[10px] font-bold select-none w-fit mb-4">
                           <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                           <span className="truncate max-w-[150px]">{act.location}</span>
                         </div>
@@ -348,14 +348,14 @@ export default function ActivityPublicClient({ activities = [] }) {
                           href={href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="btn-upcoming-event"
+                          className="w-full py-2.5 bg-transparent text-yellow-300 border border-yellow-300 hover:bg-yellow-300 hover:text-[#056349] dark:text-emerald-400 dark:border-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#0b120f] rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase"
                         >
                           {buttonText}
                         </a>
                       ) : (
                         <Link
                           href={href}
-                          className="btn-upcoming-event"
+                          className="w-full py-2.5 bg-transparent text-yellow-300 border border-yellow-300 hover:bg-yellow-300 hover:text-[#056349] dark:text-emerald-400 dark:border-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-[#0b120f] rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase"
                         >
                           {buttonText}
                         </Link>
