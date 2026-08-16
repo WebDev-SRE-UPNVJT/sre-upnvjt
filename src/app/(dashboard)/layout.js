@@ -57,7 +57,7 @@ export default function DashboardLayout({ children }) {
     { name: "Testimonials", icon: Star, href: "/testimonials", module: "content" },
     { name: t("sidebar.merch"), icon: ShoppingBag, href: "/merch", module: "merchandise" },
     { name: t("sidebar.partners"), icon: Handshake, href: "/partners", module: "partners" },
-    { name: "Featured Projects", icon: Rocket, href: "/featured-projects", module: "featured-projects" },
+    { name: "Featured Events", icon: Rocket, href: "/featured-projects", module: "featured-projects" },
 
     // Member Operations
     { name: "Literature Bank", icon: FolderOpen, href: "/literature", module: "literature" },

@@ -93,7 +93,7 @@ export default function Header() {
 
   const close = () => setMobileMenuOpen(false);
 
-  const adminRoutes = ["/dashboard", "/roles", "/users", "/departments", "/activities", "/merch", "/settings"];
+  const adminRoutes = ["/dashboard", "/roles", "/users", "/departments", "/activities", "/merch", "/settings", "/featured-projects"];
   const isDashboardRoute = 
     pathname.startsWith("/dashboard") || 
     pathname.startsWith("/member") ||
