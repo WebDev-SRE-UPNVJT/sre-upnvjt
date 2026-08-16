@@ -20,6 +20,7 @@ import {
   CheckCircle2,
   Clock,
   CalendarClock,
+  MapPin,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -158,7 +159,7 @@ const PROJECT_STATUS_CONFIG = {
 
 export default function Home() {
   const { theme, resolvedTheme } = useTheme();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [mounted, setMounted] = useState(false);
   const [dbActivities, setDbActivities] = useState([]);
   const [featuredProjectsList, setFeaturedProjectsList] = useState([]);
@@ -181,6 +182,26 @@ export default function Home() {
   }, []);
 
   const isLight = mounted && (theme === "light" || resolvedTheme === "light");
+
+  // Determine current date and categorize activities
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const pastActivities = dbActivities.filter(a => a.date && new Date(a.date) < today);
+  const upcomingActivities = dbActivities.filter(a => a.date && new Date(a.date) >= today);
+
+  const formatEventDate = (dateStr) => {
+    if (!dateStr) return "";
+    try {
+      return new Date(dateStr).toLocaleDateString(language === "id" ? "id-ID" : "en-US", {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    } catch {
+      return dateStr;
+    }
+  };
 
   const [activeSection, setActiveSection] = useState("home");
   const [partnersList, setPartnersList] = useState([]);
@@ -499,7 +520,7 @@ export default function Home() {
         </section>
 
         {/* ─── Events & Programs Section ──────────────────────────────── */}
-        {dbActivities.length > 0 && (
+        {pastActivities.length > 0 && (
           <section
             id="activity"
             className="scroll-mt-20 bg-[#0bb882] dark:bg-[#031f16] py-14 sm:py-20 lg:py-24 px-6 sm:px-8 md:px-12 lg:px-20 border-t-2 border-white/20 dark:border-white/5 relative overflow-hidden flex items-center justify-center"
@@ -549,7 +570,7 @@ export default function Home() {
                   transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
                   className="w-full"
                 >
-                  <ActivityCarousel activities={dbActivities} />
+                  <ActivityCarousel activities={pastActivities} />
                 </motion.div>
 
                 {/* CTA button — centered */}
@@ -613,7 +634,7 @@ export default function Home() {
               </p>
             </motion.div>
 
-            {featuredProjectsList.length === 0 ? (
+            {upcomingActivities.length === 0 ? (
               /* Stunning Coming Soon Placeholder */
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 15 }}
@@ -648,7 +669,7 @@ export default function Home() {
                 </div>
               </motion.div>
             ) : (
-              /* Project Cards Grid */
+              /* Upcoming Events Grid */
               <motion.div
                 variants={staggerParent}
                 initial="hidden"
@@ -656,52 +677,58 @@ export default function Home() {
                 viewport={{ once: true, margin: "-60px" }}
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6"
               >
-                {featuredProjectsList.map((project) => {
-                  const cfg = PROJECT_STATUS_CONFIG[project.status] || PROJECT_STATUS_CONFIG.ONGOING;
-                  const StatusIcon = cfg.icon;
-                  return (
-                    <motion.div
-                      key={project.id}
-                      variants={staggerChild}
-                      whileHover={{ y: -6, transition: { duration: 0.22, ease: "easeOut" } }}
-                      className="group relative bg-white/10 dark:bg-white/[0.05] border border-white/20 dark:border-white/8 rounded-2xl sm:rounded-3xl overflow-hidden flex flex-col shadow-md hover:shadow-2xl hover:shadow-black/30 transition-shadow duration-300"
-                    >
-                      {/* Image */}
-                      <div className="relative w-full aspect-[16/9] overflow-hidden flex-shrink-0">
-                        {project.imageUrl ? (
-                          <img
-                            src={project.imageUrl}
-                            alt={project.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-emerald-800/55 to-teal-950/60 flex items-center justify-center">
-                            <Rocket className="w-10 h-10 text-white/25" />
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-                        {/* Status badge */}
-                        <div className={`absolute top-3 right-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold backdrop-blur-md ${cfg.cls}`}>
-                          <StatusIcon className="w-3 h-3" aria-hidden="true" />
-                          {t(`visitor.home.${cfg.label}`)}
+                {upcomingActivities.map((activity) => (
+                  <motion.div
+                    key={activity.id}
+                    variants={staggerChild}
+                    whileHover={{ y: -6, transition: { duration: 0.22, ease: "easeOut" } }}
+                    className="group relative bg-white/10 dark:bg-white/[0.05] border border-white/20 dark:border-white/8 rounded-2xl sm:rounded-3xl overflow-hidden flex flex-col shadow-md hover:shadow-2xl hover:shadow-black/30 transition-shadow duration-300"
+                  >
+                    {/* Image */}
+                    <div className="relative w-full aspect-[16/9] overflow-hidden flex-shrink-0">
+                      {activity.imageUrl ? (
+                        <img
+                          src={activity.imageUrl}
+                          alt={activity.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-emerald-800/55 to-teal-950/60 flex items-center justify-center">
+                          <Rocket className="w-10 h-10 text-white/25" />
                         </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+                      
+                      {/* Date badge */}
+                      <div className="absolute top-3 right-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-yellow-300 text-slate-900 dark:bg-emerald-400 dark:text-black backdrop-blur-md shadow-sm">
+                        <CalendarClock className="w-3 h-3" aria-hidden="true" />
+                        {formatEventDate(activity.date)}
                       </div>
+                    </div>
 
-                      {/* Card Content */}
-                      <div className="flex flex-col gap-2 p-4 sm:p-5 flex-1">
+                    {/* Card Content */}
+                    <div className="flex flex-col gap-2 p-4 sm:p-5 flex-1">
+                      <div className="flex items-center justify-between">
                         <span className="text-[10px] font-black uppercase tracking-[0.22em] text-yellow-300/80 dark:text-emerald-400/70">
-                          {project.category}
+                          {activity.type || "EVENT"}
                         </span>
-                        <h3 className="text-base sm:text-[17px] font-bold text-white dark:text-gray-100 leading-snug line-clamp-2">
-                          {project.title}
-                        </h3>
-                        <p className="text-xs sm:text-sm text-white/60 dark:text-gray-400 leading-relaxed line-clamp-3 flex-1">
-                          {project.description}
-                        </p>
+                        {activity.location && (
+                          <span className="text-[10px] font-medium text-white/70 dark:text-gray-400 flex items-center gap-1">
+                            <MapPin className="w-3 h-3 text-yellow-300 dark:text-emerald-400" />
+                            {activity.location}
+                          </span>
+                        )}
                       </div>
-                    </motion.div>
-                  );
-                })}
+                      
+                      <h3 className="text-base sm:text-[17px] font-bold text-white dark:text-gray-100 leading-snug line-clamp-2">
+                        {activity.name}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-white/60 dark:text-gray-400 leading-relaxed line-clamp-3 flex-1">
+                        {activity.description}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
               </motion.div>
             )}
           </div>
