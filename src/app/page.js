@@ -27,7 +27,7 @@ import Link from "next/link";
 import { useTheme } from "next-themes";
 import { getPublicContent } from "@/app/actions/contentActions";
 import ActivityCarousel from "@/app/ActivityCarouselClient";
-import { getActivities } from "@/app/actions/activityActions";
+
 import { useLanguage } from "@/i18n/LanguageProvider";
 
 export const dynamic = "force-dynamic";
@@ -169,20 +169,24 @@ export default function Home() {
 
   useEffect(() => {
     setMounted(true);
-    getActivities().then((res) => {
-      if (res?.success && res?.data && res.data.length > 0) {
-        setDbActivities(res.data);
-        
-        const now = new Date();
-        now.setHours(0, 0, 0, 0);
-        
-        const past = res.data.filter(a => a.date && new Date(a.date) < now);
-        const upcoming = res.data.filter(a => a.date && new Date(a.date) >= now);
-        
-        setPastActivities(past);
-        setUpcomingActivities(upcoming);
-      }
-    });
+    // Fetch activities from public REST API (same pattern as 'Our Activity' section)
+    fetch("/api/activities/public")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setDbActivities(data);
+
+          const now = new Date();
+          now.setHours(0, 0, 0, 0);
+
+          const past = data.filter((a) => a.date && new Date(a.date) < now);
+          const upcoming = data.filter((a) => a.date && new Date(a.date) >= now);
+
+          setPastActivities(past);
+          setUpcomingActivities(upcoming);
+        }
+      })
+      .catch((err) => console.error("Failed to fetch activities:", err));
   }, []);
 
   useEffect(() => {
