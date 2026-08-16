@@ -502,7 +502,7 @@ export default function Home() {
         {dbActivities.length > 0 && (
           <section
             id="activity"
-            className="scroll-mt-20 bg-[#0bb882] dark:bg-[#031f16] py-8 sm:py-12 px-6 sm:px-8 md:px-12 lg:px-20 border-t-2 border-white/20 dark:border-white/5 relative overflow-hidden flex items-center justify-center"
+            className="scroll-mt-20 bg-[#0bb882] dark:bg-[#031f16] py-14 sm:py-20 lg:py-24 px-6 sm:px-8 md:px-12 lg:px-20 border-t-2 border-white/20 dark:border-white/5 relative overflow-hidden flex items-center justify-center"
           >
             {/* faint dot-matrix texture */}
             <div className="absolute inset-0 pointer-events-none opacity-[0.04] bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px]" />
