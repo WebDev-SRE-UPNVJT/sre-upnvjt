@@ -680,13 +680,21 @@ export default function Home() {
               </div>
             ) : (
               /* Upcoming Events Flex Layout - Professional Instagram-like 4:5 Poster Layout */
-              <div className="flex flex-wrap justify-center gap-8 w-full">
+              <div className="flex flex-wrap justify-center gap-6 sm:gap-8 w-full">
                 {upcomingActivities.map((activity) => {
                   const { day, month } = getEventDateParts(activity.date);
+                  const isExternal = !!activity.link;
+                  const href = activity.link || "/activity";
+                  const isRegister = activity.linkType === "register";
+                  
+                  const buttonText = isRegister 
+                    ? (language === "id" ? "Daftar Acara" : "Register Event")
+                    : (language === "id" ? "Lihat Detail" : "View Details");
+
                   return (
                     <div
                       key={activity.id}
-                      className="group relative flex flex-col bg-white/5 border border-white/10 dark:bg-black/20 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-black/40 hover:-translate-y-2 transition-all duration-500 w-full max-w-[350px]"
+                      className="group relative flex flex-col bg-white/5 border border-white/10 dark:bg-black/20 dark:border-white/5 rounded-[1.75rem] overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-full max-w-[280px]"
                     >
                       {/* Portrait Poster Image (Aspect Ratio 4:5) */}
                       <div className="relative w-full aspect-[4/5] overflow-hidden flex-shrink-0 bg-slate-900/40">
@@ -698,75 +706,92 @@ export default function Home() {
                           />
                         ) : (
                           <div className="w-full h-full bg-gradient-to-br from-emerald-800/40 to-teal-950/60 flex flex-col items-center justify-center gap-3">
-                            <Rocket className="w-12 h-12 text-white/20" />
+                            <Rocket className="w-10 h-10 text-white/20" />
                             <span className="text-[10px] uppercase font-bold tracking-widest text-white/40">Belum Ada Poster</span>
                           </div>
                         )}
                         {/* Dark Vignette Overlay */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+                        
                         {/* Calendar Date Badge */}
-                        <div className="absolute top-4 right-4 z-20 flex flex-col items-center justify-center w-14 h-16 bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden border border-slate-100 dark:border-white/10 select-none">
-                          <div className="w-full bg-red-500 dark:bg-emerald-500 text-[10px] font-black uppercase text-center py-1 text-white dark:text-slate-950 tracking-wider">
+                        <div className="absolute top-3 right-3 z-20 flex flex-col items-center justify-center w-12 h-14 bg-white dark:bg-slate-900 rounded-xl shadow-xl overflow-hidden border border-slate-100 dark:border-white/10 select-none">
+                          <div className="w-full bg-red-500 dark:bg-emerald-500 text-[9px] font-black uppercase text-center py-0.5 text-white dark:text-slate-950 tracking-wider">
                             {month}
                           </div>
-                          <div className="flex-1 flex items-center justify-center text-lg font-extrabold text-slate-900 dark:text-white leading-none">
+                          <div className="flex-1 flex items-center justify-center text-base font-extrabold text-slate-900 dark:text-white leading-none">
                             {day}
                           </div>
                         </div>
+
                         {/* Event Tags */}
-                        <div className="absolute bottom-4 left-4 right-4 z-10 flex flex-wrap gap-2 items-center">
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider bg-black/50 text-yellow-300 dark:text-emerald-400 border border-white/10 backdrop-blur-md">
+                        <div className="absolute bottom-3 left-3 right-3 z-10 flex flex-wrap gap-1.5 items-center">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider bg-black/50 text-yellow-300 dark:text-emerald-400 border border-white/10 backdrop-blur-md">
                             {activity.type || "EVENT"}
                           </span>
                           {activity.location && (
-                            <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold bg-white/15 text-white border border-white/5 backdrop-blur-md">
-                              <MapPin className="w-3.5 h-3.5 text-yellow-300 dark:text-emerald-400" />
-                              <span className="truncate max-w-[140px]">{activity.location}</span>
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-bold bg-white/15 text-white border border-white/5 backdrop-blur-md">
+                              <MapPin className="w-3 h-3 text-yellow-300 dark:text-emerald-400" />
+                              <span className="truncate max-w-[110px]">{activity.location}</span>
                             </span>
                           )}
                         </div>
                       </div>
-                      {/* Content Section */}
-                      <div className="p-6 flex flex-col flex-1 bg-white/5 dark:bg-black/20">
-                        <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-yellow-300 dark:group-hover:text-emerald-400 transition-colors duration-300 line-clamp-2 mb-3">
-                          {activity.name}
-                        </h3>
-                        <p className="text-sm text-white/70 dark:text-gray-400 leading-relaxed line-clamp-4 flex-1 mb-5">
-                          {activity.description}
-                        </p>
-                        <Link
-                          href="/activity"
-                          className="w-full py-3.5 bg-white/5 hover:bg-yellow-300 hover:text-slate-950 dark:bg-white/5 dark:hover:bg-emerald-400 dark:hover:text-black border border-white/15 dark:border-white/5 rounded-2xl text-xs font-bold text-center block transition-all duration-300 tracking-wider uppercase"
-                        >
-                          {language === "id" ? "Lihat Detail Acara" : "View Event Details"}
-                        </Link>
+
+                      {/* Content Section - Fixed Height for exact visual alignment */}
+                      <div className="p-4 flex flex-col h-[180px] bg-white/5 dark:bg-black/20 justify-between">
+                        <div className="space-y-1.5">
+                          <h3 className="text-sm sm:text-base font-bold text-white group-hover:text-yellow-300 dark:group-hover:text-emerald-400 transition-colors duration-300 line-clamp-2">
+                            {activity.name}
+                          </h3>
+                          <p className="text-xs text-white/70 dark:text-gray-400 leading-relaxed line-clamp-3">
+                            {activity.description}
+                          </p>
+                        </div>
+
+                        {isExternal ? (
+                          <a
+                            href={href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full py-2.5 bg-white/5 hover:bg-yellow-300 hover:text-slate-950 dark:bg-white/5 dark:hover:bg-emerald-400 dark:hover:text-black border border-white/15 dark:border-white/5 rounded-xl text-[11px] font-bold text-center block transition-all duration-300 tracking-wider uppercase"
+                          >
+                            {buttonText}
+                          </a>
+                        ) : (
+                          <Link
+                            href={href}
+                            className="w-full py-2.5 bg-white/5 hover:bg-yellow-300 hover:text-slate-950 dark:bg-white/5 dark:hover:bg-emerald-400 dark:hover:text-black border border-white/15 dark:border-white/5 rounded-xl text-[11px] font-bold text-center block transition-all duration-300 tracking-wider uppercase"
+                          >
+                            {buttonText}
+                          </Link>
+                        )}
                       </div>
                     </div>
                   );
                 })}
 
-                {/* Render Companion Card if there are less than 3 upcoming events */}
-                {upcomingActivities.length < 3 && (
-                  <div className="group relative flex flex-col bg-white/5 border border-white/10 dark:bg-black/20 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-black/40 hover:-translate-y-2 transition-all duration-500 w-full max-w-[350px]">
+                {/* Render Companion Card if there are less than 4 upcoming events */}
+                {upcomingActivities.length < 4 && (
+                  <div className="group relative flex flex-col bg-white/5 border border-white/10 dark:bg-black/20 dark:border-white/5 rounded-[1.75rem] overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-full max-w-[280px]">
                     {/* 4:5 Aspect Ratio Decorative Header */}
-                    <div className="relative w-full aspect-[4/5] flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-yellow-300/10 to-transparent dark:from-emerald-500/10 dark:to-transparent">
+                    <div className="relative w-full aspect-[4/5] flex flex-col items-center justify-center p-5 text-center bg-gradient-to-b from-yellow-300/10 to-transparent dark:from-emerald-500/10 dark:to-transparent">
                       {/* Floating Glowing Orbs */}
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 bg-yellow-300/20 dark:bg-emerald-500/20 rounded-full blur-2xl pointer-events-none animate-pulse" />
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-yellow-300/20 dark:bg-emerald-500/20 rounded-full blur-2xl pointer-events-none animate-pulse" />
                       
                       {/* Decorative Icon */}
-                      <div className="relative z-10 p-5 rounded-3xl bg-white/10 dark:bg-white/[0.05] border border-white/20 dark:border-white/10 mb-6 text-yellow-300 dark:text-emerald-400">
-                        <Sparkles className="w-10 h-10 animate-bounce" style={{ animationDuration: '3s' }} />
+                      <div className="relative z-10 p-4 rounded-2xl bg-white/10 dark:bg-white/[0.05] border border-white/20 dark:border-white/10 mb-4 text-yellow-300 dark:text-emerald-400">
+                        <Sparkles className="w-8 h-8 animate-bounce" style={{ animationDuration: '3s' }} />
                       </div>
 
                       {/* Title & Desc */}
-                      <div className="relative z-10 flex flex-col gap-3 px-4">
-                        <span className="text-[10px] font-black uppercase tracking-[0.25em] text-yellow-300 dark:text-emerald-400">
+                      <div className="relative z-10 flex flex-col gap-2 px-3">
+                        <span className="text-[9px] font-black uppercase tracking-[0.25em] text-yellow-300 dark:text-emerald-400">
                           {language === "id" ? "KOLABORASI & AKSI" : "COLLABORATION & ACTION"}
                         </span>
-                        <h3 className="text-xl font-bold text-white leading-snug">
+                        <h3 className="text-base font-bold text-white leading-snug">
                           {language === "id" ? "Lebih Banyak Event Segera Hadir!" : "More Events Coming Soon!"}
                         </h3>
-                        <p className="text-xs text-white/70 dark:text-gray-400 leading-relaxed max-w-xs">
+                        <p className="text-[11px] text-white/70 dark:text-gray-400 leading-relaxed max-w-[220px] mx-auto">
                           {language === "id" 
                             ? "Ikuti media sosial kami untuk mendapatkan pembaruan langsung tentang pendaftaran webinar, proyek riset, dan kegiatan sosial kami."
                             : "Follow our social media to get instant updates on webinar registrations, research projects, and community activities."}
@@ -774,13 +799,13 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* Bottom Action Footer */}
-                    <div className="p-6 pt-0 mt-auto bg-transparent">
+                    {/* Bottom Action Footer - styled with local color theme matching the SRE standard */}
+                    <div className="p-4 pt-0 mt-auto bg-transparent">
                       <a
                         href="https://www.instagram.com/sre.upnvjt/"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-full py-3.5 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-white rounded-2xl text-xs font-black text-center block transition-all duration-300 tracking-wider uppercase shadow-md hover:shadow-xl hover:brightness-110"
+                        className="w-full py-2.5 bg-yellow-300 hover:bg-yellow-400 text-slate-950 dark:bg-emerald-400 dark:hover:bg-emerald-300 dark:text-slate-950 font-black rounded-xl text-[11px] text-center block transition-all duration-300 tracking-wider uppercase shadow-md hover:shadow-xl hover:-translate-y-0.5"
                       >
                         {language === "id" ? "Ikuti Instagram Kami" : "Follow Our Instagram"}
                       </a>

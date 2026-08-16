@@ -52,6 +52,8 @@ export async function createActivityAction(formData) {
       location: formData.get("location"),
       date: formData.get("date"),
       type: formData.get("type"),
+      link: formData.get("link") || null,
+      linkType: formData.get("linkType") || "detail",
     };
 
     const imageFile = formData.get("image");
@@ -86,6 +88,8 @@ export async function updateActivityAction(id, formData) {
       location: formData.get("location"),
       date: formData.get("date"),
       type: formData.get("type"),
+      link: formData.get("link") || null,
+      linkType: formData.get("linkType") || "detail",
     };
 
     const imageFile = formData.get("image");
