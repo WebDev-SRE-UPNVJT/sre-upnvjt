@@ -739,7 +739,7 @@ export default function Home() {
 
                       {/* Content Section - Adjusted Padding and height to avoid cramped margins */}
                       <div className="p-5 flex flex-col bg-transparent dark:bg-black/20 rounded-b-[2rem]">
-                        <div className="h-[96px] flex flex-col justify-start mb-4">
+                        <div className="h-[74px] flex flex-col justify-start mb-3">
                           <h3 className="text-sm sm:text-base font-bold text-white group-hover:text-yellow-300 dark:group-hover:text-emerald-400 transition-colors duration-300 line-clamp-2 mb-1.5">
                             {activity.name}
                           </h3>

@@ -326,7 +326,7 @@ export default function ActivityPublicClient({ activities = [] }) {
 
                     {/* Body Content below poster */}
                     <div className="p-5 flex-1 flex flex-col justify-between">
-                      <div className="mb-4">
+                      <div className="h-[74px] flex flex-col justify-start mb-3">
                         <h3 className="text-sm sm:text-base font-bold text-white group-hover:text-yellow-300 dark:group-hover:text-emerald-400 transition-colors duration-300 line-clamp-2 mb-1.5">
                           {act.name}
                         </h3>
