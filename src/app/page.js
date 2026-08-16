@@ -753,14 +753,14 @@ export default function Home() {
                             href={href}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-full py-2.5 bg-transparent text-yellow-300 hover:bg-yellow-300 hover:!text-black dark:text-emerald-400 dark:hover:bg-emerald-400 dark:hover:!text-black border border-yellow-300 dark:border-emerald-400 rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase"
+                            className="w-full py-2.5 bg-transparent text-yellow-300 hover:bg-yellow-300 hover:text-black! dark:text-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-black! border border-yellow-300 dark:border-emerald-400 rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase"
                           >
                             {buttonText}
                           </a>
                         ) : (
                           <Link
                             href={href}
-                            className="w-full py-2.5 bg-transparent text-yellow-300 hover:bg-yellow-300 hover:!text-black dark:text-emerald-400 dark:hover:bg-emerald-400 dark:hover:!text-black border border-yellow-300 dark:border-emerald-400 rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase"
+                            className="w-full py-2.5 bg-transparent text-yellow-300 hover:bg-yellow-300 hover:text-black! dark:text-emerald-400 dark:hover:bg-emerald-400 dark:hover:text-black! border border-yellow-300 dark:border-emerald-400 rounded-xl text-[11px] font-black text-center block transition-all duration-300 tracking-wider uppercase"
                           >
                             {buttonText}
                           </Link>
