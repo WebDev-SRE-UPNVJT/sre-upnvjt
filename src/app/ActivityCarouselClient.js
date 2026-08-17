@@ -12,11 +12,18 @@ export default function ActivityCarousel({ activities }) {
 
   const carouselItems = React.useMemo(() => {
     if (!activities) return [];
-    const items = [...activities];
-    if (activities.length > 0 && activities.length < 4) {
-      items.push({ isDefault: true });
+    if (activities.length === 3) {
+      // Order: [act1, act2, defaultCard, act3] -> defaultCard is visually Card 4
+      return [activities[0], activities[1], { isDefault: true }, activities[2]];
     }
-    return items;
+    if (activities.length === 2) {
+      // Order: [act1, defaultCard, act2] -> defaultCard is visually Card 3
+      return [activities[0], { isDefault: true }, activities[1]];
+    }
+    if (activities.length === 1) {
+      return [activities[0], { isDefault: true }];
+    }
+    return [...activities];
   }, [activities]);
 
   const getBadgeText = (type) => {
@@ -125,22 +132,22 @@ export default function ActivityCarousel({ activities }) {
             onClick={onClick}
             className={`${sizeClass} flex-shrink-0 scale-100 z-10 shadow-2xl shadow-emerald-900/10 dark:shadow-emerald-950/50 rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-yellow-300 dark:border-emerald-400/60 bg-[#099c6d] dark:bg-emerald-950 flex flex-col`}
           >
-            <div className="relative w-full aspect-[4/3] flex flex-col items-center justify-center p-4 text-center bg-gradient-to-b from-yellow-300/10 to-transparent dark:from-emerald-500/10 dark:to-transparent flex-shrink-0 select-none">
+            <div className="relative w-full aspect-[4/3] flex flex-col items-center justify-center pt-5 pb-1 px-3 text-center bg-gradient-to-b from-yellow-300/10 to-transparent dark:from-emerald-500/10 dark:to-transparent flex-shrink-0 select-none">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-yellow-300/15 dark:bg-emerald-500/15 rounded-full blur-xl pointer-events-none animate-pulse" />
-              <div className="relative z-10 p-2.5 rounded-xl bg-white/10 dark:bg-white/[0.05] border border-white/20 dark:border-white/10 mb-2.5 text-yellow-300 dark:text-emerald-400">
+              <div className="relative z-10 p-2.5 rounded-xl bg-white/10 dark:bg-white/[0.05] border border-white/20 dark:border-white/10 mb-1 text-yellow-300 dark:text-emerald-400">
                 <svg className="w-6 h-6 animate-bounce" style={{ animationDuration: '3s' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
                 </svg>
               </div>
-              <span className="relative z-10 text-[9px] font-black uppercase tracking-[0.2em] text-yellow-300 dark:text-emerald-400">
+              <span className="relative z-10 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-yellow-300 dark:text-emerald-400">
                 {language === "id" ? "DOKUMENTASI & ARSIP" : "DOCUMENTATION & ARCHIVE"}
               </span>
-              <h3 className="relative z-10 text-sm sm:text-base font-extrabold text-white leading-snug mt-1 px-2 line-clamp-1">
+              <h3 className="relative z-10 text-base sm:text-lg md:text-xl font-extrabold text-white leading-snug mt-1 px-2 line-clamp-1">
                 {language === "id" ? "Lebih Banyak Kegiatan Hadir!" : "More Activities Coming!"}
               </h3>
             </div>
-            <div className="p-3.5 sm:p-4 transition-colors duration-300 flex flex-col gap-2 flex-grow justify-between">
-              <p className="text-white/95 dark:text-gray-200 text-xs leading-relaxed font-semibold line-clamp-2">
+            <div className="pt-1.5 pb-4 px-3.5 sm:p-4 transition-colors duration-300 flex flex-col gap-2 flex-grow justify-between">
+              <p className="text-white/95 dark:text-gray-200 text-xs sm:text-sm leading-relaxed font-semibold line-clamp-2">
                 {language === "id"
                   ? "Kami terus menjalankan berbagai proyek riset, workshop, dan kampanye sosial. Ikuti perjalanan transisi energi kami!"
                   : "We continuously run various research projects, workshops, and social campaigns. Follow our energy transition journey!"}
@@ -149,7 +156,7 @@ export default function ActivityCarousel({ activities }) {
                 href="https://www.instagram.com/sre.upnjatim/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-2 bg-yellow-300 hover:bg-yellow-400 text-[#058562] hover:text-black dark:bg-emerald-400 dark:hover:bg-emerald-300 dark:text-slate-950 font-black rounded-xl text-[10px] text-center block transition-all duration-300 tracking-wider uppercase shadow-md"
+                className="w-full py-2.5 px-3 bg-yellow-300 hover:bg-yellow-400 text-[#058562] hover:text-black dark:bg-emerald-400 dark:hover:bg-emerald-300 dark:text-slate-950 font-black rounded-xl text-[11px] sm:text-xs text-center block transition-all duration-300 tracking-wider uppercase shadow-md"
               >
                 {language === "id" ? "Ikuti Instagram Kami" : "Follow Our Instagram"}
               </a>
