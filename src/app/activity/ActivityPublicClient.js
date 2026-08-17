@@ -361,7 +361,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                             )}
 
                             {/* Event Tags Overlay (Category Tag + Floating Location) */}
-                            <div className="absolute bottom-3 left-3 right-3 z-10 flex flex-wrap gap-1.5 items-center">
+                            <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between">
                               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider bg-black/50 text-yellow-300 dark:text-emerald-400 border border-white/10 backdrop-blur-md">
                                 {act.type || "EVENT"}
                               </span>
@@ -465,7 +465,7 @@ export default function ActivityPublicClient({ activities = [] }) {
                             </div>
 
                             {/* Event Tags Overlay (Date + Location) */}
-                            <div className="absolute bottom-3 left-3 right-3 z-10 flex flex-wrap gap-1.5 items-center">
+                            <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between">
                               <span className="text-[10px] font-semibold text-white bg-black/55 px-2.5 py-1 rounded-lg border border-white/10 backdrop-blur-md">
                                 {formatDate(act.date)}
                               </span>
