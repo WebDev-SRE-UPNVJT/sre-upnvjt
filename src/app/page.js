@@ -768,7 +768,7 @@ export default function Home() {
                       <div className="relative w-full aspect-[4/4] sm:aspect-[4/5] overflow-hidden flex-shrink-0 bg-slate-900/40">
                         {activity.imageUrl ? (
                           <img
-                            src={activity.imageUrl}
+                            src={resolveImageUrl(activity.imageUrl)}
                             alt={activity.name}
                             className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
                           />
