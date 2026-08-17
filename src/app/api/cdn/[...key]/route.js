@@ -4,7 +4,8 @@ import { r2Client } from "@/lib/r2";
 
 export async function GET(req, { params }) {
   try {
-    const keyArray = params.key;
+    const resolvedParams = await params;
+    const keyArray = resolvedParams.key;
     if (!keyArray || keyArray.length === 0) {
       return NextResponse.json({ error: "Key is required" }, { status: 400 });
     }
