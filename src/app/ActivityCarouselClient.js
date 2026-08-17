@@ -12,18 +12,11 @@ export default function ActivityCarousel({ activities }) {
 
   const carouselItems = React.useMemo(() => {
     if (!activities) return [];
-    if (activities.length === 3) {
-      // Order: [act1, act2, defaultCard, act3] -> defaultCard is visually Card 4
-      return [activities[0], activities[1], { isDefault: true }, activities[2]];
+    const items = [...activities];
+    if (activities.length > 0 && activities.length < 4) {
+      items.push({ isDefault: true });
     }
-    if (activities.length === 2) {
-      // Order: [act1, defaultCard, act2] -> defaultCard is visually Card 3
-      return [activities[0], { isDefault: true }, activities[1]];
-    }
-    if (activities.length === 1) {
-      return [activities[0], { isDefault: true }];
-    }
-    return [...activities];
+    return items;
   }, [activities]);
 
   const getBadgeText = (type) => {
@@ -261,6 +254,19 @@ export default function ActivityCarousel({ activities }) {
     }
   };
 
+  const indicesMap4 = {
+    0: [2, 0, 1, 3],
+    1: [0, 1, 2, 3],
+    2: [1, 2, 3, 0],
+    3: [2, 3, 0, 1],
+  };
+
+  const indicesMap3 = {
+    0: [1, 0, 2],
+    1: [0, 1, 2],
+    2: [1, 2, 0],
+  };
+
   return (
     <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} className="w-full max-w-6xl mx-auto relative select-none">
       <div className="relative overflow-hidden w-full pt-4 pb-2 min-h-fit md:min-h-[370px] flex items-center justify-center">
@@ -293,19 +299,19 @@ export default function ActivityCarousel({ activities }) {
             {/* CASE 3: Exactly 3 Activities */}
             {count === 3 && (
               <>
-                {renderCardItem(carouselItems[getIndex(-1)], false, "hidden md:block md:w-[26%] lg:w-[20.5%]", prev)}
-                {renderCardItem(carouselItems[current], true, "w-full md:w-[40%] lg:w-[32%]")}
-                {renderCardItem(carouselItems[getIndex(1)], false, "hidden md:block md:w-[26%] lg:w-[20.5%]", next)}
+                {renderCardItem(carouselItems[indicesMap3[current][0]], false, "hidden md:block md:w-[26%] lg:w-[20.5%]", prev)}
+                {renderCardItem(carouselItems[indicesMap3[current][1]], true, "w-full md:w-[40%] lg:w-[32%]")}
+                {renderCardItem(carouselItems[indicesMap3[current][2]], false, "hidden md:block md:w-[26%] lg:w-[20.5%]", next)}
               </>
             )}
 
             {/* CASE 4: 4 or More Activities */}
             {count >= 4 && (
               <>
-                {renderCardItem(carouselItems[getIndex(-1)], false, "hidden md:block md:w-[26%] lg:w-[20.5%]", prev)}
-                {renderCardItem(carouselItems[current], true, "w-full md:w-[40%] lg:w-[32%]")}
-                {renderCardItem(carouselItems[getIndex(1)], false, "hidden md:block md:w-[26%] lg:w-[20.5%]", next)}
-                {renderCardItem(carouselItems[getIndex(2)], false, "hidden lg:block lg:w-[20.5%]", () => goTo(getIndex(2)))}
+                {renderCardItem(carouselItems[count === 4 ? indicesMap4[current][0] : getIndex(-1)], false, "hidden md:block md:w-[26%] lg:w-[20.5%]", prev)}
+                {renderCardItem(carouselItems[count === 4 ? indicesMap4[current][1] : current], true, "w-full md:w-[40%] lg:w-[32%]")}
+                {renderCardItem(carouselItems[count === 4 ? indicesMap4[current][2] : getIndex(1)], false, "hidden md:block md:w-[26%] lg:w-[20.5%]", next)}
+                {renderCardItem(carouselItems[count === 4 ? indicesMap4[current][3] : getIndex(2)], false, "hidden lg:block lg:w-[20.5%]", () => goTo(count === 4 ? indicesMap4[current][3] : getIndex(2)))}
               </>
             )}
           </motion.div>
