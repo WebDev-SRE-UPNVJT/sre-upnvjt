@@ -101,7 +101,7 @@ export default function ContentPublicClient({ initialArticles }) {
         
         <div className="max-w-7xl mx-auto px-0 md:px-6 relative z-10 text-center">
           <motion.div {...fadeUp} initial={fadeUp.initial} animate={fadeUp.animate} transition={fadeUp.transition}>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-yellow-300 dark:text-emerald-400 text-xs font-bold uppercase tracking-widest mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-yellow-300 dark:text-emerald-400 text-xs font-bold uppercase tracking-widest mt-6 sm:mt-0 mb-6">
               <FileText className="w-4 h-4" aria-hidden="true" /> {t("visitor.articles.latest_updates")}
             </div>
             <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-6 text-white dark:text-white font-display">
