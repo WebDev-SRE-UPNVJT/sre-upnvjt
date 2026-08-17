@@ -110,7 +110,17 @@ export default function ActivityCarousel({ activities }) {
     }),
   };
 
-  const getImage = (item) => item?.imageUrl || item?.image || '/images/about/PanelSurya.jpg';
+  const getImage = (item) => {
+    const url = item?.imageUrl || item?.image || '';
+    if (!url) return '/images/about/PanelSurya.jpg';
+    const cleaned = url
+      .replace("https://pub-7a6619b60d5847c1a16624560e5575dd.r2.dev/", "")
+      .replace("https://cdn.webly.biz.id/", "");
+    if (cleaned.startsWith("http://") || cleaned.startsWith("https://") || cleaned.startsWith("/")) {
+      return cleaned;
+    }
+    return `/api/cdn/${cleaned.replace(/^\/+/, "")}`;
+  };
   const getTitle = (item) => item?.name || item?.title || '';
 
   const renderCardItem = (item, isActive, sizeClass, onClick = null) => {

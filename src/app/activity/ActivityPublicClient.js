@@ -9,11 +9,13 @@ import Link from "next/link";
 
 function resolveImageUrl(url) {
   if (!url) return "";
-  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/")) {
-    return url;
+  const cleaned = url
+    .replace("https://pub-7a6619b60d5847c1a16624560e5575dd.r2.dev/", "")
+    .replace("https://cdn.webly.biz.id/", "");
+  if (cleaned.startsWith("http://") || cleaned.startsWith("https://") || cleaned.startsWith("/")) {
+    return cleaned;
   }
-  const baseUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL || "https://cdn.webly.biz.id/";
-  return `${baseUrl.replace(/\/+$/, "")}/${url.replace(/^\/+/, "")}`;
+  return `/api/cdn/${cleaned.replace(/^\/+/, "")}`;
 }
 
 export default function ActivityPublicClient({ activities = [] }) {
