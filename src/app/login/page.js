@@ -1,9 +1,9 @@
 "use client";
 import React, { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, ArrowLeft, Eye, EyeOff } from "lucide-react";
-import { signIn, useSession } from "next-auth/react";
+import { ArrowRight, ArrowLeft, Eye, EyeOff, Loader2, ShieldCheck, Zap, Sparkles, Lock } from "lucide-react";
+import { signIn, getSession, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/i18n/LanguageProvider";
 import { useTheme } from "next-themes";
@@ -20,9 +20,50 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
   const { data: session, status } = useSession();
   const [isPublicRegistrationEnabled, setIsPublicRegistrationEnabled] =
     useState(false);
+
+  const loginStages = [
+    {
+      id: "auth",
+      icon: ShieldCheck,
+      textId: "Memverifikasi Kredensial...",
+      textEn: "Verifying Credentials...",
+      badge: "01/03",
+      pct: 35,
+    },
+    {
+      id: "sync",
+      icon: Zap,
+      textId: "Sinkronisasi Sesi Akun...",
+      textEn: "Synchronizing Session...",
+      badge: "02/03",
+      pct: 72,
+    },
+    {
+      id: "portal",
+      icon: Sparkles,
+      textId: "Mempersiapkan Portal...",
+      textEn: "Preparing Portal...",
+      badge: "03/03",
+      pct: 96,
+    },
+  ];
+
+  React.useEffect(() => {
+    let interval;
+    if (isLoading) {
+      setLoadingStep(0);
+      interval = setInterval(() => {
+        setLoadingStep((prev) => Math.min(prev + 1, loginStages.length - 1));
+      }, 1100);
+    } else {
+      setLoadingStep(0);
+    }
+    return () => clearInterval(interval);
+  }, [isLoading]);
 
   React.useEffect(() => {
     setMounted(true);
@@ -30,18 +71,19 @@ export default function LoginPage() {
 
   const isLight = mounted && (theme === "light" || resolvedTheme === "light");
 
+  // If already authenticated on initial page load, redirect to appropriate role dashboard
   React.useEffect(() => {
-    if (status === "authenticated") {
+    if (status === "authenticated" && !isLoading) {
       const role = session?.user?.roleName;
       if (role === "MEMBER") {
-        router.push("/member");
+        window.location.href = "/member";
       } else if (role === "STAFF") {
-        router.push("/officer");
+        window.location.href = "/officer";
       } else {
-        router.push("/dashboard");
+        window.location.href = "/dashboard";
       }
     }
-  }, [status, session, router]);
+  }, [status, session, isLoading]);
 
   React.useEffect(() => {
     fetch("/api/settings/system")
@@ -59,17 +101,35 @@ export default function LoginPage() {
     setIsLoading(true);
     setError("");
 
-    const res = await signIn("credentials", {
-      redirect: false,
-      email,
-      password,
-    });
+    try {
+      const res = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      });
 
-    if (res?.error) {
-      setError(res.error);
-      setIsLoading(false);
-    } else {
-      router.push("/dashboard");
+      if (res?.error) {
+        setError(res.error);
+        setIsLoading(false);
+        return;
+      }
+
+      // Fetch the updated session directly to know the exact role immediately
+      const sessionData = await getSession();
+      const role = sessionData?.user?.roleName;
+
+      let destination = "/dashboard";
+      if (role === "MEMBER") {
+        destination = "/member";
+      } else if (role === "STAFF") {
+        destination = "/officer";
+      }
+
+      // Using window.location.href ensures clean cookie transfer & bypasses client router lag on Vercel
+      window.location.href = destination;
+    } catch (err) {
+      console.error("Login redirect error:", err);
+      window.location.href = "/dashboard";
     }
   };
 
@@ -254,16 +314,149 @@ export default function LoginPage() {
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex items-center justify-center gap-3 bg-yellow-300 dark:bg-[#e8ecc4] text-[#0a1c15] text-[15px] font-bold tracking-widest uppercase rounded-full px-8 py-4 mt-4 overflow-hidden transition-all duration-300 active:scale-95 hover:bg-yellow-200 dark:hover:bg-white disabled:opacity-70 disabled:active:scale-100 shadow-lg shadow-yellow-300/20 dark:shadow-none cursor-pointer"
-            >
-              {isLoading ? t("visitor.login.btn_logging_in") : t("visitor.login.btn_login")}
-              {!isLoading && (
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              )}
-            </button>
+            <div className="flex flex-col gap-3.5 mt-4">
+              <div className="relative group/btn">
+                {/* Outer Cyber Shockwave Ring on Loading */}
+                {isLoading && (
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.04, 1],
+                      opacity: [0.5, 0.9, 0.5],
+                    }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 1.5,
+                      ease: "easeInOut",
+                    }}
+                    className="absolute -inset-1 rounded-full bg-gradient-to-r from-emerald-400 via-amber-300 to-teal-400 opacity-70 blur-md pointer-events-none"
+                  />
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className={`group relative w-full flex items-center justify-center text-[14px] sm:text-[15px] font-black tracking-widest uppercase rounded-full px-8 py-4 overflow-hidden transition-all duration-300 shadow-xl ${
+                    isLoading
+                      ? "bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 text-slate-950 shadow-[0_0_35px_rgba(52,211,153,0.5)] cursor-wait"
+                      : "bg-yellow-300 dark:bg-[#e8ecc4] text-[#0a1c15] hover:bg-yellow-200 dark:hover:bg-white active:scale-95 shadow-yellow-300/25 dark:shadow-none cursor-pointer"
+                  }`}
+                >
+                  {/* Animated Continuous Laser Sweep Beam on Loading */}
+                  {isLoading ? (
+                    <>
+                      <motion.div
+                        initial={{ x: "-120%" }}
+                        animate={{ x: "220%" }}
+                        transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/70 to-transparent skew-x-12 pointer-events-none"
+                      />
+                      <motion.div
+                        animate={{ opacity: [0.4, 1, 0.4] }}
+                        transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
+                        className="absolute inset-0 rounded-full border-2 border-white/70 pointer-events-none"
+                      />
+                    </>
+                  ) : (
+                    /* Subtle Shimmer on Hover */
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
+                  )}
+
+                  {isLoading ? (
+                    <div className="flex items-center justify-center gap-3 relative z-10">
+                      {/* Left Icon with morphing animation */}
+                      <div className="w-7 h-7 rounded-full bg-slate-950/15 flex items-center justify-center shrink-0 border border-slate-950/20">
+                        <AnimatePresence mode="wait">
+                          {React.createElement(loginStages[loadingStep].icon, {
+                            key: loginStages[loadingStep].id,
+                            className: "w-3.5 h-3.5 text-slate-950 animate-bounce",
+                          })}
+                        </AnimatePresence>
+                      </div>
+                      
+                      {/* Dynamic Step Text centered */}
+                      <AnimatePresence mode="wait">
+                        <motion.span
+                          key={loadingStep}
+                          initial={{ opacity: 0, y: 6, filter: "blur(2px)" }}
+                          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                          exit={{ opacity: 0, y: -6, filter: "blur(2px)" }}
+                          transition={{ duration: 0.2 }}
+                          className="font-black text-slate-950 tracking-wider text-xs sm:text-sm text-center"
+                        >
+                          {language === "en" ? loginStages[loadingStep].textEn : loginStages[loadingStep].textId}
+                        </motion.span>
+                      </AnimatePresence>
+
+                      {/* Small Stage Pill */}
+                      <span className="px-2 py-0.5 rounded-full bg-slate-950/15 border border-slate-950/25 text-[9px] font-mono font-black text-slate-950 tracking-widest shrink-0">
+                        {loginStages[loadingStep].badge}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center gap-3 relative z-10">
+                      <span className="tracking-widest">{t("visitor.login.btn_login")}</span>
+                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform duration-300" />
+                    </div>
+                  )}
+                </button>
+              </div>
+
+              {/* Cyberpunk 3-Segment Neon Progress Track */}
+              <AnimatePresence>
+                {isLoading && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6, height: 0 }}
+                    animate={{ opacity: 1, y: 0, height: "auto" }}
+                    exit={{ opacity: 0, y: -6, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="w-full flex flex-col gap-2 pt-1"
+                  >
+                    {/* 3 Illuminated Segment Pills */}
+                    <div className="grid grid-cols-3 gap-2 w-full">
+                      {loginStages.map((st, idx) => {
+                        const isDone = loadingStep > idx;
+                        const isCurrent = loadingStep === idx;
+                        return (
+                          <div
+                            key={st.id}
+                            className="h-2 rounded-full bg-white/15 dark:bg-white/10 overflow-hidden relative border border-white/10"
+                          >
+                            <motion.div
+                              initial={{ width: "0%" }}
+                              animate={{
+                                width: isDone ? "100%" : isCurrent ? "100%" : "0%",
+                              }}
+                              transition={{
+                                duration: isCurrent ? 1.1 : 0.3,
+                                ease: "easeOut",
+                              }}
+                              className={`h-full rounded-full transition-colors ${
+                                isCurrent
+                                  ? "bg-gradient-to-r from-emerald-400 to-amber-300 shadow-[0_0_10px_rgba(52,211,153,0.9)]"
+                                  : isDone
+                                  ? "bg-emerald-400"
+                                  : "bg-transparent"
+                              }`}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Status & Live Percent */}
+                    <div className="flex items-center justify-between text-[11px] font-mono text-white/80 dark:text-white/60 px-1">
+                      <span className="flex items-center gap-1.5 font-sans text-xs">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block" />
+                        {language === "en" ? "Establishing secure session..." : "Menyiapkan sesi aman..."}
+                      </span>
+                      <span className="font-black text-yellow-300 dark:text-emerald-400">
+                        {loginStages[loadingStep].pct}%
+                      </span>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </form>
 
           {isPublicRegistrationEnabled && (

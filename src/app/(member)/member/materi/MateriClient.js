@@ -79,94 +79,123 @@ export default function MateriClient({ initialModules }) {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {modules.map((mod, index) => (
-            <motion.div
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ type: "spring", stiffness: 100, delay: (index % 4) * 0.1 }}
-              key={mod.id}
-              onClick={() => handleOpenModule(mod)}
-              className="relative bg-white dark:bg-[#090d14] border border-slate-200/60 dark:border-white/5 rounded-3xl overflow-hidden cursor-pointer group hover:border-emerald-500/30 transition-all duration-500 transform-gpu hover:-translate-y-2 flex flex-col h-full shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(16,185,129,0.1)]"
-            >
-              {/* Cover Banner (Keeping it but blending it into the dark theme) */}
-              <div className="relative aspect-[16/9] w-full overflow-hidden shrink-0 bg-slate-100 dark:bg-[#090d14]">
-                {mod.coverImageUrl ? (
-                  <img
-                    src={mod.coverImageUrl}
-                    alt={mod.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out opacity-90 dark:opacity-70 group-hover:opacity-100"
-                  />
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center text-emerald-500/20 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-[#090d14]">
-                    <Presentation className="w-14 h-14" />
-                  </div>
-                )}
-                
-                {/* Sleek Gradient Overlay for Text Readability & Seamless Blend */}
-                <div className="absolute inset-0 bg-gradient-to-t from-white via-white/0 to-transparent dark:from-[#090d14] dark:from-[5%] dark:via-[#090d14]/80 dark:via-[35%] dark:to-transparent" />
+          {modules.map((mod, index) => {
+            const userProg = progressMap[mod.id];
+            const hasProgress = !!userProg;
+            const slideCount = mod.slideCount || 1;
+            let pct = 0;
+            if (hasProgress) {
+              pct = slideCount > 1
+                ? Math.round((userProg.currentSlideIdx / (slideCount - 1)) * 100)
+                : (userProg.currentSlideIdx >= 0 ? 100 : 0);
+            }
+            pct = Math.min(100, Math.max(0, pct));
+            const timeAgoText = hasProgress ? formatTimeAgo(userProg.lastAccessed) : null;
 
-                <div className="absolute top-4 right-4 z-10">
-                  <span className="px-3 py-1.5 rounded-full bg-emerald-500/90 border border-emerald-400/50 text-[10px] font-black uppercase tracking-widest flex items-center gap-1 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)] backdrop-blur-md">
-                    <Layers className="w-3.5 h-3.5" />
-                    {mod.slideCount || 0} {t('materi.file_count')}
-                  </span>
-                </div>
-              </div>
-
-              {/* Title & Desc */}
-              <div className="p-6 flex-1 flex flex-col justify-between z-10 bg-white dark:bg-[#090d14] -mt-[1px]">
-                <div>
-                  <h3 className="font-extrabold text-slate-900 dark:text-white text-xl line-clamp-2 mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300 leading-snug tracking-tight">
-                    {mod.title}
-                  </h3>
-                  {mod.description ? (
-                    <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                      {mod.description}
-                    </p>
+            return (
+              <motion.div
+                initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ type: "spring", stiffness: 100, delay: (index % 4) * 0.1 }}
+                key={mod.id}
+                onClick={() => handleOpenModule(mod)}
+                className="relative bg-white/95 dark:bg-[#07130e]/95 backdrop-blur-xl border border-slate-200/80 dark:border-white/10 rounded-[2rem] overflow-hidden cursor-pointer group hover:border-emerald-500/50 transition-all duration-500 transform-gpu hover:-translate-y-2 flex flex-col h-full shadow-[0_10px_35px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_50px_rgba(16,185,129,0.2)]"
+              >
+                {/* Cover Banner */}
+                <div className="relative aspect-[16/10] w-full overflow-hidden shrink-0 bg-slate-900/60">
+                  {mod.coverImageUrl ? (
+                    <img
+                      src={mod.coverImageUrl}
+                      alt={mod.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out opacity-90 group-hover:opacity-100"
+                    />
                   ) : (
-                    <p className="text-sm text-slate-400 dark:text-slate-500 italic">{t('materi.no_description')}</p>
+                    <div className="w-full h-full flex flex-col items-center justify-center text-emerald-400/40 bg-gradient-to-br from-emerald-950 via-teal-950 to-slate-950">
+                      <Presentation className="w-14 h-14 animate-pulse" />
+                    </div>
                   )}
-                </div>
-                
-                {/* Progress & Footer */}
-                <div className="mt-8 flex flex-col gap-5">
                   
-                  {progressMap[mod.id] && (
+                  {/* Sleek Gradient Overlay for Text Readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-white via-white/20 to-transparent dark:from-[#07130e] dark:via-[#07130e]/60 dark:to-transparent" />
+
+                  {/* Slide Count Badge */}
+                  <div className="absolute top-3.5 right-3.5 z-10">
+                    <span className="px-3 py-1.5 rounded-full bg-emerald-500/90 border border-emerald-300/40 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 text-white shadow-[0_0_20px_rgba(16,185,129,0.5)] backdrop-blur-md">
+                      <Layers className="w-3.5 h-3.5" />
+                      {mod.slideCount || 0} HALAMAN
+                    </span>
+                  </div>
+                </div>
+
+                {/* Title & Desc */}
+                <div className="p-6 flex-1 flex flex-col justify-between z-10 bg-white/95 dark:bg-[#07130e]/95 -mt-2">
+                  <div>
+                    <h3 className="font-black text-slate-900 dark:text-white text-lg md:text-xl line-clamp-2 mb-2 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors duration-300 leading-snug tracking-tight">
+                      {mod.title}
+                    </h3>
+                    {mod.description ? (
+                      <p className="text-xs sm:text-sm text-slate-500 dark:text-white/60 line-clamp-2 leading-relaxed font-medium">
+                        {mod.description}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-slate-400 dark:text-white/30 italic">{t('materi.no_description')}</p>
+                    )}
+                  </div>
+                  
+                  {/* Progress & Footer */}
+                  <div className="mt-7 flex flex-col gap-4">
+                    {/* Always Visible Progress Bar */}
                     <div className="w-full">
-                      <div className="flex justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">
-                        <span className="flex items-center gap-1.5">
-                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                          {formatTimeAgo(progressMap[mod.id].lastAccessed) || 'Pernah dibuka'}
+                      <div className="flex justify-between items-center text-[10px] sm:text-[11px] font-bold mb-1.5 uppercase tracking-wider">
+                        <span className="flex items-center gap-1.5 text-slate-500 dark:text-white/45">
+                          {hasProgress ? (
+                            <>
+                              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                              <span>{timeAgoText || "Pernah dibuka"}</span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-white/20" />
+                              <span>Belum Dibuka</span>
+                            </>
+                          )}
                         </span>
-                        <span className="text-emerald-600 dark:text-emerald-400 font-black">
-                          {(mod.slideCount || 1) > 1 ? Math.round((progressMap[mod.id].currentSlideIdx / ((mod.slideCount || 1) - 1)) * 100) : (progressMap[mod.id].currentSlideIdx >= 0 ? 100 : 0)}%
+                        <span className={`font-black font-mono ${pct === 100 ? "text-emerald-500 dark:text-emerald-400" : pct > 0 ? "text-amber-500 dark:text-amber-400" : "text-slate-400 dark:text-white/30"}`}>
+                          {pct}%
                         </span>
                       </div>
-                      <div className="w-full h-2 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden shadow-inner relative">
+                      <div className="w-full h-2 bg-slate-100 dark:bg-white/8 rounded-full overflow-hidden p-0.5 border border-slate-200/50 dark:border-white/5 relative">
                         <motion.div 
                           initial={{ width: 0 }}
-                          animate={{ width: `${(mod.slideCount || 1) > 1 ? (progressMap[mod.id].currentSlideIdx / ((mod.slideCount || 1) - 1)) * 100 : (progressMap[mod.id].currentSlideIdx >= 0 ? 100 : 0)}%` }}
+                          animate={{ width: `${pct}%` }}
                           transition={{ duration: 1, ease: "easeOut" }}
-                          className="absolute top-0 left-0 h-full bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full"
+                          className={`h-full rounded-full ${
+                            pct === 100
+                              ? "bg-gradient-to-r from-emerald-400 to-teal-400 shadow-[0_0_12px_rgba(52,211,153,0.5)]"
+                              : pct > 0
+                              ? "bg-gradient-to-r from-amber-400 to-emerald-400"
+                              : "bg-transparent"
+                          }`}
                         />
                       </div>
                     </div>
-                  )}
 
-                  <div className="flex items-center justify-between pt-5 border-t border-slate-100 dark:border-white/5">
-                    <div className="flex items-center gap-2 text-slate-400 dark:text-slate-500">
-                      <Presentation className="w-4 h-4" />
-                      <span className="text-xs font-semibold uppercase tracking-wider">{t('materi.open_module')}</span>
-                    </div>
-                    
-                    <div className="px-5 py-2 rounded-xl bg-slate-900 dark:bg-white group-hover:bg-emerald-500 dark:group-hover:bg-emerald-500 text-white dark:text-slate-900 group-hover:text-white font-bold text-[11px] uppercase tracking-wider flex items-center gap-1.5 transition-all duration-300 shadow-sm group-hover:shadow-[0_4px_15px_rgba(16,185,129,0.3)]">
-                      {progressMap[mod.id] ? 'Lanjutkan' : t('materi.view_slides')} <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                    <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-white/8">
+                      <div className="flex items-center gap-2 text-slate-400 dark:text-white/40">
+                        <Presentation className="w-4 h-4 text-emerald-500" />
+                        <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-white/50">{t('materi.open_module')}</span>
+                      </div>
+                      
+                      <div className="px-4 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 group-hover:bg-emerald-500 dark:group-hover:bg-emerald-400 group-hover:text-slate-950 font-black text-[11px] uppercase tracking-wider flex items-center gap-1.5 transition-all duration-300 shadow-md group-hover:shadow-[0_4px_20px_rgba(16,185,129,0.4)] group-hover:scale-[1.03]">
+                        <span>{pct > 0 ? "Lanjutkan" : t('materi.view_slides')}</span>
+                        <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </div>
       )}
     </div>

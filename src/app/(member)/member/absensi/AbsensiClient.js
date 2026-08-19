@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   ClipboardCheck, Calendar, Info, Clock, AlertTriangle,
   CheckCircle2, Flame, Award, Trophy, Target, X, Check,
@@ -48,6 +49,15 @@ function CheckInModal({ session, onClose, onSuccess }) {
   const [done, setDone]       = useState(false);
   const router = useRouter();
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, []);
+
   const needsToken = status === "PRESENT" || status === "LATE";
 
   const handleSubmit = async (e) => {
@@ -82,12 +92,12 @@ function CheckInModal({ session, onClose, onSuccess }) {
     }
   };
 
-  return (
+  const modalNode = (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md overflow-y-auto"
       onClick={(e) => e.target === e.currentTarget && !loading && !done && onClose()}
     >
       <motion.div
@@ -95,10 +105,10 @@ function CheckInModal({ session, onClose, onSuccess }) {
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.94, y: 20 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="w-full max-w-lg bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-3xl shadow-[0_40px_80px_rgba(0,0,0,0.4)] overflow-hidden"
+        className="w-full max-w-lg bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-3xl shadow-[0_40px_80px_rgba(0,0,0,0.6)] overflow-hidden my-auto max-h-[90vh] flex flex-col"
       >
         {/* Header */}
-        <div className="flex items-start justify-between p-6 pb-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/[0.02]">
+        <div className="flex items-start justify-between p-6 pb-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/[0.02] shrink-0">
           <div>
             <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">Isi Presensi</p>
             <h3 className="text-lg font-black text-slate-900 dark:text-white">{session.title}</h3>
@@ -114,7 +124,7 @@ function CheckInModal({ session, onClose, onSuccess }) {
           )}
         </div>
 
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto flex-1">
           {/* Success state */}
           {done ? (
             <motion.div
@@ -248,6 +258,9 @@ function CheckInModal({ session, onClose, onSuccess }) {
       </motion.div>
     </motion.div>
   );
+
+  if (typeof document === "undefined") return null;
+  return createPortal(modalNode, document.body);
 }
 
 export default function AbsensiClient({ initialAttendance, validSessions = [], userRoleName = "Member" }) {
@@ -299,8 +312,13 @@ export default function AbsensiClient({ initialAttendance, validSessions = [], u
   }
 
   const onSuccess = (newRec) => setRec((prev) => [newRec, ...prev]);
+  const [statusFilter, setStatusFilter] = useState("ALL");
 
   if (!mounted) return null;
+
+  const displayedRecords = effectiveRecords.filter(
+    (r) => statusFilter === "ALL" || r.status === statusFilter
+  );
 
   return (
     <div className="w-full relative space-y-8">
@@ -314,7 +332,7 @@ export default function AbsensiClient({ initialAttendance, validSessions = [], u
           <ClipboardCheck className="w-3 h-3" /> Presensi Member
         </span>
         <h1 className="text-4xl md:text-5xl font-display font-black tracking-tighter text-slate-900 dark:text-white leading-none">
-          {t("attendance_member.title")} <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">{userRoleName}</span>
+          {t("attendance_member.title")} 
         </h1>
         <p className="text-slate-500 dark:text-white/45 text-sm mt-2.5 font-medium">
           {t("attendance_member.subtitle")}
@@ -374,47 +392,52 @@ export default function AbsensiClient({ initialAttendance, validSessions = [], u
         <StatCard icon={AlertTriangle} value={getCount("ABSENT")} label="Alpha"           iconBg="bg-red-500/10"    iconColor="text-red-500"    iconBorder="border-red-500/20"    delay={0.25} />
       </div>
 
-      {/* Status Breakdown */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="flex flex-wrap gap-3"
-      >
-        {[
-          { key: "PRESENT", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" },
-          { key: "LATE",    color: "text-amber-600 dark:text-amber-400",    bg: "bg-amber-500/10 border-amber-500/20" },
-          { key: "EXCUSED", color: "text-blue-600 dark:text-blue-400",      bg: "bg-blue-500/10 border-blue-500/20" },
-          { key: "ABSENT",  color: "text-red-600 dark:text-red-400",        bg: "bg-red-500/10 border-red-500/20" },
-        ].map(({ key, color, bg }) => {
-          const meta = STATUS_META[key];
-          const Icon = meta.icon;
-          return (
-            <div key={key} className={`flex items-center gap-2 px-4 py-2 rounded-xl border ${bg}`}>
-              <Icon className={`w-3.5 h-3.5 ${color}`} />
-              <span className={`text-xs font-black ${color}`}>{meta.label}</span>
-              <span className={`text-xs font-black ${color}`}>{getCount(key)}x</span>
-            </div>
-          );
-        })}
-      </motion.div>
-
-      {/* History Table */}
+      {/* History Table with Integrated Interactive Filters */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
-        <SectionHeader
-          icon={Calendar}
-          title="Riwayat Terakhir"
-          actionLabel="Lihat Semua Riwayat"
-          actionHref="/member/absensi/riwayat"
-          className="mb-4"
-        />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <SectionHeader
+            icon={Calendar}
+            title="Riwayat Terakhir"
+            actionLabel="Lihat Semua Riwayat"
+            actionHref="/member/absensi/riwayat"
+          />
+
+          {/* Interactive Filter Tabs */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+            {[
+              { key: "ALL", label: "Semua", count: effectiveRecords.length },
+              { key: "PRESENT", label: "Hadir", count: getCount("PRESENT") },
+              { key: "LATE", label: "Terlambat", count: getCount("LATE") },
+              { key: "EXCUSED", label: "Izin", count: getCount("EXCUSED") },
+              { key: "ABSENT", label: "Alpha", count: getCount("ABSENT") },
+            ].map((tab) => {
+              const isActive = statusFilter === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setStatusFilter(tab.key)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 shrink-0 ${
+                    isActive
+                      ? "bg-primary text-slate-950 shadow-md shadow-primary/20 scale-[1.02]"
+                      : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white/60 hover:bg-slate-200 dark:hover:bg-white/10"
+                  }`}
+                >
+                  <span>{tab.label}</span>
+                  <span className={`px-1.5 py-0.5 rounded-md text-[10px] ${isActive ? "bg-black/15 text-slate-950 font-bold" : "bg-black/10 dark:bg-white/10 text-slate-500 dark:text-white/40"}`}>
+                    {tab.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         <div className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-3xl overflow-hidden shadow-xl dark:shadow-2xl">
-          {effectiveRecords.length === 0 ? (
+          {displayedRecords.length === 0 ? (
             <EmptyState
               icon={ClipboardCheck}
               title={t("attendance_member.no_history")}
-              description="Presensi kamu akan muncul di sini setelah mengikuti sesi."
+              description="Tidak ada catatan presensi untuk filter status yang dipilih."
               className="py-16"
             />
           ) : (
@@ -430,7 +453,7 @@ export default function AbsensiClient({ initialAttendance, validSessions = [], u
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
-                  {effectiveRecords.slice(0, 6).map((rec, i) => {
+                  {displayedRecords.slice(0, 6).map((rec, i) => {
                     const meta = STATUS_META[rec.status] ?? STATUS_META.ABSENT;
                     const Icon = meta.icon;
                     return (

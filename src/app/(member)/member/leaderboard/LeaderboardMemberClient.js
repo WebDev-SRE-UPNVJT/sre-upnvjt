@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Trophy, Star, Zap, Flame, Crown, Medal,
@@ -80,6 +81,11 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
   const [period, setPeriod]           = useState("all");
   const [leaderboard, setLeaderboard] = useState(initialLeaderboard ?? []);
   const [isLoading, setIsLoading]     = useState(false);
+  const [mounted, setMounted]         = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // ─── Fetch by period ────────────────────────────────────────────────
   const handlePeriodChange = useCallback(async (newPeriod) => {
@@ -114,7 +120,7 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
 
   // ─── RENDER ──────────────────────────────────────────────────────────
   return (
-    <div className="w-full relative pb-24 select-none space-y-10">
+    <div className="w-full relative pb-36 sm:pb-44 select-none space-y-10">
 
       {/* ── Ambient glows ──────────────────────────────────────────── */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-primary/10 dark:bg-primary/8 rounded-[100%] blur-[120px] pointer-events-none -z-10" />
@@ -296,12 +302,19 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
       <div className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-3xl overflow-hidden shadow-xl dark:shadow-2xl">
 
         {/* Table header */}
-        <div className="grid grid-cols-[60px_1fr_auto_160px] gap-4 px-6 py-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/[0.015]">
-          {["Rank", "Member", "Level", "XP Progress"].map((h) => (
-            <span key={h} className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-white/30">
-              {h}
-            </span>
-          ))}
+        <div className="grid grid-cols-[45px_1fr_100px] md:grid-cols-[60px_1fr_auto_160px] gap-2 md:gap-4 px-4 md:px-6 py-3.5 md:py-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/[0.015]">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-white/30">
+            Rank
+          </span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-white/30">
+            Member
+          </span>
+          <span className="hidden md:inline text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-white/30">
+            Level
+          </span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-white/30 text-right md:text-left">
+            XP Progress
+          </span>
         </div>
 
         {/* Rows */}
@@ -326,7 +339,7 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: Math.min(i * 0.04, 0.8), duration: 0.35 }}
                 className={[
-                  "grid grid-cols-[60px_1fr_auto_160px] gap-4 items-center px-6 py-4 transition-all duration-300",
+                  "grid grid-cols-[45px_1fr_100px] md:grid-cols-[60px_1fr_auto_160px] gap-2 md:gap-4 items-center px-4 md:px-6 py-3.5 md:py-4 transition-all duration-300",
                   "hover:bg-slate-50 dark:hover:bg-white/[0.025]",
                   isMe
                     ? "bg-emerald-500/8 dark:bg-primary/8 border-l-2 border-primary"
@@ -334,42 +347,50 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
                 ].join(" ")}
               >
                 {/* Rank */}
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1">
                   {isTop3 ? (
                     <div className="flex items-center gap-1">
-                      <Medal className={`w-4 h-4 flex-shrink-0 ${item.rank === 1 ? "text-amber-500" : item.rank === 2 ? "text-slate-400" : "text-orange-500"} fill-current`} />
-                      <span className={`text-sm font-black ${item.rank === 1 ? "text-amber-500 dark:text-amber-400" : item.rank === 2 ? "text-slate-400 dark:text-slate-300" : "text-orange-500 dark:text-amber-600"}`}>
+                      <Medal className={`w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 ${item.rank === 1 ? "text-amber-500" : item.rank === 2 ? "text-slate-400" : "text-orange-500"} fill-current`} />
+                      <span className={`text-xs sm:text-sm font-black ${item.rank === 1 ? "text-amber-500 dark:text-amber-400" : item.rank === 2 ? "text-slate-400 dark:text-slate-300" : "text-orange-500 dark:text-amber-600"}`}>
                         #{item.rank}
                       </span>
                     </div>
                   ) : (
-                    <span className="text-sm font-black text-slate-400 dark:text-white/30">#{item.rank}</span>
+                    <span className="text-xs sm:text-sm font-black text-slate-400 dark:text-white/30">#{item.rank}</span>
                   )}
-                  {isMe && <Flame className="w-3.5 h-3.5 text-primary animate-pulse" />}
+                  {isMe && <Flame className="w-3 h-3 text-primary animate-pulse shrink-0 hidden sm:inline" />}
                 </div>
 
                 {/* Member */}
-                <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                   <div className="relative flex-shrink-0">
                     <Avatar
                       name={item.name}
                       url={item.profilePictureUrl}
-                      size="w-9 h-9"
+                      size="w-8 h-8 sm:w-9 sm:h-9"
                       borderCls={isMe ? "border-primary/40" : "border-slate-200 dark:border-white/10"}
-                      textSize="text-sm"
+                      textSize="text-xs sm:text-sm"
                     />
-                    {isMe && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-primary border-2 border-white dark:border-[#08120e]" />}
+                    {isMe && <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-primary border-2 border-white dark:border-[#08120e]" />}
                   </div>
                   <div className="min-w-0">
-                    <p className={`text-sm font-black truncate ${isMe ? "text-primary" : "text-slate-800 dark:text-white"}`}>
+                    <p className={`text-xs sm:text-sm font-black truncate ${isMe ? "text-primary" : "text-slate-800 dark:text-white"}`}>
                       {item.name} {isMe && <span className="text-[9px] bg-primary/15 text-primary px-1.5 py-0.5 rounded-full ml-1 font-bold">Kamu</span>}
                     </p>
-                    <p className="text-[10px] text-slate-400 dark:text-white/30">{item.divisionName ?? item.npm ?? "Member"}</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <p className="text-[10px] text-slate-400 dark:text-white/30 truncate">{item.divisionName ?? item.npm ?? "Member"}</p>
+                      {/* Level badge icon for mobile */}
+                      <span className="md:hidden shrink-0">
+                        <LevelBadge xp={item.xp} size="xs" showLabel={false} />
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                {/* Level Badge */}
-                <LevelBadge xp={item.xp} size="sm" showLabel animated={false} />
+                {/* Level Badge (Desktop Only) */}
+                <div className="hidden md:block">
+                  <LevelBadge xp={item.xp} size="sm" showLabel animated={false} />
+                </div>
 
                 {/* XP Bar */}
                 <div className="space-y-1.5">
@@ -395,65 +416,69 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
         </div>
       </div>
 
-      {/* Floating My Rank Widget */}
-      <AnimatePresence>
-        {currentUser && (
-          <motion.div
-            initial={{ opacity: 0, y: 60, scale: 0.92 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ type: "spring", bounce: 0.45, delay: 0.6 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-2xl z-50 pointer-events-none"
-          >
-            <div className="relative group pointer-events-auto">
-              {/* Pulsing border glow */}
-              <div className="absolute -inset-1 rounded-[28px] bg-gradient-to-r from-primary via-emerald-400 to-teal-500 opacity-25 group-hover:opacity-45 blur-md transition-opacity duration-500 animate-[pulse_3s_ease-in-out_infinite]" />
+      {/* Floating My Rank Widget (Portal to document.body for fixed screen position) */}
+      {mounted && typeof document !== "undefined" && createPortal(
+        <AnimatePresence>
+          {currentUser && (
+            <motion.div
+              initial={{ opacity: 0, y: 60, scale: 0.92 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 60, scale: 0.92 }}
+              transition={{ type: "spring", bounce: 0.45, delay: 0.4 }}
+              className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-2xl z-[9999] pointer-events-none"
+            >
+              <div className="relative group pointer-events-auto">
+                {/* Pulsing border glow */}
+                <div className="absolute -inset-1 rounded-[28px] bg-gradient-to-r from-primary via-emerald-400 to-teal-500 opacity-25 group-hover:opacity-45 blur-md transition-opacity duration-500 animate-[pulse_3s_ease-in-out_infinite]" />
 
-              <div className="relative bg-white/96 dark:bg-[#07130e]/96 backdrop-blur-xl border border-slate-200 dark:border-white/10 px-5 py-4 rounded-3xl shadow-[0_20px_50px_-10px_rgba(16,185,129,0.35)] flex items-center justify-between gap-4 hover:scale-[1.015] transition-transform duration-300">
+                <div className="relative bg-white/96 dark:bg-[#07130e]/96 backdrop-blur-xl border border-slate-200 dark:border-white/10 px-4 sm:px-6 py-3.5 sm:py-4 rounded-3xl shadow-[0_20px_50px_-10px_rgba(16,185,129,0.35)] flex items-center justify-between gap-3 sm:gap-4 hover:scale-[1.015] transition-transform duration-300">
 
-                {/* Left: avatar + info */}
-                <div className="flex items-center gap-3.5">
-                  <div className="relative">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-emerald-500/10 border border-primary/30 flex items-center justify-center">
-                      <Flame className="w-6 h-6 text-primary fill-primary/20 animate-pulse" />
+                  {/* Left: avatar + info */}
+                  <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
+                    <div className="relative shrink-0">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-emerald-500/10 border border-primary/30 flex items-center justify-center">
+                        <Flame className="w-5 h-5 sm:w-6 sm:h-6 text-primary fill-primary/20 animate-pulse" />
+                      </div>
+                      <div className="absolute -top-2 -right-2 sm:-top-2.5 sm:-right-2.5 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-amber-400 text-amber-900 border-2 border-white dark:border-[#07130e] flex items-center justify-center font-black text-[8px] sm:text-[9px] shadow-[0_0_8px_rgba(251,191,36,0.6)]">
+                        #{currentUser.rank}
+                      </div>
                     </div>
-                    <div className="absolute -top-2.5 -right-2.5 w-6 h-6 rounded-full bg-amber-400 text-amber-900 border-2 border-white dark:border-[#07130e] flex items-center justify-center font-black text-[9px] shadow-[0_0_8px_rgba(251,191,36,0.6)]">
-                      #{currentUser.rank}
+                    <div className="min-w-0">
+                      <p className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-white/40">Posisiku</p>
+                      <p className="text-xs sm:text-sm font-black text-slate-900 dark:text-white truncate max-w-[120px] sm:max-w-[200px]">{currentUser.name}</p>
+                      <LevelBadge xp={currentUser.xp} size="sm" className="mt-0.5 sm:mt-1" />
                     </div>
                   </div>
-                  <div>
-                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-white/40">Posisiku</p>
-                    <p className="text-sm font-black text-slate-900 dark:text-white">{currentUser.name}</p>
-                    <LevelBadge xp={currentUser.xp} size="sm" className="mt-1" />
-                  </div>
+
+                  {/* Right: XP to next rank */}
+                  {xpToNextRank > 0 ? (
+                    <div className="flex flex-col items-end gap-1 sm:gap-1.5 shrink-0 max-w-[150px] sm:max-w-[220px]">
+                      <div className="flex items-center gap-1 text-[9px] sm:text-[10px] font-black text-amber-600 dark:text-amber-400 text-right leading-tight">
+                        <ArrowUp className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+                        <span>Butuh {xpToNextRank.toLocaleString()} XP untuk naik rank</span>
+                      </div>
+                      <div className="w-full h-1.5 sm:h-2 bg-slate-100 dark:bg-white/8 rounded-full overflow-hidden">
+                        <motion.div
+                          className="h-full bg-gradient-to-r from-amber-400 to-orange-400 rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(75, (currentUser.xp / (currentUser.xp + xpToNextRank)) * 100)}%` }}
+                          transition={{ duration: 1, delay: 0.8 }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl bg-amber-500/10 border border-amber-500/25 shrink-0">
+                      <Crown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 fill-amber-500/50 animate-bounce" />
+                      <span className="text-[11px] sm:text-xs font-black text-amber-600 dark:text-amber-400">Peringkat #1!</span>
+                    </div>
+                  )}
                 </div>
-
-                {/* Right: XP to next rank */}
-                {xpToNextRank > 0 ? (
-                  <div className="flex flex-col items-end gap-1.5 flex-1 max-w-[220px]">
-                    <div className="flex items-center gap-1 text-[10px] font-black text-amber-600 dark:text-amber-400">
-                      <ArrowUp className="w-3.5 h-3.5" />
-                      Butuh {xpToNextRank.toLocaleString()} XP untuk naik rank
-                    </div>
-                    <div className="w-full h-2 bg-slate-100 dark:bg-white/8 rounded-full overflow-hidden">
-                      <motion.div
-                        className="h-full bg-gradient-to-r from-amber-400 to-orange-400 rounded-full"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${Math.min(75, (currentUser.xp / (currentUser.xp + xpToNextRank)) * 100)}%` }}
-                        transition={{ duration: 1, delay: 0.8 }}
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-amber-500/10 border border-amber-500/25">
-                    <Crown className="w-4 h-4 text-amber-500 fill-amber-500/50 animate-bounce" />
-                    <span className="text-xs font-black text-amber-600 dark:text-amber-400">Peringkat #1!</span>
-                  </div>
-                )}
               </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
       {/* Keyframe untuk sweep light di podium */}
       <style dangerouslySetInnerHTML={{ __html: `

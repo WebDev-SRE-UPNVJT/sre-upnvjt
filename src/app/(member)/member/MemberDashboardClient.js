@@ -10,6 +10,7 @@ import {
   ArrowRight,
   Star,
   BookOpen,
+  Presentation,
   Clock,
   Zap,
   Award,
@@ -74,6 +75,7 @@ export default function MemberDashboardClient({
   const levelData = getUserLevelData(profile?.xp ?? 0);
   const xp = profile?.xp ?? 0;
   const firstName = user?.name?.split(" ")[0] ?? "Member";
+  const fullName = user?.name ?? "Member";
 
   // Status per task
   const getTaskStatus = (taskId) => {
@@ -135,7 +137,8 @@ export default function MemberDashboardClient({
             <h1 className="text-4xl md:text-5xl font-display font-black tracking-tighter text-slate-900 dark:text-white leading-none">
               {timeGreeting},{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400 dark:to-emerald-300">
-                {firstName}!
+                <span className="inline md:hidden">{firstName}!</span>
+                <span className="hidden md:inline">{fullName}!</span>
               </span>
             </h1>
             <p className="text-slate-500 dark:text-white/50 text-sm font-medium mt-3 max-w-lg leading-relaxed">
@@ -270,51 +273,49 @@ export default function MemberDashboardClient({
         />
       </div>
 
-      {/* Active Quest */}
+      {/* Active Quest Banner */}
       {latestPpt && (
         <motion.div
           {...fadeUp(0.35)}
-          className="relative rounded-[2rem] p-[1.5px] overflow-hidden group shadow-[0_20px_60px_rgba(16,185,129,0.12)]"
+          className="relative rounded-[2rem] p-[1.5px] overflow-hidden group shadow-[0_20px_60px_rgba(16,185,129,0.18)]"
         >
           {/* Animated gradient border */}
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 bg-[length:200%_auto] animate-[bgSlide_4s_linear_infinite] opacity-70" />
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 bg-[length:200%_auto] animate-[bgSlide_4s_linear_infinite] opacity-80" />
 
-          <div className="relative bg-[#050e0a]/96 dark:bg-[#050e0a]/98 backdrop-blur-xl rounded-[2rem] p-7 md:p-9 flex flex-col md:flex-row justify-between items-center gap-8">
+          <div className="relative bg-gradient-to-br from-[#06241b] via-[#083024] to-[#041a13] dark:from-[#051c15] dark:via-[#07261d] dark:to-[#03140e] backdrop-blur-2xl rounded-[2rem] p-7 md:p-9 flex flex-col md:flex-row justify-between items-center gap-8 border border-emerald-500/30">
             {/* Ambient glows */}
-            <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/15 rounded-full blur-[100px] pointer-events-none group-hover:scale-125 transition-transform duration-1000" />
-            <div className="absolute bottom-0 left-0 w-60 h-60 bg-teal-500/15 rounded-full blur-[100px] pointer-events-none group-hover:scale-125 transition-transform duration-1000" />
+            <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-400/15 rounded-full blur-[110px] pointer-events-none group-hover:scale-125 transition-transform duration-1000" />
+            <div className="absolute bottom-0 left-0 w-72 h-72 bg-teal-400/15 rounded-full blur-[110px] pointer-events-none group-hover:scale-125 transition-transform duration-1000" />
 
             <div className="flex-1 relative z-10">
-              <div className="flex items-center gap-2.5 mb-4">
-                <span className="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
-                  <Activity className="w-3 h-3" /> Quest Aktif
-                </span>
-                <span className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
-                  <Zap className="w-3 h-3 fill-current" /> +10 XP
+              <div className="flex flex-wrap items-center gap-2.5 mb-4">
+                <span className="px-3.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-[0_0_15px_rgba(16,185,129,0.25)] backdrop-blur-md">
+                  <Activity className="w-3.5 h-3.5 text-emerald-400" /> Materi Terbaru
                 </span>
               </div>
 
-              <h2 className="text-2xl md:text-4xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 tracking-tight line-clamp-2">
+              <h2 className="text-2xl md:text-4xl font-display font-black text-white tracking-tight leading-snug drop-shadow-md line-clamp-2">
                 {latestPpt.title}
               </h2>
-              <p className="text-white/45 text-sm mt-3 max-w-xl leading-relaxed line-clamp-2">
+              <p className="text-white/70 text-xs sm:text-sm font-medium mt-3 max-w-xl leading-relaxed line-clamp-2">
                 {latestPpt.description ??
                   "Modul pembelajaran resmi SRE UPN Veteran Jawa Timur."}
               </p>
 
               {/* Progress bar materi */}
               <div className="mt-6 max-w-md">
-                <div className="flex justify-between items-center mb-1.5">
-                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-[10px] font-bold text-emerald-300/80 uppercase tracking-widest flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                     Progress Materi
                   </span>
-                  <span className="text-xs font-black text-emerald-400">
+                  <span className="text-xs font-black text-emerald-300 font-mono">
                     {pptProgress}%
                   </span>
                 </div>
-                <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden border border-white/5">
+                <div className="w-full h-2.5 bg-black/40 rounded-full overflow-hidden p-0.5 border border-white/10 relative">
                   <motion.div
-                    className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full"
+                    className="h-full bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 rounded-full shadow-[0_0_12px_rgba(52,211,153,0.6)]"
                     initial={{ width: 0 }}
                     animate={{ width: `${pptProgress}%` }}
                     transition={{
@@ -329,34 +330,36 @@ export default function MemberDashboardClient({
               <div className="mt-7">
                 <Link
                   href="/member/materi"
-                  className="relative inline-flex items-center gap-3 bg-emerald-500 text-[#050e0a] font-black px-8 py-4 rounded-2xl text-sm tracking-widest uppercase overflow-hidden transition-transform active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_35px_rgba(16,185,129,0.65)] group/btn"
+                  className="relative inline-flex items-center gap-3 bg-gradient-to-r from-emerald-400 to-teal-300 hover:from-emerald-300 hover:to-teal-200 text-[#041a13] font-black px-8 py-3.5 rounded-2xl text-xs tracking-widest uppercase overflow-hidden transition-all duration-300 active:scale-95 shadow-[0_0_25px_rgba(16,185,129,0.5)] hover:shadow-[0_0_40px_rgba(16,185,129,0.75)] hover:scale-[1.02] group/btn"
                 >
-                  <div className="absolute inset-0 bg-white/15 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300" />
-                  <Play className="w-5 h-5 fill-current relative z-10" />
-                  <span className="relative z-10">Mulai Belajar</span>
+                  <Play className="w-4 h-4 fill-current relative z-10" />
+                  <span className="relative z-10">
+                    {pptProgress > 0 ? "Lanjutkan Belajar" : "Mulai Belajar"}
+                  </span>
                 </Link>
               </div>
             </div>
 
             {/* Thumbnail */}
-            <div className="w-full md:w-72 aspect-[4/3] rounded-2xl bg-black/40 border-2 border-white/10 group-hover:border-emerald-500/40 overflow-hidden relative shadow-[0_0_30px_rgba(16,185,129,0.1)] transition-colors duration-500 z-10 flex-shrink-0">
+            <div className="w-full md:w-72 aspect-[16/10] sm:aspect-[4/3] rounded-2xl bg-black/60 border-2 border-emerald-400/30 group-hover:border-emerald-400/60 overflow-hidden relative shadow-[0_0_30px_rgba(16,185,129,0.2)] transition-all duration-500 z-10 flex-shrink-0">
               {latestPpt.coverImageUrl ? (
                 <img
                   src={latestPpt.coverImageUrl}
                   alt=""
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80 group-hover:opacity-100"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90 group-hover:opacity-100"
                 />
               ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center text-emerald-500/40">
+                <div className="w-full h-full flex flex-col items-center justify-center text-emerald-400/50 bg-gradient-to-br from-emerald-950 to-slate-950">
                   <BookOpen className="w-10 h-10 mb-2 animate-pulse" />
                   <span className="text-xs font-black tracking-widest uppercase">
                     Materi
                   </span>
                 </div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#050e0a] via-[#050e0a]/20 to-transparent opacity-80" />
-              <div className="absolute bottom-4 left-4">
-                <span className="px-2.5 py-1 bg-white/10 border border-white/10 rounded-lg text-[10px] font-black text-white/80 backdrop-blur-md">
+              <div className="absolute inset-0 bg-gradient-to-t from-[#041a13] via-transparent to-transparent opacity-80" />
+              <div className="absolute bottom-3 left-3">
+                <span className="px-3 py-1 bg-emerald-950/80 border border-emerald-400/30 rounded-lg text-[10px] font-black text-emerald-300 uppercase tracking-widest backdrop-blur-md shadow-md flex items-center gap-1.5">
+                  <BookOpen className="w-3 h-3 text-emerald-400" />
                   {latestPpt.slides?.length ?? "?"} Slide
                 </span>
               </div>
@@ -545,65 +548,79 @@ export default function MemberDashboardClient({
       {/* Quick Links */}
       <motion.div {...fadeUp(0.5)}>
         <SectionHeader icon={Activity} title="Menu Cepat" className="mb-4" />
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-4">
           {[
             {
               href: "/member/leaderboard",
               icon: Trophy,
               label: "Leaderboard",
-              color: "text-amber-500",
-              bg: "bg-amber-500/10",
-              border: "border-amber-500/20",
+              color: "text-amber-500 dark:text-amber-400",
+              bg: "bg-amber-500/10 dark:bg-amber-500/15",
+              border: "border-amber-500/25",
+              hoverGlow: "group-hover:shadow-[0_0_20px_rgba(245,158,11,0.2)]",
             },
             {
               href: "/member/tugas",
               icon: FolderKanban,
               label: "Tugas",
-              color: "text-blue-500",
-              bg: "bg-blue-500/10",
-              border: "border-blue-500/20",
+              color: "text-blue-500 dark:text-blue-400",
+              bg: "bg-blue-500/10 dark:bg-blue-500/15",
+              border: "border-blue-500/25",
+              hoverGlow: "group-hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]",
             },
             {
               href: "/member/absensi",
               icon: ClipboardCheck,
               label: "Absensi",
-              color: "text-emerald-500",
-              bg: "bg-emerald-500/10",
-              border: "border-emerald-500/20",
+              color: "text-emerald-500 dark:text-emerald-400",
+              bg: "bg-emerald-500/10 dark:bg-emerald-500/15",
+              border: "border-emerald-500/25",
+              hoverGlow: "group-hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]",
+            },
+            {
+              href: "/member/materi",
+              icon: Presentation,
+              label: "Materi",
+              color: "text-teal-500 dark:text-teal-400",
+              bg: "bg-teal-500/10 dark:bg-teal-500/15",
+              border: "border-teal-500/25",
+              hoverGlow: "group-hover:shadow-[0_0_20px_rgba(20,184,166,0.2)]",
             },
             {
               href: "/member/dokumen",
               icon: BookOpen,
               label: "Dokumen",
-              color: "text-purple-500",
-              bg: "bg-purple-500/10",
-              border: "border-purple-500/20",
+              color: "text-purple-500 dark:text-purple-400",
+              bg: "bg-purple-500/10 dark:bg-purple-500/15",
+              border: "border-purple-500/25",
+              hoverGlow: "group-hover:shadow-[0_0_20px_rgba(168,85,247,0.2)]",
             },
             {
               href: "/member/achievement",
               icon: Award,
               label: "Achievement",
-              color: "text-pink-500",
-              bg: "bg-pink-500/10",
-              border: "border-pink-500/20",
+              color: "text-pink-500 dark:text-pink-400",
+              bg: "bg-pink-500/10 dark:bg-pink-500/15",
+              border: "border-pink-500/25",
+              hoverGlow: "group-hover:shadow-[0_0_20px_rgba(236,72,153,0.2)]",
             },
           ].map((item, i) => (
             <motion.div
               key={item.href}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.55 + i * 0.06 }}
+              transition={{ delay: 0.55 + i * 0.04 }}
             >
               <Link
                 href={item.href}
-                className={`group flex flex-col items-center gap-2.5 p-5 rounded-2xl bg-white dark:bg-[#08120e] border ${item.border} hover:border-opacity-60 dark:border-white/5 dark:hover:border-white/10 shadow-sm hover:shadow-md dark:shadow-none transition-all duration-300 hover:scale-[1.03]`}
+                className={`group flex flex-col items-center justify-center gap-2 p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white/90 dark:bg-[#07130e] border ${item.border} hover:border-emerald-500/40 dark:border-white/10 dark:hover:border-emerald-400/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${item.hoverGlow}`}
               >
                 <div
-                  className={`p-3 rounded-xl ${item.bg} ${item.border} border ${item.color} group-hover:scale-110 transition-transform`}
+                  className={`p-2.5 sm:p-3 rounded-xl sm:rounded-2xl ${item.bg} ${item.border} border ${item.color} group-hover:scale-110 transition-transform duration-300`}
                 >
-                  <item.icon className="w-5 h-5" />
+                  <item.icon className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <span className="text-xs font-black text-slate-700 dark:text-white/70">
+                <span className="text-[11px] sm:text-xs font-black text-slate-800 dark:text-white text-center leading-tight truncate w-full">
                   {item.label}
                 </span>
               </Link>

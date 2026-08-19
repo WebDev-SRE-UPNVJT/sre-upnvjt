@@ -254,11 +254,11 @@ export default function Header() {
             {/* Menu Panel – Fullscreen backdrop blur overlay */}
             <motion.div
               key="panel"
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.98 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed inset-0 z-50 md:hidden h-[100dvh] flex flex-col justify-between px-7 pt-20 pb-6 overflow-y-auto bg-black/40 backdrop-blur-xl text-white transition-colors duration-500"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="fixed inset-0 z-50 md:hidden h-[100dvh] flex flex-col justify-between px-7 pt-20 pb-6 overflow-y-auto bg-black/50 backdrop-blur-xl text-white transition-colors duration-500"
             >
               {/* Glowing Background Ambient Orbs */}
               <div
@@ -276,12 +276,37 @@ export default function Header() {
                 }`}
               />
 
-              {/* Main Content Container */}
-              <div className="my-auto flex flex-col justify-center w-full px-2 relative z-10 py-2">
+              {/* Main Content Container with Kinetic Staggered Entrance */}
+              <motion.div
+                initial="hidden"
+                animate="show"
+                exit="hidden"
+                variants={{
+                  hidden: { opacity: 0 },
+                  show: {
+                    opacity: 1,
+                    transition: {
+                      staggerChildren: 0.07,
+                      delayChildren: 0.05,
+                    },
+                  },
+                }}
+                className="my-auto flex flex-col justify-center w-full px-2 relative z-10 py-2"
+              >
                 <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1, duration: 0.4 }}
+                  variants={{
+                    hidden: { opacity: 0, y: -14, scale: 0.96 },
+                    show: {
+                      opacity: 1,
+                      y: 0,
+                      scale: 1,
+                      transition: {
+                        type: "spring",
+                        stiffness: 420,
+                        damping: 24,
+                      },
+                    },
+                  }}
                   className={`flex items-center justify-between mb-4 sm:mb-6 pb-2 border-b transition-colors duration-500 ${
                     mounted && theme === "light"
                       ? "border-white/20"
@@ -308,7 +333,7 @@ export default function Header() {
                   </span>
                 </motion.div>
 
-                {/* Primary Links */}
+                {/* Primary Links with Staggered Kinetic Spring Step */}
                 <nav className="flex flex-col gap-1.5">
                   {navItems.map((item, i) => {
                     const isActive =
@@ -318,12 +343,25 @@ export default function Header() {
                     return (
                       <Link key={item.name} href={item.path} onClick={close}>
                         <motion.div
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{
-                            delay: 0.12 + i * 0.08,
-                            duration: 0.45,
-                            ease: [0.16, 1, 0.3, 1],
+                          variants={{
+                            hidden: {
+                              opacity: 0,
+                              x: -24,
+                              y: 14,
+                              scale: 0.94,
+                            },
+                            show: {
+                              opacity: 1,
+                              x: 0,
+                              y: 0,
+                              scale: 1,
+                              transition: {
+                                type: "spring",
+                                stiffness: 420,
+                                damping: 24,
+                                mass: 0.75,
+                              },
+                            },
                           }}
                           className={`group flex items-center justify-between py-1.5 transition-all cursor-pointer ${
                             isActive
@@ -373,12 +411,19 @@ export default function Header() {
 
                 {/* Actions Row: Login CTA + Mobile Language Toggle */}
                 <motion.div
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    delay: 0.15 + navItems.length * 0.08,
-                    duration: 0.45,
-                    ease: [0.16, 1, 0.3, 1],
+                  variants={{
+                    hidden: { opacity: 0, y: 22, scale: 0.93 },
+                    show: {
+                      opacity: 1,
+                      y: 0,
+                      scale: 1,
+                      transition: {
+                        type: "spring",
+                        stiffness: 380,
+                        damping: 24,
+                        mass: 0.8,
+                      },
+                    },
                   }}
                   className="mt-6 flex items-center gap-3"
                 >
@@ -423,13 +468,13 @@ export default function Header() {
                     </span>
                   </button>
                 </motion.div>
-              </div>
+              </motion.div>
 
               {/* Footer Section */}
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.4 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.45, duration: 0.35 }}
                 className={`mt-auto shrink-0 flex justify-between items-end text-[11px] sm:text-[12px] px-2 relative z-10 pt-4 border-t transition-colors duration-500 ${
                   mounted && theme === "light"
                     ? "border-white/20 text-white/70"

@@ -80,11 +80,12 @@ export default function LevelBadge({
   const Icon = config.icon;
 
   const sizeMap = {
+    xs: { wrap: "px-1.5 py-0.5 gap-1", icon: "w-2.5 h-2.5", text: "text-[8px]" },
     sm: { wrap: "px-2 py-0.5 gap-1", icon: "w-3 h-3", text: "text-[9px]" },
     md: { wrap: "px-3 py-1.5 gap-1.5", icon: "w-3.5 h-3.5", text: "text-[10px]" },
     lg: { wrap: "px-4 py-2 gap-2", icon: "w-4 h-4", text: "text-xs" },
   };
-  const sz = sizeMap[size];
+  const sz = sizeMap[size] ?? sizeMap.md;
 
   return (
     <motion.span

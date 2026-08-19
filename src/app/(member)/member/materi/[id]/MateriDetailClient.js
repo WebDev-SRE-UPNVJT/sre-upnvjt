@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -47,7 +48,7 @@ export default function MateriDetailClient({ initialData, r2Url }) {
   const [maxSlideIdx, setMaxSlideIdx] = useState(0);
   const [notesFontSize, setNotesFontSize] = useState('md');
   const [direction, setDirection] = useState(0); // 1 for next, -1 for prev
-  const [timeLeft, setTimeLeft] = useState(10);
+  const [timeLeft, setTimeLeft] = useState(5);
   
   const [isCompleting, setIsCompleting] = useState(false);
   const [xpGained, setXpGained] = useState(null);
@@ -199,7 +200,16 @@ export default function MateriDetailClient({ initialData, r2Url }) {
     }
   }, [maxSlideIdx, slides.length, isCompleting, hasCompleted, moduleData?.id]);
 
-
+  // Lock body scroll when completion modal is open
+  useEffect(() => {
+    if (xpGained && showModal) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+  }, [xpGained, showModal]);
 
   const toggleFullscreen = async () => {
     if (!document.fullscreenElement) {
@@ -274,8 +284,6 @@ export default function MateriDetailClient({ initialData, r2Url }) {
     );
   }
 
-  const currentSlide = slides[currentSlideIdx];
-
   const handleNext = () => {
     if (currentSlideIdx < slides.length - 1 && timeLeft === 0) {
       const nextIdx = currentSlideIdx + 1;
@@ -283,7 +291,7 @@ export default function MateriDetailClient({ initialData, r2Url }) {
       setCurrentSlideIdx(nextIdx);
       if (nextIdx > maxSlideIdx) {
         setMaxSlideIdx(nextIdx);
-        setTimeLeft(10);
+        setTimeLeft(5);
       } else {
         setTimeLeft(0);
       }
@@ -297,13 +305,14 @@ export default function MateriDetailClient({ initialData, r2Url }) {
       setCurrentSlideIdx(prevIdx);
       if (prevIdx > maxSlideIdx) {
         setMaxSlideIdx(prevIdx);
-        setTimeLeft(10);
+        setTimeLeft(5);
       } else {
         setTimeLeft(0);
       }
     }
   };
 
+  const currentSlide = slides[currentSlideIdx];
   const youtubeId = getYoutubeVideoId(currentSlide?.fileUrl);
   const currentImageUrl = cachedImages[currentSlideIdx];
   const downloadUrl = currentSlide?.fileUrl ? `${r2Url.replace(/\/$/, '')}/${currentSlide.fileUrl.replace(/^\//, '')}` : "#";
@@ -339,7 +348,7 @@ export default function MateriDetailClient({ initialData, r2Url }) {
             {/* 2. Presentation Card (order-2 on mobile) */}
             <div 
               ref={presentationRef}
-              className={`order-2 lg:order-none bg-white dark:bg-[#0d131f] border-slate-200 dark:border-white/5 overflow-hidden flex flex-col relative w-full ${isFullscreen ? 'border-0 rounded-none h-screen' : 'border rounded-2xl shadow-sm'}`}
+              className={`order-2 lg:order-none bg-white dark:bg-[#07130e] border-slate-200/80 dark:border-white/10 overflow-hidden flex flex-col relative w-full ${isFullscreen ? 'border-0 rounded-none h-screen' : 'border rounded-2xl shadow-lg dark:shadow-[0_10px_35px_rgba(0,0,0,0.35)]'}`}
             >
               {/* Media Area (strictly 16:9 unless fullscreen) */}
               <div className={`relative bg-slate-100 dark:bg-black/50 w-full flex flex-col items-center justify-center overflow-hidden ${isFullscreen ? 'flex-1' : 'aspect-video'}`}>
@@ -391,7 +400,7 @@ export default function MateriDetailClient({ initialData, r2Url }) {
               </div>
 
               {/* Controls Bar */}
-              <div className="p-4 bg-white dark:bg-[#0d131f] flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="p-4 bg-white dark:bg-[#07130e] flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-100 dark:border-white/10">
                 <div className="flex items-center gap-2">
                   <button 
                     onClick={handlePrev} 
@@ -467,41 +476,41 @@ export default function MateriDetailClient({ initialData, r2Url }) {
 
             {/* 3. Notes Section (order-3 on mobile) */}
             {moduleData?.notes && (
-              <div className="order-3 lg:order-none bg-white dark:bg-[#0d131f] border border-slate-200 dark:border-white/5 rounded-2xl p-6 sm:p-8 shadow-sm w-full">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pb-4 border-b border-slate-100 dark:border-white/5 gap-4">
+              <div className="order-3 lg:order-none bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-2xl p-6 sm:p-8 shadow-lg dark:shadow-[0_10px_35px_rgba(0,0,0,0.35)] w-full">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pb-4 border-b border-slate-100 dark:border-white/10 gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 border border-blue-500/20">
                       <Lightbulb className="w-5 h-5" />
                     </div>
                     <h3 className="text-xl font-bold text-slate-900 dark:text-white">{t('materi.module_notes') || 'Catatan Materi'}</h3>
                   </div>
                   
                   {/* Font Size Toggles */}
-                  <div className="flex items-center bg-slate-100 dark:bg-[#0a0f16] rounded-lg p-1 border border-slate-200 dark:border-white/5 self-start sm:self-auto shrink-0">
+                  <div className="flex items-center bg-slate-100 dark:bg-white/[0.05] rounded-lg p-1 border border-slate-200 dark:border-white/10 self-start sm:self-auto shrink-0">
                     <button 
                       onClick={() => setNotesFontSize('sm')}
-                      className={`w-9 h-9 rounded-md flex items-center justify-center font-bold transition-all ${notesFontSize === 'sm' ? 'bg-white dark:bg-white/10 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
+                      className={`w-9 h-9 rounded-md flex items-center justify-center font-bold transition-all ${notesFontSize === 'sm' ? 'bg-white dark:bg-emerald-500 text-emerald-600 dark:text-slate-950 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-white/60 dark:hover:text-white'}`}
                       title="Teks Kecil"
                     >
                       <span className="text-[11px]">A</span>
                     </button>
                     <button 
                       onClick={() => setNotesFontSize('md')}
-                      className={`w-9 h-9 rounded-md flex items-center justify-center font-bold transition-all ${notesFontSize === 'md' ? 'bg-white dark:bg-white/10 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
+                      className={`w-9 h-9 rounded-md flex items-center justify-center font-bold transition-all ${notesFontSize === 'md' ? 'bg-white dark:bg-emerald-500 text-emerald-600 dark:text-slate-950 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-white/60 dark:hover:text-white'}`}
                       title="Teks Sedang"
                     >
                       <span className="text-[14px]">A</span>
                     </button>
                     <button 
                       onClick={() => setNotesFontSize('lg')}
-                      className={`w-9 h-9 rounded-md flex items-center justify-center font-bold transition-all ${notesFontSize === 'lg' ? 'bg-white dark:bg-white/10 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
+                      className={`w-9 h-9 rounded-md flex items-center justify-center font-bold transition-all ${notesFontSize === 'lg' ? 'bg-white dark:bg-emerald-500 text-emerald-600 dark:text-slate-950 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-white/60 dark:hover:text-white'}`}
                       title="Teks Besar"
                     >
                       <span className="text-[18px]">A</span>
                     </button>
                   </div>
                 </div>
-                <div className="mt-4 bg-slate-50/50 dark:bg-[#0a0f16]/30 rounded-xl p-4 sm:p-6 border border-slate-100 dark:border-white/5">
+                <div className="mt-4 bg-slate-50/80 dark:bg-white/[0.03] rounded-xl p-4 sm:p-6 border border-slate-200/60 dark:border-white/10">
                   <HtmlNotes html={moduleData.notes} fontSizeClass={fontSizeStyles[notesFontSize]} />
                 </div>
               </div>
@@ -512,17 +521,17 @@ export default function MateriDetailClient({ initialData, r2Url }) {
           <div className="contents lg:block lg:col-span-1 lg:space-y-6 lg:sticky lg:top-28">
             
               {/* 1. Module Progress (order-1 on mobile) */}
-            <div className="order-1 lg:order-none bg-white dark:bg-[#0d131f] border border-slate-200 dark:border-white/5 rounded-2xl p-6 shadow-sm w-full">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">{t('materi.module_progress') || 'Progres Modul'}</h3>
-              <div className="flex justify-between text-xs font-semibold mb-2">
-                <span className="text-slate-500 dark:text-slate-400">{t('materi.completion') || 'Penyelesaian'}</span>
-                <span className="text-emerald-600 dark:text-emerald-400">
+            <div className="order-1 lg:order-none bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-lg dark:shadow-[0_10px_35px_rgba(0,0,0,0.35)] w-full">
+              <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4">{t('materi.module_progress') || 'Progres Modul'}</h3>
+              <div className="flex justify-between text-xs font-bold mb-2">
+                <span className="text-slate-500 dark:text-white/60">{t('materi.completion') || 'Penyelesaian'}</span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-mono font-black">
                   {slides?.length > 1 ? Math.round((maxSlideIdx / (slides.length - 1)) * 100) : (maxSlideIdx >= 0 ? 100 : 0)}%
                 </span>
               </div>
-              <div className="w-full h-2 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden mb-4">
+              <div className="w-full h-2.5 bg-slate-100 dark:bg-white/10 rounded-full overflow-hidden mb-4 border border-slate-200/50 dark:border-white/5 p-0.5 relative">
                 <div 
-                  className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                  className="h-full bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full transition-all duration-300 shadow-[0_0_12px_rgba(52,211,153,0.5)]"
                   style={{ width: `${slides?.length > 1 ? (maxSlideIdx / (slides.length - 1)) * 100 : (maxSlideIdx >= 0 ? 100 : 0)}%` }}
                 />
               </div>
@@ -599,93 +608,99 @@ export default function MateriDetailClient({ initialData, r2Url }) {
         </div>
       </div>
 
-      {/* Modal Hadiah XP */}
-      <AnimatePresence>
-        {xpGained && showModal && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-          >
-            <motion.div 
-              initial={{ scale: 0.8, y: 50, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              transition={{ type: "spring", damping: 12, stiffness: 200 }}
-              className="bg-white dark:bg-[#0d131f] border border-emerald-500/40 rounded-[2rem] p-8 max-w-sm w-full shadow-[0_20px_50px_rgba(16,185,129,0.2)] flex flex-col items-center text-center relative overflow-hidden"
-            >
-              {/* Confetti Particles */}
-              <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                {[...Array(20)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 1, x: 0, y: 0, scale: 0 }}
-                    animate={{ 
-                      x: (Math.random() - 0.5) * 400, 
-                      y: (Math.random() - 0.5) * 400, 
-                      scale: Math.random() * 1.5 + 0.5,
-                      opacity: 0,
-                      rotate: Math.random() * 360
-                    }}
-                    transition={{ duration: 1.5, ease: "easeOut", delay: 0.1 }}
-                    className={`absolute left-1/2 top-1/2 w-2 h-2 rounded-sm ${['bg-yellow-400', 'bg-emerald-400', 'bg-teal-400', 'bg-white'][i % 4]}`}
-                  />
-                ))}
-              </div>
-
-              {/* Background Glow */}
-              <div className="absolute -top-20 -left-20 w-48 h-48 bg-emerald-500/30 blur-[60px] rounded-full pointer-events-none" />
-              <div className="absolute -bottom-20 -right-20 w-48 h-48 bg-teal-500/30 blur-[60px] rounded-full pointer-events-none" />
-
+      {/* Modal Hadiah XP Portal */}
+      {typeof document !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {xpGained && showModal && (
               <motion.div 
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: "spring", delay: 0.2, damping: 10 }}
-                className="relative z-10 w-24 h-24 bg-gradient-to-br from-yellow-300 via-amber-400 to-amber-600 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(253,224,71,0.6)] mb-6 border-4 border-white dark:border-[#0d131f] overflow-hidden"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/75 backdrop-blur-md p-4 overflow-y-auto"
+                onClick={(e) => e.target === e.currentTarget && setShowModal(false)}
               >
-                {/* Shine effect across the medal */}
                 <motion.div 
-                  animate={{ x: ['-150%', '250%'] }}
-                  transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut", delay: 1 }}
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent skew-x-12 w-full"
-                />
-                <Award className="w-12 h-12 text-white drop-shadow-md relative z-10" />
+                  initial={{ scale: 0.8, y: 30, opacity: 0 }}
+                  animate={{ scale: 1, y: 0, opacity: 1 }}
+                  exit={{ scale: 0.8, y: 30, opacity: 0 }}
+                  transition={{ type: "spring", damping: 14, stiffness: 220 }}
+                  className="bg-white dark:bg-[#07130e] border border-emerald-500/40 rounded-[2.5rem] p-8 max-w-sm w-full shadow-[0_25px_60px_rgba(0,0,0,0.6)] flex flex-col items-center text-center relative overflow-hidden my-auto"
+                >
+                  {/* Confetti Particles */}
+                  <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                    {[...Array(20)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 1, x: 0, y: 0, scale: 0 }}
+                        animate={{ 
+                          x: (Math.random() - 0.5) * 400, 
+                          y: (Math.random() - 0.5) * 400, 
+                          scale: Math.random() * 1.5 + 0.5,
+                          opacity: 0,
+                          rotate: Math.random() * 360
+                        }}
+                        transition={{ duration: 1.5, ease: "easeOut", delay: 0.1 }}
+                        className={`absolute left-1/2 top-1/2 w-2 h-2 rounded-sm ${['bg-yellow-400', 'bg-emerald-400', 'bg-teal-400', 'bg-white'][i % 4]}`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Background Glow */}
+                  <div className="absolute -top-20 -left-20 w-48 h-48 bg-emerald-500/30 blur-[60px] rounded-full pointer-events-none" />
+                  <div className="absolute -bottom-20 -right-20 w-48 h-48 bg-teal-500/30 blur-[60px] rounded-full pointer-events-none" />
+
+                  <motion.div 
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", delay: 0.2, damping: 10 }}
+                    className="relative z-10 w-24 h-24 bg-gradient-to-br from-yellow-300 via-amber-400 to-amber-600 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(253,224,71,0.6)] mb-6 border-4 border-white dark:border-[#07130e] overflow-hidden"
+                  >
+                    {/* Shine effect across the medal */}
+                    <motion.div 
+                      animate={{ x: ['-150%', '250%'] }}
+                      transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut", delay: 1 }}
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent skew-x-12 w-full"
+                    />
+                    <Award className="w-12 h-12 text-white drop-shadow-md relative z-10" />
+                  </motion.div>
+                  
+                  <motion.h3 
+                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+                    className="text-2xl font-black text-slate-800 dark:text-white mb-2 z-10 tracking-tight"
+                  >
+                    Pencapaian Baru!
+                  </motion.h3>
+                  <motion.p 
+                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
+                    className="text-slate-500 dark:text-slate-400 text-sm mb-6 z-10 leading-relaxed"
+                  >
+                    Hebat! Kamu telah menyelesaikan modul pembelajaran ini dan mendapatkan hadiah.
+                  </motion.p>
+                  
+                  <motion.div 
+                    initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", delay: 0.6 }}
+                    className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-2xl py-3 px-8 mb-8 z-10 shadow-inner relative overflow-hidden group"
+                  >
+                    <div className="absolute inset-0 bg-emerald-400/20 w-0 group-hover:w-full transition-all duration-500 ease-out" />
+                    <span className="relative text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300 drop-shadow-sm">
+                      +{xpGained} XP
+                    </span>
+                  </motion.div>
+                  
+                  <motion.button 
+                    initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.7 }}
+                    onClick={() => setShowModal(false)}
+                    className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-black uppercase tracking-wider text-sm rounded-xl transition-all z-10 shadow-[0_10px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_15px_30px_rgba(16,185,129,0.4)] active:scale-95"
+                  >
+                    Lanjutkan Misi
+                  </motion.button>
+                </motion.div>
               </motion.div>
-              
-              <motion.h3 
-                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-                className="text-2xl font-black text-slate-800 dark:text-white mb-2 z-10 tracking-tight"
-              >
-                Pencapaian Baru!
-              </motion.h3>
-              <motion.p 
-                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-                className="text-slate-500 dark:text-slate-400 text-sm mb-6 z-10 leading-relaxed"
-              >
-                Hebat! Kamu telah menyelesaikan modul pembelajaran ini dan mendapatkan hadiah.
-              </motion.p>
-              
-              <motion.div 
-                initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", delay: 0.6 }}
-                className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-2xl py-3 px-8 mb-8 z-10 shadow-inner relative overflow-hidden group"
-              >
-                <div className="absolute inset-0 bg-emerald-400/20 w-0 group-hover:w-full transition-all duration-500 ease-out" />
-                <span className="relative text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300 drop-shadow-sm">
-                  +{xpGained} XP
-                </span>
-              </motion.div>
-              
-              <motion.button 
-                initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.7 }}
-                onClick={() => setShowModal(false)}
-                className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-black uppercase tracking-wider text-sm rounded-xl transition-all z-10 shadow-[0_10px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_15px_30px_rgba(16,185,129,0.4)] active:scale-95"
-              >
-                Lanjutkan Misi
-              </motion.button>
-            </motion.div>
-          </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>
     </div>
   );
 }

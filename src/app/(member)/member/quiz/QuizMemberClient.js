@@ -70,14 +70,15 @@ export default function QuizMemberClient({ initialQuizzes, initialSubmissions })
       </div>
 
       {/* Header */}
-      <div className="mb-12 relative z-10 text-center">
-        <span className="inline-block px-4 py-1.5 rounded-full bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-primary/30 text-xs font-black text-primary tracking-widest uppercase mb-4 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-          RE-Solve
+      <div className="mb-10 relative z-10">
+        <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-black text-emerald-600 dark:text-emerald-400 tracking-widest uppercase shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+          <Gamepad2 className="w-3.5 h-3.5" /> RE-SOLVE
         </span>
-        <h1 className="text-4xl md:text-6xl font-display font-black tracking-tighter text-slate-900 dark:text-white flex flex-col md:flex-row items-center justify-center gap-3 md:gap-4 mb-4 drop-shadow-sm text-center">
+        <h1 className="text-4xl md:text-5xl font-display font-black tracking-tighter text-slate-900 dark:text-white flex items-center gap-3 mt-4 leading-none">
+          <Target className="w-8 h-8 md:w-9 md:h-9 text-emerald-500 animate-pulse" />
           <span>{t("member_quiz.title")}</span>
         </h1>
-        <p className="text-slate-600 dark:text-white/60 max-w-2xl mx-auto font-medium text-sm md:text-base leading-relaxed">
+        <p className="text-slate-600 dark:text-white/50 max-w-xl font-medium text-sm md:text-base mt-3 leading-relaxed">
           {t("member_quiz.subtitle")}
         </p>
       </div>

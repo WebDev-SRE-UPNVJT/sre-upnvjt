@@ -129,7 +129,7 @@ export default function MemberNavbarClient({ user, profile }) {
                       : "text-slate-500 dark:text-white/60 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 border-transparent"
                   }`}
                 >
-                  Academic
+                  Akademik
                   <ChevronDown
                     className={`w-4 h-4 transition-transform duration-300 ${academicDropdownOpen ? "rotate-180" : ""}`}
                   />
@@ -174,7 +174,7 @@ export default function MemberNavbarClient({ user, profile }) {
                         }`}
                       >
                         <FolderKanban className="w-4 h-4" />
-                        Modul PPT
+                        Materi
                       </Link>
                     </motion.div>
                   )}
@@ -445,7 +445,7 @@ export default function MemberNavbarClient({ user, profile }) {
                   <FolderKanban
                     className={`w-5 h-5 ${pathname.startsWith("/member/materi") ? "text-primary" : "text-slate-400 dark:text-white/40"}`}
                   />
-                  Modul PPT
+                  Materi
                 </Link>
 
                 <Link
