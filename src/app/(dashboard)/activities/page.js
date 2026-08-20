@@ -5,6 +5,8 @@ import { hasAccess } from "@/lib/permissions";
 import { getActivities } from "@/app/actions/activityActions";
 import ActivitiesClient from "./ActivitiesClient";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Activities | SRE Portal",
   description: "Manage organization activities.",

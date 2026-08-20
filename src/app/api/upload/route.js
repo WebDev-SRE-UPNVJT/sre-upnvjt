@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
-import sharp from "sharp";
+import { authOptions } from "@/lib/authOptions";
 import path from 'path';
 
 const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || "https://cdn.webly.biz.id/";
@@ -36,6 +35,7 @@ export async function POST(req) {
     let contentType;
 
     if (isImage) {
+      const sharp = (await import("sharp")).default;
       filename = `${prefix}_${Date.now()}_${randomStr}.webp`;
       processedBuffer = await sharp(buffer).webp({ quality: 80 }).toBuffer();
       contentType = "image/webp";

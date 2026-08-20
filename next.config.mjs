@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactCompiler: true,
-  serverExternalPackages: ["canvas", "pdfjs-dist"],
+  serverExternalPackages: ["sharp", "canvas", "pdfjs-dist", "bcrypt"],
   experimental: {
     serverActions: {
       bodySizeLimit: "10mb",

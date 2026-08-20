@@ -3,15 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { activityService } from "@/lib/services/activityService";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import { hasAccess } from "@/lib/permissions";
-import sharp from "sharp";
 
 const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || "https://cdn.webly.biz.id/";
 
 async function processAndUploadImage(file) {
   if (!file || file.size === 0) return null;
   try {
+    const sharp = (await import("sharp")).default;
     const buffer = Buffer.from(await file.arrayBuffer());
     const filename = `activity/${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
     const processedBuffer = await sharp(buffer).webp({ quality: 80 }).toBuffer();
