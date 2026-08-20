@@ -21,8 +21,53 @@ const outfit = Outfit({
 });
 
 export const metadata = {
-  title: "SRE UPN Veteran Jawa Timur | Accelerating Sustainable Transition",
+  metadataBase: new URL(process.env.NEXTAUTH_URL || "https://www.sreupnjatim.com"),
+  title: {
+    default: "SRE UPN Veteran Jawa Timur | Accelerating Sustainable Transition",
+    template: "%s | SRE UPN Veteran Jawa Timur",
+  },
   description: "Empowering the next generation of renewable energy leaders. Society of Renewable Energy (SRE) UPN Veteran Jawa Timur drives clean energy advocacy, academic research, and community-led green technology projects.",
+  keywords: [
+    "SRE UPN Veteran Jawa Timur",
+    "SRE UPN Jatim",
+    "Society of Renewable Energy",
+    "SRE Indonesia",
+    "Energi Baru Terbarukan",
+    "Renewable Energy Surabaya",
+    "Green Transition",
+    "Clean Energy Transition",
+    "Mahasiswa Teknik Energi",
+  ],
+  authors: [{ name: "SRE UPN Veteran Jawa Timur", url: "https://www.sreupnjatim.com" }],
+  creator: "SRE UPN Veteran Jawa Timur",
+  publisher: "SRE UPN Veteran Jawa Timur",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "SRE UPN Veteran Jawa Timur | Accelerating Sustainable Transition",
+    description: "Empowering the next generation of renewable energy leaders. Society of Renewable Energy (SRE) UPN Veteran Jawa Timur drives clean energy advocacy, academic research, and community-led green technology projects.",
+    url: "https://www.sreupnjatim.com",
+    siteName: "SRE UPN Veteran Jawa Timur",
+    locale: "id_ID",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SRE UPN Veteran Jawa Timur",
+    description: "Empowering the next generation of renewable energy leaders. Society of Renewable Energy (SRE) UPN Veteran Jawa Timur.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default async function RootLayout({ children }) {
