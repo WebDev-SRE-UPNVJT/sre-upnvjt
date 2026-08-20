@@ -282,26 +282,28 @@ export default function ShortlinkClient({ initialLinks = [] }) {
         </div>
       </motion.div>
 
-      {/* KPI Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* KPI Stats Grid - Responsive Mobile & Desktop Layout */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
         {/* Card 1: Total Links */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white/60 dark:bg-[#08120e]/60 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-2xl p-5 shadow-sm flex items-center justify-between"
+          className="col-span-1 bg-white/70 dark:bg-[#08120e]/70 backdrop-blur-xl border border-slate-200/80 dark:border-white/5 rounded-2xl md:rounded-3xl p-4 md:p-5 shadow-sm hover:border-emerald-500/30 transition-all flex flex-col justify-between"
         >
-          <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/40 block mb-1">
-              Total Tautan Aktif
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/40">
+              Total Tautan
             </span>
+            <div className="w-7 h-7 md:w-8 md:h-8 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center justify-center shrink-0">
+              <Globe className="w-3.5 h-3.5 md:w-4 md:h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-1.5">
             <span className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white">
               {links.length}
             </span>
-            <span className="text-xs text-emerald-500 font-bold ml-1.5">Links</span>
-          </div>
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center justify-center shrink-0">
-            <Globe className="w-6 h-6" />
+            <span className="text-[11px] md:text-xs text-emerald-500 font-bold">Links</span>
           </div>
         </motion.div>
 
@@ -310,42 +312,46 @@ export default function ShortlinkClient({ initialLinks = [] }) {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="bg-white/60 dark:bg-[#08120e]/60 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-2xl p-5 shadow-sm flex items-center justify-between"
+          className="col-span-1 bg-white/70 dark:bg-[#08120e]/70 backdrop-blur-xl border border-slate-200/80 dark:border-white/5 rounded-2xl md:rounded-3xl p-4 md:p-5 shadow-sm hover:border-teal-500/30 transition-all flex flex-col justify-between"
         >
-          <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/40 block mb-1">
-              Akumulasi Klik Pengunjung
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/40">
+              Total Klik
             </span>
+            <div className="w-7 h-7 md:w-8 md:h-8 rounded-xl bg-teal-500/10 text-teal-500 border border-teal-500/20 flex items-center justify-center shrink-0">
+              <MousePointerClick className="w-3.5 h-3.5 md:w-4 md:h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-1.5">
             <span className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white">
               {totalClicks.toLocaleString("id-ID")}
             </span>
-            <span className="text-xs text-teal-500 font-bold ml-1.5">Clicks</span>
-          </div>
-          <div className="w-12 h-12 rounded-2xl bg-teal-500/10 text-teal-500 border border-teal-500/20 flex items-center justify-center shrink-0">
-            <MousePointerClick className="w-6 h-6" />
+            <span className="text-[11px] md:text-xs text-teal-500 font-bold">Clicks</span>
           </div>
         </motion.div>
 
-        {/* Card 3: Top Performer */}
+        {/* Card 3: Top Performer (Span 2 cols on mobile, 1 col on desktop) */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white/60 dark:bg-[#08120e]/60 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-2xl p-5 shadow-sm flex items-center justify-between"
+          className="col-span-2 lg:col-span-1 bg-white/70 dark:bg-[#08120e]/70 backdrop-blur-xl border border-slate-200/80 dark:border-white/5 rounded-2xl md:rounded-3xl p-4 md:p-5 shadow-sm hover:border-primary/30 transition-all flex flex-col justify-between"
         >
-          <div className="min-w-0 pr-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/40 block mb-1">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/40">
               Tautan Terpopuler
             </span>
-            <span className="text-lg md:text-xl font-black text-slate-900 dark:text-white truncate block">
+            <div className="w-7 h-7 md:w-8 md:h-8 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0">
+              <TrendingUp className="w-3.5 h-3.5 md:w-4 md:h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline justify-between gap-2 min-w-0">
+            <span className="text-base md:text-xl font-black font-mono text-slate-900 dark:text-white truncate block">
               {topLink ? `/s/${topLink.slug}` : "-"}
             </span>
-            <span className="text-xs text-emerald-500 font-bold">
-              {topLink ? `${topLink.clicks || 0} total klik` : "Belum ada data"}
+            <span className="text-[10px] md:text-xs text-emerald-500 font-bold shrink-0">
+              {topLink ? `${topLink.clicks || 0} klik` : "Belum ada data"}
             </span>
-          </div>
-          <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0">
-            <TrendingUp className="w-6 h-6" />
           </div>
         </motion.div>
       </div>
