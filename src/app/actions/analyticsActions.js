@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { pageView } from "@/db/schema";
-import { count, desc, sql, gte } from "drizzle-orm";
+import { count, desc, sql, gte, lte, and } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 
 // 4 Stat Cards Summary (Aggregated in 1 fast query)
@@ -175,3 +175,156 @@ export const getTopPages = unstable_cache(
   ["analytics-top-pages"],
   { revalidate: 30, tags: ["analytics"] }
 );
+
+// Get complete analytics report dataset for custom date ranges
+export async function getAnalyticsReportData({ startDate, endDate } = {}) {
+  try {
+    const conditions = [];
+
+    if (startDate) {
+      const start = new Date(`${startDate}T00:00:00+07:00`);
+      if (!isNaN(start.getTime())) {
+        conditions.push(gte(pageView.createdAt, start));
+      }
+    }
+    if (endDate) {
+      const end = new Date(`${endDate}T23:59:59.999+07:00`);
+      if (!isNaN(end.getTime())) {
+        conditions.push(lte(pageView.createdAt, end));
+      }
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    // 1. Stats Summary
+    const [statsResult] = await db
+      .select({
+        totalViews: count(),
+        uniqueVisitors: sql`count(distinct ${pageView.visitorId})::int`,
+        loggedInVisitors: sql`count(distinct case when ${pageView.userId} is not null then ${pageView.userId} end)::int`,
+      })
+      .from(pageView)
+      .where(whereClause);
+
+    // Most visited path in range
+    const topPathResult = await db
+      .select({
+        path: pageView.path,
+        visits: count(),
+      })
+      .from(pageView)
+      .where(whereClause)
+      .groupBy(pageView.path)
+      .orderBy(desc(count()))
+      .limit(1);
+
+    // 2. Daily Traffic in range
+    const dayExpr = sql`to_char((${pageView.createdAt} AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Jakarta'), 'YYYY-MM-DD')`;
+    const dailyRows = await db
+      .select({
+        date: sql`${dayExpr}`.as("date"),
+        visits: count(),
+      })
+      .from(pageView)
+      .where(whereClause)
+      .groupBy(dayExpr)
+      .orderBy(dayExpr);
+
+    // Generate consecutive dates if both startDate and endDate provided
+    let dailyTraffic = [];
+    if (startDate && endDate) {
+      const cur = new Date(`${startDate}T00:00:00+07:00`);
+      const stop = new Date(`${endDate}T00:00:00+07:00`);
+      while (cur <= stop) {
+        const isoDate = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(cur);
+        const label = cur.toLocaleDateString("id-ID", { timeZone: "Asia/Jakarta", day: "numeric", month: "short", year: "numeric" });
+        const found = dailyRows.find((r) => r.date === isoDate);
+        dailyTraffic.push({
+          date: label,
+          rawDate: isoDate,
+          visits: found ? Number(found.visits) : 0,
+        });
+        cur.setDate(cur.getDate() + 1);
+      }
+    } else {
+      dailyTraffic = dailyRows.map((r) => ({
+        date: r.date,
+        rawDate: r.date,
+        visits: Number(r.visits),
+      }));
+    }
+
+    // 3. Hourly Traffic in range
+    const hourExpr = sql`EXTRACT(HOUR FROM (${pageView.createdAt} AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Jakarta'))::int`;
+    const hourlyRows = await db
+      .select({
+        hour: sql`${hourExpr}`.as("hour"),
+        visits: count(),
+      })
+      .from(pageView)
+      .where(whereClause)
+      .groupBy(hourExpr)
+      .orderBy(hourExpr);
+
+    const hourlyTraffic = Array.from({ length: 24 }, (_, i) => {
+      const found = hourlyRows.find((r) => Number(r.hour) === i);
+      const hourLabel = `${String(i).padStart(2, "0")}:00`;
+      return { hour: hourLabel, visits: found ? Number(found.visits) : 0 };
+    });
+
+    // 4. Top Pages in range (top 50)
+    const topPagesRows = await db
+      .select({
+        path: pageView.path,
+        visits: count(),
+      })
+      .from(pageView)
+      .where(whereClause)
+      .groupBy(pageView.path)
+      .orderBy(desc(count()))
+      .limit(50);
+
+    const topPages = topPagesRows.map((r) => ({
+      path: r.path,
+      visits: Number(r.visits),
+    }));
+
+    // 5. Device breakdown in range
+    const deviceRows = await db
+      .select({
+        device: pageView.deviceType,
+        visits: count(),
+      })
+      .from(pageView)
+      .where(whereClause)
+      .groupBy(pageView.deviceType)
+      .orderBy(desc(count()));
+
+    const deviceBreakdown = deviceRows.map((r) => ({
+      device: r.device ?? "unknown",
+      visits: Number(r.visits),
+    }));
+
+    return {
+      success: true,
+      data: {
+        stats: {
+          totalViews: Number(statsResult?.totalViews || 0),
+          uniqueVisitors: Number(statsResult?.uniqueVisitors || 0),
+          loggedInVisitors: Number(statsResult?.loggedInVisitors || 0),
+          topPage: topPathResult[0]?.path ?? "-",
+        },
+        dailyTraffic,
+        hourlyTraffic,
+        topPages,
+        deviceBreakdown,
+        startDate: startDate || null,
+        endDate: endDate || null,
+      },
+    };
+  } catch (err) {
+    console.error("[analytics] getAnalyticsReportData error:", err);
+    return { success: false, error: err.message };
+  }
+}
+
