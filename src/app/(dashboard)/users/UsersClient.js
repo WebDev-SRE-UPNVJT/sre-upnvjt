@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Users, Plus, Edit2, Trash2, X, Search, Shield, Building2, UserCircle, 
   ChevronDown, AlertTriangle, FileSpreadsheet, Upload, Download, 
-  CheckCircle2, Loader2, FileCheck, Info, Check, AlertCircle
+  CheckCircle2, Loader2, FileCheck, Info, Check, AlertCircle,
+  Filter, FilterX, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
+  SlidersHorizontal, RotateCcw, Briefcase, Layers
 } from "lucide-react";
 import { 
   createUser, updateUser, deleteUser, importUsers 
@@ -99,6 +101,18 @@ export default function UsersClient({ initialUsers, roles, departments, division
   const [selectedDivId, setSelectedDivId] = useState("");
   const [selectedPositionName, setSelectedPositionName] = useState("");
 
+  // --- FILTER STATES ---
+  const [filterRoleId, setFilterRoleId] = useState("");
+  const [filterDeptId, setFilterDeptId] = useState("");
+  const [filterDivId, setFilterDivId] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterPosition, setFilterPosition] = useState("");
+  const [showFilters, setShowFilters] = useState(true);
+
+  // --- PAGINATION STATES ---
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
   // Export & Import States
   const [isExporting, setIsExporting] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
@@ -124,14 +138,98 @@ export default function UsersClient({ initialUsers, roles, departments, division
     setTimeout(() => setNotification(null), 5000);
   };
 
-  const filteredUsers = users.filter(u => 
-    u.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (u.npm && u.npm.includes(searchQuery)) ||
-    (u.role?.name && u.role.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (u.department?.name && u.department.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (u.positionName && u.positionName.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  // Dynamic divisions for filter
+  const filterAvailableDivisions = useMemo(() => {
+    if (!filterDeptId) return divisions || [];
+    return (divisions || []).filter(d => String(d.departmentId) === String(filterDeptId));
+  }, [divisions, filterDeptId]);
+
+  // Handle department filter change -> reset division filter if incompatible
+  const handleFilterDeptChange = (deptId) => {
+    setFilterDeptId(deptId);
+    setFilterDivId("");
+  };
+
+  // Active filters count
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (searchQuery.trim()) count++;
+    if (filterRoleId) count++;
+    if (filterDeptId) count++;
+    if (filterDivId) count++;
+    if (filterStatus) count++;
+    if (filterPosition) count++;
+    return count;
+  }, [searchQuery, filterRoleId, filterDeptId, filterDivId, filterStatus, filterPosition]);
+
+  const handleResetFilters = () => {
+    setSearchQuery("");
+    setFilterRoleId("");
+    setFilterDeptId("");
+    setFilterDivId("");
+    setFilterStatus("");
+    setFilterPosition("");
+    setCurrentPage(1);
+  };
+
+  // Filter users based on search query, role, dept, division, status, and position
+  const filteredUsers = useMemo(() => {
+    return users.filter(u => {
+      // 1. Search Query
+      if (searchQuery.trim() !== "") {
+        const q = searchQuery.toLowerCase().trim();
+        const matches = 
+          u.name.toLowerCase().includes(q) || 
+          u.email.toLowerCase().includes(q) ||
+          (u.npm && u.npm.toLowerCase().includes(q)) ||
+          (u.role?.name && u.role.name.toLowerCase().includes(q)) ||
+          (u.department?.name && u.department.name.toLowerCase().includes(q)) ||
+          (u.division?.name && u.division.name.toLowerCase().includes(q)) ||
+          (u.positionName && u.positionName.toLowerCase().includes(q));
+        if (!matches) return false;
+      }
+
+      // 2. Role Filter
+      if (filterRoleId && String(u.roleId) !== String(filterRoleId)) {
+        return false;
+      }
+
+      // 3. Department Filter
+      if (filterDeptId && String(u.departmentId) !== String(filterDeptId)) {
+        return false;
+      }
+
+      // 4. Division Filter
+      if (filterDivId && String(u.divisionId) !== String(filterDivId)) {
+        return false;
+      }
+
+      // 5. Status Filter
+      if (filterStatus === "active" && !u.isActive) return false;
+      if (filterStatus === "inactive" && u.isActive) return false;
+
+      // 6. Position Filter
+      if (filterPosition && u.positionName !== filterPosition) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [users, searchQuery, filterRoleId, filterDeptId, filterDivId, filterStatus, filterPosition]);
+
+  // Reset to page 1 whenever any filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterRoleId, filterDeptId, filterDivId, filterStatus, filterPosition, pageSize]);
+
+  // Pagination computations
+  const totalItems = filteredUsers.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalItems);
+  const paginatedUsers = useMemo(() => {
+    return filteredUsers.slice(startIndex, endIndex);
+  }, [filteredUsers, startIndex, endIndex]);
 
   const availableDivisions = selectedDeptId 
     ? divisions.filter(d => d.departmentId === parseInt(selectedDeptId))
@@ -263,7 +361,7 @@ export default function UsersClient({ initialUsers, roles, departments, division
 
       sheet1.mergeCells("A3:K3");
       const metaCell = sheet1.getCell("A3");
-      metaCell.value = `Waktu Ekspor: ${nowWIB} WIB  |  Total Data: ${filteredUsers.length} Pengguna`;
+      metaCell.value = `Waktu Ekspor: ${nowWIB} WIB  |  Total Data: ${filteredUsers.length} Pengguna ${activeFiltersCount > 0 ? "(Difilter)" : ""}`;
       metaCell.font = { name: "Calibri", size: 10, italic: true, color: { argb: "FF064E3B" } };
       metaCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFECFDF5" } };
       metaCell.alignment = { vertical: "middle", horizontal: "center" };
@@ -328,14 +426,12 @@ export default function UsersClient({ initialUsers, roles, departments, division
             right: { style: "thin", color: { argb: "FFE5E7EB" } },
           };
 
-          // Alignment
           if (colNum === 1 || colNum === 2 || colNum === 5 || colNum === 10 || colNum === 11) {
             cell.alignment = { vertical: "middle", horizontal: "center" };
           } else {
             cell.alignment = { vertical: "middle", horizontal: "left" };
           }
 
-          // Highlight status
           if (colNum === 10) {
             if (u.isActive) {
               cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: "FF047857" } };
@@ -385,11 +481,10 @@ export default function UsersClient({ initialUsers, roles, departments, division
         r.getCell(3).alignment = { vertical: "middle", horizontal: "center" };
       };
 
-      addKpiRow("Total Pengguna Terdaftar", totalUsers);
+      addKpiRow("Total Pengguna (Dalam Filter)", totalUsers);
       addKpiRow("Pengguna Aktif", activeUsers);
       addKpiRow("Pengguna Nonaktif", inactiveUsers);
 
-      // Download buffer
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       const url = window.URL.createObjectURL(blob);
@@ -587,7 +682,6 @@ export default function UsersClient({ initialUsers, roles, departments, division
           const firstSheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[firstSheetName];
 
-          // Read rows as array of arrays
           const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
           if (!rawRows || rawRows.length < 2) {
             showNotification("File Excel kosong atau tidak memiliki baris data.", "error");
@@ -595,7 +689,6 @@ export default function UsersClient({ initialUsers, roles, departments, division
             return;
           }
 
-          // Find header row (skip title/guide rows if any)
           let headerRowIndex = 0;
           for (let i = 0; i < Math.min(rawRows.length, 5); i++) {
             const rowStr = rawRows[i].map(c => String(c).toLowerCase()).join(" ");
@@ -607,7 +700,6 @@ export default function UsersClient({ initialUsers, roles, departments, division
 
           const headers = rawRows[headerRowIndex].map(h => String(h).trim().toLowerCase());
           
-          // Map column indices
           const findCol = (keywords) => {
             return headers.findIndex(h => keywords.some(k => h.includes(k)));
           };
@@ -630,7 +722,6 @@ export default function UsersClient({ initialUsers, roles, departments, division
 
           for (let i = headerRowIndex + 1; i < rawRows.length; i++) {
             const r = rawRows[i];
-            // Skip completely blank rows
             if (!r || r.every(c => String(c).trim() === "")) continue;
 
             const name = nameIdx !== -1 ? String(r[nameIdx]).trim() : "";
@@ -744,6 +835,25 @@ export default function UsersClient({ initialUsers, roles, departments, division
   const validCount = importPreview.filter(r => r.isValid).length;
   const invalidCount = importPreview.filter(r => !r.isValid).length;
 
+  // Generate pagination page numbers
+  const pageNumbers = useMemo(() => {
+    const pages = [];
+    const maxButtons = 5;
+    
+    if (totalPages <= maxButtons) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      if (currentPage <= 3) {
+        pages.push(1, 2, 3, 4, '...', totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+      }
+    }
+    return pages;
+  }, [currentPage, totalPages]);
+
   return (
     <div className="w-full relative">
       
@@ -767,7 +877,7 @@ export default function UsersClient({ initialUsers, roles, departments, division
       </AnimatePresence>
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-6">
         <div>
           <h1 className="text-3xl md:text-4xl font-display font-black tracking-tighter mb-2 flex items-center gap-3 text-gray-900 dark:text-white">
             <Users className="w-8 h-8 text-primary" />
@@ -778,25 +888,33 @@ export default function UsersClient({ initialUsers, roles, departments, division
           </p>
         </div>
         
-        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          {/* Search Box */}
-          <div className="relative flex-1 md:w-60">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-white/30" />
-            <input 
-              type="text"
-              placeholder={t("users.search")}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white dark:bg-white/5 shadow-sm dark:shadow-none border border-gray-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 transition-colors"
-            />
-          </div>
+        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+          {/* Toggle Filter Bar Button */}
+          <button
+            type="button"
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl font-bold text-xs md:text-sm tracking-wide transition-all border shrink-0 cursor-pointer ${
+              activeFiltersCount > 0
+                ? "bg-primary/10 border-primary/30 text-primary shadow-[0_0_12px_rgba(16,185,129,0.2)]"
+                : "bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-700 dark:text-white/70 hover:bg-gray-50 dark:hover:bg-white/10"
+            }`}
+            title="Tampilkan / Sembunyikan Filter"
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            <span>Filter</span>
+            {activeFiltersCount > 0 && (
+              <span className="w-5 h-5 rounded-full bg-primary text-black text-[11px] font-black flex items-center justify-center">
+                {activeFiltersCount}
+              </span>
+            )}
+          </button>
 
           {/* Export to Excel Button */}
           <button
             type="button"
             onClick={handleExportExcel}
             disabled={isExporting}
-            className="flex items-center gap-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm tracking-wide transition-all shrink-0 hover:scale-105 active:scale-95 cursor-pointer disabled:opacity-50"
+            className="flex items-center gap-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-3.5 py-2.5 rounded-xl font-bold text-xs md:text-sm tracking-wide transition-all shrink-0 hover:scale-105 active:scale-95 cursor-pointer disabled:opacity-50"
             title="Ekspor data pengguna ke Excel"
           >
             {isExporting ? (
@@ -817,7 +935,7 @@ export default function UsersClient({ initialUsers, roles, departments, division
                 setImportPreview([]);
                 setImportSummary(null);
               }}
-              className="flex items-center gap-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-800 dark:text-white/80 border border-gray-200 dark:border-white/10 px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm tracking-wide transition-all shrink-0 hover:scale-105 active:scale-95 cursor-pointer"
+              className="flex items-center gap-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-800 dark:text-white/80 border border-gray-200 dark:border-white/10 px-3.5 py-2.5 rounded-xl font-bold text-xs md:text-sm tracking-wide transition-all shrink-0 hover:scale-105 active:scale-95 cursor-pointer"
               title="Import data pengguna dari Excel"
             >
               <Upload className="w-4 h-4" />
@@ -829,7 +947,7 @@ export default function UsersClient({ initialUsers, roles, departments, division
           {canCreate && (
             <button 
               onClick={() => handleOpenModal(false)}
-              className="flex items-center gap-2 bg-primary text-[#050e0a] px-5 py-2.5 rounded-xl font-bold text-xs md:text-sm tracking-wide hover:bg-primary-focus hover:scale-105 transition-all shrink-0 shadow-[0_0_20px_rgba(16,185,129,0.3)] cursor-pointer"
+              className="flex items-center gap-2 bg-primary text-[#050e0a] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm tracking-wide hover:bg-primary-focus hover:scale-105 transition-all shrink-0 shadow-[0_0_20px_rgba(16,185,129,0.3)] cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">{t("users.add_user")}</span>
@@ -837,6 +955,167 @@ export default function UsersClient({ initialUsers, roles, departments, division
           )}
         </div>
       </div>
+
+      {/* DYNAMIC FILTER PANEL */}
+      <AnimatePresence>
+        {showFilters && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25 }}
+            className="overflow-hidden mb-6"
+          >
+            <div className="bg-white/60 dark:bg-white/[0.03] border border-gray-200/70 dark:border-white/10 rounded-2xl p-5 backdrop-blur-xl shadow-sm">
+              <div className="flex items-center justify-between gap-4 mb-4 pb-3 border-b border-gray-100 dark:border-white/5">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-white/50">
+                  <Filter className="w-3.5 h-3.5 text-primary" />
+                  <span>Filter Pengguna Dinamis</span>
+                </div>
+                {activeFiltersCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleResetFilters}
+                    className="flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary-focus transition-colors cursor-pointer"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Reset Semua Filter ({activeFiltersCount})</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                {/* 1. Search Query */}
+                <div className="lg:col-span-2">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/40 mb-1.5">
+                    Cari Pengguna
+                  </label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                    <input 
+                      type="text"
+                      placeholder="Nama, email, NPM, atau role..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl pl-9 pr-3 py-2 text-xs text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 transition-colors"
+                    />
+                  </div>
+                </div>
+
+                {/* 2. Role Filter */}
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/40 mb-1.5">
+                    Hak Akses (Role)
+                  </label>
+                  <select
+                    value={filterRoleId}
+                    onChange={(e) => setFilterRoleId(e.target.value)}
+                    className="w-full bg-white dark:bg-[#0c1e17] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 transition-colors cursor-pointer"
+                  >
+                    <option value="">Semua Role</option>
+                    {roles?.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.name?.replace(/_/g, " ")}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 3. Department Filter */}
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/40 mb-1.5">
+                    Departemen
+                  </label>
+                  <select
+                    value={filterDeptId}
+                    onChange={(e) => handleFilterDeptChange(e.target.value)}
+                    className="w-full bg-white dark:bg-[#0c1e17] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 transition-colors cursor-pointer"
+                  >
+                    <option value="">Semua Departemen</option>
+                    {departments?.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 4. Division Filter (Cascading) */}
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/40 mb-1.5">
+                    Divisi
+                  </label>
+                  <select
+                    value={filterDivId}
+                    onChange={(e) => setFilterDivId(e.target.value)}
+                    className="w-full bg-white dark:bg-[#0c1e17] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 transition-colors cursor-pointer"
+                  >
+                    <option value="">Semua Divisi</option>
+                    {filterAvailableDivisions.map((div) => (
+                      <option key={div.id} value={div.id}>
+                        {div.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 5. Status & Position in 1 block */}
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/40 mb-1.5">
+                    Status Akun
+                  </label>
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="w-full bg-white dark:bg-[#0c1e17] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 transition-colors cursor-pointer"
+                  >
+                    <option value="">Semua Status</option>
+                    <option value="active">Aktif</option>
+                    <option value="inactive">Nonaktif</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Active Filter Chips */}
+              {activeFiltersCount > 0 && (
+                <div className="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-gray-100 dark:border-white/5">
+                  <span className="text-[11px] text-gray-400 dark:text-white/40 font-medium">Filter Aktif:</span>
+                  {searchQuery && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
+                      Cari: &ldquo;{searchQuery}&rdquo;
+                      <button type="button" onClick={() => setSearchQuery("")} className="hover:text-white cursor-pointer"><X className="w-3 h-3" /></button>
+                    </span>
+                  )}
+                  {filterRoleId && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
+                      Role: {roles.find(r => String(r.id) === String(filterRoleId))?.name?.replace(/_/g, " ") || filterRoleId}
+                      <button type="button" onClick={() => setFilterRoleId("")} className="hover:text-white cursor-pointer"><X className="w-3 h-3" /></button>
+                    </span>
+                  )}
+                  {filterDeptId && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
+                      Dept: {departments.find(d => String(d.id) === String(filterDeptId))?.name || filterDeptId}
+                      <button type="button" onClick={() => handleFilterDeptChange("")} className="hover:text-white cursor-pointer"><X className="w-3 h-3" /></button>
+                    </span>
+                  )}
+                  {filterDivId && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
+                      Divisi: {divisions.find(div => String(div.id) === String(filterDivId))?.name || filterDivId}
+                      <button type="button" onClick={() => setFilterDivId("")} className="hover:text-white cursor-pointer"><X className="w-3 h-3" /></button>
+                    </span>
+                  )}
+                  {filterStatus && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
+                      Status: {filterStatus === "active" ? "Aktif" : "Nonaktif"}
+                      <button type="button" onClick={() => setFilterStatus("")} className="hover:text-white cursor-pointer"><X className="w-3 h-3" /></button>
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Users Table */}
       <div className="bg-white/40 dark:bg-white/[0.02] border border-gray-200/50 dark:border-white/10 rounded-3xl overflow-hidden backdrop-blur-xl shadow-lg dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
@@ -852,15 +1131,28 @@ export default function UsersClient({ initialUsers, roles, departments, division
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-              {filteredUsers.length === 0 ? (
+              {paginatedUsers.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center">
-                    <UserCircle className="w-12 h-12 text-gray-500 dark:text-white/10 mx-auto mb-3" />
-                    <p className="text-gray-500 dark:text-white/40">{t("users.no_users")}</p>
+                  <td colSpan="5" className="px-6 py-14 text-center">
+                    <UserCircle className="w-12 h-12 text-gray-400 dark:text-white/10 mx-auto mb-3" />
+                    <p className="text-sm font-semibold text-gray-700 dark:text-white/60 mb-1">Pengguna tidak ditemukan</p>
+                    <p className="text-xs text-gray-400 dark:text-white/40">
+                      {activeFiltersCount > 0 ? "Coba ubah atau reset filter pencarian di atas." : "Belum ada akun pengguna yang terdaftar."}
+                    </p>
+                    {activeFiltersCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={handleResetFilters}
+                        className="mt-3 px-4 py-1.5 rounded-xl bg-primary/10 border border-primary/20 text-primary text-xs font-bold hover:bg-primary/20 transition-all inline-flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span>Reset Filter</span>
+                      </button>
+                    )}
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((user) => (
+                paginatedUsers.map((user) => (
                   <tr key={user.id} className="hover:bg-white/60 dark:hover:bg-white/[0.04] transition-colors group">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -877,7 +1169,7 @@ export default function UsersClient({ initialUsers, roles, departments, division
                     <td className="px-6 py-4">
                       <div className="flex flex-col items-start gap-1">
                         <span className="px-2 py-1 bg-white dark:bg-white/5 shadow-sm dark:shadow-none border border-gray-200 dark:border-white/10 rounded-md text-gray-500 dark:text-white/70 text-xs font-medium">
-                          {user.role.name.replace("_", " ")}
+                          {user.role?.name?.replace(/_/g, " ") || "-"}
                         </span>
                         {user.positionName && (
                           <span className="text-[10px] text-primary/70 font-semibold">{user.positionName}</span>
@@ -929,6 +1221,107 @@ export default function UsersClient({ initialUsers, roles, departments, division
             </tbody>
           </table>
         </div>
+
+        {/* PAGINATION BAR */}
+        {totalItems > 0 && (
+          <div className="px-6 py-4 border-t border-gray-200/50 dark:border-white/10 bg-gray-50/50 dark:bg-white/[0.01] flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* Range & Total Info */}
+            <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-white/50 font-medium">
+              <span>
+                Menampilkan <strong className="text-gray-900 dark:text-white font-bold">{startIndex + 1}</strong> - <strong className="text-gray-900 dark:text-white font-bold">{endIndex}</strong> dari <strong className="text-gray-900 dark:text-white font-bold">{totalItems}</strong> pengguna
+              </span>
+
+              <span className="hidden sm:inline text-gray-300 dark:text-white/10">|</span>
+
+              {/* Items Per Page Selector */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] text-gray-400">Tampilkan:</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-2 py-1 text-xs text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 cursor-pointer"
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Pagination Page Controls */}
+            <div className="flex items-center gap-1.5">
+              {/* First Page */}
+              <button
+                type="button"
+                onClick={() => setCurrentPage(1)}
+                disabled={currentPage === 1}
+                className="p-2 rounded-xl text-gray-500 dark:text-white/60 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+                title="Halaman Pertama"
+              >
+                <ChevronsLeft className="w-4 h-4" />
+              </button>
+
+              {/* Prev Page */}
+              <button
+                type="button"
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="p-2 rounded-xl text-gray-500 dark:text-white/60 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+                title="Halaman Sebelumnya"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+
+              {/* Page Number Pills */}
+              <div className="flex items-center gap-1">
+                {pageNumbers.map((p, idx) => (
+                  p === '...' ? (
+                    <span key={`ellipsis-${idx}`} className="px-2 text-xs text-gray-400 dark:text-white/30">...</span>
+                  ) : (
+                    <button
+                      key={`page-${p}`}
+                      type="button"
+                      onClick={() => setCurrentPage(p)}
+                      className={`min-w-8 h-8 px-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        currentPage === p
+                          ? "bg-primary text-black shadow-[0_0_12px_rgba(16,185,129,0.3)] scale-105"
+                          : "text-gray-700 dark:text-white/70 hover:bg-gray-100 dark:hover:bg-white/10"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  )
+                ))}
+              </div>
+
+              {/* Next Page */}
+              <button
+                type="button"
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="p-2 rounded-xl text-gray-500 dark:text-white/60 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+                title="Halaman Berikutnya"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+
+              {/* Last Page */}
+              <button
+                type="button"
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={currentPage === totalPages}
+                className="p-2 rounded-xl text-gray-500 dark:text-white/60 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+                title="Halaman Terakhir"
+              >
+                <ChevronsRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* IMPORT FROM EXCEL MODAL */}
