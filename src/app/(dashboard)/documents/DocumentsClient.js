@@ -345,8 +345,12 @@ export default function DocumentsClient({ initialCategories, initialDocuments, c
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-xs font-bold px-2.5 py-1 rounded-md bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white/70 border border-gray-200 dark:border-white/5">
-                          {doc.category?.name || "Uncategorized"}
+                        <span 
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-semibold text-xs whitespace-nowrap max-w-[220px] md:max-w-[260px] truncate shadow-sm transition-all"
+                          title={doc.category?.name || "Uncategorized"}
+                        >
+                          <FolderOpen className="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400 opacity-90" />
+                          <span className="truncate">{doc.category?.name || "Uncategorized"}</span>
                         </span>
                       </td>
                       <td className="px-6 py-4 text-xs text-gray-600 dark:text-white/70 font-medium">

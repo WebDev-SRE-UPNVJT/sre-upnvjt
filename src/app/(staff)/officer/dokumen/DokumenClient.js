@@ -133,8 +133,11 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
                       <div className="p-3 rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/70 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300">
                         <FileText className="w-6 h-6" />
                       </div>
-                      <span className="text-[10px] font-bold px-2 py-1 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/50 border border-slate-200 dark:border-white/5">
-                        {doc.category?.name || "Uncategorized"}
+                      <span 
+                        className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 max-w-[180px] sm:max-w-[220px] truncate"
+                        title={doc.category?.name || "Uncategorized"}
+                      >
+                        <span className="truncate">{doc.category?.name || "Uncategorized"}</span>
                       </span>
                     </div>
 

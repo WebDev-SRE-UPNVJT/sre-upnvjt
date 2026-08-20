@@ -47,8 +47,12 @@ function DocCard({ doc, index }) {
         )}
         <div className="flex flex-wrap items-center gap-2 mt-2">
           {doc.category && (
-            <span className="flex items-center gap-1 text-[9px] font-black px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary uppercase tracking-wider">
-              <Tag className="w-2.5 h-2.5" />{doc.category.name}
+            <span 
+              className="inline-flex items-center gap-1 text-[9px] font-black px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary uppercase tracking-wider max-w-[200px] sm:max-w-[260px] truncate"
+              title={doc.category.name}
+            >
+              <Tag className="w-2.5 h-2.5 shrink-0" />
+              <span className="truncate">{doc.category.name}</span>
             </span>
           )}
           <span className="flex items-center gap-1 text-[9px] text-slate-400 dark:text-white/30 font-medium">
