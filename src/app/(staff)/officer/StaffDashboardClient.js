@@ -22,6 +22,9 @@ export default function StaffDashboardClient({
 
   if (!mounted) return null;
 
+  const firstName = user?.name?.split(" ")[0] ?? "Staff";
+  const fullName = user?.name ?? "Staff";
+
   return (
     <div className="w-full relative space-y-8 select-none transition-colors duration-500 pb-20">
       
@@ -47,7 +50,8 @@ export default function StaffDashboardClient({
             <h1 className="text-4xl md:text-5xl font-display font-black tracking-tighter text-slate-900 dark:text-white mt-6 leading-none">
               {t('staff_dashboard.welcome')} <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-emerald-400">
-                {user?.name?.split(" ")[0]}!
+                <span className="inline md:hidden">{firstName}!</span>
+                <span className="hidden md:inline">{fullName}!</span>
               </span>
             </h1>
             <p className="text-slate-500 dark:text-white/60 text-sm md:text-base font-medium mt-3 max-w-lg leading-relaxed">

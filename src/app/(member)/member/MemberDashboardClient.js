@@ -82,21 +82,21 @@ export default function MemberDashboardClient({
     const sub = submissions?.find((s) => s.taskId === taskId);
     if (!sub)
       return {
-        label: "Belum Dikerjakan",
+        label: t("member_dashboard.tasks.status_not_started") || "Belum Dikerjakan",
         cls: "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/50 border-slate-200 dark:border-white/10",
       };
     if (sub.status === "APPROVED")
       return {
-        label: "Selesai",
+        label: t("member_dashboard.tasks.status_completed") || "Selesai",
         cls: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
       };
     if (sub.status === "REJECTED")
       return {
-        label: "Perlu Revisi",
+        label: t("member_dashboard.tasks.status_revising") || "Perlu Revisi",
         cls: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/20",
       };
     return {
-      label: "Menunggu Review",
+      label: t("member_dashboard.tasks.status_reviewing") || "Menunggu Review",
       cls: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20",
     };
   };
@@ -105,12 +105,12 @@ export default function MemberDashboardClient({
   const getTimeGreeting = () => {
     const hour = new Date().getHours();
     if (hour >= 4 && hour < 11)
-      return t("dashboard.greeting.morning") || "Selamat Pagi";
+      return t("member_dashboard.greeting.morning") || t("dashboard.greeting.morning") || "Selamat Pagi";
     if (hour >= 11 && hour < 15)
-      return t("dashboard.greeting.afternoon") || "Selamat Siang";
+      return t("member_dashboard.greeting.afternoon") || t("dashboard.greeting.afternoon") || "Selamat Siang";
     if (hour >= 15 && hour < 18)
-      return t("dashboard.greeting.evening") || "Selamat Sore";
-    return t("dashboard.greeting.night") || "Selamat Malam";
+      return t("member_dashboard.greeting.evening") || t("dashboard.greeting.evening") || "Selamat Sore";
+    return t("member_dashboard.greeting.night") || t("dashboard.greeting.night") || "Selamat Malam";
   };
 
   const timeGreeting = getTimeGreeting();
@@ -194,17 +194,17 @@ export default function MemberDashboardClient({
           <div className="flex w-full mt-5 px-2 py-3 bg-slate-50 dark:bg-black/20 rounded-2xl border border-slate-200 dark:border-white/5 divide-x divide-slate-200 dark:divide-white/10">
             {[
               {
-                label: "Rank",
+                label: t("member_dashboard.profile.rank") || "Rank",
                 val: `#${rank}`,
                 color: "text-slate-900 dark:text-white",
               },
               {
-                label: "Hadir",
+                label: t("member_dashboard.profile.attendance") || "Hadir",
                 val: presentCount,
                 color: "text-emerald-600 dark:text-emerald-400",
               },
               {
-                label: "Tugas",
+                label: t("member_dashboard.profile.tasks") || "Tugas",
                 val: completedTasksCount,
                 color: "text-amber-600 dark:text-amber-400",
               },
@@ -290,7 +290,7 @@ export default function MemberDashboardClient({
             <div className="flex-1 relative z-10">
               <div className="flex flex-wrap items-center gap-2.5 mb-4">
                 <span className="px-3.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-[0_0_15px_rgba(16,185,129,0.25)] backdrop-blur-md">
-                  <Activity className="w-3.5 h-3.5 text-emerald-400" /> Materi Terbaru
+                  <Activity className="w-3.5 h-3.5 text-emerald-400" /> {t("member_dashboard.latest_material") || "Materi Terbaru"}
                 </span>
               </div>
 
@@ -307,7 +307,7 @@ export default function MemberDashboardClient({
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-[10px] font-bold text-emerald-300/80 uppercase tracking-widest flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    Progress Materi
+                    {t("member_dashboard.material_progress") || "Progress Materi"}
                   </span>
                   <span className="text-xs font-black text-emerald-300 font-mono">
                     {pptProgress}%
@@ -334,7 +334,7 @@ export default function MemberDashboardClient({
                 >
                   <Play className="w-4 h-4 fill-current relative z-10" />
                   <span className="relative z-10">
-                    {pptProgress > 0 ? "Lanjutkan Belajar" : "Mulai Belajar"}
+                    {pptProgress > 0 ? (t("member_dashboard.continue_learning") || "Lanjutkan Belajar") : (t("member_dashboard.start_learning") || "Mulai Belajar")}
                   </span>
                 </Link>
               </div>
@@ -352,7 +352,7 @@ export default function MemberDashboardClient({
                 <div className="w-full h-full flex flex-col items-center justify-center text-emerald-400/50 bg-gradient-to-br from-emerald-950 to-slate-950">
                   <BookOpen className="w-10 h-10 mb-2 animate-pulse" />
                   <span className="text-xs font-black tracking-widest uppercase">
-                    Materi
+                    {t("member_dashboard.slides_count") || "Materi"}
                   </span>
                 </div>
               )}
@@ -360,7 +360,7 @@ export default function MemberDashboardClient({
               <div className="absolute bottom-3 left-3">
                 <span className="px-3 py-1 bg-emerald-950/80 border border-emerald-400/30 rounded-lg text-[10px] font-black text-emerald-300 uppercase tracking-widest backdrop-blur-md shadow-md flex items-center gap-1.5">
                   <BookOpen className="w-3 h-3 text-emerald-400" />
-                  {latestPpt.slides?.length ?? "?"} Slide
+                  {latestPpt.slides?.length ?? "?"} {t("member_dashboard.slides_count") || "Slide"}
                 </span>
               </div>
             </div>
@@ -488,7 +488,7 @@ export default function MemberDashboardClient({
           <SectionHeader
             icon={TrendingUp}
             title={t("member_dashboard.xp_logs.title")}
-            actionLabel="Semua"
+            actionLabel={t("member_dashboard.view_all_short") || "Semua"}
             actionHref="/member/achievement"
           />
 
@@ -547,13 +547,13 @@ export default function MemberDashboardClient({
 
       {/* Quick Links */}
       <motion.div {...fadeUp(0.5)}>
-        <SectionHeader icon={Activity} title="Menu Cepat" className="mb-4" />
+        <SectionHeader icon={Activity} title={t("member_dashboard.quick_menu") || "Menu Cepat"} className="mb-4" />
         <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-4">
           {[
             {
               href: "/member/leaderboard",
               icon: Trophy,
-              label: "Leaderboard",
+              label: t("member_dashboard.quick_menu_items.leaderboard") || "Leaderboard",
               color: "text-amber-500 dark:text-amber-400",
               bg: "bg-amber-500/10 dark:bg-amber-500/15",
               border: "border-amber-500/25",
@@ -562,7 +562,7 @@ export default function MemberDashboardClient({
             {
               href: "/member/tugas",
               icon: FolderKanban,
-              label: "Tugas",
+              label: t("member_dashboard.quick_menu_items.tasks") || "Tugas",
               color: "text-blue-500 dark:text-blue-400",
               bg: "bg-blue-500/10 dark:bg-blue-500/15",
               border: "border-blue-500/25",
@@ -571,7 +571,7 @@ export default function MemberDashboardClient({
             {
               href: "/member/absensi",
               icon: ClipboardCheck,
-              label: "Absensi",
+              label: t("member_dashboard.quick_menu_items.attendance") || "Absensi",
               color: "text-emerald-500 dark:text-emerald-400",
               bg: "bg-emerald-500/10 dark:bg-emerald-500/15",
               border: "border-emerald-500/25",
@@ -580,7 +580,7 @@ export default function MemberDashboardClient({
             {
               href: "/member/materi",
               icon: Presentation,
-              label: "Materi",
+              label: t("member_dashboard.quick_menu_items.material") || "Materi",
               color: "text-teal-500 dark:text-teal-400",
               bg: "bg-teal-500/10 dark:bg-teal-500/15",
               border: "border-teal-500/25",
@@ -589,7 +589,7 @@ export default function MemberDashboardClient({
             {
               href: "/member/dokumen",
               icon: BookOpen,
-              label: "Dokumen",
+              label: t("member_dashboard.quick_menu_items.documents") || "Dokumen",
               color: "text-purple-500 dark:text-purple-400",
               bg: "bg-purple-500/10 dark:bg-purple-500/15",
               border: "border-purple-500/25",
@@ -598,7 +598,7 @@ export default function MemberDashboardClient({
             {
               href: "/member/achievement",
               icon: Award,
-              label: "Achievement",
+              label: t("member_dashboard.quick_menu_items.achievement") || "Achievement",
               color: "text-pink-500 dark:text-pink-400",
               bg: "bg-pink-500/10 dark:bg-pink-500/15",
               border: "border-pink-500/25",

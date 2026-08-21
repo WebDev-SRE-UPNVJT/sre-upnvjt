@@ -167,7 +167,8 @@ export default function DashboardClient({ stats, user }) {
           <h1 className="text-5xl md:text-6xl font-display font-black tracking-tighter mb-4 text-gray-900 dark:text-white leading-[1.1]">
             {greeting}, <br className="md:hidden" />
             <span className="text-primary dark:text-emerald-400">
-              {session?.user?.name?.split(" ")[0]}
+              <span className="inline md:hidden">{session?.user?.name?.split(" ")[0] || "User"}</span>
+              <span className="hidden md:inline">{session?.user?.name || "User"}</span>
             </span>
           </h1>
           <p className="text-gray-500 dark:text-white/50 text-base md:text-lg max-w-xl font-light mb-8 leading-relaxed">
