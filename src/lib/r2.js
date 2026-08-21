@@ -41,27 +41,50 @@ export async function uploadToR2(buffer, key, contentType = "image/webp") {
  * @param {string} keyOrUrl - R2 Storage object key or full URL
  */
 export async function deleteFromR2(keyOrUrl) {
-  if (!keyOrUrl) return;
+  if (!keyOrUrl || typeof keyOrUrl !== "string") return;
 
-  // Extract clean object key from full URL if provided
-  let key = keyOrUrl;
-  if (keyOrUrl.startsWith("http://") || keyOrUrl.startsWith("https://")) {
-    try {
-      const urlObj = new URL(keyOrUrl);
-      key = urlObj.pathname.replace(/^\/+/, "");
-    } catch {
-      key = keyOrUrl.replace(/^https?:\/\/[^\/]+\//, "");
+  try {
+    let key = keyOrUrl.trim();
+    if (!key) return;
+
+    // Check if it's a full URL
+    if (key.startsWith("http://") || key.startsWith("https://")) {
+      try {
+        const urlObj = new URL(key);
+        // Do not attempt R2 delete on non-R2 domains (e.g., drive.google.com, localhost, unsplash, etc.)
+        const cdnUrl = process.env.R2_PUBLIC_URL;
+        let cdnHost = process.env.R2_PUBLIC_URL;
+        try {
+          cdnHost = new URL(cdnUrl).hostname;
+        } catch {}
+
+        const isR2Url =
+          urlObj.hostname.includes("r2.cloudflarestorage.com") ||
+          urlObj.hostname.includes("r2.dev") ||
+          urlObj.hostname === cdnHost;
+
+        if (!isR2Url) {
+          return;
+        }
+
+        key = urlObj.pathname.replace(/^\/+/, "");
+      } catch {
+        key = key.replace(/^https?:\/\/[^\/]+\//, "");
+      }
+    } else {
+      key = key.replace(/^\/+/, "");
     }
-  } else {
-    key = key.replace(/^\/+/, "");
+
+    if (!key) return;
+
+    const command = new DeleteObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: key,
+    });
+
+    await r2Client.send(command);
+  } catch (err) {
+    console.warn(`[deleteFromR2] Warning deleting ${keyOrUrl}:`, err?.message || err);
   }
-
-  if (!key) return;
-
-  const command = new DeleteObjectCommand({
-    Bucket: R2_BUCKET_NAME,
-    Key: key,
-  });
-
-  await r2Client.send(command);
 }
+

@@ -29,12 +29,23 @@ export const activityService = {
   },
 
   updateActivity: async (id, data) => {
+    const existing = await db.query.activity.findFirst({ where: eq(activity.id, id) });
     const updateData = {
       ...data,
       updatedAt: new Date(),
     };
     if (data.location !== undefined) updateData.location = data.location;
-    if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl;
+    if (data.imageUrl !== undefined) {
+      updateData.imageUrl = data.imageUrl;
+      if (existing?.imageUrl && existing.imageUrl !== data.imageUrl) {
+        try {
+          const { deleteFromR2 } = await import("@/lib/r2");
+          await deleteFromR2(existing.imageUrl);
+        } catch (r2Err) {
+          console.warn("Failed to delete old activity image from R2:", r2Err);
+        }
+      }
+    }
     if (data.isPriority !== undefined) updateData.isPriority = data.isPriority;
     if (data.isAnnouncementModal !== undefined) updateData.isAnnouncementModal = data.isAnnouncementModal;
     if (data.date) {
@@ -49,9 +60,21 @@ export const activityService = {
   },
 
   deleteActivity: async (id) => {
+    const existing = await db.query.activity.findFirst({ where: eq(activity.id, id) });
     const [deleted] = await db.delete(activity)
       .where(eq(activity.id, id))
       .returning();
+
+    if (existing?.imageUrl) {
+      try {
+        const { deleteFromR2 } = await import("@/lib/r2");
+        await deleteFromR2(existing.imageUrl);
+      } catch (r2Err) {
+        console.warn("Failed to delete activity image from R2:", r2Err);
+      }
+    }
+
     return deleted;
   }
 };
+

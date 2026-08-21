@@ -36,6 +36,16 @@ export async function updateContent(id, data) {
   try {
     const { title, slug, body, imageUrl, isPublished, updatedById } = data;
     
+    const existing = await db.query.content.findFirst({ where: eq(content.id, id) });
+    if (imageUrl !== undefined && existing?.imageUrl && existing.imageUrl !== imageUrl) {
+      try {
+        const { deleteFromR2 } = await import("@/lib/r2");
+        await deleteFromR2(existing.imageUrl);
+      } catch (r2Err) {
+        console.warn("Failed to delete old content image from R2:", r2Err);
+      }
+    }
+
     await db.update(content).set({
       title,
       slug,
@@ -61,7 +71,17 @@ export async function updateContent(id, data) {
 
 export async function deleteContent(id) {
   try {
+    const existing = await db.query.content.findFirst({ where: eq(content.id, id) });
     await db.delete(content).where(eq(content.id, id));
+
+    if (existing?.imageUrl) {
+      try {
+        const { deleteFromR2 } = await import("@/lib/r2");
+        await deleteFromR2(existing.imageUrl);
+      } catch (r2Err) {
+        console.warn("Failed to delete content image from R2:", r2Err);
+      }
+    }
 
     revalidatePath("/content");
     revalidatePath("/dashboard/content");

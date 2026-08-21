@@ -113,14 +113,20 @@ export async function updateQuiz(id, data) {
 
 export async function deleteQuiz(id) {
   try {
-    await db.delete(quizSubmission).where(eq(quizSubmission.quizId, id));
-    await db.delete(quizQuestion).where(eq(quizQuestion.quizId, id));
-    await db.delete(quiz).where(eq(quiz.id, id));
+    const quizId = parseInt(id);
+    if (isNaN(quizId)) {
+      return { success: false, error: "ID Quiz tidak valid." };
+    }
+    // Delete related submissions and questions explicitly, cascading will also cover it at DB level
+    await db.delete(quizSubmission).where(eq(quizSubmission.quizId, quizId));
+    await db.delete(quizQuestion).where(eq(quizQuestion.quizId, quizId));
+    await db.delete(quiz).where(eq(quiz.id, quizId));
     revalidatePath("/quiz");
+    revalidatePath("/member/quiz");
     return { success: true };
   } catch (error) {
     console.error("Error deleteQuiz:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: error.message || "Gagal menghapus quiz." };
   }
 }
 

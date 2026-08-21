@@ -66,6 +66,7 @@ export async function DELETE(req, { params }) {
     const resolvedParams = await params;
     const id = parseInt(resolvedParams.id);
 
+    const mod = await db.query.pptModule.findFirst({ where: eq(pptModule.id, id) });
     // Fetch all slides in module to remove slide images from R2
     const slides = await db.query.pptSlide.findMany({
       where: eq(pptSlide.moduleId, id),
@@ -73,13 +74,16 @@ export async function DELETE(req, { params }) {
 
     try {
       const { deleteFromR2 } = await import("@/lib/r2");
+      if (mod?.coverImageUrl) {
+        await deleteFromR2(mod.coverImageUrl);
+      }
       for (const slide of slides) {
         if (slide.fileUrl) {
           await deleteFromR2(slide.fileUrl);
         }
       }
     } catch (r2Err) {
-      console.warn("Failed to delete slides from R2 during module deletion:", r2Err);
+      console.warn("Failed to delete PPT files from R2 during module deletion:", r2Err);
     }
 
     // Delete slides first (FK constraint)

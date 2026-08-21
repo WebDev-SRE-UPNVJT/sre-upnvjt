@@ -21,6 +21,16 @@ export async function PUT(req, { params }) {
       return NextResponse.json({ error: "Judul dan tanggal event wajib diisi" }, { status: 400 });
     }
 
+    const existing = await db.query.event.findFirst({ where: eq(event.id, id) });
+    if (bannerUrl !== undefined && existing?.bannerUrl && existing.bannerUrl !== bannerUrl) {
+      try {
+        const { deleteFromR2 } = await import("@/lib/r2");
+        await deleteFromR2(existing.bannerUrl);
+      } catch (r2Err) {
+        console.warn("Failed to delete old event banner from R2:", r2Err);
+      }
+    }
+
     const [updated] = await db.update(event)
       .set({
         title,
@@ -49,6 +59,17 @@ export async function DELETE(req, { params }) {
 
     const resolvedParams = await params;
     const id = parseInt(resolvedParams.id);
+    const existing = await db.query.event.findFirst({ where: eq(event.id, id) });
+
+    if (existing?.bannerUrl) {
+      try {
+        const { deleteFromR2 } = await import("@/lib/r2");
+        await deleteFromR2(existing.bannerUrl);
+      } catch (r2Err) {
+        console.warn("Failed to delete event banner from R2:", r2Err);
+      }
+    }
+
     // Delete registrations first (FK constraint)
     await db.delete(eventRegistration).where(eq(eventRegistration.eventId, id));
     await db.delete(event).where(eq(event.id, id));

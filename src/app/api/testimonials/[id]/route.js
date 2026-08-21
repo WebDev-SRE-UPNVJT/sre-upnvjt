@@ -21,6 +21,16 @@ export async function PUT(req, { params }) {
       return NextResponse.json({ error: "Nama, jabatan, dan isi testimoni wajib diisi" }, { status: 400 });
     }
 
+    const existing = await db.query.testimonial.findFirst({ where: eq(testimonial.id, id) });
+    if (authorPhotoUrl !== undefined && existing?.authorPhotoUrl && existing.authorPhotoUrl !== authorPhotoUrl) {
+      try {
+        const { deleteFromR2 } = await import("@/lib/r2");
+        await deleteFromR2(existing.authorPhotoUrl);
+      } catch (r2Err) {
+        console.warn("Failed to delete old testimonial photo from R2:", r2Err);
+      }
+    }
+
     const [updated] = await db.update(testimonial)
       .set({
         authorName,
@@ -47,7 +57,17 @@ export async function DELETE(req, { params }) {
 
     const resolvedParams = await params;
     const id = parseInt(resolvedParams.id);
+    const existing = await db.query.testimonial.findFirst({ where: eq(testimonial.id, id) });
     await db.delete(testimonial).where(eq(testimonial.id, id));
+
+    if (existing?.authorPhotoUrl) {
+      try {
+        const { deleteFromR2 } = await import("@/lib/r2");
+        await deleteFromR2(existing.authorPhotoUrl);
+      } catch (r2Err) {
+        console.warn("Failed to delete testimonial photo from R2:", r2Err);
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

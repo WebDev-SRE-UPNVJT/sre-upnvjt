@@ -113,6 +113,17 @@ export async function deleteUser(id) {
     if (isNaN(targetId)) {
       return { success: false, error: "ID Pengguna tidak valid." };
     }
+
+    const existing = await db.query.user.findFirst({ where: eq(user.id, targetId) });
+    if (existing?.profilePictureUrl) {
+      try {
+        const { deleteFromR2 } = await import("@/lib/r2");
+        await deleteFromR2(existing.profilePictureUrl);
+      } catch (r2Err) {
+        console.warn("Failed to delete user profile picture from R2:", r2Err);
+      }
+    }
+
     await db.delete(user).where(eq(user.id, targetId));
     revalidatePath("/users");
     return { success: true };

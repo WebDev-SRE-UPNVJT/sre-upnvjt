@@ -44,10 +44,21 @@ export const featuredProjectService = {
   },
 
   updateProject: async (id, data) => {
+    const existing = await db.query.featuredProject.findFirst({ where: eq(featuredProject.id, id) });
     const updateData = {
       ...data,
       updatedAt: new Date(),
     };
+
+    if (data.imageUrl !== undefined && existing?.imageUrl && existing.imageUrl !== data.imageUrl) {
+      try {
+        const { deleteFromR2 } = await import("@/lib/r2");
+        await deleteFromR2(existing.imageUrl);
+      } catch (r2Err) {
+        console.warn("Failed to delete old featured project image from R2:", r2Err);
+      }
+    }
+
     const [updated] = await db
       .update(featuredProject)
       .set(updateData)
@@ -57,10 +68,21 @@ export const featuredProjectService = {
   },
 
   deleteProject: async (id) => {
+    const existing = await db.query.featuredProject.findFirst({ where: eq(featuredProject.id, id) });
     const [deleted] = await db
       .delete(featuredProject)
       .where(eq(featuredProject.id, id))
       .returning();
+
+    if (existing?.imageUrl) {
+      try {
+        const { deleteFromR2 } = await import("@/lib/r2");
+        await deleteFromR2(existing.imageUrl);
+      } catch (r2Err) {
+        console.warn("Failed to delete featured project image from R2:", r2Err);
+      }
+    }
+
     return deleted;
   },
 };

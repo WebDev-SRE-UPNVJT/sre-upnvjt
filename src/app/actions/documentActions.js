@@ -48,6 +48,21 @@ export async function updateDocumentCategory(id, formData) {
 
 export async function deleteDocumentCategory(id) {
   try {
+    const items = await db.query.documentItem.findMany({
+      where: eq(documentItem.categoryId, id),
+    });
+
+    try {
+      const { deleteFromR2 } = await import("@/lib/r2");
+      for (const it of items) {
+        if (it.fileUrl) {
+          await deleteFromR2(it.fileUrl);
+        }
+      }
+    } catch (r2Err) {
+      console.warn("Failed to delete document files from R2:", r2Err);
+    }
+
     // Delete items in category first to preserve integrity
     await db.delete(documentItem).where(eq(documentItem.categoryId, id));
     await db.delete(documentCategory).where(eq(documentCategory.id, id));
@@ -101,6 +116,16 @@ export async function updateDocumentItem(id, payload) {
       return { error: "Judul, kategori, dan file dokumen wajib diisi" };
     }
 
+    const existing = await db.query.documentItem.findFirst({ where: eq(documentItem.id, id) });
+    if (fileUrl !== undefined && existing?.fileUrl && existing.fileUrl !== fileUrl) {
+      try {
+        const { deleteFromR2 } = await import("@/lib/r2");
+        await deleteFromR2(existing.fileUrl);
+      } catch (r2Err) {
+        console.warn("Failed to delete old document file from R2:", r2Err);
+      }
+    }
+
     const [updated] = await db.update(documentItem).set({
       categoryId: parseInt(categoryId),
       title: title.trim(),
@@ -126,7 +151,17 @@ export async function updateDocumentItem(id, payload) {
 
 export async function deleteDocumentItem(id) {
   try {
+    const existing = await db.query.documentItem.findFirst({ where: eq(documentItem.id, id) });
     await db.delete(documentItem).where(eq(documentItem.id, id));
+
+    if (existing?.fileUrl) {
+      try {
+        const { deleteFromR2 } = await import("@/lib/r2");
+        await deleteFromR2(existing.fileUrl);
+      } catch (r2Err) {
+        console.warn("Failed to delete document file from R2:", r2Err);
+      }
+    }
 
     revalidatePath("/documents");
     revalidatePath("/officer/dokumen");

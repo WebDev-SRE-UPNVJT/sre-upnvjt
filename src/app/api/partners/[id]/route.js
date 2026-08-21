@@ -23,6 +23,16 @@ export async function PUT(req, { params }) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    const existing = await db.query.partner.findFirst({ where: eq(partner.id, partnerId) });
+    if (logoUrl !== undefined && existing?.logoUrl && existing.logoUrl !== logoUrl) {
+      try {
+        const { deleteFromR2 } = await import("@/lib/r2");
+        await deleteFromR2(existing.logoUrl);
+      } catch (r2Err) {
+        console.warn("Failed to delete old partner logo from R2:", r2Err);
+      }
+    }
+
     await db.update(partner).set({
       name,
       logoUrl,
@@ -52,7 +62,17 @@ export async function DELETE(req, { params }) {
     const { id } = await params;
     const partnerId = parseInt(id);
 
+    const existing = await db.query.partner.findFirst({ where: eq(partner.id, partnerId) });
     await db.delete(partner).where(eq(partner.id, partnerId));
+
+    if (existing?.logoUrl) {
+      try {
+        const { deleteFromR2 } = await import("@/lib/r2");
+        await deleteFromR2(existing.logoUrl);
+      } catch (r2Err) {
+        console.warn("Failed to delete partner logo from R2:", r2Err);
+      }
+    }
 
     return NextResponse.json({ success: true, message: "Partner deleted" }, { status: 200 });
   } catch (error) {

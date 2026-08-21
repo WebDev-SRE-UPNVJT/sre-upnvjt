@@ -68,6 +68,16 @@ export async function createPptModule(data, createdById) {
 export async function updatePptModule(id, data) {
   try {
     const { title, description, notes, coverImageUrl, isPublished } = data;
+    const existing = await db.query.pptModule.findFirst({ where: eq(pptModule.id, id) });
+    if (coverImageUrl !== undefined && existing?.coverImageUrl && existing.coverImageUrl !== coverImageUrl) {
+      try {
+        const { deleteFromR2 } = await import("@/lib/r2");
+        await deleteFromR2(existing.coverImageUrl);
+      } catch (r2Err) {
+        console.warn("Failed to delete old PPT cover image from R2:", r2Err);
+      }
+    }
+
     const [result] = await db.update(pptModule)
       .set({
         title,
@@ -89,6 +99,23 @@ export async function updatePptModule(id, data) {
 
 export async function deletePptModule(id) {
   try {
+    const mod = await db.query.pptModule.findFirst({ where: eq(pptModule.id, id) });
+    const slides = await db.query.pptSlide.findMany({ where: eq(pptSlide.moduleId, id) });
+
+    try {
+      const { deleteFromR2 } = await import("@/lib/r2");
+      if (mod?.coverImageUrl) {
+        await deleteFromR2(mod.coverImageUrl);
+      }
+      for (const s of slides) {
+        if (s.fileUrl) {
+          await deleteFromR2(s.fileUrl);
+        }
+      }
+    } catch (r2Err) {
+      console.warn("Failed to delete PPT module files from R2:", r2Err);
+    }
+
     await db.delete(pptSlide).where(eq(pptSlide.moduleId, id));
     await db.delete(pptModule).where(eq(pptModule.id, id));
     revalidatePath("/ppt");
@@ -129,6 +156,16 @@ export async function createPptSlide(moduleId, data) {
 export async function updatePptSlide(slideId, data) {
   try {
     const { title, fileUrl, order } = data;
+    const existing = await db.query.pptSlide.findFirst({ where: eq(pptSlide.id, slideId) });
+    if (fileUrl !== undefined && existing?.fileUrl && existing.fileUrl !== fileUrl) {
+      try {
+        const { deleteFromR2 } = await import("@/lib/r2");
+        await deleteFromR2(existing.fileUrl);
+      } catch (r2Err) {
+        console.warn("Failed to delete old PPT slide file from R2:", r2Err);
+      }
+    }
+
     const [result] = await db.update(pptSlide)
       .set({
         title: title || null,
@@ -147,6 +184,16 @@ export async function updatePptSlide(slideId, data) {
 
 export async function deletePptSlide(slideId, moduleId) {
   try {
+    const existing = await db.query.pptSlide.findFirst({ where: eq(pptSlide.id, slideId) });
+    if (existing?.fileUrl) {
+      try {
+        const { deleteFromR2 } = await import("@/lib/r2");
+        await deleteFromR2(existing.fileUrl);
+      } catch (r2Err) {
+        console.warn("Failed to delete PPT slide file from R2:", r2Err);
+      }
+    }
+
     await db.delete(pptSlide).where(eq(pptSlide.id, slideId));
 
     // Re-sequence remaining slides

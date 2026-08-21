@@ -48,6 +48,17 @@ export async function PUT(req) {
 
     if (profilePictureUrl !== undefined) {
       updateData.profilePictureUrl = profilePictureUrl;
+      const currentUser = await db.query.user.findFirst({
+        where: eq(user.id, parseInt(session.user.id)),
+      });
+      if (currentUser?.profilePictureUrl && currentUser.profilePictureUrl !== profilePictureUrl) {
+        try {
+          const { deleteFromR2 } = await import("@/lib/r2");
+          await deleteFromR2(currentUser.profilePictureUrl);
+        } catch (r2Err) {
+          console.warn("Failed to delete old profile picture from R2:", r2Err);
+        }
+      }
     }
 
     if (newPassword) {

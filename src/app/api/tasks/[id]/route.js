@@ -50,6 +50,23 @@ export async function DELETE(req, { params }) {
 
     const resolvedParams = await params;
     const id = parseInt(resolvedParams.id);
+
+    // Fetch submissions to delete files from R2
+    const submissions = await db.query.taskSubmission.findMany({
+      where: eq(taskSubmission.taskId, id),
+    });
+
+    try {
+      const { deleteFromR2 } = await import("@/lib/r2");
+      for (const sub of submissions) {
+        if (sub.fileUrl) {
+          await deleteFromR2(sub.fileUrl);
+        }
+      }
+    } catch (r2Err) {
+      console.warn("Failed to delete task submission files from R2:", r2Err);
+    }
+
     // Delete submissions first (FK constraint)
     await db.delete(taskSubmission).where(eq(taskSubmission.taskId, id));
     await db.delete(task).where(eq(task.id, id));

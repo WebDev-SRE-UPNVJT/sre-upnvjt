@@ -31,6 +31,16 @@ export async function updateMerchandise(id, data) {
   try {
     const { name, price, description, imageUrl, linkUrl, isAvailable } = data;
     
+    const existing = await db.query.merchandise.findFirst({ where: eq(merchandise.id, id) });
+    if (imageUrl !== undefined && existing?.imageUrl && existing.imageUrl !== imageUrl) {
+      try {
+        const { deleteFromR2 } = await import("@/lib/r2");
+        await deleteFromR2(existing.imageUrl);
+      } catch (r2Err) {
+        console.warn("Failed to delete old merchandise image from R2:", r2Err);
+      }
+    }
+
     await db.update(merchandise).set({
       name,
       price,
@@ -51,7 +61,17 @@ export async function updateMerchandise(id, data) {
 
 export async function deleteMerchandise(id) {
   try {
+    const existing = await db.query.merchandise.findFirst({ where: eq(merchandise.id, id) });
     await db.delete(merchandise).where(eq(merchandise.id, id));
+
+    if (existing?.imageUrl) {
+      try {
+        const { deleteFromR2 } = await import("@/lib/r2");
+        await deleteFromR2(existing.imageUrl);
+      } catch (r2Err) {
+        console.warn("Failed to delete merchandise image from R2:", r2Err);
+      }
+    }
 
     revalidatePath("/merchandise");
     revalidatePath("/");

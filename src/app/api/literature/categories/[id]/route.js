@@ -41,7 +41,17 @@ export async function DELETE(req, { params }) {
 
     const resolvedParams = await params;
     const id = parseInt(resolvedParams.id);
+    const existing = await db.query.literatureCategory.findFirst({ where: eq(literatureCategory.id, id) });
     await db.delete(literatureCategory).where(eq(literatureCategory.id, id));
+
+    if (existing?.imageUrl) {
+      try {
+        const { deleteFromR2 } = await import("@/lib/r2");
+        await deleteFromR2(existing.imageUrl);
+      } catch (r2Err) {
+        console.warn("Failed to delete literature category image from R2:", r2Err);
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
