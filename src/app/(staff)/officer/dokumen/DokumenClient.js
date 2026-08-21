@@ -10,7 +10,7 @@ import {
 import { useLanguage } from "@/i18n/LanguageProvider";
 
 export default function DokumenClient({ initialCategories, initialDocuments, user }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
 
@@ -52,7 +52,7 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
               <FileText className="w-5 h-5" />
             </div>
             <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-500 uppercase tracking-widest">
-              RE-Core Administrasi
+              {t("documents.badge") || "RE-Core Administrasi"}
             </span>
           </div>
 
@@ -76,7 +76,7 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
             className="inline-flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs md:text-sm tracking-wide shadow-[0_4px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_6px_25px_rgba(16,185,129,0.45)] hover:scale-[1.02] active:scale-95 transition-all shrink-0 cursor-pointer group"
           >
             <FolderOpen className="w-4 h-4 text-emerald-100 group-hover:scale-110 transition-transform" />
-            <span>Konsultasi Administrasi</span>
+            <span>{t("documents.consultation") || "Konsultasi Administrasi"}</span>
             <ExternalLink className="w-3.5 h-3.5 opacity-70 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </a>
 
@@ -105,7 +105,7 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
           {/* Label Filter */}
           <div className="hidden lg:flex items-center gap-1.5 px-3 py-2 text-xs font-black uppercase tracking-wider text-slate-400 dark:text-white/40 shrink-0 border-r border-slate-200 dark:border-white/10 mr-1">
             <Filter className="w-3.5 h-3.5 text-emerald-500" />
-            <span>Kategori:</span>
+            <span>{t("documents.category_label") || "Kategori:"}</span>
           </div>
 
           {/* Pill 1: Semua Dokumen */}
@@ -119,7 +119,7 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
             }`}
           >
             <Layers className="w-3.5 h-3.5 shrink-0" />
-            <span>Semua Dokumen</span>
+            <span>{t("documents.all_doc") || "Semua Dokumen"}</span>
             <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-black ${
               activeCategory === "all" ? "bg-black/20 text-slate-950" : "bg-slate-200 dark:bg-white/10 text-slate-500 dark:text-white/40"
             }`}>
@@ -182,10 +182,10 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
                       {/* Truncated Category Badge */}
                       <span 
                         className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 text-slate-600 dark:text-white/60 max-w-[180px] sm:max-w-[200px] truncate group-hover:border-emerald-500/20 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors"
-                        title={doc.category?.name || "Uncategorized"}
+                        title={doc.category?.name || (t("documents.uncategorized") || "Uncategorized")}
                       >
                         <Folder className="w-3 h-3 shrink-0 opacity-70" />
-                        <span className="truncate">{doc.category?.name || "Uncategorized"}</span>
+                        <span className="truncate">{doc.category?.name || (t("documents.uncategorized") || "Uncategorized")}</span>
                       </span>
                     </div>
 
@@ -194,7 +194,7 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
                       {doc.title}
                     </h3>
                     <p className="text-xs text-slate-500 dark:text-white/50 line-clamp-2 mb-4 leading-relaxed">
-                      {doc.description || "Tidak ada deskripsi berkas."}
+                      {doc.description || (t("documents.no_description") || "Tidak ada deskripsi berkas.")}
                     </p>
                   </div>
 
@@ -207,7 +207,7 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
                       </div>
                       <div className="flex items-center gap-1.5">
                         <Clock className="w-3 h-3 opacity-70" />
-                        <span>{doc.createdAt ? new Date(doc.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "-"}</span>
+                        <span>{doc.createdAt ? new Date(doc.createdAt).toLocaleDateString(language === "en" ? "en-US" : "id-ID", { day: "numeric", month: "short", year: "numeric" }) : "-"}</span>
                       </div>
                     </div>
 
@@ -220,7 +220,7 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
                       title={t("documents.download") || "Buka / Unduh Dokumen"}
                     >
                       <Download className="w-3.5 h-3.5" />
-                      <span>Unduh</span>
+                      <span>{t("documents.download") || "Unduh"}</span>
                     </a>
                   </div>
                 </div>
@@ -236,12 +236,12 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
         >
           <FileText className="w-12 h-12 text-slate-300 dark:text-white/20 mx-auto mb-4" />
           <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
-            {t("documents.empty") || "Dokumen Tidak Ditemukan"}
+            {t("documents.empty_title") || "Dokumen Tidak Ditemukan"}
           </h3>
           <p className="text-sm text-slate-500 dark:text-white/50 text-center max-w-sm">
             {searchQuery
-              ? "Tidak ada berkas dokumen yang cocok dengan pencarian Anda."
-              : "Belum ada berkas dokumen dalam kategori ini."}
+              ? (t("documents.empty_search_desc") || "Tidak ada berkas dokumen yang cocok dengan pencarian Anda.")
+              : (t("documents.empty_cat_desc") || "Belum ada berkas dokumen dalam kategori ini.")}
           </p>
           {activeCategory !== "all" && (
             <button
@@ -249,7 +249,7 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
               onClick={() => setActiveCategory("all")}
               className="mt-4 px-4 py-2 rounded-xl bg-emerald-500/10 text-emerald-500 text-xs font-bold hover:bg-emerald-500/20 transition-colors"
             >
-              Lihat Semua Dokumen
+              {t("documents.view_all_docs") || "Lihat Semua Dokumen"}
             </button>
           )}
         </motion.div>

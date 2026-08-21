@@ -17,32 +17,42 @@ export async function PUT(req) {
     const body = await req.json();
     const { name, email, npm, profilePictureUrl, currentPassword, newPassword } = body;
 
-    if (!name || !email) {
-      return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
-    }
-
-    const existingEmail = await db.query.user.findFirst({
-      where: eq(user.email, email),
+    const currentUser = await db.query.user.findFirst({
+      where: eq(user.id, parseInt(session.user.id)),
     });
 
-    if (existingEmail && existingEmail.id !== parseInt(session.user.id)) {
-      return NextResponse.json({ error: "Email is already taken" }, { status: 400 });
+    if (!currentUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    if (email && email.trim() !== currentUser.email) {
+      const existingEmail = await db.query.user.findFirst({
+        where: eq(user.email, email.trim()),
+      });
+
+      if (existingEmail && existingEmail.id !== parseInt(session.user.id)) {
+        return NextResponse.json({ error: "Email is already taken" }, { status: 400 });
+      }
     }
 
     const updateData = {};
 
-    if (name) updateData.name = name;
+    if (name && name.trim()) updateData.name = name.trim();
+    if (email && email.trim()) updateData.email = email.trim();
 
     if (npm !== undefined) {
-      if (npm) {
+      if (npm && npm.trim()) {
+        const cleanNpm = npm.trim();
         const existingNpm = await db.query.user.findFirst({
-          where: eq(user.npm, npm),
+          where: eq(user.npm, cleanNpm),
         });
 
         if (existingNpm && existingNpm.id !== parseInt(session.user.id)) {
           return NextResponse.json({ error: "NPM is already taken" }, { status: 400 });
         }
-        updateData.npm = npm;
+        updateData.npm = cleanNpm;
+      } else {
+        updateData.npm = null;
       }
     }
 

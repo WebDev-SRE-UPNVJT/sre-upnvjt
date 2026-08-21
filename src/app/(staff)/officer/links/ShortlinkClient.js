@@ -77,7 +77,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
     const url = `${origin}/s/${slug}`;
     navigator.clipboard.writeText(url);
     setCopiedId(id);
-    showNotification(`Tautan /s/${slug} disalin ke papan klip!`, "success");
+    showNotification(t("shortlinks.copied_toast", { slug }) || `Tautan /s/${slug} disalin ke papan klip!`, "success");
     setTimeout(() => setCopiedId(null), 2000);
   };
 
@@ -150,7 +150,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
     }
 
     if (isSlugAvailable === false && !editingId) {
-      setError("Slug ini sudah dipakai! Silakan pilih nama slug yang lain.");
+      setError(t("shortlinks.slug_taken") || "Slug ini sudah dipakai! Silakan pilih nama slug yang lain.");
       setLoading(false);
       return;
     }
@@ -176,10 +176,10 @@ export default function ShortlinkClient({ initialLinks = [] }) {
 
       if (editingId) {
         setLinks(links.map(l => l.id === editingId ? { ...l, ...data } : l));
-        showNotification("Tautan berhasil diperbarui!", "success");
+        showNotification(t("shortlinks.updated_toast") || "Tautan berhasil diperbarui!", "success");
       } else {
         setLinks([data, ...links]);
-        showNotification("Tautan baru berhasil dibuat!", "success");
+        showNotification(t("shortlinks.created_toast") || "Tautan baru berhasil dibuat!", "success");
       }
       
       handleCloseForm();
@@ -202,7 +202,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
       
       setLinks(links.filter(l => l.id !== id));
       setDeleteId(null);
-      showNotification("Tautan berhasil dihapus permanen.", "success");
+      showNotification(t("shortlinks.deleted_toast") || "Tautan berhasil dihapus permanen.", "success");
     } catch (err) {
       showNotification(err.message || "Gagal menghapus tautan", "error");
     } finally {
@@ -256,7 +256,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
               <Link2 className="w-5 h-5" />
             </div>
             <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-500 uppercase tracking-widest">
-              RE-Direct Link Center
+              {t('shortlinks.badge') || "RE-Direct Link Center"}
             </span>
           </div>
 
@@ -293,7 +293,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
         >
           <div className="flex items-center justify-between gap-2 mb-2">
             <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/40">
-              Total Tautan
+              {t('shortlinks.stat_total_links') || "Total Tautan"}
             </span>
             <div className="w-7 h-7 md:w-8 md:h-8 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center justify-center shrink-0">
               <Globe className="w-3.5 h-3.5 md:w-4 md:h-4" />
@@ -316,7 +316,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
         >
           <div className="flex items-center justify-between gap-2 mb-2">
             <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/40">
-              Total Klik
+              {t('shortlinks.stat_total_clicks') || "Total Klik"}
             </span>
             <div className="w-7 h-7 md:w-8 md:h-8 rounded-xl bg-teal-500/10 text-teal-500 border border-teal-500/20 flex items-center justify-center shrink-0">
               <MousePointerClick className="w-3.5 h-3.5 md:w-4 md:h-4" />
@@ -324,7 +324,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
           </div>
           <div className="flex items-baseline gap-1.5">
             <span className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white">
-              {totalClicks.toLocaleString("id-ID")}
+              {totalClicks.toLocaleString()}
             </span>
             <span className="text-[11px] md:text-xs text-teal-500 font-bold">Clicks</span>
           </div>
@@ -339,7 +339,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
         >
           <div className="flex items-center justify-between gap-2 mb-2">
             <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/40">
-              Tautan Terpopuler
+              {t('shortlinks.stat_top_performer') || "Tautan Terpopuler"}
             </span>
             <div className="w-7 h-7 md:w-8 md:h-8 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0">
               <TrendingUp className="w-3.5 h-3.5 md:w-4 md:h-4" />
@@ -350,7 +350,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
               {topLink ? `/s/${topLink.slug}` : "-"}
             </span>
             <span className="text-[10px] md:text-xs text-emerald-500 font-bold shrink-0">
-              {topLink ? `${topLink.clicks || 0} klik` : "Belum ada data"}
+              {topLink ? `${topLink.clicks || 0} ${t('shortlinks.clicks_word') || 'klik'}` : (t('shortlinks.no_data') || "Belum ada data")}
             </span>
           </div>
         </motion.div>
@@ -362,7 +362,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-white/30" />
           <input
             type="text"
-            placeholder="Cari tautan, slug, atau tujuan URL..."
+            placeholder={t('shortlinks.search_ph') || "Cari tautan, slug, atau tujuan URL..."}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-slate-50 dark:bg-[#0a1610] border border-slate-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs md:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-medium"
@@ -370,9 +370,9 @@ export default function ShortlinkClient({ initialLinks = [] }) {
         </div>
         
         <div className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-white/60 whitespace-nowrap">
-          <span>Menampilkan:</span>
+          <span>{t('shortlinks.showing') || "Menampilkan:"}</span>
           <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-black">
-            {filteredLinks.length} Tautan
+            {t('shortlinks.links_count', { count: filteredLinks.length }) || `${filteredLinks.length} Tautan`}
           </span>
         </div>
       </div>
@@ -409,7 +409,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                       type="button"
                       onClick={() => setQrModal({ isOpen: true, link })}
                       className="p-2 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-emerald-500/10 hover:text-emerald-500 text-slate-500 dark:text-white/60 transition-colors cursor-pointer"
-                      title="Lihat QR Code"
+                      title={t('shortlinks.view_qr') || "Lihat QR Code"}
                     >
                       <QrCode className="w-4 h-4" />
                     </button>
@@ -421,7 +421,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                           ? 'bg-emerald-500 text-black shadow-md shadow-emerald-500/30' 
                           : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/60 hover:text-emerald-500 hover:bg-emerald-500/10'
                       }`}
-                      title="Salin Tautan Lengkap"
+                      title={t('shortlinks.copy_url') || "Salin Tautan Lengkap"}
                     >
                       {copiedId === link.id ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                     </button>
@@ -444,16 +444,16 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                 <div className="grid grid-cols-2 gap-2.5 mb-4">
                   <div className="bg-slate-50 dark:bg-black/30 p-3 rounded-2xl border border-slate-100 dark:border-white/5">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/30 block mb-0.5">
-                      Jumlah Klik
+                      {t('shortlinks.clicks_count_label') || "Jumlah Klik"}
                     </span>
                     <span className="text-xl font-black text-slate-900 dark:text-white tabular-nums">
-                      {(link.clicks || 0).toLocaleString("id-ID")}
+                      {(link.clicks || 0).toLocaleString()}
                     </span>
                   </div>
 
                   <div className="bg-slate-50 dark:bg-black/30 p-3 rounded-2xl border border-slate-100 dark:border-white/5 flex flex-col justify-center">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/30 block mb-1">
-                      Dibuat Oleh
+                      {t('shortlinks.created_by') || "Dibuat Oleh"}
                     </span>
                     <div className="flex items-center gap-1.5 min-w-0">
                       <div className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center text-[9px] font-black shrink-0">
@@ -488,7 +488,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                     type="button"
                     onClick={() => handleOpenForm(link)}
                     className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-500/10 rounded-xl transition-colors cursor-pointer"
-                    title="Edit Tautan"
+                    title={t('shortlinks.edit_tooltip') || "Edit Tautan"}
                   >
                     <Edit3 className="w-4 h-4" />
                   </button>
@@ -496,7 +496,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                     type="button"
                     onClick={() => handleDelete(link.id)}
                     className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer"
-                    title="Hapus Tautan"
+                    title={t('shortlinks.delete_tooltip') || "Hapus Tautan"}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -518,12 +518,14 @@ export default function ShortlinkClient({ initialLinks = [] }) {
             <LinkIcon className="w-8 h-8" />
           </div>
           <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">
-            {searchQuery ? "Tautan Tidak Ditemukan" : "Belum Ada Tautan Singkat"}
+            {searchQuery 
+              ? (t('shortlinks.search_empty_title') || "Tautan Tidak Ditemukan") 
+              : (t('shortlinks.empty_title') || "Belum Ada Tautan Singkat")}
           </h3>
           <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-white/50 max-w-sm mb-6">
             {searchQuery 
-              ? "Tidak ada tautan yang cocok dengan kata kunci pencarian Anda." 
-              : "Buat tautan singkat pertama Anda untuk mempermudah penyebaran link resmi SRE."}
+              ? (t('shortlinks.search_empty_desc') || "Tidak ada tautan yang cocok dengan kata kunci pencarian Anda.") 
+              : (t('shortlinks.empty_desc') || "Buat tautan singkat pertama Anda untuk mempermudah penyebaran link resmi SRE.")}
           </p>
           <button
             type="button"
@@ -531,7 +533,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-black font-bold text-xs hover:bg-emerald-400 transition-all shadow-md shadow-emerald-500/20 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>Buat Tautan Baru</span>
+            <span>{t('shortlinks.create_new') || "Buat Tautan Baru"}</span>
           </button>
         </motion.div>
       )}
@@ -566,10 +568,10 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                     </div>
                     <div>
                       <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">
-                        {editingId ? "Edit Tautan Singkat" : "Buat Tautan Singkat Baru"}
+                        {editingId ? (t('shortlinks.edit_title') || "Edit Tautan Singkat") : (t('shortlinks.create_title') || "Buat Tautan Singkat Baru")}
                       </h2>
                       <p className="text-xs text-slate-400 dark:text-white/40 mt-0.5">
-                        Kustomisasi nama slug dan target destinasi URL resmi.
+                        {t('shortlinks.modal_desc') || "Kustomisasi nama slug dan target destinasi URL resmi."}
                       </p>
                     </div>
                   </div>
@@ -593,12 +595,12 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                   {/* Original URL */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-white/70">
-                      Target URL Asli (Destination URL) *
+                      {t('shortlinks.dest_url_label') || "Target URL Asli (Destination URL) *"}
                     </label>
                     <input
                       type="url"
                       required
-                      placeholder="https://drive.google.com/... atau https://..."
+                      placeholder={t('shortlinks.url_ph') || "https://drive.google.com/... atau https://..."}
                       value={formData.originalUrl}
                       onChange={(e) => setFormData({...formData, originalUrl: e.target.value})}
                       className="w-full bg-slate-50 dark:bg-[#060e0a] border border-slate-200 dark:border-white/10 rounded-2xl px-4 py-3 text-xs md:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500 transition-all font-medium"
@@ -608,7 +610,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                   {/* Custom Slug */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-white/70">
-                      Nama Slug Kustom *
+                      {t('shortlinks.custom_slug_label') || "Nama Slug Kustom *"}
                     </label>
                     <div className="flex relative rounded-2xl overflow-hidden border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#060e0a]">
                       <span className="inline-flex items-center px-3.5 bg-slate-100 dark:bg-white/5 border-r border-slate-200 dark:border-white/10 text-slate-500 dark:text-white/40 font-mono text-xs whitespace-nowrap">
@@ -634,12 +636,12 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                     </div>
                     {isSlugAvailable === false && (
                       <p className="flex items-center gap-1.5 text-[11px] font-bold text-red-500 mt-1">
-                        <AlertCircle className="w-3.5 h-3.5" /> Slug ini sudah dipakai! Silakan ganti nama slug.
+                        <AlertCircle className="w-3.5 h-3.5" /> {t('shortlinks.slug_taken') || "Slug ini sudah dipakai! Silakan ganti nama slug."}
                       </p>
                     )}
                     {isSlugAvailable === true && (
                       <p className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-500 mt-1">
-                        <Check className="w-3.5 h-3.5" /> Slug tersedia untuk digunakan.
+                        <Check className="w-3.5 h-3.5" /> {t('shortlinks.slug_avail') || "Slug tersedia untuk digunakan."}
                       </p>
                     )}
                   </div>
@@ -647,11 +649,11 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                   {/* Description */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-white/70">
-                      Keterangan / Catatan Singkat
+                      {t('shortlinks.desc_label') || "Keterangan / Catatan Singkat"}
                     </label>
                     <input
                       type="text"
-                      placeholder="Contoh: Dokumen SOP Administrasi Periode 2026"
+                      placeholder={t('shortlinks.desc_ph') || "Contoh: Dokumen SOP Administrasi Periode 2026"}
                       value={formData.description}
                       onChange={(e) => setFormData({...formData, description: e.target.value})}
                       className="w-full bg-slate-50 dark:bg-[#060e0a] border border-slate-200 dark:border-white/10 rounded-2xl px-4 py-3 text-xs md:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500 transition-all font-medium"
@@ -665,7 +667,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                       onClick={handleCloseForm}
                       className="px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-white/60 hover:bg-slate-100 dark:hover:bg-white/5 transition-all cursor-pointer"
                     >
-                      Batal
+                      {t('shortlinks.cancel') || "Batal"}
                     </button>
                     <button
                       type="submit"
@@ -673,7 +675,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                       className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all disabled:opacity-50 cursor-pointer"
                     >
                       {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                      <span>{editingId ? "Simpan Perubahan" : "Buat Tautan"}</span>
+                      <span>{editingId ? (t('shortlinks.save_changes') || "Simpan Perubahan") : (t('shortlinks.create_link') || "Buat Tautan")}</span>
                     </button>
                   </div>
                 </form>
@@ -715,7 +717,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                 </div>
 
                 <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1">
-                  QR Code Tautan
+                  {t('shortlinks.qr_modal_title') || "QR Code Tautan"}
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-white/40 font-mono mb-6">
                   /s/{qrModal.link.slug}
@@ -736,7 +738,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                     className="flex-1 py-2.5 px-4 rounded-xl bg-emerald-500 text-black font-bold text-xs hover:bg-emerald-400 transition-all flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/20 cursor-pointer"
                   >
                     <Copy className="w-4 h-4" />
-                    <span>Salin URL</span>
+                    <span>{t('shortlinks.copy_url_btn') || "Salin URL"}</span>
                   </button>
                   <a
                     href={`https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(`${typeof window !== "undefined" ? window.location.origin : "https://www.sreupnjatim.com"}/s/${qrModal.link.slug}`)}&color=064e3b&bgcolor=ffffff`}
@@ -745,7 +747,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                     rel="noreferrer"
                     className="py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white font-bold text-xs hover:bg-slate-200 dark:hover:bg-white/20 transition-all"
                   >
-                    Unduh QR
+                    {t('shortlinks.download_qr_btn') || "Unduh QR"}
                   </a>
                 </div>
               </motion.div>
@@ -776,9 +778,9 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                 <div className="w-16 h-16 rounded-2xl bg-red-500/10 text-red-500 border border-red-500/20 flex items-center justify-center mx-auto mb-5">
                   <Trash2 className="w-8 h-8" />
                 </div>
-                <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">Hapus Tautan?</h3>
+                <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">{t('shortlinks.delete_modal_title') || "Hapus Tautan?"}</h3>
                 <p className="text-slate-500 dark:text-white/60 font-medium mb-6 text-xs leading-relaxed">
-                  Tindakan ini permanen. Tautan dan seluruh data analitik kliknya akan dihapus dari sistem.
+                  {t('shortlinks.delete_modal_desc') || "Tindakan ini permanen. Tautan dan seluruh data analitik kliknya akan dihapus dari sistem."}
                 </p>
                 
                 <div className="flex w-full gap-3">
@@ -787,14 +789,14 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                     disabled={isDeleting}
                     className="flex-1 py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/5 transition-all cursor-pointer"
                   >
-                    Batal
+                    {t('shortlinks.cancel') || "Batal"}
                   </button>
                   <button 
                     onClick={() => confirmDelete(deleteId)}
                     disabled={isDeleting}
                     className="flex-1 flex justify-center items-center py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/25 transition-all disabled:opacity-50 cursor-pointer"
                   >
-                    {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Hapus"}
+                    {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : (t('shortlinks.delete') || "Hapus")}
                   </button>
                 </div>
               </motion.div>
