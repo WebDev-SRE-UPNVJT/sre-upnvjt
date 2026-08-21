@@ -21,7 +21,7 @@ const outfit = Outfit({
 });
 
 export const metadata = {
-  metadataBase: new URL(process.env.NEXTAUTH_URL || "https://www.sreupnjatim.com"),
+  metadataBase: new URL(process.env.NEXTAUTH_URL || "https://sreupnjatim.com"),
   title: {
     default: "SRE UPN Veteran Jawa Timur | Accelerating Sustainable Transition",
     template: "%s | SRE UPN Veteran Jawa Timur",
@@ -38,7 +38,7 @@ export const metadata = {
     "Clean Energy Transition",
     "Mahasiswa Teknik Energi",
   ],
-  authors: [{ name: "SRE UPN Veteran Jawa Timur", url: "https://www.sreupnjatim.com" }],
+  authors: [{ name: "SRE UPN Veteran Jawa Timur", url: "https://sreupnjatim.com" }],
   creator: "SRE UPN Veteran Jawa Timur",
   publisher: "SRE UPN Veteran Jawa Timur",
   alternates: {
@@ -47,7 +47,7 @@ export const metadata = {
   openGraph: {
     title: "SRE UPN Veteran Jawa Timur | Accelerating Sustainable Transition",
     description: "Empowering the next generation of renewable energy leaders. Society of Renewable Energy (SRE) UPN Veteran Jawa Timur drives clean energy advocacy, academic research, and community-led green technology projects.",
-    url: "https://www.sreupnjatim.com",
+    url: "https://sreupnjatim.com",
     siteName: "SRE UPN Veteran Jawa Timur",
     locale: "id_ID",
     type: "website",
