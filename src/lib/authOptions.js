@@ -59,6 +59,11 @@ export const authOptions = {
   ],
   session: {
     strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 1 Hari (24 Jam)
+    updateAge: 60 * 60,    // Refresh token per 1 jam saat ada aktivitas aktif
+  },
+  jwt: {
+    maxAge: 24 * 60 * 60, // 1 Hari (24 Jam)
   },
   callbacks: {
     async jwt({ token, user: authUser, trigger, session }) {
