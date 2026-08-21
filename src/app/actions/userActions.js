@@ -109,11 +109,16 @@ export async function updateUser(id, data) {
 
 export async function deleteUser(id) {
   try {
-    await db.delete(user).where(eq(user.id, id));
+    const targetId = parseInt(id);
+    if (isNaN(targetId)) {
+      return { success: false, error: "ID Pengguna tidak valid." };
+    }
+    await db.delete(user).where(eq(user.id, targetId));
     revalidatePath("/users");
     return { success: true };
   } catch (error) {
-    return { success: false, error: "Gagal menghapus pengguna." };
+    console.error("[userActions] deleteUser error:", error);
+    return { success: false, error: error.message || "Gagal menghapus pengguna." };
   }
 }
 

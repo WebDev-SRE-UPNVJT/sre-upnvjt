@@ -12,7 +12,7 @@ export const department = pgTable('department', {
 export const division = pgTable('division', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
-  departmentId: integer('departmentId').references(() => department.id).notNull(),
+  departmentId: integer('departmentId').references(() => department.id, { onDelete: 'cascade' }).notNull(),
 });
 
 export const role = pgTable('role', {
@@ -48,8 +48,8 @@ export const user = pgTable('user', {
   positionName: varchar('positionName', { length: 255 }),
   isActive: boolean('isActive').default(true).notNull(),
   roleId: integer('roleId').references(() => role.id).notNull(),
-  departmentId: integer('departmentId').references(() => department.id),
-  divisionId: integer('divisionId').references(() => division.id),
+  departmentId: integer('departmentId').references(() => department.id, { onDelete: 'set null' }),
+  divisionId: integer('divisionId').references(() => division.id, { onDelete: 'set null' }),
   profilePictureUrl: varchar('profilePictureUrl', { length: 500 }),
   totalPoints: integer('totalPoints').default(0).notNull(), // kept for legacy
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
@@ -57,7 +57,7 @@ export const user = pgTable('user', {
 });
 
 export const memberProfile = pgTable('memberProfile', {
-  userId: integer('userId').references(() => user.id).primaryKey(),
+  userId: integer('userId').references(() => user.id, { onDelete: 'cascade' }).primaryKey(),
   xp: integer('xp').default(0).notNull(),
   level: integer('level').default(1).notNull(),
 });
@@ -71,7 +71,7 @@ export const announcement = pgTable('announcement', {
   content: text('content').notNull(),
   targetAudience: varchar('targetAudience', { length: 255 }),
   isActive: boolean('isActive').default(true).notNull(),
-  createdById: integer('createdById').references(() => user.id).notNull(),
+  createdById: integer('createdById').references(() => user.id, { onDelete: 'cascade' }).notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
 
@@ -83,7 +83,7 @@ export const content = pgTable('content', {
   body: text('body').notNull(),
   imageUrl: varchar('imageUrl', { length: 1000 }),
   isPublished: boolean('isPublished').default(false).notNull(),
-  updatedById: integer('updatedById').references(() => user.id).notNull(),
+  updatedById: integer('updatedById').references(() => user.id, { onDelete: 'cascade' }).notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
 
@@ -93,15 +93,15 @@ export const formTemplate = pgTable('formTemplate', {
   title: varchar('title', { length: 255 }).notNull(),
   description: text('description'),
   questions: jsonb('questions').notNull().default([]),
-  createdById: integer('createdById').references(() => user.id).notNull(),
+  createdById: integer('createdById').references(() => user.id, { onDelete: 'cascade' }).notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
   updatedAt: timestamp('updatedAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
 
 export const formSubmission = pgTable('formSubmission', {
   id: serial('id').primaryKey(),
-  formTemplateId: integer('formTemplateId').references(() => formTemplate.id).notNull(),
-  memberId: integer('memberId').references(() => user.id).notNull(),
+  formTemplateId: integer('formTemplateId').references(() => formTemplate.id, { onDelete: 'cascade' }).notNull(),
+  memberId: integer('memberId').references(() => user.id, { onDelete: 'cascade' }).notNull(),
   answers: jsonb('answers').notNull().default([]),
   score: integer('score'),
   submittedAt: timestamp('submittedAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
@@ -112,24 +112,24 @@ export const task = pgTable('task', {
   title: varchar('title', { length: 255 }).notNull(),
   description: text('description').notNull(),
   rewardXp: integer('rewardXp').default(0).notNull(),
-  formTemplateId: integer('formTemplateId').references(() => formTemplate.id),
+  formTemplateId: integer('formTemplateId').references(() => formTemplate.id, { onDelete: 'set null' }),
   folderId: varchar('folderId', { length: 255 }),
   maxUploadSizeMb: integer('maxUploadSizeMb'),
   allowMultipleFiles: boolean('allowMultipleFiles').default(false),
   submissionType: varchar('submissionType', { length: 50 }).default('BOTH'),
   deadline: timestamp('deadline', { mode: 'date' }).notNull(),
-  createdById: integer('createdById').references(() => user.id).notNull(),
+  createdById: integer('createdById').references(() => user.id, { onDelete: 'cascade' }).notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
 
 export const taskSubmission = pgTable('taskSubmission', {
   id: serial('id').primaryKey(),
-  taskId: integer('taskId').references(() => task.id).notNull(),
-  memberId: integer('memberId').references(() => user.id).notNull(),
+  taskId: integer('taskId').references(() => task.id, { onDelete: 'cascade' }).notNull(),
+  memberId: integer('memberId').references(() => user.id, { onDelete: 'cascade' }).notNull(),
   fileUrl: varchar('fileUrl', { length: 1000 }),
   status: varchar('status', { length: 50 }).notNull(), // 'PENDING', 'APPROVED', 'REJECTED'
   feedback: text('feedback'),
-  reviewedById: integer('reviewedById').references(() => user.id),
+  reviewedById: integer('reviewedById').references(() => user.id, { onDelete: 'set null' }),
   submittedAt: timestamp('submittedAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
 
@@ -143,14 +143,14 @@ export const attendanceSession = pgTable('attendanceSession', {
   endTime: timestamp('endTime', { mode: 'date' }),
   token: varchar('token', { length: 50 }),
   isActive: boolean('isActive').default(true).notNull(),
-  createdById: integer('createdById').references(() => user.id).notNull(),
+  createdById: integer('createdById').references(() => user.id, { onDelete: 'cascade' }).notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
 
 export const attendance = pgTable('attendance', {
   id: serial('id').primaryKey(),
-  sessionId: integer('sessionId').references(() => attendanceSession.id).notNull(),
-  memberId: integer('memberId').references(() => user.id).notNull(),
+  sessionId: integer('sessionId').references(() => attendanceSession.id, { onDelete: 'cascade' }).notNull(),
+  memberId: integer('memberId').references(() => user.id, { onDelete: 'cascade' }).notNull(),
   status: varchar('status', { length: 50 }).notNull(), // 'PRESENT', 'ABSENT', etc.
   notes: text('notes'),
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
@@ -301,14 +301,14 @@ export const memberApplication = pgTable('memberApplication', {
   faculty: varchar('faculty', { length: 255 }).notNull(),
   motivation: text('motivation').notNull(),
   status: varchar('status', { length: 50 }).default('PENDING').notNull(),
-  reviewedById: integer('reviewedById').references(() => user.id),
+  reviewedById: integer('reviewedById').references(() => user.id, { onDelete: 'set null' }),
   appliedAt: timestamp('appliedAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
   updatedAt: timestamp('updatedAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
 
 export const eventRegistration = pgTable('eventRegistration', {
   id: serial('id').primaryKey(),
-  eventId: integer('eventId').references(() => event.id).notNull(),
+  eventId: integer('eventId').references(() => event.id, { onDelete: 'cascade' }).notNull(),
   fullName: varchar('fullName', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).notNull(),
   teamName: varchar('teamName', { length: 255 }),
@@ -342,14 +342,14 @@ export const literatureCategory = pgTable('literatureCategory', {
 
 export const literatureItem = pgTable('literatureItem', {
   id: serial('id').primaryKey(),
-  categoryId: integer('categoryId').references(() => literatureCategory.id).notNull(),
+  categoryId: integer('categoryId').references(() => literatureCategory.id, { onDelete: 'cascade' }).notNull(),
   title: varchar('title', { length: 255 }).notNull(),
   author: varchar('author', { length: 255 }),
   year: integer('year'),
   driveUrl: varchar('driveUrl', { length: 1000 }).notNull(),
   type: varchar('type', { length: 50 }),
   isPublished: boolean('isPublished').default(false).notNull(),
-  uploadedById: integer('uploadedById').references(() => user.id).notNull(),
+  uploadedById: integer('uploadedById').references(() => user.id, { onDelete: 'cascade' }).notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()),
 });
 
@@ -361,14 +361,14 @@ export const pptModule = pgTable('pptModule', {
   notes: text('notes'),
   coverImageUrl: varchar('coverImageUrl', { length: 1000 }),
   isPublished: boolean('isPublished').default(false).notNull(),
-  createdById: integer('createdById').references(() => user.id).notNull(),
+  createdById: integer('createdById').references(() => user.id, { onDelete: 'cascade' }).notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()),
   updatedAt: timestamp('updatedAt', { mode: 'date' }).$defaultFn(() => new Date()),
 });
 
 export const pptSlide = pgTable('pptSlide', {
   id: serial('id').primaryKey(),
-  moduleId: integer('moduleId').references(() => pptModule.id).notNull(),
+  moduleId: integer('moduleId').references(() => pptModule.id, { onDelete: 'cascade' }).notNull(),
   order: integer('order').notNull(),
   title: varchar('title', { length: 255 }),
   fileUrl: varchar('fileUrl', { length: 1000 }).notNull(),
@@ -384,13 +384,13 @@ export const quiz = pgTable('quiz', {
   passingScore: integer('passingScore').default(70),
   rewardXp: integer('rewardXp').default(0).notNull(),
   isPublished: boolean('isPublished').default(false).notNull(),
-  createdById: integer('createdById').references(() => user.id).notNull(),
+  createdById: integer('createdById').references(() => user.id, { onDelete: 'cascade' }).notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()),
 });
 
 export const quizQuestion = pgTable('quizQuestion', {
   id: serial('id').primaryKey(),
-  quizId: integer('quizId').references(() => quiz.id).notNull(),
+  quizId: integer('quizId').references(() => quiz.id, { onDelete: 'cascade' }).notNull(),
   order: integer('order').notNull(),
   type: varchar('type', { length: 50 }).notNull(), // 'MULTIPLE_CHOICE' | 'ESSAY'
   question: text('question').notNull(),
@@ -401,14 +401,14 @@ export const quizQuestion = pgTable('quizQuestion', {
 
 export const quizSubmission = pgTable('quizSubmission', {
   id: serial('id').primaryKey(),
-  quizId: integer('quizId').references(() => quiz.id).notNull(),
-  memberId: integer('memberId').references(() => user.id).notNull(),
+  quizId: integer('quizId').references(() => quiz.id, { onDelete: 'cascade' }).notNull(),
+  memberId: integer('memberId').references(() => user.id, { onDelete: 'cascade' }).notNull(),
   answers: jsonb('answers').notNull().default([]), // [{questionId, selectedOptionId?, essayText?}]
   mcqScore: integer('mcqScore'),                   // auto-calculated on submit
   essayScore: integer('essayScore'),               // manually set by grader
   totalScore: integer('totalScore'),
   isPassed: boolean('isPassed'),
-  gradedById: integer('gradedById').references(() => user.id),
+  gradedById: integer('gradedById').references(() => user.id, { onDelete: 'set null' }),
   submittedAt: timestamp('submittedAt', { mode: 'date' }).$defaultFn(() => new Date()),
   gradedAt: timestamp('gradedAt', { mode: 'date' }),
 });
@@ -416,12 +416,12 @@ export const quizSubmission = pgTable('quizSubmission', {
 // 15. XP Transaction Log
 export const xpTransaction = pgTable('xpTransaction', {
   id: serial('id').primaryKey(),
-  userId: integer('userId').references(() => user.id).notNull(),
+  userId: integer('userId').references(() => user.id, { onDelete: 'cascade' }).notNull(),
   amount: integer('amount').notNull(),
   reason: varchar('reason', { length: 255 }).notNull(),
   sourceType: varchar('sourceType', { length: 50 }), // 'task' | 'quiz' | 'attendance' | 'manual'
   sourceId: integer('sourceId'),
-  grantedById: integer('grantedById').references(() => user.id),
+  grantedById: integer('grantedById').references(() => user.id, { onDelete: 'set null' }),
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()),
 });
 
@@ -435,11 +435,11 @@ export const documentCategory = pgTable('documentCategory', {
 
 export const documentItem = pgTable('documentItem', {
   id: serial('id').primaryKey(),
-  categoryId: integer('categoryId').references(() => documentCategory.id).notNull(),
+  categoryId: integer('categoryId').references(() => documentCategory.id, { onDelete: 'cascade' }).notNull(),
   title: varchar('title', { length: 255 }).notNull(),
   description: text('description'),
   fileUrl: varchar('fileUrl', { length: 1000 }).notNull(),
-  uploadedById: integer('uploadedById').references(() => user.id).notNull(),
+  uploadedById: integer('uploadedById').references(() => user.id, { onDelete: 'cascade' }).notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()),
 });
 
@@ -450,7 +450,7 @@ export const shortlink = pgTable('shortlink', {
   originalUrl: text('originalUrl').notNull(),
   description: varchar('description', { length: 255 }),
   clicks: integer('clicks').default(0).notNull(),
-  createdById: integer('createdById').references(() => user.id).notNull(),
+  createdById: integer('createdById').references(() => user.id, { onDelete: 'cascade' }).notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
 
@@ -559,7 +559,7 @@ export const pageView = pgTable('pageView', {
   id: serial('id').primaryKey(),
   path: text('path').notNull(),
   visitorId: varchar('visitorId', { length: 36 }).notNull(), // UUID dari cookie sre_vid
-  userId: integer('userId').references(() => user.id),       // nullable — hanya kalau visitor login
+  userId: integer('userId').references(() => user.id, { onDelete: 'set null' }),       // nullable — hanya kalau visitor login
   deviceType: varchar('deviceType', { length: 20 }),         // mobile | desktop | tablet
   browser: varchar('browser', { length: 100 }),
   referrer: text('referrer'),
@@ -583,7 +583,7 @@ export const featuredProject = pgTable('featuredProject', {
   imageUrl: varchar('imageUrl', { length: 1000 }),
   isPublished: boolean('isPublished').default(false).notNull(),
   order: integer('order').default(0).notNull(), // display ordering
-  createdById: integer('createdById').references(() => user.id).notNull(),
+  createdById: integer('createdById').references(() => user.id, { onDelete: 'cascade' }).notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
   updatedAt: timestamp('updatedAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
