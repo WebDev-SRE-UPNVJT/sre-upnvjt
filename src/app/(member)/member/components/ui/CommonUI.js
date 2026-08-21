@@ -73,7 +73,7 @@ export function SectionHeader({
   className = "",
 }) {
   return (
-    <div className={`flex justify-between items-center ${className}`}>
+    <div className={`flex justify-between items-center gap-4 flex-wrap sm:flex-nowrap ${className}`}>
       <h3 className="font-display font-black text-xl tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
         {Icon && <Icon className="w-5 h-5 text-primary flex-shrink-0" />}
         {title}
@@ -81,7 +81,7 @@ export function SectionHeader({
       {actionLabel && actionHref && (
         <Link
           href={actionHref}
-          className="group flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-[11px] font-black text-primary hover:bg-primary hover:text-white dark:hover:text-[#050e0a] hover:border-primary transition-all duration-300 hover:shadow-[0_0_15px_rgba(16,185,129,0.35)]"
+          className="group flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-[11px] font-black text-primary hover:bg-primary hover:text-white dark:hover:text-[#050e0a] hover:border-primary transition-all duration-300 hover:shadow-[0_0_15px_rgba(16,185,129,0.35)] shrink-0 ml-auto"
         >
           {actionLabel}
           <svg

@@ -15,28 +15,24 @@ import { EmptyState, SectionHeader } from "../components/ui/CommonUI";
 // ─── Status config ──────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
   NOT_STARTED: {
-    label: "Belum Dikerjakan",
     badge: "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/50 border-slate-200 dark:border-white/10",
     border: "hover:border-blue-500/40",
     glow: "hover:shadow-[0_0_25px_rgba(59,130,246,0.12)]",
     dot: "bg-slate-300 dark:bg-white/20",
   },
   PENDING: {
-    label: "Menunggu Review",
     badge: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/25",
     border: "hover:border-amber-500/40",
     glow: "hover:shadow-[0_0_25px_rgba(245,158,11,0.12)]",
     dot: "bg-amber-400 animate-pulse",
   },
   APPROVED: {
-    label: "Disetujui",
     badge: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/25",
     border: "hover:border-emerald-500/40",
     glow: "hover:shadow-[0_0_25px_rgba(16,185,129,0.12)]",
     dot: "bg-emerald-400",
   },
   REJECTED: {
-    label: "Perlu Revisi",
     badge: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/25",
     border: "hover:border-red-500/40",
     glow: "hover:shadow-[0_0_25px_rgba(239,68,68,0.12)]",
@@ -44,13 +40,20 @@ const STATUS_CONFIG = {
   },
 };
 
-const FILTER_TABS = [
-  { key: "ALL",         label: "Semua" },
-  { key: "NOT_STARTED", label: "Belum" },
-  { key: "PENDING",     label: "Review" },
-  { key: "APPROVED",    label: "Selesai" },
-  { key: "REJECTED",    label: "Revisi" },
-];
+function getStatusLabel(status, t) {
+  switch (status) {
+    case "NOT_STARTED":
+      return t("member_tasks.status_not_started") || "Belum Dikerjakan";
+    case "PENDING":
+      return t("member_tasks.status_pending") || "Menunggu Review";
+    case "APPROVED":
+      return t("member_tasks.status_approved") || "Disetujui";
+    case "REJECTED":
+      return t("member_tasks.status_rejected") || "Perlu Revisi";
+    default:
+      return status;
+  }
+}
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 function getStatus(taskId, submissions) {
@@ -61,8 +64,8 @@ function getStatus(taskId, submissions) {
   return "PENDING";
 }
 
-function getDeadlineInfo(deadlineStr) {
-  if (!deadlineStr) return { isOverdue: false, text: "Tanpa Deadline", isSoon: false, isUrgent: false };
+function getDeadlineInfo(deadlineStr, t, language) {
+  if (!deadlineStr) return { isOverdue: false, text: t("member_tasks.no_deadline") || "Tanpa Deadline", isSoon: false, isUrgent: false };
 
   const now = new Date();
   const deadline = new Date(deadlineStr);
@@ -70,7 +73,9 @@ function getDeadlineInfo(deadlineStr) {
 
   if (diffMs < 0) {
     const overdueDays = Math.floor(Math.abs(diffMs) / (1000 * 60 * 60 * 24));
-    const text = overdueDays === 0 ? "Lewat deadline (Hari ini)" : `Lewat ${overdueDays} hari`;
+    const text = overdueDays === 0
+      ? (t("member_tasks.overdue_today") || "Lewat deadline (Hari ini)")
+      : (t("member_tasks.overdue_days", { count: overdueDays }) || `Lewat ${overdueDays} hari`);
     return { isOverdue: true, text, isSoon: false, isUrgent: false };
   }
 
@@ -78,21 +83,22 @@ function getDeadlineInfo(deadlineStr) {
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
   if (diffDays === 0) {
-    return { isOverdue: false, text: `Tenggat ${diffHours} jam lagi`, isSoon: true, isUrgent: true };
+    return { isOverdue: false, text: t("member_tasks.due_hours", { count: diffHours }) || `Tenggat ${diffHours} jam lagi`, isSoon: true, isUrgent: true };
   } else if (diffDays <= 3) {
-    return { isOverdue: false, text: `Tenggat ${diffDays} hari lagi`, isSoon: true, isUrgent: false };
+    return { isOverdue: false, text: t("member_tasks.due_days", { count: diffDays }) || `Tenggat ${diffDays} hari lagi`, isSoon: true, isUrgent: false };
   } else {
-    const formatted = deadline.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
-    return { isOverdue: false, text: `${diffDays} hari lagi (${formatted})`, isSoon: false, isUrgent: false };
+    const formatted = deadline.toLocaleDateString(language === "en" ? "en-US" : "id-ID", { day: "numeric", month: "short", year: "numeric" });
+    return { isOverdue: false, text: t("member_tasks.due_date", { days: diffDays, formatted }) || `${diffDays} hari lagi (${formatted})`, isSoon: false, isUrgent: false };
   }
 }
 
 // ─── Task Card ───────────────────────────────────────────────────────────────
 function TaskCard({ task, submission, onOpen, index }) {
+  const { t, language } = useLanguage();
   const status   = getStatus(task.id, submission ? [submission] : []);
   const cfg      = STATUS_CONFIG[status];
-  const dlInfo   = getDeadlineInfo(task.deadline);
-  const canSubmit = status === "NOT_STARTED" || status === "REJECTED";
+  const dlInfo   = getDeadlineInfo(task.deadline, t, language);
+  const statusLabel = getStatusLabel(status, t);
 
   return (
     <motion.div
@@ -140,7 +146,7 @@ function TaskCard({ task, submission, onOpen, index }) {
 
             {/* Status badge */}
             <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg border uppercase tracking-wider ${cfg.badge}`}>
-              {STATUS_CONFIG[status].label}
+              {statusLabel}
             </span>
           </div>
         </div>
@@ -161,7 +167,7 @@ function TaskCard({ task, submission, onOpen, index }) {
 
 // ─── Submit Modal ────────────────────────────────────────────────────────────
 function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
-  const { t }             = useLanguage();
+  const { t, language }   = useLanguage();
   const router            = useRouter();
   const fileRef           = useRef(null);
   const [type, setType]   = useState(task?.submissionType === "LINK" ? "link" : "file");
@@ -175,6 +181,7 @@ function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
   const status    = getStatus(task.id, submission ? [submission] : []);
   const canSubmit = status === "NOT_STARTED" || status === "REJECTED";
   const statusCfg = STATUS_CONFIG[status];
+  const statusLabel = getStatusLabel(status, t);
 
   const maxMb = task?.maxUploadSizeMb || 10;
   const allowMulti = task?.allowMultipleFiles ?? false;
@@ -185,7 +192,7 @@ function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
 
     for (const f of incoming) {
       if (f.size > maxMb * 1024 * 1024) {
-        setError(`Ukuran berkas "${f.name}" (${(f.size / (1024 * 1024)).toFixed(1)} MB) melebihi batas maksimal ${maxMb} MB.`);
+        setError(t("member_tasks.modal.error_file_size", { name: f.name, size: (f.size / (1024 * 1024)).toFixed(1), max: maxMb }) || `Ukuran berkas "${f.name}" (${(f.size / (1024 * 1024)).toFixed(1)} MB) melebihi batas maksimal ${maxMb} MB.`);
         return;
       }
     }
@@ -228,13 +235,13 @@ function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
       fd.append("type", type);
 
       if (type === "link") {
-        if (!url.trim()) { setError("Link tidak boleh kosong."); setLoading(false); return; }
+        if (!url.trim()) { setError(t("member_tasks.modal.error_empty_link") || "Link tidak boleh kosong."); setLoading(false); return; }
         fd.append("fileUrl", url.trim());
       } else {
-        if (files.length === 0) { setError("Pilih file terlebih dahulu."); setLoading(false); return; }
+        if (files.length === 0) { setError(t("member_tasks.modal.error_no_file") || "Pilih file terlebih dahulu."); setLoading(false); return; }
         for (const f of files) {
           if (f.size > maxMb * 1024 * 1024) {
-            setError(`Ukuran berkas "${f.name}" melebihi batas maksimal ${maxMb} MB.`);
+            setError(t("member_tasks.modal.error_file_size", { name: f.name, size: (f.size / (1024 * 1024)).toFixed(1), max: maxMb }) || `Ukuran berkas "${f.name}" melebihi batas maksimal ${maxMb} MB.`);
             setLoading(false);
             return;
           }
@@ -247,7 +254,7 @@ function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
 
       if (!res.ok) throw new Error(data.error ?? "Gagal mengirim submisi.");
 
-      setSuccess("Tugas berhasil disubmit! Menunggu review.");
+      setSuccess(t("member_tasks.modal.success_msg") || "Tugas berhasil disubmit! Menunggu review.");
       onSubmitSuccess(data.submission);
       router.refresh();
     } catch (err) {
@@ -277,7 +284,7 @@ function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
           <div className="flex-1 pr-4">
             <div className="flex items-center gap-2 mb-2">
               <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg border uppercase tracking-wider ${statusCfg.badge}`}>
-                {statusCfg.label}
+                {statusLabel}
               </span>
               <span className="flex items-center gap-1 text-[10px] font-black text-amber-500 font-mono">
                 <Zap className="w-3 h-3" />+{task.rewardXp} XP
@@ -307,10 +314,10 @@ function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
                     : "bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-white/50"
                 }`}>
                   <Calendar className={`w-3.5 h-3.5 ${isOverdue ? "text-red-500" : ""}`} />
-                  Deadline: {new Date(task.deadline).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+                  {t("member_tasks.modal.deadline") || "Deadline"}: {new Date(task.deadline).toLocaleDateString(language === "en" ? "en-US" : "id-ID", { day: "numeric", month: "long", year: "numeric" })}
                   {isOverdue && (
                     <span className="ml-1 text-[9px] uppercase font-black px-1.5 py-0.5 rounded bg-red-500 text-white">
-                      Lewat Deadline
+                      {language === "en" ? "Overdue" : "Lewat Deadline"}
                     </span>
                   )}
                 </span>
@@ -318,15 +325,15 @@ function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
             })()}
             <span className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-500">
               {type === "link" ? <LinkIcon className="w-3.5 h-3.5" /> : <UploadCloud className="w-3.5 h-3.5" />}
-              {type === "link" ? "Hanya Link / Tautan" : "Hanya File / Berkas"}
+              {type === "link" ? (language === "en" ? "Link / URL Only" : "Hanya Link / Tautan") : (language === "en" ? "File Only" : "Hanya File / Berkas")}
             </span>
             {type === "file" && (
               <>
                 <span className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400">
-                  Maks {maxMb} MB
+                  {language === "en" ? `Max ${maxMb} MB` : `Maks ${maxMb} MB`}
                 </span>
                 <span className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400">
-                  {allowMulti ? "Boleh >1 File" : "Maks 1 File"}
+                  {allowMulti ? (language === "en" ? ">1 File Allowed" : "Boleh >1 File") : (language === "en" ? "Max 1 File" : "Maks 1 File")}
                 </span>
               </>
             )}
@@ -337,7 +344,7 @@ function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
             <div className="flex items-start gap-3 p-4 bg-red-500/8 border border-red-500/20 rounded-2xl">
               <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-xs font-black text-red-600 dark:text-red-400 mb-1">Feedback Reviewer:</p>
+                <p className="text-xs font-black text-red-600 dark:text-red-400 mb-1">{t("member_tasks.modal.feedback_reviewer") || "Feedback Reviewer"}:</p>
                 <p className="text-sm text-slate-600 dark:text-white/60">{submission.feedback}</p>
               </div>
             </div>
@@ -348,7 +355,7 @@ function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
             <div className="flex items-center gap-3 p-4 bg-emerald-500/8 border border-emerald-500/20 rounded-2xl">
               <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-black text-emerald-600 dark:text-emerald-400">Submisi kamu</p>
+                <p className="text-xs font-black text-emerald-600 dark:text-emerald-400">{language === "en" ? "Your Submission" : "Submisi kamu"}</p>
                 <p className="text-xs text-slate-500 dark:text-white/40 truncate mt-0.5">{submission.fileUrl}</p>
               </div>
               <a href={submission.fileUrl} target="_blank" rel="noreferrer" className="p-1.5 rounded-lg hover:bg-emerald-500/20 text-emerald-500 transition-colors flex-shrink-0">
@@ -369,7 +376,7 @@ function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
                     type="url"
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
-                    placeholder="https://drive.google.com/... atau link lainnya"
+                    placeholder={t("member_tasks.modal.link_placeholder") || "https://drive.google.com/... atau link lainnya"}
                     className="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl text-sm font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/25 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
                   />
                 </div>
@@ -381,109 +388,92 @@ function TaskDetailModal({ task, submission, onClose, onSubmitSuccess }) {
                   onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                   onDragLeave={() => setIsDragging(false)}
                   onDrop={handleDrop}
-                  onClick={() => fileRef.current?.click()}
-                  className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all duration-300
-                    ${isDragging
-                      ? "border-primary bg-primary/5"
-                      : files.length > 0
-                        ? "border-emerald-500/50 bg-emerald-500/5"
-                        : "border-slate-300 dark:border-white/15 hover:border-primary/50 hover:bg-primary/5"}`}
+                  className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all ${
+                    isDragging
+                      ? "border-primary bg-primary/5 scale-[1.01]"
+                      : "border-slate-200 dark:border-white/10 hover:border-primary/40 bg-slate-50 dark:bg-white/[0.01]"
+                  }`}
                 >
-                  <input ref={fileRef} type="file" multiple={allowMulti} className="hidden" onChange={(e) => validateAndSetFiles(e.target.files)} />
+                  <input
+                    type="file"
+                    ref={fileRef}
+                    multiple={allowMulti}
+                    className="hidden"
+                    onChange={(e) => validateAndSetFiles(e.target.files)}
+                  />
 
-                  {files.length > 0 ? (
-                    <div className="space-y-2.5" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center justify-between pb-1 border-b border-slate-200 dark:border-white/10">
-                        <span className="text-xs font-bold text-slate-600 dark:text-white/70">
-                          {files.length} {allowMulti ? "berkas terpilih" : "berkas terpilih"}
-                        </span>
-                        <div className="flex items-center gap-3">
-                          {allowMulti && (
-                            <button
-                              type="button"
-                              onClick={() => fileRef.current?.click()}
-                              className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
-                            >
-                              + Tambah File
-                            </button>
-                          )}
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                      <UploadCloud className="w-6 h-6" />
+                    </div>
+                    <p className="text-sm font-bold text-slate-700 dark:text-white/80">
+                      {t("member_tasks.modal.dropzone_title") || "Pilih berkas atau tarik ke sini"}
+                    </p>
+                    <p className="text-xs text-slate-400 dark:text-white/30">
+                      {t("member_tasks.modal.dropzone_sub", { max: maxMb }) || `Format bebas, maks ${maxMb} MB per berkas`} {allowMulti && (t("member_tasks.modal.dropzone_multi") || "(Dukungan multi-file aktif)")}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => fileRef.current?.click()}
+                      className="mt-2 px-4 py-2 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-xs font-black transition-colors"
+                    >
+                      {t("member_tasks.modal.dropzone_browse") || "Jelajahi Berkas"}
+                    </button>
+                  </div>
+
+                  {/* Selected files list */}
+                  {files.length > 0 && (
+                    <div className="mt-4 space-y-2 text-left">
+                      {files.map((file, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-2.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl">
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <FileText className="w-4 h-4 text-primary flex-shrink-0" />
+                            <span className="text-xs font-medium text-slate-700 dark:text-white/80 truncate">{file.name}</span>
+                            <span className="text-[10px] text-slate-400 flex-shrink-0">({(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                          </div>
                           <button
                             type="button"
-                            onClick={() => setFiles([])}
-                            className="text-xs text-red-500 hover:underline"
+                            onClick={() => removeFileAtIndex(idx)}
+                            className="p-1 text-slate-400 hover:text-red-500 rounded-lg transition-colors ml-2"
                           >
-                            Hapus Semua
+                            <X className="w-4 h-4" />
                           </button>
                         </div>
-                      </div>
-
-                      <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                        {files.map((f, i) => (
-                          <div key={i} className="flex items-center gap-2.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2.5">
-                            <FileText className="w-4 h-4 text-primary flex-shrink-0" />
-                            <div className="flex-1 min-w-0 text-left">
-                              <p className="text-xs font-bold text-slate-700 dark:text-white truncate">{f.name}</p>
-                              <p className="text-[10px] text-slate-400 dark:text-white/30 font-mono">{(f.size / 1024).toFixed(1)} KB</p>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => removeFileAtIndex(i)}
-                              className="p-1 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-colors"
-                              title="Hapus file ini"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
+                      ))}
                     </div>
-                  ) : (
-                    <>
-                      <UploadCloud className={`w-10 h-10 mx-auto mb-3 transition-colors ${isDragging ? "text-primary" : "text-slate-300 dark:text-white/20"}`} />
-                      <p className="text-sm font-black text-slate-600 dark:text-white/60">
-                        {allowMulti ? "Drag & drop beberapa file di sini" : "Drag & drop file di sini"}
-                      </p>
-                      <p className="text-xs text-slate-400 dark:text-white/30 mt-1">
-                        {allowMulti ? "atau klik untuk memilih multiple file" : "atau klik untuk pilih file"}
-                      </p>
-                    </>
                   )}
                 </div>
               )}
 
-              {/* Messages */}
-              <AnimatePresence>
-                {error && (
-                  <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                    className="flex items-center gap-2.5 p-3.5 bg-red-500/8 border border-red-500/20 rounded-xl">
-                    <XCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
-                    <p className="text-xs font-bold text-red-600 dark:text-red-400">{error}</p>
-                  </motion.div>
-                )}
-                {success && (
-                  <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                    className="flex items-center gap-2.5 p-3.5 bg-emerald-500/8 border border-emerald-500/20 rounded-xl">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                    <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{success}</p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {/* Error & Success alerts */}
+              {error && (
+                <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold rounded-xl">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+              {success && (
+                <div className="flex items-center gap-2 p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-bold rounded-xl">
+                  <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                  <span>{success}</span>
+                </div>
+              )}
 
               {/* Submit button */}
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-primary to-emerald-400 hover:from-primary-focus hover:to-emerald-500 text-sm font-black text-[#050e0a] tracking-widest uppercase transition-all duration-300 flex items-center justify-center gap-2.5 shadow-[0_0_25px_rgba(16,185,129,0.25)] hover:shadow-[0_0_35px_rgba(16,185,129,0.45)] disabled:opacity-60 disabled:cursor-not-allowed hover:scale-[1.01]"
+                className="w-full py-3.5 bg-gradient-to-r from-primary to-emerald-400 hover:from-primary-focus hover:to-emerald-500 text-[#050e0a] font-black text-xs uppercase tracking-widest rounded-2xl shadow-[0_0_20px_rgba(16,185,129,0.25)] hover:shadow-[0_0_30px_rgba(16,185,129,0.45)] hover:scale-[1.01] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>
                     <div className="w-4 h-4 rounded-full border-2 border-[#050e0a]/30 border-t-[#050e0a] animate-spin" />
-                    {type === "file" ? "Mengupload ke Google Drive..." : "Mengirim..."}
+                    {type === "file" ? (t("member_tasks.modal.btn_uploading") || "Mengupload ke Google Drive...") : (t("member_tasks.modal.btn_submitting") || "Mengirim...")}
                   </>
                 ) : (
                   <>
                     <Send className="w-4 h-4" />
-                    {status === "REJECTED" ? "Submit Ulang" : "Kirim Tugas"}
+                    {status === "REJECTED" ? (t("member_tasks.modal.btn_resubmit") || "Submit Ulang") : (t("member_tasks.modal.btn_submit") || "Kirim Tugas")}
                   </>
                 )}
               </button>
@@ -502,6 +492,14 @@ export default function TugasClient({ user, initialTasks, initialSubmissions }) 
   const [activeTask, setActive] = useState(null);
   const [filter, setFilter]     = useState("ALL");
   const [search, setSearch]     = useState("");
+
+  const filterTabs = [
+    { key: "ALL",         label: t("member_tasks.tabs.all") || "Semua" },
+    { key: "NOT_STARTED", label: t("member_tasks.tabs.not_started") || "Belum" },
+    { key: "PENDING",     label: t("member_tasks.tabs.pending") || "Review" },
+    { key: "APPROVED",    label: t("member_tasks.tabs.completed") || "Selesai" },
+    { key: "REJECTED",    label: t("member_tasks.tabs.rejected") || "Revisi" },
+  ];
 
   // Derive submissions map
   const subMap = Object.fromEntries(submissions.map((s) => [s.taskId, s]));
@@ -544,22 +542,22 @@ export default function TugasClient({ user, initialTasks, initialSubmissions }) 
       >
         <div>
           <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/25 text-[10px] font-black text-blue-600 dark:text-blue-400 tracking-widest uppercase mb-3">
-            <FolderKanban className="w-3 h-3" /> Penugasan Aktif
+            <FolderKanban className="w-3 h-3" /> {t("member_tasks.badge_active") || "Penugasan Aktif"}
           </span>
           <h1 className="text-4xl md:text-5xl font-display font-black tracking-tighter text-slate-900 dark:text-white leading-none">
-            {t("member_tasks.title")}
+            {t("member_tasks.title") || "Daftar Penugasan"}
           </h1>
           <p className="text-slate-500 dark:text-white/45 text-sm mt-2 font-medium">
-            {t("member_tasks.subtitle")}
+            {t("member_tasks.subtitle") || "Pantau tugas divisimu dan kumpulkan laporan pekerjaanmu tepat waktu untuk mendapatkan XP."}
           </p>
         </div>
 
         {/* Mini stats */}
         <div className="flex items-center gap-3 flex-wrap">
           {[
-            { label: "Total",   val: totalTasks,    color: "text-slate-700 dark:text-white" },
-            { label: "Review",  val: pendingCount,  color: "text-amber-600 dark:text-amber-400" },
-            { label: "Selesai", val: approvedCount, color: "text-emerald-600 dark:text-emerald-400" },
+            { label: t("member_tasks.stats.total") || "Total",   val: totalTasks,    color: "text-slate-700 dark:text-white" },
+            { label: t("member_tasks.stats.review") || "Review",  val: pendingCount,  color: "text-amber-600 dark:text-amber-400" },
+            { label: t("member_tasks.stats.completed") || "Selesai", val: approvedCount, color: "text-emerald-600 dark:text-emerald-400" },
           ].map((s) => (
             <div key={s.label} className="flex flex-col items-center px-4 py-2.5 bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-2xl shadow-sm">
               <span className={`text-xl font-black ${s.color}`}>{s.val}</span>
@@ -578,7 +576,7 @@ export default function TugasClient({ user, initialTasks, initialSubmissions }) 
       >
         {/* Filter tabs */}
         <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/8 rounded-2xl overflow-x-auto">
-          {FILTER_TABS.map(({ key, label }) => {
+          {filterTabs.map(({ key, label }) => {
             const count = key === "ALL"
               ? tasks.length
               : tasks.filter((tk) => getStatus(tk.id, submissions) === key).length;
@@ -608,7 +606,7 @@ export default function TugasClient({ user, initialTasks, initialSubmissions }) 
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari tugas..."
+              placeholder={t("member_tasks.search_placeholder") || "Cari tugas..."}
               className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/8 rounded-2xl text-sm font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/25 focus:outline-none focus:border-primary/50 transition-all"
             />
           </div>
@@ -617,7 +615,7 @@ export default function TugasClient({ user, initialTasks, initialSubmissions }) 
             className="group flex items-center gap-1.5 px-3.5 py-2.5 bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/8 hover:border-primary/30 rounded-2xl transition-all duration-300 hover:shadow-[0_0_16px_rgba(16,185,129,0.1)] whitespace-nowrap flex-shrink-0"
           >
             <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-white/40 group-hover:text-primary transition-colors" />
-            <span className="text-xs font-black text-slate-600 dark:text-white/60 group-hover:text-primary transition-colors">Riwayat</span>
+            <span className="text-xs font-black text-slate-600 dark:text-white/60 group-hover:text-primary transition-colors">{t("member_tasks.history_btn") || "Riwayat"}</span>
             <ChevronRight className="w-3 h-3 text-slate-300 dark:text-white/20 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
           </Link>
         </div>
@@ -639,8 +637,8 @@ export default function TugasClient({ user, initialTasks, initialSubmissions }) 
           <div className="md:col-span-2">
             <EmptyState
               icon={FolderKanban}
-              title={filter !== "ALL" ? `Tidak ada tugas dengan status "${FILTER_TABS.find(f => f.key === filter)?.label}"` : "Belum ada tugas"}
-              description="Tugas akan muncul di sini saat sudah dibuat oleh admin."
+              title={filter !== "ALL" ? (t("member_tasks.empty_filter", { status: filterTabs.find(f => f.key === filter)?.label }) || `Tidak ada tugas dengan status "${filterTabs.find(f => f.key === filter)?.label}"`) : (t("member_tasks.empty_title") || "Belum ada tugas")}
+              description={t("member_tasks.empty_desc") || "Tugas akan muncul di sini saat sudah dibuat oleh admin."}
               className="py-20 bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-3xl"
             />
           </div>

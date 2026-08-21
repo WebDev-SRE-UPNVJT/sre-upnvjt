@@ -17,30 +17,36 @@ import Link from "next/link";
 // ─── Status config ──────────────────────────────────────────────────────────
 const STATUS_META = {
   PRESENT: {
-    label: "Hadir",
     icon:  CheckCircle2,
     badge: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/25",
   },
   ABSENT: {
-    label: "Alpha",
     icon:  AlertTriangle,
     badge: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/25",
   },
   LATE: {
-    label: "Terlambat",
     icon:  Clock,
     badge: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/25",
   },
   EXCUSED: {
-    label: "Izin",
     icon:  Info,
     badge: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/25",
   },
 };
 
+function getStatusLabel(status, t) {
+  switch (status) {
+    case "PRESENT": return t("attendance_member.status_present") || "Hadir";
+    case "LATE":    return t("attendance_member.status_late") || "Terlambat";
+    case "EXCUSED": return t("attendance_member.status_excused") || "Izin";
+    case "ABSENT":  return t("attendance_member.status_absent") || "Alpha";
+    default:        return status;
+  }
+}
+
 // ─── Check-in Modal ──────────────────────────────────────────────────────────
 function CheckInModal({ session, onClose, onSuccess }) {
-  const { t }           = useLanguage();
+  const { t, language }           = useLanguage();
   const [status, setStatus] = useState("PRESENT");
   const [token, setToken]   = useState("");
   const [notes, setNotes]   = useState("");
@@ -110,11 +116,11 @@ function CheckInModal({ session, onClose, onSuccess }) {
         {/* Header */}
         <div className="flex items-start justify-between p-6 pb-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/[0.02] shrink-0">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">Isi Presensi</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">{t("attendance_member.modal.title") || "Isi Presensi"}</p>
             <h3 className="text-lg font-black text-slate-900 dark:text-white">{session.title}</h3>
             <p className="text-xs text-slate-500 dark:text-white/40 mt-0.5 flex items-center gap-1">
               <Calendar className="w-3 h-3" />
-              {new Date(session.date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+              {new Date(session.date).toLocaleDateString(language === "en" ? "en-US" : "id-ID", { day: "numeric", month: "long", year: "numeric" })}
             </p>
           </div>
           {!loading && !done && (
@@ -135,11 +141,11 @@ function CheckInModal({ session, onClose, onSuccess }) {
               <div className="w-20 h-20 rounded-full bg-emerald-500/15 border-2 border-emerald-500/30 flex items-center justify-center mb-4">
                 <Check className="w-10 h-10 text-emerald-500" />
               </div>
-              <h4 className="text-2xl font-black text-slate-900 dark:text-white mb-1">Berhasil!</h4>
-              <p className="text-sm text-slate-500 dark:text-white/50">{t("attendance_member.modal_success_msg")}</p>
+              <h4 className="text-2xl font-black text-slate-900 dark:text-white mb-1">{t("attendance_member.modal.success_title") || "Berhasil!"}</h4>
+              <p className="text-sm text-slate-500 dark:text-white/50">{t("attendance_member.modal.success_msg") || "Presensi berhasil dicatat!"}</p>
               {(status === "PRESENT" || status === "LATE") && (
                 <div className="mt-4 flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-black">
-                  <Zap className="w-3.5 h-3.5" />+10 XP diterima!
+                  <Zap className="w-3.5 h-3.5" />{t("attendance_member.modal.xp_received") || "+10 XP diterima!"}
                 </div>
               )}
             </motion.div>
@@ -147,12 +153,12 @@ function CheckInModal({ session, onClose, onSuccess }) {
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Status selector */}
               <div>
-                <p className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-white/40 mb-3">Pilih Status Kehadiran</p>
+                <p className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-white/40 mb-3">{t("attendance_member.modal.select_status") || "Pilih Status Kehadiran"}</p>
                 <div className="grid grid-cols-3 gap-3">
                   {[
-                    { key: "PRESENT", label: "Hadir",     icon: CheckCircle2, active: "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10", icon_active: "bg-emerald-500 text-white", text_active: "text-emerald-700 dark:text-emerald-400" },
-                    { key: "LATE",    label: "Terlambat",  icon: Clock,        active: "border-amber-500 bg-amber-50 dark:bg-amber-500/10",       icon_active: "bg-amber-500 text-white",   text_active: "text-amber-700 dark:text-amber-400" },
-                    { key: "EXCUSED", label: "Izin",       icon: Info,         active: "border-blue-500 bg-blue-50 dark:bg-blue-500/10",           icon_active: "bg-blue-500 text-white",    text_active: "text-blue-700 dark:text-blue-400" },
+                    { key: "PRESENT", label: t("attendance_member.status_present") || "Hadir",     icon: CheckCircle2, active: "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10", icon_active: "bg-emerald-500 text-white", text_active: "text-emerald-700 dark:text-emerald-400" },
+                    { key: "LATE",    label: t("attendance_member.status_late") || "Terlambat",  icon: Clock,        active: "border-amber-500 bg-amber-50 dark:bg-amber-500/10",       icon_active: "bg-amber-500 text-white",   text_active: "text-amber-700 dark:text-amber-400" },
+                    { key: "EXCUSED", label: t("attendance_member.status_excused") || "Izin",       icon: Info,         active: "border-blue-500 bg-blue-50 dark:bg-blue-500/10",           icon_active: "bg-blue-500 text-white",    text_active: "text-blue-700 dark:text-blue-400" },
                   ].map(({ key, label, icon: Icon, active, icon_active, text_active }) => (
                     <button
                       key={key}
@@ -180,21 +186,20 @@ function CheckInModal({ session, onClose, onSuccess }) {
                     initial={{ opacity: 0, y: -8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
-                    className="space-y-2"
+                    className="space-y-1.5"
                   >
-                    <label className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-white/40 flex items-center gap-1.5">
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-600 dark:text-white/60 flex items-center gap-1.5">
                       <Key className="w-3.5 h-3.5 text-primary" />
-                      Token Presensi
+                      {t("attendance_member.modal.token_label") || "Token Kehadiran (Dari Pemateri)"}
                     </label>
                     <input
                       type="text"
+                      required
                       value={token}
                       onChange={(e) => setToken(e.target.value.toUpperCase())}
-                      placeholder="Masukkan token dari admin…"
-                      required
-                      className="w-full bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl px-4 py-3.5 text-slate-900 dark:text-white font-black uppercase tracking-widest text-center text-lg focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all placeholder:text-slate-300 dark:placeholder:text-white/20 placeholder:font-normal placeholder:normal-case placeholder:tracking-normal"
+                      placeholder={t("attendance_member.modal.token_placeholder") || "Contoh: SRE2026"}
+                      className="w-full px-4 py-3.5 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl text-sm font-mono font-black tracking-widest text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 uppercase focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
                     />
-                    <p className="text-[10px] text-slate-400 dark:text-white/25 text-center">Token diberikan oleh admin saat sesi berlangsung</p>
                   </motion.div>
                 ) : (
                   <motion.div
@@ -202,54 +207,61 @@ function CheckInModal({ session, onClose, onSuccess }) {
                     initial={{ opacity: 0, y: -8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
-                    className="space-y-2"
+                    className="space-y-1.5"
                   >
-                    <label className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-white/40 flex items-center gap-1.5">
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-600 dark:text-white/60 flex items-center gap-1.5">
                       <FileText className="w-3.5 h-3.5 text-blue-500" />
-                      Keterangan Izin
+                      {t("attendance_member.modal.notes_label") || "Keterangan / Alasan"}
                     </label>
                     <textarea
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      placeholder="Jelaskan alasan izin kamu…"
                       required
                       rows={3}
-                      className="w-full bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl px-4 py-3.5 text-slate-900 dark:text-white font-medium resize-none focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/10 transition-all"
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder={t("attendance_member.modal.notes_placeholder") || "Jelaskan alasan izin / sakit kamu..."}
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all resize-none"
                     />
                   </motion.div>
                 )}
               </AnimatePresence>
 
+              {/* Optional note for PRESENT / LATE */}
+              {needsToken && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-400 dark:text-white/40">
+                    {t("attendance_member.modal.notes_late_label") || "Catatan Tambahan (Opsional)"}
+                  </label>
+                  <input
+                    type="text"
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder={t("attendance_member.modal.notes_late_placeholder") || "Tuliskan alasan keterlambatan bila ada..."}
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 focus:outline-none focus:border-primary/50 transition-all"
+                  />
+                </div>
+              )}
+
               {/* Error */}
-              <AnimatePresence>
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    className="flex items-center gap-2.5 p-3.5 bg-red-500/8 border border-red-500/20 rounded-xl"
-                  >
-                    <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
-                    <p className="text-xs font-bold text-red-600 dark:text-red-400">{error}</p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {error && (
+                <div className="flex items-center gap-2 p-3.5 bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold rounded-2xl">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
 
               {/* Submit */}
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full py-4 rounded-2xl font-black text-sm tracking-widest uppercase transition-all duration-300 flex items-center justify-center gap-2.5 disabled:opacity-60 disabled:cursor-not-allowed hover:scale-[1.01]
-                  ${status === "PRESENT" ? "bg-emerald-500 hover:bg-emerald-600 text-white shadow-[0_0_25px_rgba(16,185,129,0.3)]" :
-                    status === "LATE"    ? "bg-amber-500 hover:bg-amber-600 text-white shadow-[0_0_25px_rgba(245,158,11,0.3)]" :
-                                          "bg-blue-500 hover:bg-blue-600 text-white shadow-[0_0_25px_rgba(59,130,246,0.3)]"}`}
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-primary to-emerald-400 hover:from-primary-focus hover:to-emerald-500 text-[#050e0a] font-black text-xs uppercase tracking-widest transition-all duration-300 shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
-                  <><div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />Mengirim...</>
-                ) : needsToken ? (
-                  <><Check className="w-4 h-4" />Kirim Presensi</>
+                  <>
+                    <div className="w-4 h-4 rounded-full border-2 border-[#050e0a]/30 border-t-[#050e0a] animate-spin" />
+                    <span>{t("attendance_member.modal.btn_submitting") || "Mengirim..."}</span>
+                  </>
                 ) : (
-                  <><FileText className="w-4 h-4" />Kirim Izin</>
+                  <span>{t("attendance_member.modal.btn_submit") || "Kirim Presensi"}</span>
                 )}
               </button>
             </form>
@@ -259,62 +271,59 @@ function CheckInModal({ session, onClose, onSuccess }) {
     </motion.div>
   );
 
-  if (typeof document === "undefined") return null;
-  return createPortal(modalNode, document.body);
+  return typeof document !== "undefined" ? createPortal(modalNode, document.body) : null;
 }
 
-export default function AbsensiClient({ initialAttendance, validSessions = [], userRoleName = "Member" }) {
-  const { t }              = useLanguage();
-  const router             = useRouter();
-  const [records, setRec]  = useState(initialAttendance ?? []);
-  const [mounted, setMounted] = useState(false);
+// ─── Main Component ──────────────────────────────────────────────────────────
+export default function AbsensiClient({ initialSessions, initialAttendance, user }) {
+  const { t, language }     = useLanguage();
+  const [sessions]          = useState(initialSessions ?? []);
+  const [records, setRecs]  = useState(initialAttendance ?? []);
   const [activeSession, setActiveSession] = useState(null);
+  const [statusFilter, setStatusFilter]   = useState("ALL");
 
-  useEffect(() => setMounted(true), []);
+  // Effective records (termasuk auto-ABSENT untuk sesi lampau yang belum diisi)
+  const effectiveRecords = sessions
+    .filter((s) => !s.isActive || records.some((r) => r.sessionId === s.id))
+    .map((sess) => {
+      const rec = records.find((r) => r.sessionId === sess.id);
+      if (rec) return { ...rec, session: sess };
+      return {
+        id:        `auto-${sess.id}`,
+        sessionId: sess.id,
+        session:   sess,
+        status:    "ABSENT",
+        notes:     t("attendance_member.auto_absent_msg") || "Tidak mengisi presensi",
+        createdAt: sess.date,
+      };
+    })
+    .sort((a, b) => new Date(b.session?.date ?? b.createdAt) - new Date(a.session?.date ?? a.createdAt));
 
-  // ─── Effective records (auto-ABSENT untuk sesi yang sudah lewat) ──
-  const effectiveRecords = [...records];
-  const pendingSessions  = [];
+  // Sesi yang masih aktif dan belum diisi oleh user
+  const pendingSessions = sessions.filter(
+    (s) => s.isActive && !records.some((r) => r.sessionId === s.id)
+  );
 
-  for (const sess of validSessions) {
-    const hasRecord = records.some((r) => r.sessionId === sess.id);
-    if (!hasRecord) {
-      if (!sess.isActive) {
-        effectiveRecords.push({
-          id: `auto-${sess.id}`,
-          sessionId: sess.id,
-          session: sess,
-          status: "ABSENT",
-          notes: t("attendance_member.auto_absent_msg"),
-          createdAt: sess.date,
-        });
-      } else {
-        pendingSessions.push(sess);
-      }
-    }
-  }
+  // Stats calculation
+  const totalCompleted = effectiveRecords.length;
+  const presentCount   = effectiveRecords.filter((r) => r.status === "PRESENT").length;
+  const lateCount      = effectiveRecords.filter((r) => r.status === "LATE").length;
+  const presentTotal   = presentCount + lateCount;
+  const attendRate     = totalCompleted === 0 ? 100 : Math.round((presentTotal / totalCompleted) * 100);
 
-  effectiveRecords.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  // Streak calculation (dari sesi terlama ke terbaru)
+  const streak = [...effectiveRecords]
+    .reverse()
+    .reduce((acc, curr) => (curr.status === "PRESENT" || curr.status === "LATE" ? acc + 1 : 0), 0);
 
-  const getCount = (s) => effectiveRecords.filter((r) => r.status === s).length;
+  const getCount = (st) => effectiveRecords.filter((r) => r.status === st).length;
 
-  const totalValid    = validSessions.length;
-  const presentTotal  = getCount("PRESENT") + getCount("LATE");
-  const attendRate    = totalValid === 0 ? 0 : Math.round((presentTotal / totalValid) * 100);
-
-  // Streak: hitung dari sesi terbaru ke belakang
-  let streak = 0;
-  const sortedSessions = [...validSessions].sort((a, b) => new Date(b.date) - new Date(a.date));
-  for (const sess of sortedSessions) {
-    const rec = effectiveRecords.find((r) => r.sessionId === sess.id);
-    if (rec && (rec.status === "PRESENT" || rec.status === "LATE")) streak++;
-    else break;
-  }
-
-  const onSuccess = (newRec) => setRec((prev) => [newRec, ...prev]);
-  const [statusFilter, setStatusFilter] = useState("ALL");
-
-  if (!mounted) return null;
+  const onSuccess = (newRec) => {
+    setRecs((prev) => {
+      const filtered = prev.filter((r) => r.sessionId !== newRec.sessionId);
+      return [newRec, ...filtered];
+    });
+  };
 
   const displayedRecords = effectiveRecords.filter(
     (r) => statusFilter === "ALL" || r.status === statusFilter
@@ -329,7 +338,7 @@ export default function AbsensiClient({ initialAttendance, validSessions = [], u
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}>
         <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/25 text-[10px] font-black text-primary tracking-widest uppercase mb-3">
-          <ClipboardCheck className="w-3 h-3" /> Presensi Member
+          <ClipboardCheck className="w-3 h-3" /> {t("attendance_member.badge_member") || "Presensi Member"}
         </span>
         <h1 className="text-4xl md:text-5xl font-display font-black tracking-tighter text-slate-900 dark:text-white leading-none">
           {t("attendance_member.title")} 
@@ -357,13 +366,13 @@ export default function AbsensiClient({ initialAttendance, validSessions = [], u
                   <AlertTriangle className="w-7 h-7 text-amber-400 animate-pulse" />
                 </div>
                 <div>
-                  <p className="text-xs font-black uppercase tracking-widest text-amber-400/70 mb-1">Sesi Terbuka</p>
+                  <p className="text-xs font-black uppercase tracking-widest text-amber-400/70 mb-1">{t("attendance_member.open_session") || "Sesi Terbuka"}</p>
                   <h3 className="text-lg font-black text-white">
                     {pendingSessions.length === 1
                       ? pendingSessions[0].title
-                      : `${pendingSessions.length} sesi presensi menunggu`}
+                      : (t("attendance_member.pending_sessions_waiting", { count: pendingSessions.length }) || `${pendingSessions.length} sesi presensi menunggu`)}
                   </h3>
-                  <p className="text-xs text-white/50 mt-0.5">Segera isi sebelum sesi ditutup</p>
+                  <p className="text-xs text-white/50 mt-0.5">{t("attendance_member.open_session_warn") || "Segera isi sebelum sesi ditutup"}</p>
                 </div>
               </div>
 
@@ -386,30 +395,37 @@ export default function AbsensiClient({ initialAttendance, validSessions = [], u
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={Target}       value={`${attendRate}%`} label="Tingkat Kehadiran"  iconBg="bg-primary/10"    iconColor="text-primary"    iconBorder="border-primary/20"    delay={0.1} />
-        <StatCard icon={Flame}        value={streak}           label="Streak Hadir"        iconBg="bg-orange-500/10" iconColor="text-orange-500" iconBorder="border-orange-500/20" delay={0.15} />
-        <StatCard icon={CheckCircle2} value={presentTotal}     label="Total Hadir"         iconBg="bg-emerald-500/10" iconColor="text-emerald-500" iconBorder="border-emerald-500/20" delay={0.2} />
-        <StatCard icon={AlertTriangle} value={getCount("ABSENT")} label="Alpha"           iconBg="bg-red-500/10"    iconColor="text-red-500"    iconBorder="border-red-500/20"    delay={0.25} />
+        <StatCard icon={Target}       value={`${attendRate}%`} label={t("attendance_member.stat_rate") || "Tingkat Kehadiran"}  iconBg="bg-primary/10"    iconColor="text-primary"    iconBorder="border-primary/20"    delay={0.1} />
+        <StatCard icon={Flame}        value={streak}           label={t("attendance_member.stat_streak") || "Streak Hadir"}        iconBg="bg-orange-500/10" iconColor="text-orange-500" iconBorder="border-orange-500/20" delay={0.15} />
+        <StatCard icon={CheckCircle2} value={presentTotal}     label={t("attendance_member.stat_total_present") || "Total Hadir"}         iconBg="bg-emerald-500/10" iconColor="text-emerald-500" iconBorder="border-emerald-500/20" delay={0.2} />
+        <StatCard icon={AlertTriangle} value={getCount("ABSENT")} label={t("attendance_member.stat_absent") || "Alpha"}           iconBg="bg-red-500/10"    iconColor="text-red-500"    iconBorder="border-red-500/20"    delay={0.25} />
       </div>
 
       {/* History Table with Integrated Interactive Filters */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-          <SectionHeader
-            icon={Calendar}
-            title="Riwayat Terakhir"
-            actionLabel="Lihat Semua Riwayat"
-            actionHref="/member/absensi/riwayat"
-          />
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
+          <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap">
+            <h3 className="font-display font-black text-xl tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
+              <Calendar className="w-5 h-5 text-primary flex-shrink-0" />
+              {t("attendance_member.recent_history") || "Riwayat Terakhir"}
+            </h3>
+            <Link
+              href="/member/absensi/riwayat"
+              className="group flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-[11px] font-black text-primary hover:bg-primary hover:text-white dark:hover:text-[#050e0a] hover:border-primary transition-all duration-300 hover:shadow-[0_0_15px_rgba(16,185,129,0.35)] shrink-0"
+            >
+              {t("attendance_member.view_all_history") || "Lihat Semua Riwayat"}
+              <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+          </div>
 
           {/* Interactive Filter Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
             {[
-              { key: "ALL", label: "Semua", count: effectiveRecords.length },
-              { key: "PRESENT", label: "Hadir", count: getCount("PRESENT") },
-              { key: "LATE", label: "Terlambat", count: getCount("LATE") },
-              { key: "EXCUSED", label: "Izin", count: getCount("EXCUSED") },
-              { key: "ABSENT", label: "Alpha", count: getCount("ABSENT") },
+              { key: "ALL", label: t("attendance_member.status_all") || "Semua", count: effectiveRecords.length },
+              { key: "PRESENT", label: t("attendance_member.status_present") || "Hadir", count: getCount("PRESENT") },
+              { key: "LATE", label: t("attendance_member.status_late") || "Terlambat", count: getCount("LATE") },
+              { key: "EXCUSED", label: t("attendance_member.status_excused") || "Izin", count: getCount("EXCUSED") },
+              { key: "ABSENT", label: t("attendance_member.status_absent") || "Alpha", count: getCount("ABSENT") },
             ].map((tab) => {
               const isActive = statusFilter === tab.key;
               return (
@@ -436,8 +452,8 @@ export default function AbsensiClient({ initialAttendance, validSessions = [], u
           {displayedRecords.length === 0 ? (
             <EmptyState
               icon={ClipboardCheck}
-              title={t("attendance_member.no_history")}
-              description="Tidak ada catatan presensi untuk filter status yang dipilih."
+              title={t("attendance_member.empty_history_title") || "Belum ada riwayat"}
+              description={t("attendance_member.empty_history_desc") || "Tidak ada catatan presensi untuk filter status yang dipilih."}
               className="py-16"
             />
           ) : (
@@ -445,7 +461,12 @@ export default function AbsensiClient({ initialAttendance, validSessions = [], u
               <table className="w-full min-w-[600px] text-left">
                 <thead className="border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/[0.015]">
                   <tr>
-                    {["Sesi", "Tanggal", "Status", "Keterangan"].map((h) => (
+                    {[
+                      t("attendance_member.th_session") || "Sesi",
+                      t("attendance_member.th_date") || "Tanggal",
+                      t("attendance_member.th_status") || "Status",
+                      t("attendance_member.th_notes") || "Keterangan"
+                    ].map((h) => (
                       <th key={h} className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/30">
                         {h}
                       </th>
@@ -456,6 +477,7 @@ export default function AbsensiClient({ initialAttendance, validSessions = [], u
                   {displayedRecords.slice(0, 6).map((rec, i) => {
                     const meta = STATUS_META[rec.status] ?? STATUS_META.ABSENT;
                     const Icon = meta.icon;
+                    const statusLabel = getStatusLabel(rec.status, t);
                     return (
                       <motion.tr
                         key={rec.id}
@@ -475,12 +497,12 @@ export default function AbsensiClient({ initialAttendance, validSessions = [], u
                           </div>
                         </td>
                         <td className="px-5 py-4 text-sm text-slate-500 dark:text-white/40 whitespace-nowrap">
-                          {new Date(rec.session?.date ?? rec.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                          {new Date(rec.session?.date ?? rec.createdAt).toLocaleDateString(language === "en" ? "en-US" : "id-ID", { day: "numeric", month: "short", year: "numeric" })}
                         </td>
                         <td className="px-5 py-4">
                           <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wider ${meta.badge}`}>
                             <Icon className="w-3 h-3" />
-                            {meta.label}
+                            {statusLabel}
                           </span>
                         </td>
                         <td className="px-5 py-4 text-xs text-slate-400 dark:text-white/30 max-w-[200px] truncate">
@@ -495,13 +517,13 @@ export default function AbsensiClient({ initialAttendance, validSessions = [], u
               {effectiveRecords.length > 6 && (
                 <div className="px-5 py-3.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
                   <span className="text-xs text-slate-400 dark:text-white/30">
-                    Menampilkan 6 dari {effectiveRecords.length} sesi
+                    {t("attendance_member.showing_x_of_y", { shown: 6, total: effectiveRecords.length }) || `Menampilkan 6 dari ${effectiveRecords.length} sesi`}
                   </span>
                   <Link
                     href="/member/absensi/riwayat"
                     className="text-xs font-black text-primary hover:text-primary/80 transition-colors"
                   >
-                    Lihat semua →
+                    {t("attendance_member.view_all_arrow") || "Lihat semua →"}
                   </Link>
                 </div>
               )}

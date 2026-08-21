@@ -58,13 +58,6 @@ const PODIUM_CONFIG = {
   },
 };
 
-// ─── Period tabs ────────────────────────────────────────────────────────────
-const PERIODS = [
-  { key: "all",   label: "Semua Waktu", icon: Trophy },
-  { key: "month", label: "Bulan Ini",   icon: Calendar },
-  { key: "week",  label: "Minggu Ini",  icon: TrendingUp },
-];
-
 // ─── Avatar ─────────────────────────────────────────────────────────────────
 function Avatar({ name, url, size = "w-10 h-10", borderCls = "", shadowCls = "", textSize = "text-sm" }) {
   return url ? (
@@ -82,6 +75,12 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
   const [leaderboard, setLeaderboard] = useState(initialLeaderboard ?? []);
   const [isLoading, setIsLoading]     = useState(false);
   const [mounted, setMounted]         = useState(false);
+
+  const periods = [
+    { key: "all",   label: t("leaderboard.period_all") || "Semua Waktu", icon: Trophy },
+    { key: "month", label: t("leaderboard.period_month") || "Bulan Ini",   icon: Calendar },
+    { key: "week",  label: t("leaderboard.period_week") || "Minggu Ini",  icon: TrendingUp },
+  ];
 
   useEffect(() => {
     setMounted(true);
@@ -135,7 +134,7 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
       >
         <div>
           <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-[10px] font-black text-amber-600 dark:text-amber-400 tracking-widest uppercase">
-            <Trophy className="w-3 h-3" /> Hall of Fame
+            <Trophy className="w-3 h-3" /> {t("leaderboard.badge_hof") || "Hall of Fame"}
           </span>
           <h1 className="text-4xl md:text-5xl font-display font-black tracking-tighter text-slate-900 dark:text-white mt-4 flex items-center gap-3 leading-none">
             <Trophy className="w-9 h-9 text-amber-500 dark:text-amber-400 animate-[bounce_2s_ease-in-out_infinite]" />
@@ -148,7 +147,7 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
 
         {/* Period Tabs */}
         <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/8 rounded-2xl">
-          {PERIODS.map(({ key, label, icon: Icon }) => (
+          {periods.map(({ key, label, icon: Icon }) => (
             <button
               key={key}
               onClick={() => handlePeriodChange(key)}
@@ -177,7 +176,7 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
           >
             <div className="flex flex-col items-center gap-3">
               <div className="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-              <p className="text-sm font-black text-primary">Memuat data...</p>
+              <p className="text-sm font-black text-primary">{t("leaderboard.loading") || "Memuat data..."}</p>
             </div>
           </motion.div>
         )}
@@ -261,7 +260,7 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
                     {/* "You" indicator */}
                     {isMe && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-primary text-white text-[8px] font-black rounded-full whitespace-nowrap z-30">
-                        Kamu
+                        {t("leaderboard.you") || "Kamu"}
                       </div>
                     )}
                   </div>
@@ -304,16 +303,16 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
         {/* Table header */}
         <div className="grid grid-cols-[45px_1fr_100px] md:grid-cols-[60px_1fr_auto_160px] gap-2 md:gap-4 px-4 md:px-6 py-3.5 md:py-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/[0.015]">
           <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-white/30">
-            Rank
+            {t("leaderboard.table_rank") || "Rank"}
           </span>
           <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-white/30">
-            Member
+            {t("leaderboard.table_member") || "Member"}
           </span>
           <span className="hidden md:inline text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-white/30">
-            Level
+            {t("leaderboard.table_level") || "Level"}
           </span>
           <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-white/30 text-right md:text-left">
-            XP Progress
+            {t("leaderboard.table_xp") || "XP Progress"}
           </span>
         </div>
 
@@ -322,8 +321,8 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
           {leaderboard.length === 0 ? (
             <EmptyState
               icon={Users}
-              title="Belum ada data leaderboard"
-              description={period !== "all" ? "Belum ada aktivitas XP dalam periode ini." : "Data akan muncul setelah ada member dengan XP."}
+              title={t("leaderboard.empty_title") || "Belum ada data leaderboard"}
+              description={period !== "all" ? (t("leaderboard.empty_period_desc") || "Belum ada aktivitas XP dalam periode ini.") : (t("leaderboard.empty_desc") || "Data akan muncul setelah ada member dengan XP.")}
               className="py-16"
             />
           ) : leaderboard.map((item, i) => {
@@ -375,7 +374,7 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
                   </div>
                   <div className="min-w-0">
                     <p className={`text-xs sm:text-sm font-black truncate ${isMe ? "text-primary" : "text-slate-800 dark:text-white"}`}>
-                      {item.name} {isMe && <span className="text-[9px] bg-primary/15 text-primary px-1.5 py-0.5 rounded-full ml-1 font-bold">Kamu</span>}
+                      {item.name} {isMe && <span className="text-[9px] bg-primary/15 text-primary px-1.5 py-0.5 rounded-full ml-1 font-bold">{t("leaderboard.you") || "Kamu"}</span>}
                     </p>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       <p className="text-[10px] text-slate-400 dark:text-white/30 truncate">{item.divisionName ?? item.npm ?? "Member"}</p>
@@ -444,7 +443,7 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
                       </div>
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-white/40">Posisiku</p>
+                      <p className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-white/40">{t("leaderboard.my_position") || "Posisiku"}</p>
                       <p className="text-xs sm:text-sm font-black text-slate-900 dark:text-white truncate max-w-[120px] sm:max-w-[200px]">{currentUser.name}</p>
                       <LevelBadge xp={currentUser.xp} size="sm" className="mt-0.5 sm:mt-1" />
                     </div>
@@ -455,7 +454,7 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
                     <div className="flex flex-col items-end gap-1 sm:gap-1.5 shrink-0 max-w-[150px] sm:max-w-[220px]">
                       <div className="flex items-center gap-1 text-[9px] sm:text-[10px] font-black text-amber-600 dark:text-amber-400 text-right leading-tight">
                         <ArrowUp className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
-                        <span>Butuh {xpToNextRank.toLocaleString()} XP untuk naik rank</span>
+                        <span>{t("leaderboard.need_xp_to_rank", { count: xpToNextRank.toLocaleString() }) || `Butuh ${xpToNextRank.toLocaleString()} XP untuk naik rank`}</span>
                       </div>
                       <div className="w-full h-1.5 sm:h-2 bg-slate-100 dark:bg-white/8 rounded-full overflow-hidden">
                         <motion.div
@@ -469,7 +468,7 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
                   ) : (
                     <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl bg-amber-500/10 border border-amber-500/25 shrink-0">
                       <Crown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 fill-amber-500/50 animate-bounce" />
-                      <span className="text-[11px] sm:text-xs font-black text-amber-600 dark:text-amber-400">Peringkat #1!</span>
+                      <span className="text-[11px] sm:text-xs font-black text-amber-600 dark:text-amber-400">{t("leaderboard.rank_first") || "Peringkat #1!"}</span>
                     </div>
                   )}
                 </div>
