@@ -19,7 +19,7 @@ export default function MemberNavbarClient({ user, profile }) {
   const [academicDropdownOpen, setAcademicDropdownOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -59,10 +59,10 @@ export default function MemberNavbarClient({ user, profile }) {
   }, [pathname]);
 
   const navLinks = [
-    { name: "Beranda", href: "/member" },
-    { name: "Tugas", href: "/member/tugas", icon: FolderKanban },
-    { name: "Leaderboard", href: "/member/leaderboard", icon: Trophy },
-    { name: "Presensi", href: "/member/absensi", icon: ClipboardCheck },
+    { name: t("member_nav.home") || "Beranda", href: "/member" },
+    { name: t("member_nav.tasks") || "Tugas", href: "/member/tugas", icon: FolderKanban },
+    { name: t("member_nav.leaderboard") || "Leaderboard", href: "/member/leaderboard", icon: Trophy },
+    { name: t("member_nav.attendance") || "Presensi", href: "/member/absensi", icon: ClipboardCheck },
   ];
 
   const levelData = getUserLevelData(profile?.xp || user?.totalPoints || 0);
@@ -115,7 +115,7 @@ export default function MemberNavbarClient({ user, profile }) {
                     : "text-slate-500 dark:text-white/60 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent"
                 }`}
               >
-                Beranda
+                {t("member_nav.home") || "Beranda"}
               </Link>
 
               {/* Academic Dropdown */}
@@ -129,7 +129,7 @@ export default function MemberNavbarClient({ user, profile }) {
                       : "text-slate-500 dark:text-white/60 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 border-transparent"
                   }`}
                 >
-                  Akademik
+                  {t("member_nav.academic") || "Akademik"}
                   <ChevronDown
                     className={`w-4 h-4 transition-transform duration-300 ${academicDropdownOpen ? "rotate-180" : ""}`}
                   />
@@ -152,7 +152,7 @@ export default function MemberNavbarClient({ user, profile }) {
                         }`}
                       >
                         <BookOpen className="w-4 h-4" />
-                        Bank Literatur
+                        {t("member_nav.literature") || "Bank Literatur"}
                       </Link>
                       <Link
                         href="/member/quiz"
@@ -163,7 +163,7 @@ export default function MemberNavbarClient({ user, profile }) {
                         }`}
                       >
                         <Award className="w-4 h-4" />
-                        Quiz
+                        {t("member_nav.quiz") || "Quiz"}
                       </Link>
                       <Link
                         href="/member/materi"
@@ -174,7 +174,7 @@ export default function MemberNavbarClient({ user, profile }) {
                         }`}
                       >
                         <FolderKanban className="w-4 h-4" />
-                        Materi
+                        {t("member_nav.material") || "Materi"}
                       </Link>
                     </motion.div>
                   )}
@@ -186,7 +186,7 @@ export default function MemberNavbarClient({ user, profile }) {
                 const isActive = pathname.startsWith(link.href);
                 return (
                   <Link
-                    key={link.name}
+                    key={link.href}
                     href={link.href}
                     className={`px-4 py-2 rounded-xl text-sm font-bold tracking-wide transition-all duration-300 ${
                       isActive
@@ -387,7 +387,7 @@ export default function MemberNavbarClient({ user, profile }) {
               {/* Header with close button */}
               <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-white/5">
                 <span className="text-sm font-black text-slate-400 dark:text-white/50 tracking-widest uppercase">
-                  Menu Utama
+                  {t("member_nav.home") ? (language === "en" ? "Main Menu" : "Menu Utama") : "Menu Utama"}
                 </span>
                 <button
                   onClick={() => setIsOpen(false)}
@@ -411,11 +411,11 @@ export default function MemberNavbarClient({ user, profile }) {
                   <Award
                     className={`w-5 h-5 ${pathname === "/member" ? "text-primary" : "text-slate-400 dark:text-white/40"}`}
                   />
-                  Beranda
+                  {t("member_nav.home") || "Beranda"}
                 </Link>
 
                 <div className="mt-4 mb-2 px-4 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/30">
-                  Academic Pages
+                  {t("member_nav.academic") || "Akademik"}
                 </div>
 
                 <Link
@@ -430,7 +430,7 @@ export default function MemberNavbarClient({ user, profile }) {
                   <BookOpen
                     className={`w-5 h-5 ${pathname.startsWith("/member/literatur") ? "text-primary" : "text-slate-400 dark:text-white/40"}`}
                   />
-                  Bank Literatur
+                  {t("member_nav.literature") || "Bank Literatur"}
                 </Link>
 
                 <Link
@@ -445,7 +445,7 @@ export default function MemberNavbarClient({ user, profile }) {
                   <FolderKanban
                     className={`w-5 h-5 ${pathname.startsWith("/member/materi") ? "text-primary" : "text-slate-400 dark:text-white/40"}`}
                   />
-                  Materi
+                  {t("member_nav.material") || "Materi"}
                 </Link>
 
                 <Link
@@ -460,11 +460,11 @@ export default function MemberNavbarClient({ user, profile }) {
                   <Award
                     className={`w-5 h-5 ${pathname.startsWith("/member/quiz") ? "text-primary" : "text-slate-400 dark:text-white/40"}`}
                   />
-                  Quiz
+                  {t("member_nav.quiz") || "Quiz"}
                 </Link>
 
                 <div className="mt-4 mb-2 px-4 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/30">
-                  Activity
+                  {language === "en" ? "Activities" : "Aktivitas"}
                 </div>
 
                 {navLinks.slice(1).map((link) => {

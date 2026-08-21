@@ -17,7 +17,7 @@ export default function StaffNavbarClient({ user }) {
   const [isOpen, setIsOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -52,10 +52,10 @@ export default function StaffNavbarClient({ user }) {
   }, [pathname]);
 
   const navLinks = [
-    { name: "Beranda", href: "/officer", icon: LayoutDashboard },
-    { name: "SRE Links", href: "/officer/links", icon: LinkIcon },
-    { name: "Literatur", href: "/officer/literatur", icon: BookOpen },
-    { name: "Dokumen", href: "/officer/dokumen", icon: FileText },
+    { name: t("staff_nav.home") || "Beranda", href: "/officer", icon: LayoutDashboard },
+    { name: t("staff_nav.links") || "SRE Links", href: "/officer/links", icon: LinkIcon },
+    { name: t("staff_nav.literature") || "Literatur", href: "/officer/literatur", icon: BookOpen },
+    { name: t("staff_nav.documents") || "Dokumen", href: "/officer/dokumen", icon: FileText },
   ];
 
   return (
@@ -206,7 +206,7 @@ export default function StaffNavbarClient({ user }) {
                           className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-all"
                         >
                           <User className="w-4 h-4 text-primary" />
-                          Detail Profil
+                          {t("staff_nav.profile_detail") || "Detail Profil"}
                         </Link>
                       </div>
 
@@ -216,7 +216,7 @@ export default function StaffNavbarClient({ user }) {
                         className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl text-red-400 bg-red-500/10 border border-red-500/15 hover:bg-red-500/25 font-bold transition-all text-xs"
                       >
                         <LogOut className="w-4 h-4" />
-                        Sign Out
+                        {t("staff_nav.sign_out") || "Sign Out"}
                       </button>
                     </motion.div>
                   )}
@@ -286,7 +286,7 @@ export default function StaffNavbarClient({ user }) {
               {/* Header with close button */}
               <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-white/5">
                 <span className="text-sm font-black text-slate-400 dark:text-white/50 tracking-widest uppercase">
-                  Menu Utama
+                  {t("staff_nav.main_menu") || "Menu Utama"}
                 </span>
                 <button
                   onClick={() => setIsOpen(false)}
@@ -356,14 +356,14 @@ export default function StaffNavbarClient({ user }) {
                     className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold text-slate-600 dark:text-white bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 transition-all"
                   >
                     <User className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-                    Profil
+                    {t("staff_nav.profile") || "Profil"}
                   </Link>
                   <button
                     onClick={() => signOut({ callbackUrl: "/login" })}
                     className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 transition-all"
                   >
                     <LogOut className="w-4 h-4" />
-                    Keluar
+                    {t("staff_nav.logout") || "Keluar"}
                   </button>
                 </div>
               </div>
