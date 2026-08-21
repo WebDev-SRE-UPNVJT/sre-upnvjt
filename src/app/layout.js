@@ -26,7 +26,7 @@ export const metadata = {
     default: "SRE UPN Veteran Jawa Timur | Accelerating Sustainable Transition",
     template: "%s | SRE UPN Veteran Jawa Timur",
   },
-  description: "Empowering the next generation of renewable energy leaders. Society of Renewable Energy (SRE) UPN Veteran Jawa Timur drives clean energy advocacy, academic research, and community-led green technology projects.",
+  description: "Empowering renewable energy leaders. SRE UPN Veteran Jawa Timur drives clean energy transition, research, and community green technology projects.",
   keywords: [
     "SRE UPN Veteran Jawa Timur",
     "SRE UPN Jatim",
@@ -46,7 +46,7 @@ export const metadata = {
   },
   openGraph: {
     title: "SRE UPN Veteran Jawa Timur | Accelerating Sustainable Transition",
-    description: "Empowering the next generation of renewable energy leaders. Society of Renewable Energy (SRE) UPN Veteran Jawa Timur drives clean energy advocacy, academic research, and community-led green technology projects.",
+    description: "Empowering renewable energy leaders. SRE UPN Veteran Jawa Timur drives clean energy transition, research, and community green technology projects.",
     url: "https://sreupnjatim.com",
     siteName: "SRE UPN Veteran Jawa Timur",
     locale: "id_ID",
@@ -55,7 +55,7 @@ export const metadata = {
   twitter: {
     card: "summary_large_image",
     title: "SRE UPN Veteran Jawa Timur",
-    description: "Empowering the next generation of renewable energy leaders. Society of Renewable Energy (SRE) UPN Veteran Jawa Timur.",
+    description: "Empowering renewable energy leaders. SRE UPN Veteran Jawa Timur drives clean energy transition, research, and community green technology projects.",
   },
   robots: {
     index: true,

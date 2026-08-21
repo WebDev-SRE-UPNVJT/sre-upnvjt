@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "About Us | SRE UPNVJT",
-  description: "Learn more about SRE UPNVJT.",
+  description: "Pelajari visi, misi, dan struktur divisi Society of Renewable Energy (SRE) UPN Veteran Jawa Timur dalam mengakselerasi transisi energi hijau.",
 };
 
 export default async function AboutPage() {
