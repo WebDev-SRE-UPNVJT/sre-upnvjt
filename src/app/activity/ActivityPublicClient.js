@@ -6,17 +6,7 @@ import { Calendar, MapPin, Sparkles, Filter, Activity as ActivityIcon, ArrowUpRi
 import { useLanguage } from "@/i18n/LanguageProvider";
 import { useTheme } from "next-themes";
 import Link from "next/link";
-
-function resolveImageUrl(url) {
-  if (!url) return "";
-  const cleaned = url
-    .replace("https://pub-7a6619b60d5847c1a16624560e5575dd.r2.dev/", "")
-    .replace("https://cdn.webly.biz.id/", "");
-  if (cleaned.startsWith("http://") || cleaned.startsWith("https://") || cleaned.startsWith("/")) {
-    return cleaned;
-  }
-  return `/api/cdn/${cleaned.replace(/^\/+/, "")}`;
-}
+import { resolveImageUrl } from "@/lib/imageUrl";
 
 export default function ActivityPublicClient({ activities = [] }) {
   const { language, t } = useLanguage();

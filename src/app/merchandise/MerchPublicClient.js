@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { ShoppingBag, ArrowUpRight, Package, ShoppingCart, ExternalLink, Tag } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageProvider";
+import { resolveImageUrl } from "@/lib/imageUrl";
 
 const InstagramIcon = (props) => (
   <svg className={`fill-current ${props.className || "w-5 h-5"}`} viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
@@ -123,7 +124,7 @@ export default function MerchPublicClient({ merchandise = [] }) {
                 >
                   <div className="sm:w-1/2 aspect-square relative overflow-hidden bg-[#07130e]/30 dark:bg-emerald-950/30">
                     <img
-                      src={item.imageUrl || "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=800&auto=format&fit=crop"}
+                      src={resolveImageUrl(item.imageUrl) || "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=800&auto=format&fit=crop"}
                       alt={item.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     />
@@ -204,7 +205,7 @@ export default function MerchPublicClient({ merchandise = [] }) {
                 >
                   <div className="relative aspect-square w-full overflow-hidden bg-[#07130e]/30 dark:bg-emerald-950/30">
                     <img
-                      src={item.imageUrl || "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=800&auto=format&fit=crop"}
+                      src={resolveImageUrl(item.imageUrl) || "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=800&auto=format&fit=crop"}
                       alt={item.name}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />

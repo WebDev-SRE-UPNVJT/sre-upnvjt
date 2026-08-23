@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
@@ -16,6 +16,15 @@ export default function PDFViewerWrapper({ file, onLoadSuccess, numPages, render
     });
   }, []);
 
+  const pdfOptions = useMemo(() => {
+    if (!ReactPdf?.pdfjs?.version) return undefined;
+    return {
+      cMapUrl: `https://unpkg.com/pdfjs-dist@${ReactPdf.pdfjs.version}/cmaps/`,
+      cMapPacked: true,
+      standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${ReactPdf.pdfjs.version}/standard_fonts/`,
+    };
+  }, [ReactPdf?.pdfjs?.version]);
+
   if (!ReactPdf) {
     return (
       <div className="w-full flex items-center justify-center p-12 text-slate-400 font-bold uppercase tracking-widest text-xs">
@@ -25,12 +34,6 @@ export default function PDFViewerWrapper({ file, onLoadSuccess, numPages, render
   }
 
   const { Document, Page } = ReactPdf;
-
-  const pdfOptions = {
-    cMapUrl: `https://unpkg.com/pdfjs-dist@${ReactPdf.pdfjs.version}/cmaps/`,
-    cMapPacked: true,
-    standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${ReactPdf.pdfjs.version}/standard_fonts/`,
-  };
 
   return (
     <Document

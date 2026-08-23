@@ -13,6 +13,7 @@ import {
 } from "@/app/actions/literatureActions";
 import { useSession } from "next-auth/react";
 import { hasAccess } from "@/lib/permissions";
+import { resolveImageUrl } from "@/lib/imageUrl";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const ITEM_TYPES = ["PDF", "SLIDES", "DOC", "VIDEO", "OTHER"];
@@ -379,7 +380,7 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
                             {item.category?.imageUrl && (
-                              <img src={item.category.imageUrl} alt="" className="w-5 h-5 rounded object-cover" />
+                              <img src={resolveImageUrl(item.category.imageUrl)} alt="" className="w-5 h-5 rounded object-cover" />
                             )}
                             <span className="text-sm text-gray-600 dark:text-white/70 truncate max-w-[120px]">
                               {item.category?.name || "—"}
@@ -448,7 +449,7 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
                 <div className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5 border-b border-gray-200 dark:border-white/5">
                   {cat.imageUrl ? (
                     <img
-                      src={cat.imageUrl}
+                      src={resolveImageUrl(cat.imageUrl)}
                       alt={cat.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
@@ -552,7 +553,7 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
                     <div className="flex gap-3 items-start">
                       {catForm.imageUrl && (
                         <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-black/30">
-                          <img src={catForm.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                          <img src={resolveImageUrl(catForm.imageUrl)} alt="Preview" className="w-full h-full object-cover" />
                         </div>
                       )}
                       <div className="flex-1 flex flex-col gap-2">
@@ -677,7 +678,7 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
                           </select>
                           {selectedCatPreview?.imageUrl && (
                             <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-black/30">
-                              <img src={selectedCatPreview.imageUrl} alt="" className="w-full h-full object-cover" />
+                              <img src={resolveImageUrl(selectedCatPreview.imageUrl)} alt="" className="w-full h-full object-cover" />
                             </div>
                           )}
                         </div>

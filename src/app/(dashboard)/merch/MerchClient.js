@@ -9,6 +9,7 @@ import {
 import { createMerchandise, updateMerchandise, deleteMerchandise } from "@/app/actions/merchandiseActions";
 import { useSession } from "next-auth/react";
 import { hasAccess } from "@/lib/permissions";
+import { resolveImageUrl } from "@/lib/imageUrl";
 
 const EMPTY_MERCH = {
   name: "",
@@ -198,7 +199,7 @@ export default function MerchClient({ initialMerchandise }) {
                   <div className="relative aspect-square w-full overflow-hidden bg-gray-100 dark:bg-black/50 border-b border-gray-200 dark:border-white/5">
                     {item.imageUrl ? (
                       <img
-                        src={item.imageUrl}
+                        src={resolveImageUrl(item.imageUrl)}
                         alt={item.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
@@ -341,8 +342,8 @@ export default function MerchClient({ initialMerchandise }) {
                       <label className="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase mb-2">Foto Produk (URL or Upload)</label>
                       <div className="flex gap-4">
                         {currentMerch.imageUrl && (
-                          <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 border border-gray-200 dark:border-white/10 bg-black">
-                            <img src={currentMerch.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                          <div className="w-16 h-16 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shrink-0">
+                            <img src={resolveImageUrl(currentMerch.imageUrl)} alt="Preview" className="w-full h-full object-cover" />
                           </div>
                         )}
                         <input

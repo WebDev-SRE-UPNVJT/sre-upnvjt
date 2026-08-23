@@ -17,6 +17,7 @@ import {
 } from "@/app/actions/pptActions";
 import { useSession } from "next-auth/react";
 import { hasAccess } from "@/lib/permissions";
+import { resolveImageUrl } from "@/lib/imageUrl";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const EMPTY_MODULE = { title: "", description: "", notes: "", coverImageUrl: "", isPublished: false };
@@ -100,6 +101,35 @@ export default function PptClient({ initialModules, currentUser }) {
       }
     } catch {
       notify("error", "Terjadi kesalahan saat upload");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSlideFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !activeModule?.id) return;
+
+    setIsLoading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("folder", `ppt-slides/module-${activeModule.id}`);
+
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (res.ok && data.url) {
+        setSlideForm(prev => ({
+          ...prev,
+          fileUrl: data.url,
+          title: prev.title || (file.name ? file.name.replace(/\.[^/.]+$/, "") : `Slide ${(slides.length || 0) + 1}`),
+        }));
+        notify("success", "Gambar slide berhasil diunggah!");
+      } else {
+        notify("error", data.error || "Gagal mengunggah gambar slide");
+      }
+    } catch {
+      notify("error", "Terjadi kesalahan saat upload gambar slide");
     } finally {
       setIsLoading(false);
     }
@@ -514,14 +544,60 @@ export default function PptClient({ initialModules, currentUser }) {
                         onChange={e => setSlideForm(p => ({ ...p, title: e.target.value }))}
                         className={inputCls} placeholder="e.g. Pengantar Mekanika Fluida" />
                     </InputField>
-                    <InputField label="File URL (WebP / R2) *">
-                      <input type="url" required value={slideForm.fileUrl || ''}
-                        onChange={e => setSlideForm(p => ({ ...p, fileUrl: e.target.value }))}
-                        className={inputCls}
-                        placeholder="https://..." />
-                      <p className="mt-1.5 text-[11px] text-gray-400 dark:text-white/30 leading-relaxed">
-                        Masukkan tautan file dari Cloudflare R2 atau storage lainnya.
-                      </p>
+
+                    <InputField label="File Gambar Slide (Upload atau Link) *">
+                      <div className="flex flex-col gap-3">
+                        {/* Live preview */}
+                        {slideForm.fileUrl && (
+                          <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10 bg-slate-900/40 shadow-inner group">
+                            <CachedImage
+                              src={slideForm.fileUrl}
+                              alt={slideForm.title || "Slide Preview"}
+                              className="w-full h-full object-contain"
+                            />
+                            <div className="absolute top-2 right-2">
+                              <button
+                                type="button"
+                                onClick={() => setSlideForm(p => ({ ...p, fileUrl: "" }))}
+                                className="p-1.5 rounded-lg bg-black/60 text-white/80 hover:text-white hover:bg-black/80 transition-all backdrop-blur-md"
+                                title="Hapus gambar"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* File upload button */}
+                        <label className={`flex items-center justify-center gap-2 h-11 px-4 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold transition-all cursor-pointer ${isLoading ? "opacity-50 pointer-events-none" : ""}`}>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleSlideFileUpload}
+                            className="hidden"
+                          />
+                          <UploadCloud className="w-4 h-4 shrink-0" />
+                          <span>{slideForm.fileUrl ? "Ganti File Gambar" : "Upload File Gambar (WebP/PNG/JPG)"}</span>
+                        </label>
+
+                        {/* Direct URL input */}
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </div>
+                          <input
+                            type="text"
+                            required
+                            value={slideForm.fileUrl || ''}
+                            onChange={e => setSlideForm(p => ({ ...p, fileUrl: e.target.value }))}
+                            className={`${inputCls} pl-9 text-xs`}
+                            placeholder="Atau tempel URL (https://...)"
+                          />
+                        </div>
+                        <p className="text-[11px] text-gray-400 dark:text-white/40 leading-relaxed">
+                          File akan disimpan otomatis ke folder <code className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-white/10 text-primary font-mono text-[10px]">ppt-slides/module-{activeModule?.id}/</code> di Cloudflare R2.
+                        </p>
+                      </div>
                     </InputField>
                   </form>
                 </div>
@@ -782,7 +858,7 @@ function ModuleModal({ open, onClose, form, setForm, onSubmit, isEditing, isLoad
                   <div className="flex gap-3 items-start">
                     {form.coverImageUrl && (
                       <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-black/30">
-                        <img src={form.coverImageUrl} alt="Preview" className="w-full h-full object-cover" />
+                        <img src={resolveImageUrl(form.coverImageUrl)} alt="Preview" className="w-full h-full object-cover" />
                       </div>
                     )}
                     <div className="flex-1 flex flex-col gap-2">

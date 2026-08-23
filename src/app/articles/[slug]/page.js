@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, Calendar, User, FileText, Image as ImageIcon } from "lucide-react";
+import { resolveImageUrl } from "@/lib/imageUrl";
 
 export const dynamic = "force-dynamic";
 
@@ -84,7 +85,7 @@ export default async function ContentDetailPage({ params }) {
         {articleData.imageUrl ? (
           <div className="w-full h-[400px] md:h-[500px] rounded-[2rem] overflow-hidden mb-12 shadow-2xl shadow-primary/5">
             <img 
-              src={articleData.imageUrl} 
+              src={resolveImageUrl(articleData.imageUrl)} 
               alt={articleData.title} 
               className="w-full h-full object-cover"
             />

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageProvider";
+import { resolveImageUrl } from "@/lib/imageUrl";
 
 export default function ActivityCarousel({ activities }) {
   const { t, language } = useLanguage();
@@ -113,13 +114,7 @@ export default function ActivityCarousel({ activities }) {
   const getImage = (item) => {
     const url = item?.imageUrl || item?.image || '';
     if (!url) return '/images/about/PanelSurya.jpg';
-    const cleaned = url
-      .replace("https://pub-7a6619b60d5847c1a16624560e5575dd.r2.dev/", "")
-      .replace("https://cdn.webly.biz.id/", "");
-    if (cleaned.startsWith("http://") || cleaned.startsWith("https://") || cleaned.startsWith("/")) {
-      return cleaned;
-    }
-    return `/api/cdn/${cleaned.replace(/^\/+/, "")}`;
+    return resolveImageUrl(url);
   };
   const getTitle = (item) => item?.name || item?.title || '';
 

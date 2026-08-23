@@ -23,6 +23,7 @@ import {
 import { getUserLevelData } from "@/lib/leveling";
 import { useLanguage } from "@/i18n/LanguageProvider";
 import LevelBadge from "./components/ui/LevelBadge";
+import { resolveImageUrl } from "@/lib/imageUrl";
 import XPProgressBar from "./components/ui/XPProgressBar";
 import StatCard from "./components/ui/StatCard";
 import { EmptyState, SectionHeader } from "./components/ui/CommonUI";
@@ -344,7 +345,7 @@ export default function MemberDashboardClient({
             <div className="w-full md:w-72 aspect-[16/10] sm:aspect-[4/3] rounded-2xl bg-black/60 border-2 border-emerald-400/30 group-hover:border-emerald-400/60 overflow-hidden relative shadow-[0_0_30px_rgba(16,185,129,0.2)] transition-all duration-500 z-10 flex-shrink-0">
               {latestPpt.coverImageUrl ? (
                 <img
-                  src={latestPpt.coverImageUrl}
+                  src={resolveImageUrl(latestPpt.coverImageUrl)}
                   alt=""
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90 group-hover:opacity-100"
                 />

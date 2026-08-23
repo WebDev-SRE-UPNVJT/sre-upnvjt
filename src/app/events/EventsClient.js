@@ -6,6 +6,7 @@ import {
   Calendar, MapPin, Tag, ExternalLink, X, ArrowLeft, ArrowRight,
   Send, Sparkles, CheckCircle2, AlertTriangle, Activity,
 } from "lucide-react";
+import { resolveImageUrl } from "@/lib/imageUrl";
 
 export default function EventsClient({ initialEvents }) {
   const [events] = useState(initialEvents || []);
@@ -93,7 +94,7 @@ export default function EventsClient({ initialEvents }) {
                 {/* Banner image */}
                 <div className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5 border-b border-white/5">
                   {ev.bannerUrl ? (
-                    <img src={ev.bannerUrl} alt={ev.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img src={resolveImageUrl(ev.bannerUrl)} alt={ev.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-primary/30">
                       <Activity className="w-10 h-10" />

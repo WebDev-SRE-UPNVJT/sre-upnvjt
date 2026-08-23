@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { FolderOpen, Search, ExternalLink, Calendar, User, FileText, Sparkles, Filter, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/i18n/LanguageProvider";
+import { resolveImageUrl } from "@/lib/imageUrl";
 
 const TYPE_COLORS = {
   PDF:    "bg-red-500/10 text-red-400 border-red-500/20",
@@ -52,12 +53,6 @@ export default function LiteraturStaffClient({ initialItems, categories }) {
 
   const getCategoryCount = (catId) => items.filter(i => i.categoryId === catId || i.category?.id === catId).length;
 
-  const resolveImageUrl = (url) => {
-    if (!url) return null;
-    if (url.startsWith('http') || url.startsWith('/')) return url;
-    return `/images/${url}`;
-  };
-
   return (
     <div className="w-full relative select-none">
       
@@ -99,18 +94,18 @@ export default function LiteraturStaffClient({ initialItems, categories }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
             onClick={() => setSelectedCategoryId("all")}
-            className="cursor-pointer group relative overflow-hidden rounded-3xl border border-slate-200 dark:border-white/5 bg-white dark:bg-[#090d14] shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(16,185,129,0.1)] hover:-translate-y-2 transition-all duration-500"
+            className="cursor-pointer group relative overflow-hidden rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#090d14] shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:shadow-none hover:shadow-[0_12px_30px_rgba(16,185,129,0.15)] hover:border-emerald-500/50 hover:-translate-y-1.5 transition-all duration-500"
           >
             <div className="aspect-[4/3] w-full overflow-hidden relative">
                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-100 dark:from-emerald-900/20 to-slate-50 dark:to-[#090d14]">
                  <FolderOpen className="w-20 h-20 text-emerald-500/40 group-hover:scale-110 group-hover:text-emerald-500/70 transition-all duration-500" />
                </div>
-               <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 dark:from-[#090d14] dark:via-[#090d14]/40 to-transparent" />
+               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent" />
                <div className="absolute bottom-6 left-6 right-6">
-                  <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{t('literatur.all_categories')}</h3>
-                  <p className="text-slate-500 dark:text-white/60 text-sm line-clamp-2">{t('literatur.all_categories_desc')}</p>
+                  <h3 className="text-2xl font-black text-white mb-2 group-hover:text-emerald-300 transition-colors">{t('literatur.all_categories')}</h3>
+                  <p className="text-slate-200 text-sm line-clamp-2">{t('literatur.all_categories_desc')}</p>
                </div>
-               <div className="absolute top-4 right-4 bg-emerald-500/90 backdrop-blur-md text-white text-[10px] font-black uppercase px-3 py-1.5 rounded-full shadow-sm">
+               <div className="absolute top-4 right-4 bg-emerald-500 text-white text-[10px] font-black uppercase px-3 py-1.5 rounded-full shadow-md">
                   {items.length} {t('literatur.total_literatur')}
                </div>
             </div>
@@ -123,26 +118,26 @@ export default function LiteraturStaffClient({ initialItems, categories }) {
               transition={{ duration: 0.4, delay: (index + 1) * 0.05 }}
               key={cat.id}
               onClick={() => setSelectedCategoryId(cat.id.toString())}
-              className="cursor-pointer group relative overflow-hidden rounded-3xl border border-slate-200 dark:border-white/5 bg-white dark:bg-[#090d14] shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(16,185,129,0.1)] hover:-translate-y-2 transition-all duration-500"
+              className="cursor-pointer group relative overflow-hidden rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#090d14] shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:shadow-none hover:shadow-[0_12px_30px_rgba(16,185,129,0.15)] hover:border-emerald-500/50 hover:-translate-y-1.5 transition-all duration-500"
             >
-              <div className="aspect-[4/3] w-full overflow-hidden relative">
+              <div className="aspect-[4/3] w-full overflow-hidden relative bg-slate-900">
                  {cat.imageUrl ? (
                    <img 
                      src={resolveImageUrl(cat.imageUrl)} 
                      alt={cat.name}
-                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90 dark:opacity-70 group-hover:opacity-100" 
+                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90 group-hover:opacity-100" 
                    />
                  ) : (
-                   <div className="w-full h-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-300 dark:text-white/20">
+                   <div className="w-full h-full bg-slate-900 flex items-center justify-center text-emerald-500/30">
                      <FileText className="w-16 h-16" />
                    </div>
                  )}
-                 <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-[#090d14] dark:from-[5%] via-white/80 dark:via-[#090d14]/60 to-transparent" />
+                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent" />
                  <div className="absolute bottom-6 left-6 right-6">
-                    <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors leading-tight">{cat.name}</h3>
-                    <p className="text-slate-500 dark:text-white/60 text-sm line-clamp-2 leading-relaxed">{cat.description || t('literatur.category_desc_fallback')}</p>
+                    <h3 className="text-2xl font-black text-white mb-2 group-hover:text-emerald-300 transition-colors leading-tight break-words">{cat.name}</h3>
+                    <p className="text-slate-200 text-sm line-clamp-2 leading-relaxed break-words">{cat.description || t('literatur.category_desc_fallback')}</p>
                  </div>
-                 <div className="absolute top-4 right-4 bg-emerald-500/90 backdrop-blur-md text-white text-[10px] font-black uppercase px-3 py-1.5 rounded-full shadow-sm">
+                 <div className="absolute top-4 right-4 bg-emerald-500 text-white text-[10px] font-black uppercase px-3 py-1.5 rounded-full shadow-md">
                     {getCategoryCount(cat.id)} {t('literatur.literatur_count')}
                  </div>
               </div>
@@ -336,28 +331,28 @@ export default function LiteraturStaffClient({ initialItems, categories }) {
                   transition={{ duration: 0.4, delay: (index % 4) * 0.05 }}
                   key={item.id}
                   href={`/officer/literatur/${item.id}`}
-                  className="relative bg-white dark:bg-[#090d14] border border-slate-200/60 dark:border-white/5 rounded-3xl overflow-hidden cursor-pointer group hover:border-emerald-500/30 transition-all duration-500 transform-gpu hover:-translate-y-2 flex flex-col h-full shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(16,185,129,0.1)]"
+                  className="relative bg-white dark:bg-[#090d14] border border-slate-200 dark:border-white/10 rounded-3xl overflow-hidden cursor-pointer group hover:border-emerald-500/50 transition-all duration-500 transform-gpu hover:-translate-y-1.5 flex flex-col h-full shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:shadow-none hover:shadow-[0_12px_30px_rgba(16,185,129,0.15)]"
                 >
                   {/* Category Cover */}
-                  <div className="relative aspect-[16/9] w-full overflow-hidden shrink-0 bg-slate-100 dark:bg-[#090d14]">
+                  <div className="relative aspect-[16/9] w-full overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-900 border-b border-slate-100 dark:border-white/5">
                     {item.category?.imageUrl ? (
                       <img
                         src={resolveImageUrl(item.category.imageUrl)}
                         alt=""
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out opacity-90 dark:opacity-70 group-hover:opacity-100"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                       />
                     ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center text-emerald-500/20 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-[#090d14]">
+                      <div className="w-full h-full flex flex-col items-center justify-center text-emerald-500/40 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-[#090d14]">
                         <FolderOpen className="w-14 h-14" />
                       </div>
                     )}
                     
-                    {/* Sleek Gradient Overlay for Text Readability & Seamless Blend */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-white via-white/0 to-transparent dark:from-[#090d14] dark:from-[5%] dark:via-[#090d14]/60 dark:via-[35%] dark:to-transparent" />
+                    {/* Subtle gradient vignette */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                     
                     {/* Badges */}
-                    <div className="absolute top-4 left-4 z-10 flex gap-2">
-                      <span className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 backdrop-blur-md shadow-sm border bg-white/90 dark:bg-black/50 ${
+                    <div className="absolute top-3.5 left-3.5 z-10 flex gap-2">
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 backdrop-blur-md shadow-sm border bg-white/95 dark:bg-black/70 ${
                         TYPE_COLORS[item.type] || TYPE_COLORS.OTHER
                       }`}>
                         {item.type || "OTHER"}
@@ -366,32 +361,32 @@ export default function LiteraturStaffClient({ initialItems, categories }) {
                   </div>
 
                   {/* Title & metadata */}
-                  <div className="p-6 flex-1 flex flex-col justify-between z-10 bg-white dark:bg-[#090d14] -mt-[1px]">
+                  <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between z-10 bg-white dark:bg-[#090d14]">
                     <div>
-                      <h3 className="font-extrabold text-slate-900 dark:text-white text-lg line-clamp-2 mb-4 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300 leading-snug tracking-tight">
+                      <h3 className="font-extrabold text-slate-900 dark:text-white text-base sm:text-lg line-clamp-2 mb-3 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300 leading-snug tracking-tight break-words">
                         {item.title}
                       </h3>
-                      <div className="space-y-2.5 mb-6">
+                      <div className="space-y-2 mb-5">
                         {item.author && (
-                          <div className="flex items-center gap-2.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
-                            <User className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                          <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 font-medium">
+                            <User className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                             <span className="truncate">{item.author}</span>
                           </div>
                         )}
                         {item.year && (
-                          <div className="flex items-center gap-2.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
-                            <Calendar className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                          <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 font-medium">
+                            <Calendar className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                             <span>{t('literatur.year')} {item.year}</span>
                           </div>
                         )}
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-5 border-t border-slate-100 dark:border-white/5">
-                      <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 tracking-widest uppercase flex items-center gap-1.5 group-hover:text-emerald-500 transition-colors">
+                    <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-white/10">
+                      <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 tracking-wider uppercase flex items-center gap-1.5 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                         {t('literatur.open')}
                       </span>
-                      <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white text-slate-400 dark:text-slate-500 transition-all duration-300 group-hover:scale-110 shadow-sm">
+                      <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200/80 dark:border-white/5 flex items-center justify-center group-hover:bg-emerald-500 group-hover:border-emerald-500 group-hover:text-white text-slate-500 dark:text-slate-400 transition-all duration-300 group-hover:scale-110 shadow-sm">
                         <ExternalLink className="w-3.5 h-3.5" />
                       </div>
                     </div>

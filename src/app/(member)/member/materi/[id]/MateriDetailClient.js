@@ -8,6 +8,7 @@ import {
   ChevronLeft, ChevronRight, Download, Play, Lightbulb, ArrowLeft, Layers, Presentation, Maximize, Minimize, Loader2, Timer, CheckCircle2, Award
 } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageProvider";
+import { resolveImageUrl } from "@/lib/imageUrl";
 
 // Helper component to render HTML notes nicely
 const HtmlNotes = ({ html, fontSizeClass }) => {
@@ -136,7 +137,7 @@ export default function MateriDetailClient({ initialData, r2Url }) {
       const isYoutube = getYoutubeVideoId(slide.fileUrl);
       if (isYoutube) return;
 
-      const fullUrl = `${r2Url.replace(/\/$/, '')}/${slide.fileUrl.replace(/^\//, '')}`;
+      const fullUrl = resolveImageUrl(slide.fileUrl);
       
       // Avoid refetching if we already tried
       if (fetchedSlides.current.has(slideIdx)) return;

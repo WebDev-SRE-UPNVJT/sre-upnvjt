@@ -38,42 +38,53 @@ export async function uploadToR2(buffer, key, contentType = "image/webp") {
 
 /**
  * Deletes an object from Cloudflare R2 bucket.
+ * Handles full URLs (R2.dev, custom CDN, local proxy /api/cdn/) as well as raw keys.
  * @param {string} keyOrUrl - R2 Storage object key or full URL
  */
 export async function deleteFromR2(keyOrUrl) {
   if (!keyOrUrl || typeof keyOrUrl !== "string") return;
 
   try {
-    let key = keyOrUrl.trim();
-    if (!key) return;
+    let raw = keyOrUrl.trim();
+    if (!raw) return;
 
-    // Check if it's a full URL
+    let key = raw;
+
+    // If it's a full URL, parse the pathname
     if (key.startsWith("http://") || key.startsWith("https://")) {
       try {
         const urlObj = new URL(key);
-        // Do not attempt R2 delete on non-R2 domains (e.g., drive.google.com, localhost, unsplash, etc.)
-        const cdnUrl = process.env.R2_PUBLIC_URL;
-        let cdnHost = process.env.R2_PUBLIC_URL;
-        try {
-          cdnHost = new URL(cdnUrl).hostname;
-        } catch {}
+        const host = urlObj.hostname.toLowerCase();
 
-        const isR2Url =
-          urlObj.hostname.includes("r2.cloudflarestorage.com") ||
-          urlObj.hostname.includes("r2.dev") ||
-          urlObj.hostname === cdnHost;
-
-        if (!isR2Url) {
+        // Do not attempt R2 delete on non-storage third-party domains
+        if (
+          host.includes("google.com") ||
+          host.includes("googleapis.com") ||
+          host.includes("youtube.com") ||
+          host.includes("youtu.be") ||
+          host.includes("unsplash.com") ||
+          host.includes("qrserver.com")
+        ) {
           return;
         }
 
-        key = urlObj.pathname.replace(/^\/+/, "");
+        key = urlObj.pathname;
       } catch {
-        key = key.replace(/^https?:\/\/[^\/]+\//, "");
+        key = key.replace(/^https?:\/\/[^\/]+/, "");
       }
-    } else {
-      key = key.replace(/^\/+/, "");
     }
+
+    // Strip internal proxy prefix /api/cdn/
+    key = key.replace(/^\/?api\/cdn\//, "");
+
+    // Strip known public CDN / R2 prefixes if present in string
+    key = key
+      .replace(/^https?:\/\/pub-[a-zA-Z0-9]+\.r2\.dev\//, "")
+      .replace(/^https?:\/\/cdn\.webly\.biz\.id\//, "")
+      .replace(/^https?:\/\/[a-zA-Z0-9]+\.r2\.cloudflarestorage\.com\/[^\/]+\//, "");
+
+    // Strip leading slashes
+    key = key.replace(/^\/+/, "");
 
     if (!key) return;
 
@@ -83,8 +94,8 @@ export async function deleteFromR2(keyOrUrl) {
     });
 
     await r2Client.send(command);
+    console.log(`[deleteFromR2] Deleted object from bucket '${R2_BUCKET_NAME}': ${key}`);
   } catch (err) {
     console.warn(`[deleteFromR2] Warning deleting ${keyOrUrl}:`, err?.message || err);
   }
 }
-

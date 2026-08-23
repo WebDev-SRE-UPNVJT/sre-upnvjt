@@ -8,6 +8,7 @@ import {
   ChevronRight, Calendar, ArrowRight, Search, FileText, Leaf
 } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageProvider";
+import { resolveImageUrl } from "@/lib/imageUrl";
 
 // ─── Animation Variants ────────────────────────────────────────────────────────
 
@@ -166,7 +167,7 @@ export default function ContentPublicClient({ initialArticles }) {
                           <div className="h-56 relative overflow-hidden bg-black/30">
                             {article.imageUrl ? (
                               <Image
-                                src={article.imageUrl}
+                                src={resolveImageUrl(article.imageUrl)}
                                 alt={article.title}
                                 fill
                                 sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"

@@ -26,9 +26,12 @@ export async function POST(req) {
     const folder = data.get('folder') || '';
     const safeFolder = folder.split('/').map(part => part.replace(/[^a-zA-Z0-9_-]/g, '')).filter(Boolean).join('/');
 
-    const prefix = safeFolder ? safeFolder.toUpperCase() : "FILE";
+    // Extract a clean file base name without paths or slashes
+    const rawBase = file.name ? path.parse(file.name).name : 'file';
+    const cleanBase = rawBase.replace(/[^a-zA-Z0-9_-]/g, '_').replace(/^_+|_+$/g, '') || 'file';
+
+    const isImage = file.type?.startsWith("image/") || /\.(jpg|jpeg|png|webp|gif|avif|bmp|tiff|heic|heif)$/i.test(file.name || '');
     const randomStr = Math.random().toString(36).substring(2, 8);
-    const isImage = file.type?.startsWith("image/") || /\.(jpg|jpeg|png|webp|gif|avif)$/i.test(file.name);
 
     let filename;
     let processedBuffer;
@@ -36,12 +39,15 @@ export async function POST(req) {
 
     if (isImage) {
       const sharp = (await import("sharp")).default;
-      filename = `${prefix}_${Date.now()}_${randomStr}.webp`;
-      processedBuffer = await sharp(buffer).webp({ quality: 80 }).toBuffer();
+      filename = `${cleanBase}_${Date.now()}_${randomStr}.webp`;
+      processedBuffer = await sharp(buffer)
+        .rotate()
+        .webp({ quality: 82, effort: 4 })
+        .toBuffer();
       contentType = "image/webp";
     } else {
-      const ext = path.extname(file.name);
-      filename = `${prefix}_${Date.now()}_${randomStr}${ext}`;
+      const ext = path.extname(file.name || '');
+      filename = `${cleanBase}_${Date.now()}_${randomStr}${ext}`;
       processedBuffer = buffer;
       contentType = file.type || "application/octet-stream";
     }

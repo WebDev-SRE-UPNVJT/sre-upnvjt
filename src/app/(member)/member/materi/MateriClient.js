@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageProvider";
 import { useRouter } from "next/navigation";
+import { resolveImageUrl } from "@/lib/imageUrl";
 
 export default function MateriClient({ initialModules }) {
   const { t } = useLanguage();
@@ -105,7 +106,7 @@ export default function MateriClient({ initialModules }) {
                 <div className="relative aspect-[16/10] w-full overflow-hidden shrink-0 bg-slate-900/60">
                   {mod.coverImageUrl ? (
                     <img
-                      src={mod.coverImageUrl}
+                      src={resolveImageUrl(mod.coverImageUrl)}
                       alt={mod.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out opacity-90 group-hover:opacity-100"
                     />

@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { hasAccess } from "@/lib/permissions";
+import { resolveImageUrl } from "@/lib/imageUrl";
 
 const EMPTY_EVENT = {
   title: "", description: "", bannerUrl: "", eventDate: "",
@@ -279,7 +280,7 @@ export default function EventsAdminClient({ initialEvents, initialRegistrations,
               >
                 <div className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5 border-b border-gray-200 dark:border-white/5">
                   {ev.bannerUrl ? (
-                    <img src={ev.bannerUrl} alt={ev.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img src={resolveImageUrl(ev.bannerUrl)} alt={ev.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-primary/40">
                       <Activity className="w-10 h-10" />
@@ -523,7 +524,7 @@ export default function EventsAdminClient({ initialEvents, initialRegistrations,
                     <div className="flex gap-3 items-start">
                       {eventForm.bannerUrl && (
                         <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-black/30">
-                          <img src={eventForm.bannerUrl} alt="Preview" className="w-full h-full object-cover" />
+                          <img src={resolveImageUrl(eventForm.bannerUrl)} alt="Preview" className="w-full h-full object-cover" />
                         </div>
                       )}
                       <div className="flex-1 flex flex-col gap-2">

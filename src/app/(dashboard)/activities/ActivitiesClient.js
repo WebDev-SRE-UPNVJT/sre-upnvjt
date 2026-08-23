@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { hasAccess } from "@/lib/permissions";
 import { createActivityAction, updateActivityAction, deleteActivityAction } from "@/app/actions/activityActions";
+import { resolveImageUrl } from "@/lib/imageUrl";
 
 export default function ActivitiesClient({ initialActivities, currentUser }) {
   const [activities, setActivities] = useState(initialActivities || []);
@@ -152,7 +153,7 @@ export default function ActivitiesClient({ initialActivities, currentUser }) {
                 <div className="w-full h-56 -mt-6 -mx-6 mb-6 overflow-hidden relative">
                   <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent dark:from-[#07130e] dark:via-transparent dark:to-transparent z-10 opacity-80 group-hover:opacity-60 transition-opacity duration-500" />
                   <img 
-                    src={activity.imageUrl} 
+                    src={resolveImageUrl(activity.imageUrl)} 
                     alt={activity.name} 
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
                   />
@@ -381,10 +382,17 @@ export default function ActivitiesClient({ initialActivities, currentUser }) {
                     className="w-full bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-500 dark:text-white/70 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-primary/10 file:text-primary hover:file:bg-primary hover:file:text-[#050e0a] file:transition-colors focus:outline-none focus:border-primary transition-colors cursor-pointer"
                   />
                   {currentActivity?.imageUrl && (
-                    <p className="text-xs text-primary mt-2 flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" />
-                      Current image exists. Uploading a new one will replace it.
-                    </p>
+                    <div className="mt-2.5 flex items-center gap-3">
+                      <img 
+                        src={resolveImageUrl(currentActivity.imageUrl)} 
+                        alt="Current preview" 
+                        className="w-12 h-12 rounded-xl object-cover border border-gray-200 dark:border-white/10 shrink-0 shadow-sm" 
+                      />
+                      <p className="text-xs text-primary flex items-center gap-1.5 font-medium">
+                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                        Current image exists. Uploading a new one will replace it.
+                      </p>
+                    </div>
                   )}
                 </div>
               </div>

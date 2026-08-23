@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Plus, Edit2, Trash2, Search, Rocket, X, CheckCircle2, XCircle, Eye, EyeOff, ArrowUp, ArrowDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { resolveImageUrl } from "@/lib/imageUrl";
 import {
   createFeaturedProjectAction,
   updateFeaturedProjectAction,
@@ -195,7 +196,7 @@ export default function FeaturedProjectsClient({ initialProjects, currentUser })
                       <div className="flex items-center gap-3">
                         {project.imageUrl ? (
                           <img
-                            src={project.imageUrl}
+                            src={resolveImageUrl(project.imageUrl)}
                             alt={project.title}
                             className="w-10 h-10 rounded-lg object-cover border border-gray-100 dark:border-white/10 flex-shrink-0"
                           />
@@ -353,7 +354,7 @@ export default function FeaturedProjectsClient({ initialProjects, currentUser })
                   <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Cover Image</label>
                   {imagePreview && (
                     <div className="mb-3 relative w-full h-40 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10">
-                      <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                      <img src={resolveImageUrl(imagePreview)} alt="Preview" className="w-full h-full object-cover" />
                     </div>
                   )}
                   <input

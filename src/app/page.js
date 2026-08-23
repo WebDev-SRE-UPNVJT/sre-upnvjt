@@ -28,6 +28,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useTheme } from "next-themes";
+import { resolveImageUrl, resolveLogoUrl } from "@/lib/imageUrl";
 import { getPublicContent } from "@/app/actions/contentActions";
 import ActivityCarousel from "@/app/ActivityCarouselClient";
 
@@ -91,28 +92,6 @@ const ARTICLES = [
 ];
 
 const PARTNERS = ["SRE Indonesia", "UPN Veteran Jawa Timur", "SRE UPNVJT"];
-
-function resolveLogoUrl(url) {
-  if (!url) return "";
-  const cleaned = url
-    .replace("https://pub-7a6619b60d5847c1a16624560e5575dd.r2.dev/", "")
-    .replace("https://cdn.webly.biz.id/", "");
-  if (cleaned.startsWith("http://") || cleaned.startsWith("https://") || cleaned.startsWith("/")) {
-    return cleaned;
-  }
-  return `/api/cdn/${cleaned.replace(/^\/+/, "")}`;
-}
-
-function resolveImageUrl(url) {
-  if (!url) return "";
-  const cleaned = url
-    .replace("https://pub-7a6619b60d5847c1a16624560e5575dd.r2.dev/", "")
-    .replace("https://cdn.webly.biz.id/", "");
-  if (cleaned.startsWith("http://") || cleaned.startsWith("https://") || cleaned.startsWith("/")) {
-    return cleaned;
-  }
-  return `/api/cdn/${cleaned.replace(/^\/+/, "")}`;
-}
 
 function PartnerLogoImage({ partner, className }) {
   const [hasError, setHasError] = useState(false);
