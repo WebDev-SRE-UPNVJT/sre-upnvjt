@@ -382,18 +382,29 @@ async function main() {
       }
     }
 
-    // 5. Ensure memberProfile for every user (xp: 0, level: 1)
+    // 5. Ensure memberProfile ONLY for users with MEMBER role
     if (userRecord) {
-      const existingProfile = await db.query.memberProfile.findFirst({
-        where: (p, { eq }) => eq(p.userId, userRecord.id)
-      });
-      if (!existingProfile) {
-        await db.insert(schema.memberProfile).values({
-          userId: userRecord.id,
-          xp: 0,
-          level: 1,
+      if (userRecord.roleId === memberRole.id) {
+        const existingProfile = await db.query.memberProfile.findFirst({
+          where: (p, { eq }) => eq(p.userId, userRecord.id)
         });
-        console.log(`Member profile created for ${m.name}`);
+        if (!existingProfile) {
+          await db.insert(schema.memberProfile).values({
+            userId: userRecord.id,
+            xp: 0,
+            level: 1,
+          });
+          console.log(`Member profile created for ${m.name}`);
+        }
+      } else {
+        // Remove memberProfile if exists for non-MEMBER (staff/super admin)
+        const existingProfile = await db.query.memberProfile.findFirst({
+          where: (p, { eq }) => eq(p.userId, userRecord.id)
+        });
+        if (existingProfile) {
+          await db.delete(schema.memberProfile).where(eq(schema.memberProfile.userId, userRecord.id));
+          console.log(`Removed member profile from non-member user: ${m.name}`);
+        }
       }
     }
   }

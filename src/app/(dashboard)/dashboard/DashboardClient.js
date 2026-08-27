@@ -218,8 +218,13 @@ export default function DashboardClient({ stats, user }) {
         />
       </motion.div>
 
-      <div className="mt-10 grid grid-col-1">
-        {isClient && <ChartActivity />}
+      <div className="mt-10 grid grid-cols-1">
+        {isClient && (
+          <ChartActivity
+            data={stats?.monthlyTrends}
+            year={stats?.currentYear}
+          />
+        )}
       </div>
 
       {/* Main Content Area */}
@@ -240,46 +245,76 @@ export default function DashboardClient({ stats, user }) {
 
           <div className="flex-1 overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-white/10 scrollbar-track-transparent">
             {stats?.recentActivities?.length > 0 ? (
-              <div className="relative border-l-2 border-gray-100 dark:border-white/5 ml-3 space-y-8 pb-4 pt-2">
-                {stats.recentActivities.map((activity, i) => (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.5 + i * 0.1 }}
-                    key={activity.id}
-                    className="relative pl-6 group"
-                  >
-                    {/* Timeline Node */}
-                    <div className="absolute w-3.5 h-3.5 bg-white dark:bg-[#08120e] border-2 border-primary rounded-full left-[-8.5px] top-1 group-hover:scale-150 group-hover:bg-primary transition-all duration-300" />
+              <div className="relative border-l-2 border-gray-100 dark:border-white/5 ml-3 space-y-6 pb-4 pt-2">
+                {stats.recentActivities.map((activity, i) => {
+                  let badgeStyle = "bg-primary/10 text-primary border-primary/20";
+                  let nodeBorder = "border-primary";
 
-                    <div className="bg-gray-50 dark:bg-white/2 p-4 rounded-2xl border border-gray-100 dark:border-white/5 group-hover:border-primary/30 transition-colors">
-                      <div className="flex justify-between items-start mb-1.5">
-                        <h4 className="text-sm font-bold text-gray-900 dark:text-white line-clamp-1 pr-2">
-                          {activity.title}
-                        </h4>
-                      </div>
-                      <p className="text-xs text-gray-500 dark:text-white/50 mb-3">
-                        {activity.desc}
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[9px] font-bold uppercase tracking-widest text-primary bg-primary/10 px-2 py-0.5 rounded-md">
-                          {activity.type}
-                        </span>
-                        <span className="text-[10px] text-gray-400 dark:text-white/40 font-medium">
-                          {new Date(activity.date).toLocaleDateString(
-                            language === "id" ? "id-ID" : "en-GB",
-                            {
-                              day: "numeric",
-                              month: "short",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            },
+                  if (activity.type === "ANNOUNCEMENT") {
+                    badgeStyle = "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20";
+                    nodeBorder = "border-amber-500";
+                  } else if (activity.type === "TASK") {
+                    badgeStyle = "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20";
+                    nodeBorder = "border-blue-500";
+                  } else if (activity.type === "REVIEW") {
+                    badgeStyle = "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
+                    nodeBorder = "border-emerald-500";
+                  } else if (activity.type === "ATTENDANCE") {
+                    badgeStyle = "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20";
+                    nodeBorder = "border-purple-500";
+                  } else if (activity.type === "EVENT") {
+                    badgeStyle = "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20";
+                    nodeBorder = "border-indigo-500";
+                  } else if (activity.type === "ARTICLE") {
+                    badgeStyle = "bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20";
+                    nodeBorder = "border-teal-500";
+                  }
+
+                  return (
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2 + i * 0.05 }}
+                      key={activity.id}
+                      className="relative pl-6 group"
+                    >
+                      {/* Timeline Node */}
+                      <div className={`absolute w-3.5 h-3.5 bg-white dark:bg-[#08120e] border-2 ${nodeBorder} rounded-full left-[-8.5px] top-1.5 group-hover:scale-150 transition-all duration-300 shadow-sm`} />
+
+                      <div className="bg-gray-50/70 dark:bg-white/[0.02] hover:bg-gray-50 dark:hover:bg-white/[0.04] p-4 rounded-2xl border border-gray-100 dark:border-white/5 group-hover:border-primary/30 transition-all">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1.5">
+                          <h4 className="text-sm font-bold text-gray-900 dark:text-white line-clamp-1">
+                            {activity.title}
+                          </h4>
+                          <span className="text-[10px] text-gray-400 dark:text-white/40 font-medium whitespace-nowrap">
+                            {new Date(activity.date).toLocaleDateString(
+                              language === "id" ? "id-ID" : "en-GB",
+                              {
+                                day: "numeric",
+                                month: "short",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
+                            )}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-white/60 mb-3 leading-relaxed">
+                          {activity.desc}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${badgeStyle}`}>
+                            {activity.type}
+                          </span>
+                          {activity.actor && (
+                            <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium">
+                              Oleh: <strong className="text-gray-700 dark:text-white/70">{activity.actor}</strong>
+                            </span>
                           )}
-                        </span>
+                        </div>
                       </div>
-                    </div>
-                  </motion.div>
-                ))}
+                    </motion.div>
+                  );
+                })}
               </div>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center border border-dashed border-gray-200 dark:border-white/10 rounded-2xl bg-gray-50 dark:bg-white/[0.01] h-48">
