@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { user, department, content, event, task, taskSubmission, attendance, attendanceSession, announcement } from "@/db/schema";
+import { user, department, content, activity, event, task, taskSubmission, attendance, attendanceSession, announcement } from "@/db/schema";
 import { eq, count, desc } from "drizzle-orm";
 
 export async function getDashboardStats(role, departmentId, userId) {
@@ -13,13 +13,13 @@ export async function getDashboardStats(role, departmentId, userId) {
       uCountRes,
       cCountRes,
       dCountRes,
-      eCountRes,
+      actCountRes,
       recentArticles,
       recentAnnouncements,
       recentTasks,
       recentSubmissions,
       recentSessions,
-      recentEvents,
+      recentActivitiesList,
       publishedList,
       submissionsList,
       attendancesList,
@@ -27,7 +27,7 @@ export async function getDashboardStats(role, departmentId, userId) {
       db.select({ value: count() }).from(user).where(eq(user.isActive, true)),
       db.select({ value: count() }).from(content).where(eq(content.isPublished, true)),
       db.select({ value: count() }).from(department),
-      db.select({ value: count() }).from(event),
+      db.select({ value: count() }).from(activity),
       db.query.content.findMany({
         orderBy: [desc(content.createdAt)],
         limit: 5,
@@ -65,8 +65,8 @@ export async function getDashboardStats(role, departmentId, userId) {
           createdBy: { columns: { name: true } },
         },
       }),
-      db.query.event.findMany({
-        orderBy: [desc(event.createdAt)],
+      db.query.activity.findMany({
+        orderBy: [desc(activity.createdAt)],
         limit: 5,
       }),
       db.query.content.findMany({
@@ -84,7 +84,7 @@ export async function getDashboardStats(role, departmentId, userId) {
     const totalUsers = uCountRes[0]?.value || 0;
     const publishedArticles = cCountRes[0]?.value || 0;
     const totalDepartments = dCountRes[0]?.value || 0;
-    const totalActivities = eCountRes[0]?.value || 0;
+    const totalActivities = actCountRes[0]?.value || 0;
 
     // 1. Articles
     const formattedArticles = recentArticles.map((art) => ({
@@ -157,14 +157,14 @@ export async function getDashboardStats(role, departmentId, userId) {
       date: sess.createdAt,
     }));
 
-    // 6. Events
-    const formattedEvents = recentEvents.map((ev) => ({
-      id: `event-${ev.id}`,
-      title: ev.title,
-      desc: `Agenda kegiatan / event baru ditambahkan ke kalender SRE.`,
+    // 6. Activities (/activities)
+    const formattedActivitiesList = recentActivitiesList.map((act) => ({
+      id: `activity-${act.id}`,
+      title: act.name,
+      desc: `Aktivitas / kegiatan baru ditambahkan ke halaman Activities SRE.`,
       type: "EVENT",
       actor: "Admin Event",
-      date: ev.createdAt,
+      date: act.createdAt,
     }));
 
     // Merge and sort newest first (up to 10 latest activities)
@@ -174,7 +174,7 @@ export async function getDashboardStats(role, departmentId, userId) {
       ...formattedTasks,
       ...formattedSubmissions,
       ...formattedSessions,
-      ...formattedEvents,
+      ...formattedActivitiesList,
     ]
       .filter((item) => item.date)
       .sort((a, b) => new Date(b.date) - new Date(a.date))
