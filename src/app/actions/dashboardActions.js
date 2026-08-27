@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { user, department, content, activity, event, task, taskSubmission, attendance, attendanceSession, announcement } from "@/db/schema";
+import { user, department, content, activity, event, task, taskSubmission, attendance, attendanceSession, announcement, literatureItem } from "@/db/schema";
 import { eq, count, desc } from "drizzle-orm";
 
 export async function getDashboardStats(role, departmentId, userId) {
@@ -11,7 +11,7 @@ export async function getDashboardStats(role, departmentId, userId) {
     // Run database queries in parallel
     const [
       uCountRes,
-      cCountRes,
+      litCountRes,
       dCountRes,
       actCountRes,
       recentArticles,
@@ -25,7 +25,7 @@ export async function getDashboardStats(role, departmentId, userId) {
       attendancesList,
     ] = await Promise.all([
       db.select({ value: count() }).from(user).where(eq(user.isActive, true)),
-      db.select({ value: count() }).from(content).where(eq(content.isPublished, true)),
+      db.select({ value: count() }).from(literatureItem),
       db.select({ value: count() }).from(department),
       db.select({ value: count() }).from(activity),
       db.query.content.findMany({
@@ -82,7 +82,7 @@ export async function getDashboardStats(role, departmentId, userId) {
     ]);
 
     const totalUsers = uCountRes[0]?.value || 0;
-    const publishedArticles = cCountRes[0]?.value || 0;
+    const totalLiterature = litCountRes[0]?.value || 0;
     const totalDepartments = dCountRes[0]?.value || 0;
     const totalActivities = actCountRes[0]?.value || 0;
 
@@ -221,7 +221,8 @@ export async function getDashboardStats(role, departmentId, userId) {
 
     const stats = {
       totalUsers,
-      publishedArticles,
+      totalLiterature,
+      publishedArticles: totalLiterature,
       totalDepartments,
       totalActivities,
       recentActivities,

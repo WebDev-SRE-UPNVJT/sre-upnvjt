@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Users,
   FileText,
+  BookOpen,
   CheckSquare,
   TrendingUp,
   AlertCircle,
@@ -201,12 +202,12 @@ export default function DashboardClient({ stats, user }) {
           trend="Active"
         />
         <Widget
-          title={t("dashboard.widgets.published_articles")}
-          value={stats?.publishedArticles || "0"}
+          title={t("dashboard.widgets.total_literature")}
+          value={stats?.totalLiterature ?? stats?.publishedArticles ?? "0"}
           subtitle=""
-          icon={FileText}
+          icon={BookOpen}
           color="emerald-500"
-          trend="Content"
+          trend="Bank"
         />
         <Widget
           title={t("dashboard.widgets.departments")}
