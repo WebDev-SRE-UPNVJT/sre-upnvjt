@@ -5,11 +5,10 @@ import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getDashboardStats } from "@/app/actions/dashboardActions";
-
-export const dynamic = "force-dynamic";
-
 import { user, role } from "@/db/schema";
 import { eq } from "drizzle-orm";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Dashboard Overview | SRE Portal",
@@ -17,37 +16,51 @@ export const metadata = {
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
-  
-  if (!session) {
+
+  if (!session || !session.user) {
     redirect("/login");
   }
 
-  const usersResult = await db.select({
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    departmentId: user.departmentId,
-    roleName: role.name
-  })
-  .from(user)
-  .leftJoin(role, eq(user.roleId, role.id))
-  .where(eq(user.email, session.user.email))
-  .limit(1);
-
-  if (!usersResult || usersResult.length === 0) redirect("/login");
-
-  const currentUser = {
-    ...usersResult[0],
-    role: { name: usersResult[0].roleName }
+  let currentUser = {
+    id: parseInt(session.user.id) || 0,
+    name: session.user.name || "User",
+    email: session.user.email || "",
+    departmentId: null,
+    role: { name: session.user.roleName || "" },
   };
 
-  const roleName = currentUser.role?.name || "";
-  const departmentId = currentUser.departmentId;
+  try {
+    const usersResult = await db
+      .select({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        departmentId: user.departmentId,
+        roleName: role.name,
+      })
+      .from(user)
+      .leftJoin(role, eq(user.roleId, role.id))
+      .where(eq(user.email, session.user.email))
+      .limit(1);
 
-  console.log("Calling getDashboardStats with role:", currentUser.role.name, "dept:", currentUser.departmentId, "id:", currentUser.id);
-  const statsResponse = await getDashboardStats(currentUser.role.name, currentUser.departmentId, currentUser.id);
-  console.log("statsResponse:", JSON.stringify(statsResponse));
-  const stats = statsResponse.success ? statsResponse.data : null;
+    if (usersResult && usersResult.length > 0) {
+      currentUser = {
+        ...usersResult[0],
+        role: { name: usersResult[0].roleName || session.user.roleName || "" },
+      };
+    }
+  } catch (err) {
+    console.error("[DashboardPage] Error querying current user:", err);
+  }
+
+  let stats = null;
+  try {
+    const roleName = currentUser.role?.name || "";
+    const statsResponse = await getDashboardStats(roleName, currentUser.departmentId, currentUser.id);
+    stats = statsResponse?.success ? statsResponse.data : null;
+  } catch (err) {
+    console.error("[DashboardPage] Error getting stats:", err);
+  }
 
   return <DashboardClient stats={stats} user={currentUser} />;
 }

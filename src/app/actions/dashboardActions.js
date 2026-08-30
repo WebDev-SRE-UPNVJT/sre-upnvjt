@@ -1,33 +1,61 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { user, department, content, activity, event, task, taskSubmission, attendance, attendanceSession, announcement, literatureItem } from "@/db/schema";
-import { eq, count, desc } from "drizzle-orm";
+import {
+  user,
+  department,
+  content,
+  activity,
+  task,
+  taskSubmission,
+  attendance,
+  attendanceSession,
+  announcement,
+  literatureItem,
+} from "@/db/schema";
+import { eq, count, desc, gte, lt, and } from "drizzle-orm";
+import { unstable_cache } from "next/cache";
 
-export async function getDashboardStats(role, departmentId, userId) {
+const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+
+function getEmptyStats(currentYear) {
+  const defaultTrends = monthNames.map((name) => ({
+    name,
+    articles: 0,
+    submissions: 0,
+    attendances: 0,
+  }));
+  return {
+    totalUsers: 0,
+    totalLiterature: 0,
+    publishedArticles: 0,
+    totalDepartments: 0,
+    totalActivities: 0,
+    recentActivities: [],
+    monthlyTrends: defaultTrends,
+    currentYear,
+    chartData: defaultTrends.map(() => 0),
+    rawChartData: defaultTrends.map(() => 0),
+    pendingAttendance: [],
+  };
+}
+
+async function fetchDashboardStatsInternal() {
+  const currentYear = new Date().getFullYear();
+  const startOfYear = new Date(currentYear, 0, 1);
+  const endOfYear = new Date(currentYear + 1, 0, 1);
+
   try {
-    const currentYear = new Date().getFullYear();
-
-    // Run database queries in parallel
-    const [
-      uCountRes,
-      litCountRes,
-      dCountRes,
-      actCountRes,
-      recentArticles,
-      recentAnnouncements,
-      recentTasks,
-      recentSubmissions,
-      recentSessions,
-      recentActivitiesList,
-      publishedList,
-      submissionsList,
-      attendancesList,
-    ] = await Promise.all([
+    // 1. Fetch High-level counts in parallel
+    const countsPromise = Promise.allSettled([
       db.select({ value: count() }).from(user).where(eq(user.isActive, true)),
       db.select({ value: count() }).from(literatureItem),
       db.select({ value: count() }).from(department),
       db.select({ value: count() }).from(activity),
+    ]);
+
+    // 2. Fetch Recent Activities feeds
+    const recentFeedsPromise = Promise.allSettled([
       db.query.content.findMany({
         orderBy: [desc(content.createdAt)],
         limit: 5,
@@ -69,24 +97,60 @@ export async function getDashboardStats(role, departmentId, userId) {
         orderBy: [desc(activity.createdAt)],
         limit: 5,
       }),
+    ]);
+
+    // 3. Fetch Monthly trend data bounded to the current year
+    const trendsPromise = Promise.allSettled([
       db.query.content.findMany({
-        where: eq(content.isPublished, true),
+        where: and(
+          eq(content.isPublished, true),
+          gte(content.createdAt, startOfYear),
+          lt(content.createdAt, endOfYear)
+        ),
         columns: { createdAt: true },
       }),
       db.query.taskSubmission.findMany({
+        where: and(
+          gte(taskSubmission.submittedAt, startOfYear),
+          lt(taskSubmission.submittedAt, endOfYear)
+        ),
         columns: { submittedAt: true },
       }),
       db.query.attendance.findMany({
+        where: and(
+          gte(attendance.createdAt, startOfYear),
+          lt(attendance.createdAt, endOfYear)
+        ),
         columns: { createdAt: true },
       }),
     ]);
 
-    const totalUsers = uCountRes[0]?.value || 0;
-    const totalLiterature = litCountRes[0]?.value || 0;
-    const totalDepartments = dCountRes[0]?.value || 0;
-    const totalActivities = actCountRes[0]?.value || 0;
+    const [countsRes, recentFeedsRes, trendsRes] = await Promise.all([
+      countsPromise,
+      recentFeedsPromise,
+      trendsPromise,
+    ]);
 
-    // 1. Articles
+    // Extract counts
+    const totalUsers = countsRes[0].status === "fulfilled" ? countsRes[0].value[0]?.value || 0 : 0;
+    const totalLiterature = countsRes[1].status === "fulfilled" ? countsRes[1].value[0]?.value || 0 : 0;
+    const totalDepartments = countsRes[2].status === "fulfilled" ? countsRes[2].value[0]?.value || 0 : 0;
+    const totalActivities = countsRes[3].status === "fulfilled" ? countsRes[3].value[0]?.value || 0 : 0;
+
+    // Extract recent feeds
+    const recentArticles = recentFeedsRes[0].status === "fulfilled" ? recentFeedsRes[0].value : [];
+    const recentAnnouncements = recentFeedsRes[1].status === "fulfilled" ? recentFeedsRes[1].value : [];
+    const recentTasks = recentFeedsRes[2].status === "fulfilled" ? recentFeedsRes[2].value : [];
+    const recentSubmissions = recentFeedsRes[3].status === "fulfilled" ? recentFeedsRes[3].value : [];
+    const recentSessions = recentFeedsRes[4].status === "fulfilled" ? recentFeedsRes[4].value : [];
+    const recentActivitiesList = recentFeedsRes[5].status === "fulfilled" ? recentFeedsRes[5].value : [];
+
+    // Extract trend data
+    const publishedList = trendsRes[0].status === "fulfilled" ? trendsRes[0].value : [];
+    const submissionsList = trendsRes[1].status === "fulfilled" ? trendsRes[1].value : [];
+    const attendancesList = trendsRes[2].status === "fulfilled" ? trendsRes[2].value : [];
+
+    // Format activities
     const formattedArticles = recentArticles.map((art) => ({
       id: `article-${art.id}`,
       title: art.title,
@@ -98,7 +162,6 @@ export async function getDashboardStats(role, departmentId, userId) {
       date: art.createdAt,
     }));
 
-    // 2. Announcements
     const formattedAnnouncements = recentAnnouncements.map((ann) => ({
       id: `announcement-${ann.id}`,
       title: ann.title,
@@ -110,7 +173,6 @@ export async function getDashboardStats(role, departmentId, userId) {
       date: ann.createdAt,
     }));
 
-    // 3. Tasks
     const formattedTasks = recentTasks.map((t) => ({
       id: `task-${t.id}`,
       title: t.title,
@@ -122,7 +184,6 @@ export async function getDashboardStats(role, departmentId, userId) {
       date: t.createdAt,
     }));
 
-    // 4. Submissions & Reviews
     const formattedSubmissions = recentSubmissions.map((sub) => {
       const isReviewed = sub.status === "APPROVED" || sub.status === "REJECTED";
       if (isReviewed && sub.reviewer?.name) {
@@ -145,7 +206,6 @@ export async function getDashboardStats(role, departmentId, userId) {
       };
     });
 
-    // 5. Attendance Sessions
     const formattedSessions = recentSessions.map((sess) => ({
       id: `session-${sess.id}`,
       title: sess.title,
@@ -157,7 +217,6 @@ export async function getDashboardStats(role, departmentId, userId) {
       date: sess.createdAt,
     }));
 
-    // 6. Activities (/activities)
     const formattedActivitiesList = recentActivitiesList.map((act) => ({
       id: `activity-${act.id}`,
       title: act.name,
@@ -167,7 +226,6 @@ export async function getDashboardStats(role, departmentId, userId) {
       date: act.createdAt,
     }));
 
-    // Merge and sort newest first (up to 10 latest activities)
     const recentActivities = [
       ...formattedArticles,
       ...formattedAnnouncements,
@@ -181,7 +239,6 @@ export async function getDashboardStats(role, departmentId, userId) {
       .slice(0, 10);
 
     // Build 12-month trend data
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
     const monthlyTrends = monthNames.map((name) => ({
       name,
       articles: 0,
@@ -193,7 +250,8 @@ export async function getDashboardStats(role, departmentId, userId) {
       if (art.createdAt) {
         const d = new Date(art.createdAt);
         if (d.getFullYear() === currentYear) {
-          monthlyTrends[d.getMonth()].articles++;
+          const m = d.getMonth();
+          if (monthlyTrends[m]) monthlyTrends[m].articles++;
         }
       }
     });
@@ -202,7 +260,8 @@ export async function getDashboardStats(role, departmentId, userId) {
       if (sub.submittedAt) {
         const d = new Date(sub.submittedAt);
         if (d.getFullYear() === currentYear) {
-          monthlyTrends[d.getMonth()].submissions++;
+          const m = d.getMonth();
+          if (monthlyTrends[m]) monthlyTrends[m].submissions++;
         }
       }
     });
@@ -211,12 +270,12 @@ export async function getDashboardStats(role, departmentId, userId) {
       if (att.createdAt) {
         const d = new Date(att.createdAt);
         if (d.getFullYear() === currentYear) {
-          monthlyTrends[d.getMonth()].attendances++;
+          const m = d.getMonth();
+          if (monthlyTrends[m]) monthlyTrends[m].attendances++;
         }
       }
     });
 
-    // Fallback legacy array for backward compatibility
     const chartData = monthlyTrends.map((m) => m.articles);
 
     const stats = {
@@ -235,8 +294,26 @@ export async function getDashboardStats(role, departmentId, userId) {
 
     return { success: true, data: stats };
   } catch (error) {
-    console.error("Error fetching dashboard stats:", error);
-    return { success: false, error: "Failed to fetch dashboard statistics" };
+    console.error("Error in fetchDashboardStatsInternal:", error);
+    return { success: true, data: getEmptyStats(currentYear) };
   }
 }
 
+// Cache stats for 30 seconds to provide lightning fast responses and prevent connection spamming
+const getCachedDashboardStats = unstable_cache(
+  async () => {
+    return await fetchDashboardStatsInternal();
+  },
+  ["admin-dashboard-stats-overview"],
+  { revalidate: 30, tags: ["dashboard-stats"] }
+);
+
+export async function getDashboardStats(role, departmentId, userId) {
+  try {
+    return await getCachedDashboardStats();
+  } catch (error) {
+    console.error("Error fetching dashboard stats:", error);
+    const currentYear = new Date().getFullYear();
+    return { success: true, data: getEmptyStats(currentYear) };
+  }
+}

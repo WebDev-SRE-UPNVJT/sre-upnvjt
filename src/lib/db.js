@@ -9,32 +9,26 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-// In development, cache the database client globally to prevent multiple connections on hot-reload.
-// prepare: false is required when using Supabase's transaction pooler (port 6543)
+// Cache the database client globally across both dev and prod to prevent connection pool exhaustion in Next.js
 let client;
 let db;
 
 const dbConfig = {
   max: process.env.NODE_ENV === 'production' ? 10 : 20,
-  idle_timeout: 30,
+  idle_timeout: 20,
   connect_timeout: 10,
   prepare: false,
 };
 
-if (process.env.NODE_ENV === 'production') {
-  client = postgres(process.env.DATABASE_URL, dbConfig);
-  db = drizzle(client, { schema });
-} else {
-  if (!globalThis.globalDbClient) {
-    globalThis.globalDbClient = postgres(process.env.DATABASE_URL, dbConfig);
-  }
-  client = globalThis.globalDbClient;
-  
-  if (!globalThis.globalDb) {
-    globalThis.globalDb = drizzle(client, { schema });
-  }
-  db = globalThis.globalDb;
+if (!globalThis.globalDbClient) {
+  globalThis.globalDbClient = postgres(process.env.DATABASE_URL, dbConfig);
 }
+client = globalThis.globalDbClient;
+
+if (!globalThis.globalDb) {
+  globalThis.globalDb = drizzle(client, { schema });
+}
+db = globalThis.globalDb;
 
 export { db };
 
