@@ -180,11 +180,8 @@ export default function Home() {
           const past = data.filter((a) => a.date && new Date(a.date) < now);
           const upcoming = data.filter((a) => a.date && new Date(a.date) >= now);
 
-          // Priority sorting for upcoming activities (isAnnouncementModal -> isPriority -> date)
+          // Priority sorting for upcoming activities (isPriority -> date)
           upcoming.sort((a, b) => {
-            if (a.isAnnouncementModal !== b.isAnnouncementModal) {
-              return a.isAnnouncementModal ? -1 : 1;
-            }
             if (a.isPriority !== b.isPriority) {
               return a.isPriority ? -1 : 1;
             }
@@ -194,13 +191,13 @@ export default function Home() {
           setPastActivities(past);
           setUpcomingActivities(upcoming);
 
-          // Find priority/announcement activity for Modal popup
-          const priorityEvent = upcoming.find((a) => a.isAnnouncementModal || a.isPriority) ||
-                                data.find((a) => a.isAnnouncementModal || a.isPriority);
+          // Find announcement activity strictly for Modal popup (only isAnnouncementModal)
+          const announcementEvent = upcoming.find((a) => a.isAnnouncementModal) ||
+                                    data.find((a) => a.isAnnouncementModal);
 
-          if (priorityEvent) {
+          if (announcementEvent) {
             const triggerModalOpen = () => {
-              setModalActivity(priorityEvent);
+              setModalActivity(announcementEvent);
               const hasShown = sessionStorage.getItem("sre_priority_modal_shown");
               if (!hasShown) {
                 setPriorityModalOpen(true);
@@ -208,8 +205,8 @@ export default function Home() {
               }
             };
 
-            if (priorityEvent.imageUrl) {
-              const fullUrl = resolveImageUrl(priorityEvent.imageUrl);
+            if (announcementEvent.imageUrl) {
+              const fullUrl = resolveImageUrl(announcementEvent.imageUrl);
               if (typeof window !== "undefined" && window.Image) {
                 const img = new window.Image();
                 img.src = fullUrl;
@@ -728,7 +725,7 @@ export default function Home() {
                   const isExternal = !!activity.link;
                   const href = activity.link || "/activity";
                   const isRegister = activity.linkType === "register";
-                  const isPriorityOrAnnouncement = activity.isAnnouncementModal || activity.isPriority;
+                  const isPriority = activity.isPriority;
                   
                   const buttonText = isRegister 
                     ? (language === "id" ? "Daftar Acara" : "Register Event")
@@ -738,7 +735,7 @@ export default function Home() {
                     <div
                       key={activity.id}
                       className={`group relative flex flex-col bg-[#058562] dark:bg-slate-950/75 border rounded-[2rem] overflow-hidden shadow-2xl hover:shadow-black/40 hover:-translate-y-1.5 transition-all duration-500 w-[260px] sm:w-full sm:max-w-[280px] shrink-0 sm:shrink snap-center ${
-                        isPriorityOrAnnouncement
+                        isPriority
                           ? "border-yellow-300 dark:border-emerald-400/80 shadow-[0_0_25px_rgba(253,224,71,0.25)] dark:shadow-[0_0_25px_rgba(52,211,153,0.25)] ring-2 ring-yellow-300/40 dark:ring-emerald-400/40"
                           : "border-white/20 dark:border-white/10"
                       }`}
@@ -760,14 +757,6 @@ export default function Home() {
                         {/* Dark Vignette Overlay */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
                         
-                        {/* Priority Badge */}
-                        {isPriorityOrAnnouncement && (
-                          <div className="absolute top-3 left-3 z-20 flex items-center gap-1 px-2.5 py-1 rounded-full bg-yellow-300 dark:bg-emerald-400 text-slate-950 dark:text-[#0b120f] shadow-lg text-[9px] font-black uppercase tracking-wider">
-                            <Sparkles className="w-3 h-3 text-slate-950 dark:text-[#0b120f]" />
-                            <span>{t("visitor.home.priority_activity_badge") || "SEDANG DIBUKA"}</span>
-                          </div>
-                        )}
-
                         {/* Calendar Date Badge */}
                         <div className="absolute top-3 right-3 z-20 flex flex-col items-center justify-center w-12 h-14 bg-white dark:bg-slate-900 rounded-xl shadow-xl overflow-hidden border border-slate-100 dark:border-white/10 select-none">
                           <div className="w-full bg-red-500 dark:bg-emerald-500 text-[9px] font-black uppercase text-center py-0.5 text-white dark:text-slate-950 tracking-wider">

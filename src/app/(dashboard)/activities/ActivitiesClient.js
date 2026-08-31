@@ -337,7 +337,7 @@ export default function ActivitiesClient({ initialActivities, currentUser }) {
               <div className="flex items-center justify-between p-4 bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 rounded-xl">
                 <div>
                   <div className="text-gray-900 dark:text-white font-medium text-[14px]">Active Activity</div>
-                  <div className="text-gray-500 dark:text-white/50 text-[12px]">Tampilkan kegiatan ini sebagai Sedang Dibuka di bagian utama (Featured Section)</div>
+                  <div className="text-gray-500 dark:text-white/50 text-[12px]">Tampilkan kegiatan ini di bagian utama (Featured Section)</div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input 
