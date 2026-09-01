@@ -9,19 +9,24 @@ import { appendFormResponseToSheet } from '@/lib/googleSheets';
 export async function POST(req, { params }) {
   try {
     const { id } = await params;
-    const formId = parseInt(id, 10);
-
-    if (isNaN(formId)) {
-      return NextResponse.json({ error: 'Invalid form ID' }, { status: 400 });
-    }
-
-    const form = await db.query.formTemplate.findFirst({
-      where: eq(formTemplate.id, formId),
+    let form = await db.query.formTemplate.findFirst({
+      where: eq(formTemplate.uuid, String(id)),
     });
+
+    if (!form) {
+      const numId = parseInt(id, 10);
+      if (!isNaN(numId)) {
+        form = await db.query.formTemplate.findFirst({
+          where: eq(formTemplate.id, numId),
+        });
+      }
+    }
 
     if (!form) {
       return NextResponse.json({ error: 'Formulir tidak ditemukan' }, { status: 404 });
     }
+
+    const formId = form.id;
 
     if (!form.isPublished) {
       return NextResponse.json({
@@ -53,6 +58,33 @@ export async function POST(req, { params }) {
       responderEmail = autoEmail || '',
       answers = [],
     } = body;
+
+    // Validasi pertanyaan wajib (Server-Side Validation)
+    if (Array.isArray(form.questions)) {
+      for (const q of form.questions) {
+        if (q && q.type !== 'page_break' && Boolean(q.required)) {
+          const submittedAnswer = (answers || []).find((a) => String(a.questionId) === String(q.id));
+          const val = submittedAnswer?.value;
+          const isEmpty =
+            val === undefined ||
+            val === null ||
+            (typeof val === 'string' && val.trim() === '') ||
+            (Array.isArray(val) && val.length === 0);
+
+          if (isEmpty) {
+            return NextResponse.json(
+              {
+                error:
+                  q.type === 'file'
+                    ? `Berkas untuk "${q.question || 'soal'}" wajib diunggah.`
+                    : `Pertanyaan "${q.question || 'soal'}" wajib diisi.`,
+              },
+              { status: 400 }
+            );
+          }
+        }
+      }
+    }
 
     // 1. Simpan ke database PostgreSQL
     const [inserted] = await db.insert(formSubmission).values({

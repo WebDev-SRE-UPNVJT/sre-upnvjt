@@ -90,12 +90,15 @@ export const content = pgTable('content', {
 // 5. Tasks & Submissions
 export const formTemplate = pgTable('formTemplate', {
   id: serial('id').primaryKey(),
+  uuid: varchar('uuid', { length: 64 }).unique(),
   title: varchar('title', { length: 255 }).notNull(),
   description: text('description'),
   questions: jsonb('questions').notNull().default([]),
   isPublished: boolean('isPublished').default(true).notNull(),
   spreadsheetId: varchar('spreadsheetId', { length: 255 }),
   spreadsheetUrl: varchar('spreadsheetUrl', { length: 500 }),
+  driveFolderId: varchar('driveFolderId', { length: 255 }),
+  driveFolderUrl: varchar('driveFolderUrl', { length: 500 }),
   successMessage: text('successMessage'),
   createdById: integer('createdById').references(() => user.id, { onDelete: 'cascade' }).notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),

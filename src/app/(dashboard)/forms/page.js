@@ -13,6 +13,7 @@ import {
   FileSpreadsheet,
   Users,
   Sparkles,
+  Folder,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -249,39 +250,58 @@ export default function FormsList() {
                         </span>
                       </td>
 
-                      {/* Google Spreadsheet Link / Button */}
+                      {/* Google Spreadsheet & Drive Folder Links */}
                       <td className="p-5 whitespace-nowrap">
-                        {form.spreadsheetUrl || form.spreadsheetId ? (
-                          <a
-                            href={
-                              form.spreadsheetUrl ||
-                              `https://docs.google.com/spreadsheets/d/${form.spreadsheetId}/edit`
-                            }
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/20 px-3.5 py-1.5 rounded-xl transition-all shadow-sm"
-                            title="Buka Google Spreadsheet"
-                          >
-                            <FileSpreadsheet className="w-4 h-4" />
-                            <span>Buka Spreadsheet</span>
-                            <ExternalLink className="w-3 h-3 opacity-70" />
-                          </a>
-                        ) : (
-                          <button
-                            type="button"
-                            disabled={creatingSheetId === form.id}
-                            onClick={() => handleConnectSheet(form.id)}
-                            className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-600 dark:text-white/70 bg-gray-100 dark:bg-white/5 hover:bg-emerald-500 hover:text-[#050e0a] dark:hover:bg-primary dark:hover:text-[#050e0a] border border-gray-200 dark:border-white/10 px-3.5 py-1.5 rounded-xl transition-all"
-                            title="Hubungkan ke Google Spreadsheet"
-                          >
-                            <FileSpreadsheet className="w-4 h-4" />
-                            <span>
-                              {creatingSheetId === form.id
-                                ? 'Menghubungkan...'
-                                : 'Hubungkan Sheets'}
-                            </span>
-                          </button>
-                        )}
+                        <div className="flex flex-col gap-1.5 items-start">
+                          {form.spreadsheetUrl || form.spreadsheetId ? (
+                            <a
+                              href={
+                                form.spreadsheetUrl ||
+                                `https://docs.google.com/spreadsheets/d/${form.spreadsheetId}/edit`
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/20 px-3 py-1.5 rounded-xl transition-all shadow-sm"
+                              title="Buka Google Spreadsheet"
+                            >
+                              <FileSpreadsheet className="w-3.5 h-3.5" />
+                              <span>Spreadsheet</span>
+                              <ExternalLink className="w-3 h-3 opacity-70" />
+                            </a>
+                          ) : (
+                            <button
+                              type="button"
+                              disabled={creatingSheetId === form.id}
+                              onClick={() => handleConnectSheet(form.id)}
+                              className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-600 dark:text-white/70 bg-gray-100 dark:bg-white/5 hover:bg-emerald-500 hover:text-[#050e0a] dark:hover:bg-primary dark:hover:text-[#050e0a] border border-gray-200 dark:border-white/10 px-3 py-1.5 rounded-xl transition-all"
+                              title="Hubungkan ke Google Spreadsheet"
+                            >
+                              <FileSpreadsheet className="w-3.5 h-3.5" />
+                              <span>
+                                {creatingSheetId === form.id
+                                  ? 'Menghubungkan...'
+                                  : 'Hubungkan Sheets'}
+                              </span>
+                            </button>
+                          )}
+
+                          {(form.driveFolderUrl || form.driveFolderId) && (
+                            <a
+                              href={
+                                form.driveFolderUrl ||
+                                `https://drive.google.com/drive/folders/${form.driveFolderId}`
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50/50 dark:bg-emerald-500/5 hover:bg-emerald-100/80 dark:hover:bg-emerald-500/15 border border-emerald-200/60 dark:border-emerald-500/20 px-3 py-1 rounded-xl transition-all"
+                              title="Buka Folder Berkas Google Drive"
+                            >
+                              <Folder className="w-3.5 h-3.5" />
+                              <span>Folder Berkas</span>
+                              <ExternalLink className="w-3 h-3 opacity-70" />
+                            </a>
+                          )}
+                        </div>
                       </td>
 
                       {/* Public Form Link */}
@@ -289,11 +309,11 @@ export default function FormsList() {
                         <div className="inline-flex items-center gap-1.5">
                           <button
                             type="button"
-                            onClick={() => handleCopyLink(form.id)}
+                            onClick={() => handleCopyLink(form.uuid || form.id)}
                             className="p-2 text-gray-500 dark:text-white/60 hover:text-primary hover:bg-primary/10 rounded-xl transition-all"
-                            title="Salin Link Formulir"
+                            title="Salin Link Formulir (UUID)"
                           >
-                            {copiedId === form.id ? (
+                            {copiedId === (form.uuid || form.id) ? (
                               <span className="text-xs font-bold text-emerald-500 flex items-center gap-1">
                                 <Check className="w-3.5 h-3.5" /> Tersalin
                               </span>
@@ -302,7 +322,7 @@ export default function FormsList() {
                             )}
                           </button>
                           <a
-                            href={`/f/${form.id}`}
+                            href={`/f/${form.uuid || form.id}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="p-2 text-gray-500 dark:text-white/60 hover:text-primary hover:bg-primary/10 rounded-xl transition-all"

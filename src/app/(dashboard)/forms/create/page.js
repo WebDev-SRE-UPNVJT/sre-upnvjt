@@ -18,6 +18,8 @@ import {
   CheckCircle2,
   MessageSquare,
   Sparkles,
+  UploadCloud,
+  Folder,
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -113,6 +115,7 @@ export default function CreateForm() {
     { value: 'radio', label: 'Pilihan Ganda' },
     { value: 'checkbox', label: 'Kotak Centang' },
     { value: 'dropdown', label: 'Dropdown' },
+    { value: 'file', label: 'Upload File / Dokumen' },
     { value: 'date', label: 'Tanggal' },
     { value: 'number', label: 'Angka' },
     { value: 'page_break', label: 'Pembatas Halaman (Page Break)' },
@@ -331,6 +334,23 @@ export default function CreateForm() {
                 )}
                 {q.type === 'number' && (
                   <input type="number" disabled placeholder="Angka..." className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-3 text-sm" />
+                )}
+                {q.type === 'file' && (
+                  <div className="border-2 border-dashed border-gray-300 dark:border-white/10 rounded-2xl p-6 text-center bg-gray-50/50 dark:bg-white/[0.02]">
+                    <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mx-auto mb-2">
+                      <UploadCloud className="w-6 h-6" />
+                    </div>
+                    <p className="text-sm font-bold text-gray-700 dark:text-white/80">
+                      Pilih atau seret berkas ke sini
+                    </p>
+                    <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mt-1">
+                      Maks: {q.maxSizeMb || 10}MB • {q.maxFiles && q.maxFiles > 1 ? `Hingga ${q.maxFiles} File • ` : ''}
+                      {!q.allowedTypes || q.allowedTypes.includes('all') ? 'Semua Format Berkas' : q.allowedTypes.join(', ').toUpperCase()}
+                    </p>
+                    <p className="text-[11px] text-gray-400 dark:text-white/40 mt-0.5">
+                      Otomatis tersimpan ke Google Drive
+                    </p>
+                  </div>
                 )}
               </div>
             ))}
@@ -562,6 +582,117 @@ export default function CreateForm() {
                       >
                         <Plus size={14} /> Tambah Pilihan
                       </button>
+                    </div>
+                  )}
+
+                  {/* File Upload Settings Box */}
+                  {q.type === 'file' && (
+                    <div className="p-5 rounded-2xl bg-emerald-50/60 dark:bg-emerald-500/5 border border-emerald-200/70 dark:border-emerald-500/20 mb-4 space-y-4">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl shrink-0 mt-0.5">
+                          <UploadCloud className="w-5 h-5" />
+                        </div>
+                        <div className="text-xs">
+                          <span className="font-bold text-emerald-700 dark:text-emerald-400 block mb-0.5">
+                            Konfigurasi Unggah Berkas (Google Drive Sync)
+                          </span>
+                          <p className="text-gray-500 dark:text-white/60 leading-relaxed">
+                            Atur jenis format file dan batasan ukuran maksimal yang dapat diunggah oleh responden. Berkas otomatis tersimpan di Google Drive.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* 1. Format / Jenis File yang Diizinkan */}
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-white/80 mb-2">
+                          Jenis Berkas yang Diizinkan:
+                        </label>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          {[
+                            { id: 'all', label: 'Semua Format', desc: 'PDF, Gambar, Office, ZIP, dll' },
+                            { id: 'pdf', label: 'PDF (.pdf)', desc: 'Dokumen berkas PDF' },
+                            { id: 'image', label: 'Gambar / Foto', desc: 'JPG, PNG, WEBP, GIF' },
+                            { id: 'document', label: 'Dokumen Office', desc: 'Word, Excel, PPT, CSV' },
+                            { id: 'archive', label: 'Arsip (ZIP/RAR)', desc: '.zip, .rar, .7z, .tar' },
+                            { id: 'audio_video', label: 'Audio / Video', desc: 'MP4, MP3, MOV, WAV' },
+                          ].map((typeItem) => {
+                            const selectedTypes = q.allowedTypes || ['all'];
+                            const isSelected =
+                              typeItem.id === 'all'
+                                ? selectedTypes.includes('all') || selectedTypes.length === 0
+                                : selectedTypes.includes(typeItem.id) && !selectedTypes.includes('all');
+
+                            return (
+                              <button
+                                type="button"
+                                key={typeItem.id}
+                                onClick={() => {
+                                  let newTypes = [...(q.allowedTypes || ['all'])];
+                                  if (typeItem.id === 'all') {
+                                    newTypes = ['all'];
+                                  } else {
+                                    newTypes = newTypes.filter((t) => t !== 'all');
+                                    if (newTypes.includes(typeItem.id)) {
+                                      newTypes = newTypes.filter((t) => t !== typeItem.id);
+                                      if (newTypes.length === 0) newTypes = ['all'];
+                                    } else {
+                                      newTypes.push(typeItem.id);
+                                    }
+                                  }
+                                  updateQuestion(q.id, 'allowedTypes', newTypes);
+                                }}
+                                className={`p-2.5 rounded-xl border text-left text-xs transition-all ${
+                                  isSelected
+                                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                                    : 'bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-700 dark:text-white/80 hover:bg-gray-50 dark:hover:bg-white/10'
+                                }`}
+                              >
+                                <span className="font-bold block leading-tight">{typeItem.label}</span>
+                                <span className={`text-[10px] block mt-0.5 ${isSelected ? 'text-white/80' : 'text-gray-400 dark:text-white/40'}`}>
+                                  {typeItem.desc}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* 2. Batas Ukuran & Jumlah File */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-emerald-200/50 dark:border-white/5">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 dark:text-white/80 mb-1.5">
+                            Batas Maksimal Ukuran File:
+                          </label>
+                          <select
+                            value={q.maxSizeMb || 10}
+                            onChange={(e) => updateQuestion(q.id, 'maxSizeMb', parseInt(e.target.value, 10))}
+                            className="w-full bg-white dark:bg-[#071913] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-gray-800 dark:text-white focus:outline-none focus:border-primary"
+                          >
+                            <option value={1}>1 MB</option>
+                            <option value={5}>5 MB</option>
+                            <option value={10}>10 MB (Standar)</option>
+                            <option value={25}>25 MB</option>
+                            <option value={50}>50 MB</option>
+                            <option value={100}>100 MB</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 dark:text-white/80 mb-1.5">
+                            Maksimal Jumlah File:
+                          </label>
+                          <select
+                            value={q.maxFiles || 1}
+                            onChange={(e) => updateQuestion(q.id, 'maxFiles', parseInt(e.target.value, 10))}
+                            className="w-full bg-white dark:bg-[#071913] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-gray-800 dark:text-white focus:outline-none focus:border-primary"
+                          >
+                            <option value={1}>1 File (Tunggal)</option>
+                            <option value={3}>Hingga 3 File</option>
+                            <option value={5}>Hingga 5 File</option>
+                            <option value={10}>Hingga 10 File</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
                   )}
 

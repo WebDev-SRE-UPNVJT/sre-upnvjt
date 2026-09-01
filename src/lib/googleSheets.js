@@ -1,4 +1,5 @@
 import { google } from "googleapis";
+import { Readable } from "stream";
 
 /**
  * Mendapatkan OAuth2 Client Google dengan Refresh Token yang terkonfigurasi di sistem
@@ -65,6 +66,7 @@ export async function createFormSpreadsheet(formTitle, questions = []) {
 
     const spreadsheetId = createRes.data.spreadsheetId;
     const spreadsheetUrl = createRes.data.spreadsheetUrl || `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit`;
+    const targetSheetId = createRes.data?.sheets?.[0]?.properties?.sheetId ?? 0;
 
     // 2. Tulis Header ke Baris 1
     await sheets.spreadsheets.values.update({
@@ -85,7 +87,7 @@ export async function createFormSpreadsheet(formTitle, questions = []) {
             {
               repeatCell: {
                 range: {
-                  sheetId: 0,
+                  sheetId: targetSheetId,
                   startRowIndex: 0,
                   endRowIndex: 1,
                   startColumnIndex: 0,
@@ -116,7 +118,7 @@ export async function createFormSpreadsheet(formTitle, questions = []) {
             {
               autoResizeDimensions: {
                 dimensions: {
-                  sheetId: 0,
+                  sheetId: targetSheetId,
                   dimension: "COLUMNS",
                   startIndex: 0,
                   endIndex: headers.length,
@@ -335,3 +337,120 @@ export async function appendFormResponseToSheet(spreadsheetId, payload, question
     return null;
   }
 }
+
+/**
+ * Membuat Folder baru di Google Drive untuk menampung file upload responden suatu formulir
+ */
+export async function createFormDriveFolder(formTitle) {
+  try {
+    const auth = getGoogleOAuth2Client();
+    const drive = google.drive({ version: "v3", auth });
+
+    const safeTitle = (formTitle || "Formulir SRE").trim();
+    const folderName = `${safeTitle} (Berkas Upload)`;
+    const parentFolderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+
+    const fileMetadata = {
+      name: folderName,
+      mimeType: "application/vnd.google-apps.folder",
+      ...(parentFolderId ? { parents: [parentFolderId] } : {}),
+    };
+
+    const folderRes = await drive.files.create({
+      requestBody: fileMetadata,
+      fields: "id, webViewLink",
+      supportsAllDrives: true,
+    });
+
+    const folderId = folderRes.data.id;
+    const folderUrl =
+      folderRes.data.webViewLink ||
+      `https://drive.google.com/drive/folders/${folderId}`;
+
+    // Beri izin akses baca bagi siapa saja yang memiliki link
+    try {
+      await drive.permissions.create({
+        fileId: folderId,
+        requestBody: {
+          role: "reader",
+          type: "anyone",
+        },
+        supportsAllDrives: true,
+      });
+    } catch (permErr) {
+      console.warn("[GoogleDrive] Folder permission setting warning:", permErr.message);
+    }
+
+    return {
+      folderId,
+      folderUrl,
+    };
+  } catch (error) {
+    console.error("[GoogleDrive] Error creating form drive folder:", error);
+    throw error;
+  }
+}
+
+/**
+ * Mengunggah file respons form ke Google Drive folder form
+ */
+export async function uploadFormFileToDrive({ file, folderId, customFileName }) {
+  try {
+    const auth = getGoogleOAuth2Client();
+    const drive = google.drive({ version: "v3", auth });
+
+    const targetFolderId = folderId || process.env.GOOGLE_DRIVE_FOLDER_ID;
+
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    const stream = Readable.from(buffer);
+
+    const safeOriginalName = (file.name || "berkas").replace(/[^a-zA-Z0-9._-]/g, "_");
+    const fileName = customFileName || `${Date.now()}_${safeOriginalName}`;
+
+    const fileMetadata = {
+      name: fileName,
+      ...(targetFolderId ? { parents: [targetFolderId] } : {}),
+    };
+
+    const media = {
+      mimeType: file.type || "application/octet-stream",
+      body: stream,
+    };
+
+    const uploaded = await drive.files.create({
+      requestBody: fileMetadata,
+      media: media,
+      fields: "id, name, webViewLink, webContentLink, size",
+      supportsAllDrives: true,
+    });
+
+    const fileId = uploaded.data.id;
+
+    // Set permission to anyone with link can view/download
+    try {
+      await drive.permissions.create({
+        fileId: fileId,
+        requestBody: {
+          role: "reader",
+          type: "anyone",
+        },
+        supportsAllDrives: true,
+      });
+    } catch (permErr) {
+      console.warn("[GoogleDrive] File permission warning:", permErr.message);
+    }
+
+    return {
+      fileId,
+      fileName: uploaded.data.name || fileName,
+      webViewLink: uploaded.data.webViewLink || `https://drive.google.com/file/d/${fileId}/view`,
+      webContentLink: uploaded.data.webContentLink,
+      fileSize: file.size,
+    };
+  } catch (error) {
+    console.error("[GoogleDrive] Error uploading file to drive:", error);
+    throw error;
+  }
+}
+

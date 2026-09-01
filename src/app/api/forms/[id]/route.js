@@ -4,7 +4,7 @@ import { formTemplate, formSubmission } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
-import { createFormSpreadsheet } from '@/lib/googleSheets';
+import { createFormSpreadsheet, createFormDriveFolder } from '@/lib/googleSheets';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +37,11 @@ export async function GET(req, { params }) {
         form.spreadsheetUrl ||
         (form.spreadsheetId
           ? `https://docs.google.com/spreadsheets/d/${form.spreadsheetId}/edit`
+          : null),
+      driveFolderUrl:
+        form.driveFolderUrl ||
+        (form.driveFolderId
+          ? `https://drive.google.com/drive/folders/${form.driveFolderId}`
           : null),
       submissionCount: form.submissions?.length || 0,
     }, {
@@ -76,6 +81,10 @@ export async function PUT(req, { params }) {
 
     let spreadsheetId = body.spreadsheetId;
     let spreadsheetUrl = body.spreadsheetUrl;
+    let driveFolderId = body.driveFolderId;
+    let driveFolderUrl = body.driveFolderUrl;
+
+    const hasFileUpload = Array.isArray(questions) && questions.some((q) => q && q.type === 'file');
 
     // Jika diminta buat Google Spreadsheet dan belum ada
     if (createSpreadsheet && !spreadsheetId) {
@@ -85,6 +94,17 @@ export async function PUT(req, { params }) {
         spreadsheetUrl = sheetRes.spreadsheetUrl;
       } catch (sheetErr) {
         console.error('Failed to create Google Spreadsheet for form:', sheetErr);
+      }
+    }
+
+    // Jika ada soal upload file dan belum memiliki folder Drive
+    if (hasFileUpload && !driveFolderId) {
+      try {
+        const folderRes = await createFormDriveFolder(title);
+        driveFolderId = folderRes.folderId;
+        driveFolderUrl = folderRes.folderUrl;
+      } catch (folderErr) {
+        console.error('Failed to create Google Drive folder for form:', folderErr);
       }
     }
 
@@ -98,6 +118,8 @@ export async function PUT(req, { params }) {
     if (isPublished !== undefined) updateData.isPublished = Boolean(isPublished);
     if (spreadsheetId !== undefined) updateData.spreadsheetId = spreadsheetId;
     if (spreadsheetUrl !== undefined) updateData.spreadsheetUrl = spreadsheetUrl;
+    if (driveFolderId !== undefined) updateData.driveFolderId = driveFolderId;
+    if (driveFolderUrl !== undefined) updateData.driveFolderUrl = driveFolderUrl;
     if (successMessage !== undefined) updateData.successMessage = successMessage;
 
     const [updatedForm] = await db.update(formTemplate)

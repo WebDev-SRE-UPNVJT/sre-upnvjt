@@ -4,7 +4,7 @@ import { formTemplate, formSubmission } from '@/db/schema';
 import { eq, desc, count } from 'drizzle-orm';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
-import { createFormSpreadsheet } from '@/lib/googleSheets';
+import { createFormSpreadsheet, createFormDriveFolder } from '@/lib/googleSheets';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +25,11 @@ export async function GET(req) {
         f.spreadsheetUrl ||
         (f.spreadsheetId
           ? `https://docs.google.com/spreadsheets/d/${f.spreadsheetId}/edit`
+          : null),
+      driveFolderUrl:
+        f.driveFolderUrl ||
+        (f.driveFolderId
+          ? `https://drive.google.com/drive/folders/${f.driveFolderId}`
           : null),
       submissionCount: f.submissions?.length || 0,
     }));
@@ -64,6 +69,10 @@ export async function POST(req) {
 
     let spreadsheetId = body.spreadsheetId || null;
     let spreadsheetUrl = body.spreadsheetUrl || null;
+    let driveFolderId = body.driveFolderId || null;
+    let driveFolderUrl = body.driveFolderUrl || null;
+
+    const hasFileUpload = questions.some((q) => q && q.type === 'file');
 
     // Otomatis buat Google Spreadsheet jika opsi diaktifkan
     if (createSpreadsheet && !spreadsheetId) {
@@ -73,17 +82,30 @@ export async function POST(req) {
         spreadsheetUrl = sheetRes.spreadsheetUrl;
       } catch (sheetErr) {
         console.error('Failed to create Google Spreadsheet for form:', sheetErr);
-        // Lanjutkan penyimpanan form dengan log peringatan
+      }
+    }
+
+    // Otomatis buat Folder Google Drive jika terdapat tipe soal upload file atau auto-create aktif
+    if ((hasFileUpload || createSpreadsheet) && !driveFolderId) {
+      try {
+        const folderRes = await createFormDriveFolder(title);
+        driveFolderId = folderRes.folderId;
+        driveFolderUrl = folderRes.folderUrl;
+      } catch (folderErr) {
+        console.error('Failed to create Google Drive folder for form:', folderErr);
       }
     }
 
     const [newForm] = await db.insert(formTemplate).values({
+      uuid: crypto.randomUUID(),
       title: title.trim(),
       description: description?.trim() || null,
       questions: questions || [],
       isPublished: Boolean(isPublished),
       spreadsheetId,
       spreadsheetUrl,
+      driveFolderId,
+      driveFolderUrl,
       successMessage: successMessage || 'Tanggapan Anda telah berhasil direkam.',
       createdById: userId,
     }).returning();
