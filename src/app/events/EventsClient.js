@@ -48,7 +48,7 @@ export default function EventsClient({ initialEvents }) {
         }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (res.ok) {
         setSuccess("Pendaftaran berhasil dikirim! Silakan tunggu konfirmasi email.");
         setTimeout(() => setActiveEvent(null), 2000);

@@ -116,7 +116,7 @@ export default function RegisterClient({ roles, departments, divisions }) {
         body: JSON.stringify(formData),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
         setError(data.error || "Registration failed");

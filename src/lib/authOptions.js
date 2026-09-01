@@ -97,15 +97,14 @@ export const authOptions = {
       }
       return session;
     },
-    async redirect({ url, baseUrl, token }) {
-      const roleName = token?.roleName;
-      const KNOWN_ROLES = ["SUPER_ADMIN", "KETUA", "WAKIL_KETUA", "SEKRETARIS", "BENDAHARA", "MEMBER", "ALUMNI", "STAFF"];
-      const isKnownRole = roleName && KNOWN_ROLES.includes(roleName);
-
-      if (!isKnownRole) {
-        return baseUrl + "/";
-      }
-      return url.startsWith(baseUrl) ? url : baseUrl + "/dashboard";
+    async redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      // Allows callback URLs on the same origin
+      try {
+        if (new URL(url).origin === baseUrl) return url;
+      } catch (e) {}
+      return baseUrl + "/dashboard";
     },
   },
   pages: {

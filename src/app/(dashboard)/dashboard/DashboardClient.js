@@ -2,44 +2,32 @@
 
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Users,
-  FileText,
-  BookOpen,
-  CheckSquare,
-  TrendingUp,
-  AlertCircle,
-  Calendar,
   Activity,
-  ArrowRight,
-  Clock,
-  Plus,
-  BarChart2,
-  Star,
-  Zap,
-  Trophy,
+  BookOpen,
+  Building2,
+  Calendar,
+  ArrowUpRight,
 } from "lucide-react";
+import Link from "next/link";
 import { useLanguage } from "@/i18n/LanguageProvider";
-import ChartActivity from "./chartActivity";
+
 export default function DashboardClient({ stats, user }) {
   const { data: session } = useSession();
   const { t, language } = useLanguage();
-  const role = session?.user?.roleName;
   const [greeting, setGreeting] = useState("Welcome");
   const [currentDate, setCurrentDate] = useState("");
 
-  const [isClient, setIsClient] = useState(false);
-
   useEffect(() => {
-    setIsClient(true);
     const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) setGreeting(t("dashboard.greeting.morning"));
+    if (hour >= 5 && hour < 12) setGreeting(t("dashboard.greeting.morning") || "Selamat Pagi");
     else if (hour >= 12 && hour < 18)
-      setGreeting(t("dashboard.greeting.afternoon"));
+      setGreeting(t("dashboard.greeting.afternoon") || "Selamat Siang");
     else if (hour >= 18 && hour < 22)
-      setGreeting(t("dashboard.greeting.evening"));
-    else setGreeting(t("dashboard.greeting.night"));
+      setGreeting(t("dashboard.greeting.evening") || "Selamat Sore");
+    else setGreeting(t("dashboard.greeting.night") || "Selamat Malam");
 
     setCurrentDate(
       new Date().toLocaleDateString(language === "id" ? "id-ID" : "en-US", {
@@ -49,292 +37,143 @@ export default function DashboardClient({ stats, user }) {
         year: "numeric",
       }),
     );
-  }, []);
+  }, [language, t]);
 
   const container = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
-      transition: { staggerChildren: 0.1 },
+      transition: { staggerChildren: 0.08 },
     },
   };
 
   const item = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 15 },
     show: {
       opacity: 1,
       y: 0,
-      transition: { type: "spring", stiffness: 300, damping: 24 },
+      transition: { duration: 0.4, ease: "easeOut" },
     },
   };
 
-  const chartData = stats?.chartData || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-  const rawChartData = stats?.rawChartData || [
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  const cards = [
+    {
+      title: t("dashboard.widgets.total_members") || "Total Anggota",
+      value: stats?.totalUsers ?? 0,
+      href: "/users",
+      icon: Users,
+      bgGlow: "from-emerald-500/15 via-emerald-500/5 to-transparent",
+      borderColor: "hover:border-emerald-500/30",
+      iconBg: "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-500/20",
+    },
+    {
+      title: t("dashboard.widgets.total_activities") || "Total Kegiatan",
+      value: stats?.totalActivities ?? 0,
+      href: "/activities",
+      icon: Activity,
+      bgGlow: "from-blue-500/15 via-blue-500/5 to-transparent",
+      borderColor: "hover:border-blue-500/30",
+      iconBg: "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-500/20",
+    },
+    {
+      title: t("dashboard.widgets.total_literature") || "Literature Bank",
+      value: stats?.totalLiterature ?? 0,
+      href: "/literature",
+      icon: BookOpen,
+      bgGlow: "from-amber-500/15 via-amber-500/5 to-transparent",
+      borderColor: "hover:border-amber-500/30",
+      iconBg: "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-500/20",
+    },
+    {
+      title: t("dashboard.widgets.departments") || "Departemen",
+      value: stats?.totalDepartments ?? 0,
+      href: "/departments",
+      icon: Building2,
+      bgGlow: "from-purple-500/15 via-purple-500/5 to-transparent",
+      borderColor: "hover:border-purple-500/30",
+      iconBg: "bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-100 dark:border-purple-500/20",
+    },
   ];
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-
-  const Widget = ({
-    title,
-    value,
-    subtitle,
-    icon: Icon,
-    color = "primary",
-    trend = "+5%",
-  }) => (
-    <motion.div
-      variants={item}
-      className="bg-white dark:bg-[#08120e] hover:bg-gray-50 dark:hover:bg-[#0a1611] border border-gray-100 dark:border-white/5 rounded-3xl p-6 relative overflow-hidden group transition-all duration-500 hover:-translate-y-1 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none dark:hover:shadow-[0_10px_40px_rgba(16,185,129,0.1)]"
-    >
-      {/* Decorative Glows */}
-      <div
-        className={`absolute -right-6 -top-6 w-32 h-32 rounded-full bg-${color}/10 blur-2xl group-hover:bg-${color}/20 group-hover:scale-150 transition-all duration-700`}
-      ></div>
-
-      <div className="flex justify-between items-start mb-8 relative z-10">
-        <div
-          className={`p-3.5 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 text-${color} group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-sm dark:shadow-none`}
-        >
-          <Icon className="w-6 h-6" />
-        </div>
-        <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold border border-emerald-100 dark:border-emerald-500/20">
-          <TrendingUp className="w-3 h-3" />
-          {trend}
-        </div>
-      </div>
-
-      <div className="relative z-10">
-        <h3 className="text-4xl md:text-5xl font-display font-black text-gray-900 dark:text-white tracking-tighter mb-2">
-          {value}
-        </h3>
-        <p className="text-gray-900 dark:text-white font-bold text-sm tracking-wide mb-1">
-          {title}
-        </p>
-        <p className="text-xs text-gray-500 dark:text-white/40 font-medium">
-          {subtitle}
-        </p>
-      </div>
-
-      {/* Mini sparkline mock */}
-      <div className="absolute bottom-0 left-0 w-full h-12 opacity-20 group-hover:opacity-40 transition-opacity pointer-events-none">
-        <svg
-          viewBox="0 0 100 20"
-          preserveAspectRatio="none"
-          className="w-full h-full"
-        >
-          <path
-            d="M0,20 L10,15 L20,18 L30,10 L40,12 L50,5 L60,8 L70,2 L80,6 L90,1 L100,5 L100,20 Z"
-            className={`fill-${color}`}
-          />
-        </svg>
-      </div>
-    </motion.div>
-  );
 
   return (
-    <div className="w-full relative pb-20">
+    <div className="w-full relative pb-10">
       {/* Background Ambience */}
       <div
-        className="absolute top-0 left-1/4 w-125 h-125 bg-primary/5 dark:bg-primary/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen animate-pulse"
-        style={{ animationDuration: "6s" }}
-      ></div>
-      <div className="absolute top-40 right-1/4 w-[400px] h-[400px] bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-[100px] pointer-events-none mix-blend-screen"></div>
+        className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 dark:bg-primary/10 rounded-full blur-[100px] pointer-events-none mix-blend-screen"
+      />
+      <div className="absolute top-20 right-1/4 w-80 h-80 bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-[90px] pointer-events-none mix-blend-screen" />
 
-      {/* Header and ID Card */}
-      <div className="flex flex-col xl:flex-row justify-between items-start gap-10 mb-12 relative z-10">
+      {/* Header and Welcome */}
+      <div className="flex flex-col xl:flex-row justify-between items-start gap-6 mb-8 relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="flex-1 pt-4"
+          transition={{ duration: 0.5 }}
+          className="flex-1 pt-2"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-bold text-gray-600 dark:text-white/60 mb-6 shadow-sm">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-bold text-gray-600 dark:text-white/60 mb-4 shadow-sm">
             <Calendar className="w-3.5 h-3.5 text-primary" />
             {currentDate}
           </div>
-          <h1 className="text-5xl md:text-6xl font-display font-black tracking-tighter mb-4 text-gray-900 dark:text-white leading-[1.1]">
-            {greeting}, <br className="md:hidden" />
+          <h1 className="text-4xl md:text-5xl font-display font-black tracking-tighter mb-2 text-gray-900 dark:text-white leading-tight">
+            {greeting},{" "}
             <span className="text-primary dark:text-emerald-400">
-              <span className="inline md:hidden">{session?.user?.name?.split(" ")[0] || "User"}</span>
-              <span className="hidden md:inline">{session?.user?.name || "User"}</span>
+              {session?.user?.name || "User"}
             </span>
           </h1>
-          <p className="text-gray-500 dark:text-white/50 text-base md:text-lg max-w-xl font-light mb-8 leading-relaxed">
-            {t("dashboard.welcome_msg")}
+          <p className="text-gray-500 dark:text-white/50 text-sm md:text-base max-w-xl font-light">
+            {t("dashboard.welcome_msg") || "Selamat datang di SRE UPN Veteran Jawa Timur Admin Portal."}
           </p>
         </motion.div>
       </div>
 
-      {/* Widgets Grid */}
+      {/* Stat Cards Grid */}
       <motion.div
         variants={container}
         initial="hidden"
         animate="show"
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10"
       >
-        <Widget
-          title={t("dashboard.widgets.total_members")}
-          value={stats?.totalUsers || "0"}
-          subtitle=""
-          icon={Users}
-          color="primary"
-          trend="+"
-        />
-        <Widget
-          title={t("dashboard.widgets.total_activities")}
-          value={stats?.totalActivities || "0"}
-          subtitle=""
-          icon={Activity}
-          color="blue-500"
-          trend="Active"
-        />
-        <Widget
-          title={t("dashboard.widgets.total_literature")}
-          value={stats?.totalLiterature ?? stats?.publishedArticles ?? "0"}
-          subtitle=""
-          icon={BookOpen}
-          color="emerald-500"
-          trend="Bank"
-        />
-        <Widget
-          title={t("dashboard.widgets.departments")}
-          value={stats?.totalDepartments || "0"}
-          subtitle=""
-          icon={Activity}
-          color="amber-500"
-          trend="Stable"
-        />
-      </motion.div>
+        {cards.map((card, idx) => {
+          const Icon = card.icon;
+          return (
+            <motion.div
+              key={idx}
+              variants={item}
+              className={`bg-white dark:bg-[#08120e] hover:bg-gray-50 dark:hover:bg-[#0b1813] border border-gray-100 dark:border-white/5 ${card.borderColor} rounded-3xl p-6 relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-none`}
+            >
+              {/* Background gradient glow on hover */}
+              <div
+                className={`absolute -right-6 -top-6 w-32 h-32 rounded-full bg-gradient-to-br ${card.bgGlow} blur-2xl group-hover:scale-150 transition-all duration-500 pointer-events-none`}
+              />
 
-      <div className="mt-10 grid grid-cols-1">
-        {isClient && (
-          <ChartActivity
-            data={stats?.monthlyTrends}
-            year={stats?.currentYear}
-          />
-        )}
-      </div>
-
-      {/* Main Content Area */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4, duration: 0.8 }}
-        className="mt-10 grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10"
-      >
-        {/* Recent Activity Timeline */}
-        <div className="bg-white dark:bg-[#08120e] border border-gray-100 dark:border-white/5 rounded-3xl p-8 min-h-110 flex flex-col relative overflow-hidden shadow-sm dark:shadow-none lg:col-span-3">
-          <div className="flex justify-between items-center mb-8">
-            <h3 className="font-display font-bold text-2xl tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
-              <Clock className="w-6 h-6 text-blue-500" />
-              {t("dashboard.timeline.title")}
-            </h3>
-          </div>
-
-          <div className="flex-1 overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-white/10 scrollbar-track-transparent">
-            {stats?.recentActivities?.length > 0 ? (
-              <div className="relative border-l-2 border-gray-100 dark:border-white/5 ml-3 space-y-6 pb-4 pt-2">
-                {stats.recentActivities.map((activity, i) => {
-                  let badgeStyle = "bg-primary/10 text-primary border-primary/20";
-                  let nodeBorder = "border-primary";
-
-                  if (activity.type === "ANNOUNCEMENT") {
-                    badgeStyle = "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20";
-                    nodeBorder = "border-amber-500";
-                  } else if (activity.type === "TASK") {
-                    badgeStyle = "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20";
-                    nodeBorder = "border-blue-500";
-                  } else if (activity.type === "REVIEW") {
-                    badgeStyle = "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
-                    nodeBorder = "border-emerald-500";
-                  } else if (activity.type === "ATTENDANCE") {
-                    badgeStyle = "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20";
-                    nodeBorder = "border-purple-500";
-                  } else if (activity.type === "EVENT") {
-                    badgeStyle = "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20";
-                    nodeBorder = "border-indigo-500";
-                  } else if (activity.type === "ARTICLE") {
-                    badgeStyle = "bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20";
-                    nodeBorder = "border-teal-500";
-                  }
-
-                  return (
-                    <motion.div
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.2 + i * 0.05 }}
-                      key={activity.id}
-                      className="relative pl-6 group"
-                    >
-                      {/* Timeline Node */}
-                      <div className={`absolute w-3.5 h-3.5 bg-white dark:bg-[#08120e] border-2 ${nodeBorder} rounded-full left-[-8.5px] top-1.5 group-hover:scale-150 transition-all duration-300 shadow-sm`} />
-
-                      <div className="bg-gray-50/70 dark:bg-white/[0.02] hover:bg-gray-50 dark:hover:bg-white/[0.04] p-4 rounded-2xl border border-gray-100 dark:border-white/5 group-hover:border-primary/30 transition-all">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1.5">
-                          <h4 className="text-sm font-bold text-gray-900 dark:text-white line-clamp-1">
-                            {activity.title}
-                          </h4>
-                          <span className="text-[10px] text-gray-400 dark:text-white/40 font-medium whitespace-nowrap">
-                            {new Date(activity.date).toLocaleDateString(
-                              language === "id" ? "id-ID" : "en-GB",
-                              {
-                                day: "numeric",
-                                month: "short",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              },
-                            )}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-500 dark:text-white/60 mb-3 leading-relaxed">
-                          {activity.desc}
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${badgeStyle}`}>
-                            {activity.type}
-                          </span>
-                          {activity.actor && (
-                            <span className="text-[10px] text-gray-500 dark:text-white/40 font-medium">
-                              Oleh: <strong className="text-gray-700 dark:text-white/70">{activity.actor}</strong>
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="flex-1 flex flex-col items-center justify-center border border-dashed border-gray-200 dark:border-white/10 rounded-2xl bg-gray-50 dark:bg-white/[0.01] h-48">
-                <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center mb-3">
-                  <Star className="w-6 h-6 text-gray-300 dark:text-white/20" />
+              <div className="flex justify-between items-start mb-6 relative z-10">
+                <div
+                  className={`p-3 rounded-2xl border ${card.iconBg} group-hover:scale-110 transition-transform duration-300 shadow-sm`}
+                >
+                  <Icon className="w-6 h-6" />
                 </div>
-                <p className="text-gray-400 dark:text-white/30 font-bold text-sm tracking-wide">
-                  {t("dashboard.timeline.quiet")}
-                </p>
-                <p className="text-xs text-gray-400 dark:text-white/20 mt-1">
-                  {t("dashboard.timeline.no_activities")}
+                <Link
+                  href={card.href}
+                  className="text-gray-400 hover:text-primary dark:text-white/30 dark:hover:text-emerald-400 transition-colors p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5"
+                  title="Lihat Detail"
+                >
+                  <ArrowUpRight className="w-4 h-4" />
+                </Link>
+              </div>
+
+              <div className="relative z-10">
+                <h3 className="text-3xl md:text-4xl font-display font-black text-gray-900 dark:text-white tracking-tight mb-1">
+                  {card.value}
+                </h3>
+                <p className="text-gray-600 dark:text-white/70 font-semibold text-sm">
+                  {card.title}
                 </p>
               </div>
-            )}
-          </div>
-        </div>
+            </motion.div>
+          );
+        })}
       </motion.div>
-
-    
     </div>
   );
 }

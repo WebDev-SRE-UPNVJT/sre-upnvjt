@@ -4,8 +4,7 @@ import { NextResponse } from "next/server";
 
 export default async function middleware(req, event) {
   const secret = process.env.NEXTAUTH_SECRET || "fallback_secret_for_dev_only";
-  const isProd = process.env.NODE_ENV === "production" || req.url.startsWith("https://");
-  const token = await getToken({ req, secret, secureCookie: isProd });
+  const token = await getToken({ req, secret });
   const isAuth = !!token;
   const isAuthPage = req.nextUrl.pathname.startsWith("/login");
   const isMemberRole = token?.roleName === "MEMBER";
@@ -42,7 +41,6 @@ export default async function middleware(req, event) {
 
   const authMiddleware = withAuth({
     secret,
-    secureCookie: isProd,
     callbacks: {
       authorized: ({ token }) => !!token,
     },

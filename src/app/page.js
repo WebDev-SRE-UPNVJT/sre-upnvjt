@@ -169,7 +169,11 @@ export default function Home() {
     setMounted(true);
     // Fetch activities from public REST API (same pattern as 'Our Activity' section)
     fetch("/api/activities/public")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) return [];
+        const ct = res.headers.get("content-type");
+        return ct && ct.includes("application/json") ? res.json() : [];
+      })
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           setDbActivities(data);
@@ -270,16 +274,22 @@ export default function Home() {
   const [publicTestimonialsList, setPublicTestimonialsList] = useState([]);
   const [isScrolled, setIsScrolled] = useState(false);
 
-
-
   useEffect(() => {
     fetch('/api/partners')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) return [];
+        const ct = res.headers.get("content-type");
+        return ct && ct.includes("application/json") ? res.json() : [];
+      })
       .then(data => { if (Array.isArray(data)) setPartnersList(data); })
       .catch(console.error);
     
     fetch('/api/events/public')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) return [];
+        const ct = res.headers.get("content-type");
+        return ct && ct.includes("application/json") ? res.json() : [];
+      })
       .then(data => {
         if (Array.isArray(data)) {
           const formatted = data.map(ev => ({
@@ -296,12 +306,20 @@ export default function Home() {
       .catch(() => { setPublicActivitiesList(MOCK_ACTIVITIES); });
 
     fetch('/api/testimonials')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) return [];
+        const ct = res.headers.get("content-type");
+        return ct && ct.includes("application/json") ? res.json() : [];
+      })
       .then(data => { if (Array.isArray(data)) setPublicTestimonialsList(data); })
       .catch(console.error);
 
     fetch('/api/featured-projects/public')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) return [];
+        const ct = res.headers.get("content-type");
+        return ct && ct.includes("application/json") ? res.json() : [];
+      })
       .then(data => { if (Array.isArray(data)) setFeaturedProjectsList(data); })
       .catch(console.error);
     

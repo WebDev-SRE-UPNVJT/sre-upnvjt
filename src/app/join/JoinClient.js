@@ -27,7 +27,7 @@ export default function JoinClient() {
         body: JSON.stringify({ fullName, email, npm, faculty, motivation }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (res.ok) {
         setSuccess(true);
       } else {

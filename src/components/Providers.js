@@ -17,7 +17,9 @@ if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
 export function Providers({ children }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-      <SessionProvider>{children}</SessionProvider>
+      <SessionProvider refetchOnWindowFocus={false} refetchWhenOffline={false}>
+        {children}
+      </SessionProvider>
     </ThemeProvider>
   );
 }
