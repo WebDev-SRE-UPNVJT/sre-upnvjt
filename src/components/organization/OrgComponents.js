@@ -61,7 +61,7 @@ export function DepartmentCard({ dept, index, isExecutive = false }) {
   }
 
   return (
-    <Link href={`/about/organization/${dept.slug}`} className="block w-full h-full">
+    <Link href={`/about/organization/${dept.slug}`} className="block w-full h-full p-1">
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -165,7 +165,7 @@ function getJurusanByNpm(npm) {
     case "033": return "Teknik Sipil";
     case "034": return "Teknik Lingkungan";
     case "036": return "Teknik Mesin";
-    case "081": return "Teknik Informatika";
+    case "081": return "Informatika";
     case "082": return "Sistem Informasi";
     case "083": return "Sains Data";
     case "011": return "Ekonomi Pembangunan";
@@ -176,6 +176,8 @@ function getJurusanByNpm(npm) {
     case "041": return "Agroteknologi";
     case "042": return "Agribisnis";
     case "043": return "Teknologi Pangan";
+    case "071": return "Ilmu Hukum";
+    case "014": return "Kewirausahaan";
     default: return "Teknik";
   }
 }

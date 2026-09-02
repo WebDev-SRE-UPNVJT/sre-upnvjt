@@ -12,7 +12,7 @@ export default function ActivityCarousel({ activities }) {
   const [touchStart, setTouchStart] = useState(null);
 
   const carouselItems = React.useMemo(() => {
-    if (!activities) return [];
+    if (!activities || activities.length === 0) return [{ isDefault: true }];
     const items = [...activities];
     if (activities.length > 0 && activities.length < 4) {
       items.push({ isDefault: true });
@@ -195,13 +195,13 @@ export default function ActivityCarousel({ activities }) {
           whileHover={{ y: -8, scale: 1.02 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
           onClick={onClick}
-          className={`${sizeClass} flex-shrink-0 scale-100 z-10 shadow-2xl shadow-emerald-900/10 dark:shadow-emerald-950/50 rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-yellow-300 dark:border-emerald-400/60 bg-[#099c6d] dark:bg-emerald-950`}
+          className={`${sizeClass} flex-shrink-0 scale-100 z-10 shadow-2xl shadow-emerald-900/10 dark:shadow-emerald-950/50 rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-yellow-300 dark:border-emerald-400/60 bg-[#099c6d] dark:bg-emerald-950 flex flex-col`}
         >
-          <div className="relative w-full aspect-[4/3]">
+          <div className="relative w-full aspect-[4/3] flex-shrink-0 overflow-hidden">
             <img
               src={getImage(item)}
               alt={getTitle(item)}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-center block"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" aria-hidden="true" />
             <span className="absolute top-3 right-3 bg-yellow-300 dark:bg-emerald-400 text-slate-900 dark:text-slate-950 text-[11px] sm:text-xs font-black px-3.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
@@ -211,7 +211,7 @@ export default function ActivityCarousel({ activities }) {
               {getTitle(item)}
             </h3>
           </div>
-          <div className="p-3.5 sm:p-4 transition-colors duration-300 flex flex-col gap-2">
+          <div className="p-3.5 sm:p-4 transition-colors duration-300 flex flex-col gap-2 flex-grow justify-between">
             {item?.date && (
               <div className="flex items-center text-[10px] sm:text-xs text-yellow-300 dark:text-emerald-400 font-bold uppercase tracking-wider">
                 <Calendar className="w-3.5 h-3.5 mr-1 text-yellow-300 dark:text-emerald-400" />
@@ -230,20 +230,20 @@ export default function ActivityCarousel({ activities }) {
           whileHover={{ y: -4, scale: 0.95, opacity: 0.8 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
           onClick={onClick}
-          className={`${sizeClass} flex-shrink-0 opacity-50 scale-90 rounded-2xl overflow-hidden cursor-pointer border-2 border-yellow-300 dark:border-emerald-500/40 bg-[#099c6d] dark:bg-[#093021] shadow-lg`}
+          className={`${sizeClass} flex-shrink-0 opacity-55 scale-90 rounded-2xl overflow-hidden cursor-pointer border-2 border-yellow-300 dark:border-emerald-500/40 bg-[#099c6d] dark:bg-[#093021] shadow-lg flex flex-col`}
         >
-          <div className="relative w-full aspect-[4/3]">
+          <div className="relative w-full aspect-[4/3] flex-shrink-0 overflow-hidden">
             <img
               src={getImage(item)}
               alt={getTitle(item)}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-center block"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" aria-hidden="true" />
-            <h3 className="absolute bottom-2.5 left-3 text-white font-black text-xs uppercase tracking-wide line-clamp-1">
+            <h3 className="absolute bottom-2.5 left-3 right-3 text-white font-black text-xs uppercase tracking-wide line-clamp-1">
               {getTitle(item)}
             </h3>
           </div>
-          <div className="p-3 flex flex-col gap-1.5">
+          <div className="p-3 flex flex-col gap-1.5 flex-grow justify-between">
             {item?.date && (
               <div className="flex items-center text-[9px] text-yellow-300 dark:text-emerald-400 font-bold uppercase tracking-wider">
                 <Calendar className="w-3 h-3 mr-1 text-yellow-300 dark:text-emerald-400" />
@@ -259,22 +259,9 @@ export default function ActivityCarousel({ activities }) {
     }
   };
 
-  const indicesMap4 = {
-    0: [2, 0, 1, 3],
-    1: [0, 1, 2, 3],
-    2: [1, 2, 3, 0],
-    3: [2, 3, 0, 1],
-  };
-
-  const indicesMap3 = {
-    0: [1, 0, 2],
-    1: [0, 1, 2],
-    2: [1, 2, 0],
-  };
-
   return (
     <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} className="w-full max-w-6xl mx-auto relative select-none">
-      <div className="relative overflow-hidden w-full pt-4 pb-2 min-h-fit md:min-h-[370px] flex items-center justify-center">
+      <div className="relative overflow-hidden w-full pt-4 pb-2 min-h-fit md:min-h-[380px] flex items-center justify-center">
         <AnimatePresence initial={false} custom={direction} mode="popLayout">
           <motion.div
             key={current}
@@ -288,35 +275,32 @@ export default function ActivityCarousel({ activities }) {
               opacity: { duration: 0.35, ease: "easeOut" },
               scale: { duration: 0.35, ease: "easeOut" }
             }}
-            className="flex items-center justify-center gap-3 sm:gap-4 w-full"
+            className="flex items-center justify-center gap-4 sm:gap-6 w-full px-2"
           >
-            {/* CASE 1: Only 1 Activity */}
-            {count === 1 && renderCardItem(carouselItems[0], true, "w-full md:w-[48%] lg:w-[38%]")}
-
-            {/* CASE 2: Exactly 2 Activities */}
-            {count === 2 && (
+            {count === 1 ? (
+              renderCardItem(carouselItems[0], true, "w-full max-w-[420px]")
+            ) : (
               <>
-                {renderCardItem(carouselItems[current], true, "w-[50%] md:w-[40%] lg:w-[32%]")}
-                {renderCardItem(carouselItems[getIndex(1)], false, "w-[40%] md:w-[26%] lg:w-[20.5%]", next)}
-              </>
-            )}
-
-            {/* CASE 3: Exactly 3 Activities */}
-            {count === 3 && (
-              <>
-                {renderCardItem(carouselItems[indicesMap3[current][0]], false, "hidden md:block md:w-[26%] lg:w-[20.5%]", prev)}
-                {renderCardItem(carouselItems[indicesMap3[current][1]], true, "w-full md:w-[40%] lg:w-[32%]")}
-                {renderCardItem(carouselItems[indicesMap3[current][2]], false, "hidden md:block md:w-[26%] lg:w-[20.5%]", next)}
-              </>
-            )}
-
-            {/* CASE 4: 4 or More Activities */}
-            {count >= 4 && (
-              <>
-                {renderCardItem(carouselItems[count === 4 ? indicesMap4[current][0] : getIndex(-1)], false, "hidden md:block md:w-[26%] lg:w-[20.5%]", prev)}
-                {renderCardItem(carouselItems[count === 4 ? indicesMap4[current][1] : current], true, "w-full md:w-[40%] lg:w-[32%]")}
-                {renderCardItem(carouselItems[count === 4 ? indicesMap4[current][2] : getIndex(1)], false, "hidden md:block md:w-[26%] lg:w-[20.5%]", next)}
-                {renderCardItem(carouselItems[count === 4 ? indicesMap4[current][3] : getIndex(2)], false, "hidden lg:block lg:w-[20.5%]", () => goTo(count === 4 ? indicesMap4[current][3] : getIndex(2)))}
+                {/* Previous Card (Left) */}
+                {renderCardItem(
+                  carouselItems[getIndex(-1)],
+                  false,
+                  "hidden md:flex md:w-[28%] lg:w-[26%] max-w-[280px]",
+                  prev
+                )}
+                {/* Active Card (Center) */}
+                {renderCardItem(
+                  carouselItems[current],
+                  true,
+                  "w-full md:w-[44%] lg:w-[38%] max-w-[420px]"
+                )}
+                {/* Next Card (Right) */}
+                {renderCardItem(
+                  carouselItems[getIndex(1)],
+                  false,
+                  "hidden md:flex md:w-[28%] lg:w-[26%] max-w-[280px]",
+                  next
+                )}
               </>
             )}
           </motion.div>

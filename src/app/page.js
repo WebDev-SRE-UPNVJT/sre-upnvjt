@@ -192,7 +192,8 @@ export default function Home() {
             return new Date(a.date) - new Date(b.date);
           });
 
-          setPastActivities(past);
+          // Always populate pastActivities so the Our Activity section never disappears
+          setPastActivities(past.length > 0 ? past : data);
           setUpcomingActivities(upcoming);
 
           // Find announcement activity strictly for Modal popup (only isAnnouncementModal)
@@ -598,7 +599,7 @@ export default function Home() {
         </section>
 
         {/* ─── Events & Programs Section ──────────────────────────────── */}
-        {pastActivities.length > 0 && (
+        {(pastActivities.length > 0 || dbActivities.length > 0) && (
           <section
             id="activity"
             className="scroll-mt-20 bg-[#0bb882] dark:bg-[#031f16] py-14 sm:py-20 lg:py-24 px-6 sm:px-8 md:px-12 lg:px-20 border-t-2 border-white/20 dark:border-white/5 relative overflow-hidden flex items-center justify-center"
@@ -648,7 +649,7 @@ export default function Home() {
                   transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
                   className="w-full"
                 >
-                  <ActivityCarousel activities={pastActivities} />
+                  <ActivityCarousel activities={pastActivities.length > 0 ? pastActivities : dbActivities} />
                 </motion.div>
 
                 {/* CTA button — centered */}

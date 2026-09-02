@@ -265,7 +265,7 @@ export default function AboutClient({ departmentsData = [] }) {
             return (
               <div className="w-full max-w-7xl mx-auto flex flex-col items-center">
                 {execDept && (
-                  <div className="w-full max-w-2xl mx-auto z-10">
+                  <div className="w-full max-w-2xl mx-auto z-10 pt-3 px-1">
                     <DepartmentCard dept={execDept} index={0} isExecutive={true} />
                   </div>
                 )}
@@ -277,7 +277,7 @@ export default function AboutClient({ departmentsData = [] }) {
                 <div 
                   ref={sliderRef}
                   onScroll={handleScroll}
-                  className="flex overflow-x-auto pb-6 gap-5 scrollbar-none snap-x snap-mandatory flex-nowrap justify-start w-[calc(100%+1.5rem)] -mr-6 pr-6 max-w-none sm:max-w-full sm:w-full sm:mr-0 sm:pr-0 sm:flex-wrap sm:justify-center sm:gap-6 lg:gap-6 mt-2 lg:mt-0"
+                  className="flex overflow-x-auto pt-3 pb-6 px-1 gap-5 scrollbar-none snap-x snap-mandatory flex-nowrap justify-start w-[calc(100%+1.5rem)] -mr-6 pr-6 max-w-none sm:max-w-full sm:w-full sm:mr-0 sm:pr-0 sm:flex-wrap sm:justify-center sm:gap-6 lg:gap-6 mt-1 lg:mt-0"
                 >
                   {otherDepts.map((dept, idx) => (
                     <div 
