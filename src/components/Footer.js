@@ -39,15 +39,15 @@ const SOCIAL_LINKS = [
     Icon: LinkedinIcon,
     aria: "SRE UPNVJT on LinkedIn",
   },
-  {
-    label: "TikTok",
-    href: "https://tiktok.com/@sre.upnvjt",
-    Icon: TikTokIcon,
-    aria: "SRE UPNVJT on TikTok",
-  },
+  // {
+  //   label: "TikTok",
+  //   href: "https://tiktok.com/@sre.upnvjt",
+  //   Icon: TikTokIcon,
+  //   aria: "SRE UPNVJT on TikTok",
+  // },
   {
     label: "Email",
-    href: "mailto:sre.upnjatim@gmail.com",
+    href: "mailto:upnvjatim@sre.co.id",
     Icon: Mail,
     aria: "Send an email to SRE UPNVJT",
   },

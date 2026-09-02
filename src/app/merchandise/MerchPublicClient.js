@@ -275,7 +275,7 @@ export default function MerchPublicClient({ merchandise = [] }) {
               @sre.upnjatim
             </a>
 
-            <a
+            {/* <a
               href="https://shopee.co.id"
               target="_blank"
               rel="noopener noreferrer"
@@ -283,7 +283,7 @@ export default function MerchPublicClient({ merchandise = [] }) {
             >
               <ShoppingCart className="w-5 h-5" />
               {t("visitor.merchandise.shopee")}
-            </a>
+            </a> */}
           </div>
         </div>
       </section>

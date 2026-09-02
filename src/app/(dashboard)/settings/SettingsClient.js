@@ -177,7 +177,7 @@ export default function SettingsClient({ user }) {
   };
 
   // System Settings Logic
-  const [systemData, setSystemData] = useState({ APP_LANGUAGE: "id", APP_TITLE: "SRE UPNVJT Portal" });
+  const [systemData, setSystemData] = useState({ APP_LANGUAGE: "en", APP_TITLE: "SRE UPNVJT Portal" });
   const [isSavingSystem, setIsSavingSystem] = useState(false);
   const [systemMessage, setSystemMessage] = useState(null);
 

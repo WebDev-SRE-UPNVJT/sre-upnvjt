@@ -93,12 +93,12 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
-  let appLanguage = "id";
+  let appLanguage = "en";
   try {
     const langSetting = await db.query.systemSetting.findFirst({
       where: eq(systemSetting.keyName, "APP_LANGUAGE")
     });
-    if (langSetting) appLanguage = langSetting.valueData;
+    if (langSetting && langSetting.valueData) appLanguage = langSetting.valueData;
   } catch (e) {
     // ignore
   }

@@ -366,18 +366,18 @@ export default function AboutClient({ departmentsData = [] }) {
                   </svg>
                 )
               },
+              // {
+              //   href: "https://youtube.com/@sreupnvjt",
+              //   label: "YouTube",
+              //   aria: "SRE UPNVJT on YouTube",
+              //   icon: (
+              //     <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+              //       <path d="M23.498 6.163a3.003 3.003 0 00-2.11-2.108C19.524 3.545 12 3.545 12 3.545s-7.525 0-9.387.51a3.003 3.003 0 00-2.11 2.108C0 8.025 0 12 0 12s0 3.975.503 5.837a3.003 3.003 0 002.11 2.108c1.862.51 9.387.51 9.387.51s7.525 0 9.387-.51a3.003 3.003 0 002.11-2.108C24 15.975 24 12 24 12s0-3.975-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+              //     </svg>
+              //   )
+              // },
               {
-                href: "https://youtube.com/@sreupnvjt",
-                label: "YouTube",
-                aria: "SRE UPNVJT on YouTube",
-                icon: (
-                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M23.498 6.163a3.003 3.003 0 00-2.11-2.108C19.524 3.545 12 3.545 12 3.545s-7.525 0-9.387.51a3.003 3.003 0 00-2.11 2.108C0 8.025 0 12 0 12s0 3.975.503 5.837a3.003 3.003 0 002.11 2.108c1.862.51 9.387.51 9.387.51s7.525 0 9.387-.51a3.003 3.003 0 002.11-2.108C24 15.975 24 12 24 12s0-3.975-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                  </svg>
-                )
-              },
-              {
-                href: "mailto:sre@upnjatim.ac.id",
+                href: "mailto:upnvjatim@sre.co.id",
                 label: "Email",
                 aria: "Email SRE UPNVJT",
                 icon: <Mail className="w-5 h-5" aria-hidden="true" />
