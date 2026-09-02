@@ -96,12 +96,12 @@ export default function DashboardClient({ stats, user }) {
   ];
 
   return (
-    <div className="w-full relative pb-10">
+    <div className="w-full max-w-full overflow-x-hidden relative pb-10">
       {/* Background Ambience */}
       <div
-        className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 dark:bg-primary/10 rounded-full blur-[100px] pointer-events-none mix-blend-screen"
+        className="absolute top-0 left-1/4 w-72 sm:w-96 h-72 sm:h-96 bg-primary/5 dark:bg-primary/10 rounded-full blur-[100px] pointer-events-none mix-blend-screen"
       />
-      <div className="absolute top-20 right-1/4 w-80 h-80 bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-[90px] pointer-events-none mix-blend-screen" />
+      <div className="absolute top-20 right-1/4 w-60 sm:w-80 h-60 sm:h-80 bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-[90px] pointer-events-none mix-blend-screen" />
 
       {/* Header and Welcome */}
       <div className="flex flex-col xl:flex-row justify-between items-start gap-6 mb-8 relative z-10">
@@ -109,13 +109,13 @@ export default function DashboardClient({ stats, user }) {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="flex-1 pt-2"
+          className="flex-1 pt-2 min-w-0 w-full"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-bold text-gray-600 dark:text-white/60 mb-4 shadow-sm">
             <Calendar className="w-3.5 h-3.5 text-primary" />
             {currentDate}
           </div>
-          <h1 className="text-4xl md:text-5xl font-display font-black tracking-tighter mb-2 text-gray-900 dark:text-white leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-black tracking-tighter mb-2 text-gray-900 dark:text-white leading-tight break-words">
             {greeting},{" "}
             <span className="text-primary dark:text-emerald-400">
               {session?.user?.name || "User"}
@@ -132,7 +132,7 @@ export default function DashboardClient({ stats, user }) {
         variants={container}
         initial="hidden"
         animate="show"
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 relative z-10"
       >
         {cards.map((card, idx) => {
           const Icon = card.icon;
@@ -140,7 +140,7 @@ export default function DashboardClient({ stats, user }) {
             <motion.div
               key={idx}
               variants={item}
-              className={`bg-white dark:bg-[#08120e] hover:bg-gray-50 dark:hover:bg-[#0b1813] border border-gray-100 dark:border-white/5 ${card.borderColor} rounded-3xl p-6 relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-none`}
+              className={`bg-white dark:bg-[#08120e] hover:bg-gray-50 dark:hover:bg-[#0b1813] border border-gray-100 dark:border-white/5 ${card.borderColor} rounded-3xl p-6 relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-none min-w-0`}
             >
               {/* Background gradient glow on hover */}
               <div

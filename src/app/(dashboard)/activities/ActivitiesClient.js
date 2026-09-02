@@ -148,86 +148,90 @@ export default function ActivitiesClient({ initialActivities, currentUser }) {
           </div>
         ) : (
           filteredActivities.map((activity) => (
-            <div key={activity.id} className="bg-white/40 dark:bg-white/[0.02] rounded-3xl border border-gray-200/50 dark:border-white/10 p-6 shadow-lg hover:shadow-xl hover:border-primary/30 dark:hover:border-primary/30 hover:shadow-[0_0_30px_rgba(16,185,129,0.15)] transition-all duration-500 flex flex-col h-full backdrop-blur-xl group overflow-hidden relative">
+            <div key={activity.id} className="bg-white/40 dark:bg-white/[0.02] rounded-3xl border border-gray-200/50 dark:border-white/10 shadow-lg hover:shadow-xl hover:border-primary/30 dark:hover:border-primary/30 hover:shadow-[0_0_30px_rgba(16,185,129,0.15)] transition-all duration-500 flex flex-col h-full backdrop-blur-xl group overflow-hidden relative">
               {activity.imageUrl && (
-                <div className="w-full h-56 -mt-6 -mx-6 mb-6 overflow-hidden relative">
-                  <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent dark:from-[#07130e] dark:via-transparent dark:to-transparent z-10 opacity-80 group-hover:opacity-60 transition-opacity duration-500" />
+                <div className="w-full h-56 overflow-hidden relative shrink-0">
+                  <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-transparent to-transparent dark:from-[#07130e] dark:via-transparent dark:to-transparent z-10 opacity-70 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none" />
                   <img 
                     src={resolveImageUrl(activity.imageUrl)} 
                     alt={activity.name} 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700" 
                   />
                   <div className="absolute top-4 left-4 z-20">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-white text-primary shadow-lg">
-                      <Type className="w-3 h-3" />
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-white/95 dark:bg-[#07130e]/90 text-primary shadow-lg backdrop-blur-md border border-white/20 dark:border-white/10">
+                      <Type className="w-3.5 h-3.5" />
                       {activity.type}
                     </span>
                   </div>
                 </div>
               )}
               
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex flex-wrap items-center gap-1.5">
-                  {!activity.imageUrl && (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-primary/10 text-primary">
-                      <Type className="w-3 h-3" />
-                      {activity.type}
-                    </span>
-                  )}
-                  {activity.isPriority && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-600 dark:text-amber-300 border border-amber-500/30">
-                      Active
-                    </span>
-                  )}
-                  {activity.isAnnouncementModal && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-purple-500/15 text-purple-600 dark:text-purple-300 border border-purple-500/30">
-                      Modal Pengumuman
-                    </span>
+              <div className="p-6 flex flex-col flex-1">
+                <div className="flex justify-between items-start gap-2 mb-4">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {!activity.imageUrl && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-primary/10 text-primary">
+                        <Type className="w-3 h-3" />
+                        {activity.type}
+                      </span>
+                    )}
+                    {activity.isPriority && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-600 dark:text-amber-300 border border-amber-500/30">
+                        Active
+                      </span>
+                    )}
+                    {activity.isAnnouncementModal && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-purple-500/15 text-purple-600 dark:text-purple-300 border border-purple-500/30">
+                        Modal Pengumuman
+                      </span>
+                    )}
+                  </div>
+                  
+                  {(canUpdate || canDelete) && (
+                    <div className={`flex items-center gap-1 ${activity.imageUrl ? 'absolute top-4 right-4 z-20 bg-slate-900/70 dark:bg-black/70 backdrop-blur-md border border-white/20 rounded-xl p-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 shadow-lg' : ''}`}>
+                      {canUpdate && (
+                        <button
+                          onClick={() => handleOpenModal(activity)}
+                          title="Edit Activity"
+                          className={`p-2 rounded-lg transition-all ${activity.imageUrl ? 'text-white hover:bg-white/20 hover:text-primary' : 'text-gray-500 dark:text-white/60 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10'}`}
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          onClick={() => {
+                            setCurrentActivity(activity);
+                            setIsDeleteOpen(true);
+                          }}
+                          title="Delete Activity"
+                          className={`p-2 rounded-lg transition-all ${activity.imageUrl ? 'text-white hover:bg-red-500/80 hover:text-white' : 'text-gray-500 dark:text-white/60 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10'}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
                 
-                {(canUpdate || canDelete) && (
-                  <div className={`flex items-center gap-1 ${activity.imageUrl ? 'absolute top-4 right-4 z-20 bg-white/20 dark:bg-black/40 backdrop-blur-md rounded-xl p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg' : ''}`}>
-                    {canUpdate && (
-                      <button
-                        onClick={() => handleOpenModal(activity)}
-                        className={`p-2 rounded-xl transition-colors ${activity.imageUrl ? 'text-white hover:bg-white/20' : 'text-gray-400 dark:text-white/40 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10'}`}
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                    )}
-                    {canDelete && (
-                      <button
-                        onClick={() => {
-                          setCurrentActivity(activity);
-                          setIsDeleteOpen(true);
-                        }}
-                        className={`p-2 rounded-xl transition-colors ${activity.imageUrl ? 'text-white hover:bg-red-500/80 hover:text-white' : 'text-gray-400 dark:text-white/40 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10'}`}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
+                <h3 className="text-xl font-display font-bold text-gray-900 dark:text-white mb-2 line-clamp-1 group-hover:text-primary transition-colors">{activity.name}</h3>
+                <p className="text-sm text-gray-500 dark:text-white/60 mb-6 line-clamp-3 flex-1 leading-relaxed">
+                  {activity.description || "No description provided."}
+                </p>
+                
+                <div className="space-y-3 pt-5 border-t border-gray-200/50 dark:border-white/10 mt-auto">
+                  <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-white/70">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                      <Calendar className="w-4 h-4" />
+                    </div>
+                    <span className="font-medium">{activity.date ? new Date(activity.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : "No Date"}</span>
                   </div>
-                )}
-              </div>
-              
-              <h3 className="text-xl font-display font-bold text-gray-900 dark:text-white mb-2 line-clamp-1 group-hover:text-primary transition-colors">{activity.name}</h3>
-              <p className="text-sm text-gray-500 dark:text-white/60 mb-6 line-clamp-3 flex-1 leading-relaxed">
-                {activity.description || "No description provided."}
-              </p>
-              
-              <div className="space-y-3 pt-5 border-t border-gray-200/50 dark:border-white/10">
-                <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-white/70">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-primary">
-                    <Calendar className="w-4 h-4" />
+                  <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-white/70">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                      <MapPin className="w-4 h-4" />
+                    </div>
+                    <span className="font-medium truncate">{activity.location || "Location TBD"}</span>
                   </div>
-                  <span className="font-medium">{activity.date ? new Date(activity.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : "No Date"}</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-white/70">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-primary">
-                    <MapPin className="w-4 h-4" />
-                  </div>
-                  <span className="font-medium truncate">{activity.location || "Location TBD"}</span>
                 </div>
               </div>
             </div>

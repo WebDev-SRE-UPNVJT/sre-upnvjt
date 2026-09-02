@@ -188,9 +188,9 @@ export default function DashboardLayout({ children }) {
   );
 
   return (
-    <div className="fixed inset-0 w-screen h-screen bg-gray-50 dark:bg-[#020806] text-gray-900 dark:text-white overflow-hidden selection:bg-primary/30 transition-colors duration-500 flex overscroll-none">
-      <div className="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="fixed bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+    <div className="fixed inset-0 w-full max-w-full h-screen bg-gray-50 dark:bg-[#020806] text-gray-900 dark:text-white overflow-hidden selection:bg-primary/30 transition-colors duration-500 flex overscroll-none">
+      <div className="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px] pointer-events-none overflow-hidden" />
+      <div className="fixed bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px] pointer-events-none overflow-hidden" />
       
       {/* Desktop Sidebar (Floating & Fixed Height) */}
       <motion.aside 
@@ -291,7 +291,7 @@ export default function DashboardLayout({ children }) {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col h-full overflow-y-auto overscroll-contain relative">
+      <main className="flex-1 min-w-0 w-full max-w-full flex flex-col h-full overflow-y-auto overflow-x-hidden overscroll-contain relative">
         {/* Top Action Bar (Desktop Theme Toggle on Top-Right Corner) */}
         <div className="hidden lg:flex justify-end items-center px-6 md:px-10 pt-5 pb-1 sticky top-0 z-30 pointer-events-none">
           <div className="pointer-events-auto flex items-center gap-2.5 px-3 py-1.5 rounded-2xl bg-white/80 dark:bg-[#08120e]/80 backdrop-blur-xl border border-gray-200 dark:border-white/10 shadow-sm hover:border-primary/30 transition-all duration-300">
@@ -303,11 +303,11 @@ export default function DashboardLayout({ children }) {
         </div>
 
         {/* Mobile Header */}
-        <div className="lg:hidden flex items-center justify-between p-4 bg-white/80 dark:bg-[#050e0a]/80 backdrop-blur-xl border-b border-gray-200 dark:border-white/10 sticky top-0 z-[60] transition-colors duration-500">
-          <div className="font-display font-bold text-xl tracking-tight flex items-center gap-1 text-gray-900 dark:text-white">
-            <div className="h-16 w-48 bg-primary dark:bg-white transition-all duration-300" style={{ WebkitMaskImage: "url(/images/logo.png)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", WebkitMaskPosition: "left center", maskImage: "url(/images/logo.png)", maskSize: "contain", maskRepeat: "no-repeat", maskPosition: "left center" }}></div>
+        <div className="lg:hidden flex items-center justify-between px-4 py-3 bg-white/80 dark:bg-[#050e0a]/80 backdrop-blur-xl border-b border-gray-200 dark:border-white/10 sticky top-0 z-[60] transition-colors duration-500 min-w-0 w-full">
+          <div className="font-display font-bold text-xl tracking-tight flex items-center gap-1 text-gray-900 dark:text-white min-w-0">
+            <div className="h-10 w-36 sm:h-12 sm:w-44 bg-primary dark:bg-white transition-all duration-300 shrink-0" style={{ WebkitMaskImage: "url(/images/logo.png)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", WebkitMaskPosition: "left center", maskImage: "url(/images/logo.png)", maskSize: "contain", maskRepeat: "no-repeat", maskPosition: "left center" }}></div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <div className="flex items-center gap-1 px-2 py-1 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
               <ThemeToggle />
             </div>
@@ -318,7 +318,7 @@ export default function DashboardLayout({ children }) {
         </div>
 
         {/* Page Content */}
-        <div className="p-6 md:p-10 pt-2 md:pt-4 flex-1">
+        <div className="p-4 sm:p-6 md:p-10 pt-2 md:pt-4 flex-1 min-w-0 w-full max-w-full overflow-x-hidden">
           {children}
         </div>
       </main>
