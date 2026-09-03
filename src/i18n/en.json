@@ -1010,6 +1010,7 @@
     "subtitle": "Monitor your attendance recap. Boost your XP and maintain your streak to become the top member!",
     "badge_member": "Member Attendance",
     "open_session": "Open Session",
+    "pending_count": "pending attendance sessions",
     "pending_sessions_waiting": "{count} pending attendance sessions",
     "open_session_warn": "Please check in before the session closes",
     "stat_rate": "Attendance Rate",

@@ -275,12 +275,24 @@ function CheckInModal({ session, onClose, onSuccess }) {
 }
 
 // ─── Main Component ──────────────────────────────────────────────────────────
-export default function AbsensiClient({ initialSessions, initialAttendance, user }) {
+export default function AbsensiClient({ initialSessions, validSessions, initialAttendance, user, userRoleName }) {
   const { t, language }     = useLanguage();
-  const [sessions]          = useState(initialSessions ?? []);
+  const [sessions, setSessions] = useState(initialSessions || validSessions || []);
   const [records, setRecs]  = useState(initialAttendance ?? []);
   const [activeSession, setActiveSession] = useState(null);
   const [statusFilter, setStatusFilter]   = useState("ALL");
+
+  useEffect(() => {
+    if (initialSessions || validSessions) {
+      setSessions(initialSessions || validSessions || []);
+    }
+  }, [initialSessions, validSessions]);
+
+  useEffect(() => {
+    if (initialAttendance) {
+      setRecs(initialAttendance);
+    }
+  }, [initialAttendance]);
 
   // Effective records (termasuk auto-ABSENT untuk sesi lampau yang belum diisi)
   const effectiveRecords = sessions
@@ -301,7 +313,7 @@ export default function AbsensiClient({ initialSessions, initialAttendance, user
 
   // Sesi yang masih aktif dan belum diisi oleh user
   const pendingSessions = sessions.filter(
-    (s) => s.isActive && !records.some((r) => r.sessionId === s.id)
+    (s) => Boolean(s.isActive) && !records.some((r) => r.sessionId === s.id)
   );
 
   // Stats calculation
@@ -348,46 +360,126 @@ export default function AbsensiClient({ initialSessions, initialAttendance, user
         </p>
       </motion.div>
 
-      {/* Active Session Banner */}
+      {/* ── Active Session Banner (Hero / Card Grid) ─────────────── */}
       <AnimatePresence>
         {pendingSessions.length > 0 && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="relative rounded-[2rem] p-[1.5px] overflow-hidden shadow-[0_15px_40px_rgba(245,158,11,0.15)]"
+            initial={{ opacity: 0, y: -16, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -16, scale: 0.98 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="relative rounded-3xl p-[1.5px] overflow-hidden bg-gradient-to-r from-amber-500/80 via-orange-400 to-amber-500/80 shadow-[0_15px_45px_rgba(245,158,11,0.18)]"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-amber-500 via-orange-400 to-amber-500 bg-[length:200%_auto] animate-[bgSlide_3s_linear_infinite]" />
-            <div className="relative bg-[#0f0c00]/95 dark:bg-[#0f0c00]/98 backdrop-blur-xl rounded-[2rem] p-6 flex flex-col md:flex-row items-start md:items-center gap-5">
-              <div className="absolute top-0 right-0 w-60 h-60 bg-amber-500/20 rounded-full blur-[80px] pointer-events-none" />
+            {/* Ambient Background Gradient & Glow */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-amber-400/20 via-transparent to-transparent pointer-events-none" />
+            
+            <div className="relative bg-gradient-to-br from-slate-900/95 via-[#120e06]/98 to-[#0b1410]/95 dark:from-[#0d0a02]/98 dark:via-[#09120e]/98 dark:to-[#040a08]/98 backdrop-blur-2xl rounded-[calc(1.5rem-1px)] p-6 sm:p-7 md:p-8 overflow-hidden">
+              
+              {/* Decorative radial glows */}
+              <div className="absolute -top-16 -left-16 w-52 h-52 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-16 -right-16 w-60 h-60 bg-orange-500/15 rounded-full blur-3xl pointer-events-none" />
 
-              <div className="flex items-center gap-4 flex-1 relative z-10">
-                <div className="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center flex-shrink-0">
-                  <AlertTriangle className="w-7 h-7 text-amber-400 animate-pulse" />
-                </div>
-                <div>
-                  <p className="text-xs font-black uppercase tracking-widest text-amber-400/70 mb-1">{t("attendance_member.open_session") || "Sesi Terbuka"}</p>
-                  <h3 className="text-lg font-black text-white">
-                    {pendingSessions.length === 1
-                      ? pendingSessions[0].title
-                      : (t("attendance_member.pending_sessions_waiting", { count: pendingSessions.length }) || `${pendingSessions.length} sesi presensi menunggu`)}
-                  </h3>
-                  <p className="text-xs text-white/50 mt-0.5">{t("attendance_member.open_session_warn") || "Segera isi sebelum sesi ditutup"}</p>
-                </div>
-              </div>
+              {pendingSessions.length === 1 ? (
+                /* ── Single Active Session Layout ── */
+                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                  {/* Left Column Info */}
+                  <div className="space-y-3.5 flex-1 min-w-0">
+                    {/* Metadata Badges */}
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[11px] font-black tracking-wider uppercase shadow-[0_0_12px_rgba(245,158,11,0.2)]">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                        </span>
+                        {t("attendance_member.open_session") || "Sesi Terbuka"}
+                      </span>
 
-              <div className="flex flex-col gap-2 relative z-10 w-full md:w-auto">
-                {pendingSessions.slice(0, 2).map((sess) => (
-                  <button
-                    key={sess.id}
-                    onClick={() => setActiveSession(sess)}
-                    className="flex items-center justify-between gap-4 px-5 py-3 bg-amber-500 hover:bg-amber-400 text-amber-900 font-black text-sm rounded-2xl transition-all hover:scale-[1.02] shadow-[0_0_20px_rgba(245,158,11,0.4)]"
-                  >
-                    <span className="truncate">{sess.title}</span>
-                    <ChevronRight className="w-4 h-4 flex-shrink-0" />
-                  </button>
-                ))}
-              </div>
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/15 border border-primary/30 text-primary text-[11px] font-black">
+                        <Zap className="w-3.5 h-3.5" />
+                        +10 XP
+                      </span>
+
+                      <span className="inline-flex items-center gap-1.5 text-slate-300 dark:text-white/60 text-xs font-medium">
+                        <Calendar className="w-3.5 h-3.5 text-amber-400/80" />
+                        {new Date(pendingSessions[0].date).toLocaleDateString(language === "en" ? "en-US" : "id-ID", {
+                          weekday: "short",
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric"
+                        })}
+                      </span>
+                    </div>
+
+                    {/* Title & Description */}
+                    <div>
+                      <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-black text-white tracking-tight leading-tight">
+                        {pendingSessions[0].title}
+                      </h2>
+                      <p className="text-slate-300/80 dark:text-white/60 text-xs sm:text-sm mt-1.5 font-medium max-w-2xl">
+                        {pendingSessions[0].description || (t("attendance_member.open_session_warn") || "Segera isi presensi sebelum sesi ditutup.")}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Right Column Action */}
+                  <div className="relative z-10 pt-2 lg:pt-0 shrink-0">
+                    <button
+                      onClick={() => setActiveSession(pendingSessions[0])}
+                      className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 px-7 py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 hover:from-amber-300 hover:via-orange-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-widest transition-all duration-300 shadow-[0_0_25px_rgba(245,158,11,0.35)] hover:shadow-[0_0_35px_rgba(245,158,11,0.55)] hover:scale-[1.02] active:scale-95 cursor-pointer"
+                    >
+                      <Key className="w-4 h-4 text-slate-950/80 group-hover:rotate-12 transition-transform duration-300" />
+                      <span>{t("attendance_member.modal.title") || "Isi Presensi Sekarang"}</span>
+                      <ChevronRight className="w-4 h-4 text-slate-950 group-hover:translate-x-1 transition-transform duration-300" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* ── Multiple Active Sessions Layout ── */
+                <div className="relative z-10 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-white/10">
+                    <div className="flex items-center gap-2.5">
+                      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[11px] font-black tracking-wider uppercase">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                        </span>
+                        {t("attendance_member.open_session") || "Sesi Terbuka"}
+                      </span>
+                      <span className="text-xs font-bold text-amber-200/90">
+                        {pendingSessions.length} {t("attendance_member.pending_count") || "sesi presensi menunggu"}
+                      </span>
+                    </div>
+                    <p className="text-xs text-white/50">{t("attendance_member.open_session_warn") || "Segera isi sebelum sesi ditutup"}</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    {pendingSessions.map((sess) => (
+                      <div
+                        key={sess.id}
+                        className="bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-amber-500/40 rounded-2xl p-4 sm:p-5 transition-all duration-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                      >
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 rounded-md bg-primary/15 text-primary text-[10px] font-black">+10 XP</span>
+                            <span className="text-[11px] text-white/50 flex items-center gap-1 font-medium">
+                              <Calendar className="w-3 h-3 text-amber-400/80" />
+                              {new Date(sess.date).toLocaleDateString(language === "en" ? "en-US" : "id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                            </span>
+                          </div>
+                          <h4 className="text-sm sm:text-base font-black text-white truncate">{sess.title}</h4>
+                        </div>
+                        <button
+                          onClick={() => setActiveSession(sess)}
+                          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-300 hover:to-orange-300 text-slate-950 font-black text-xs uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-95 shadow-md shadow-amber-500/20 shrink-0 cursor-pointer"
+                        >
+                          <span>{t("attendance_member.modal.title") || "Isi Presensi"}</span>
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

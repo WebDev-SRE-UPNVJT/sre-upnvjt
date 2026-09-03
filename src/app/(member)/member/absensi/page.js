@@ -41,5 +41,13 @@ export default async function MemberAbsensiPage() {
     }
   });
 
-  return <AbsensiClient initialAttendance={records} validSessions={validSessions} userRoleName={userRecord?.role?.name || "Member"} />;
+  return (
+    <AbsensiClient
+      initialSessions={allSessions}
+      validSessions={validSessions}
+      initialAttendance={records}
+      user={userRecord || session.user}
+      userRoleName={userRecord?.role?.name || "Member"}
+    />
+  );
 }
