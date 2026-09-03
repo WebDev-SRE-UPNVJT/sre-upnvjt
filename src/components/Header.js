@@ -93,7 +93,7 @@ export default function Header() {
 
   const close = () => setMobileMenuOpen(false);
 
-  const adminRoutes = ["/dashboard", "/roles", "/users", "/departments", "/activities", "/merch", "/settings", "/featured-projects"];
+  const adminRoutes = ["/dashboard", "/roles", "/users", "/departments", "/activities", "/merch", "/settings", "/featured-projects", "/shortlinks"];
   const isDashboardRoute = 
     pathname.startsWith("/dashboard") || 
     pathname.startsWith("/member") ||
@@ -130,7 +130,7 @@ export default function Header() {
               className="flex items-center select-none cursor-pointer z-[60] relative"
             >
               <img
-                src="/images/logo.png"
+                src="/images/logo.webp"
                 alt="SRE Logo"
                 className="h-7 sm:h-8 md:h-10 w-auto object-contain transition-all duration-300 brightness-0 invert"
               />

@@ -4,8 +4,9 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { db } from "@/lib/db";
 import { shortlink } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { hasAccess } from "@/lib/permissions";
 
-// PUT: Update a shortlink
+// PUT: Update a shortlink (or toggle isActive status)
 export async function PUT(req, { params }) {
   try {
     const session = await getServerSession(authOptions);
@@ -14,38 +15,39 @@ export async function PUT(req, { params }) {
     }
 
     const { id } = await params;
-    const { slug, originalUrl, description } = await req.json();
+    const body = await req.json();
+    const { slug, originalUrl, description, isActive } = body;
 
-    if (!slug || !originalUrl) {
-      return NextResponse.json({ error: "Slug and Original URL are required" }, { status: 400 });
-    }
-
-    // Only allow update if the user created it, or if the user is an admin
-    // For simplicity, we just allow the creator to update it, or any staff member.
-    // In this portal, staff can manage links. We'll allow it.
-    
-    // Check if slug is taken by another link
-    const existing = await db.query.shortlink.findFirst({
-      where: and(eq(shortlink.slug, slug))
+    const existingLink = await db.query.shortlink.findFirst({
+      where: eq(shortlink.id, Number(id)),
     });
 
-    if (existing && existing.id !== Number(id)) {
-      return NextResponse.json({ error: "Slug already exists" }, { status: 400 });
+    if (!existingLink) {
+      return NextResponse.json({ error: "Shortlink not found" }, { status: 404 });
     }
+
+    // Check if slug is taken by another link
+    if (slug && slug !== existingLink.slug) {
+      const slugExists = await db.query.shortlink.findFirst({
+        where: eq(shortlink.slug, slug),
+      });
+
+      if (slugExists && slugExists.id !== Number(id)) {
+        return NextResponse.json({ error: "Slug already exists" }, { status: 400 });
+      }
+    }
+
+    const updateData = {};
+    if (slug !== undefined) updateData.slug = slug;
+    if (originalUrl !== undefined) updateData.originalUrl = originalUrl;
+    if (description !== undefined) updateData.description = description || null;
+    if (isActive !== undefined) updateData.isActive = isActive;
 
     const updated = await db
       .update(shortlink)
-      .set({
-        slug,
-        originalUrl,
-        description: description || null,
-      })
+      .set(updateData)
       .where(eq(shortlink.id, Number(id)))
       .returning();
-
-    if (!updated.length) {
-      return NextResponse.json({ error: "Shortlink not found" }, { status: 404 });
-    }
 
     return NextResponse.json(updated[0]);
   } catch (error) {

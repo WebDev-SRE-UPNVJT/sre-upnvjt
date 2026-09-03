@@ -37,6 +37,7 @@ const hiddenHeaderRoutes = [
   "/testimonials",
   "/officer",
   "/featured-projects",
+  "/shortlinks",
   "/f",
 ];
 

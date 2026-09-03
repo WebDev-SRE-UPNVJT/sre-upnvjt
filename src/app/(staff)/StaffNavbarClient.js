@@ -75,11 +75,11 @@ export default function StaffNavbarClient({ user }) {
                 <div
                   className="h-12 w-36 bg-primary dark:bg-white transition-all duration-300"
                   style={{
-                    WebkitMaskImage: "url(/images/logo.png)",
+                    WebkitMaskImage: "url(/images/logo.webp)",
                     WebkitMaskSize: "contain",
                     WebkitMaskRepeat: "no-repeat",
                     WebkitMaskPosition: "left center",
-                    maskImage: "url(/images/logo.png)",
+                    maskImage: "url(/images/logo.webp)",
                     maskSize: "contain",
                     maskRepeat: "no-repeat",
                     maskPosition: "left center",

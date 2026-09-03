@@ -21,6 +21,7 @@
     "merch": "Merch Store",
     "partners": "Partners",
     "logs": "System Logs",
+    "shortlinks": "SRE Links (Shortlinks)",
     "settings": "Settings",
     "logout": "Log Out"
   },
@@ -904,7 +905,23 @@
     "slug_avail": "Slug is available for use.",
     "desc_label": "Notes / Short Description",
     "desc_ph": "Example: 2026 Admin SOP Document",
-    "url_ph": "https://drive.google.com/... or https://..."
+    "url_ph": "https://drive.google.com/... or https://...",
+    "admin_monitoring_title": "SRE Links Monitoring",
+    "admin_monitoring_subtitle": "Supervise all shortlinks created by staff, track click analytics, and suspend links violating policies.",
+    "status_active": "Active",
+    "status_suspended": "Suspended",
+    "status_all": "All Statuses",
+    "toggle_suspend": "Suspend Link",
+    "toggle_activate": "Activate Link",
+    "suspend_confirm_title": "Suspend this link?",
+    "suspend_confirm_desc": "Link /s/{slug} will be disabled and will not forward visitors to the destination URL.",
+    "activate_confirm_title": "Reactivate this link?",
+    "activate_confirm_desc": "Link /s/{slug} will be active again and accessible as normal.",
+    "stat_active_links": "Active Links",
+    "stat_suspended_links": "Suspended Links",
+    "suspended_toast": "Link /s/{slug} has been suspended!",
+    "activated_toast": "Link /s/{slug} has been reactivated!",
+    "creator_dept": "Department: {dept}"
   },
   "member_dashboard": {
     "greeting": {

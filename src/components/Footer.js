@@ -63,7 +63,7 @@ export default function Footer() {
   }, []);
   const isLight = mounted && (theme === "light" || resolvedTheme === "light");
 
-  const adminRoutes = ["/dashboard", "/roles", "/users", "/departments", "/activities", "/merch", "/settings"];
+  const adminRoutes = ["/dashboard", "/roles", "/users", "/departments", "/activities", "/merch", "/settings", "/featured-projects", "/shortlinks"];
   const isDashboardRoute = adminRoutes.some(route => pathname === route || pathname.startsWith(route + "/"));
   if (pathname === "/login" || isDashboardRoute) return null;
 
@@ -78,7 +78,7 @@ export default function Footer() {
           {/* Logo */}
           <Link href="/" className="mb-6 sm:mb-8 inline-block" aria-label="SRE UPNVJT Home">
             <Image
-              src="/images/logo.png"
+              src="/images/logo.webp"
               alt="SRE UPNVJT Logo"
               width={140}
               height={50}

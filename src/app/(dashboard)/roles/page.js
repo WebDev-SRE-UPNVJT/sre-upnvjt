@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 const availableModules = [
   // Core admin modules
   "users", "roles", "departments", "forms",
-  "content", "merchandise",
+  "content", "merchandise", "shortlinks",
   // Operational modules (new)
   "tasks", "literature", "quiz", "ppt",
   "leaderboard", "attendance", "events", "activities",

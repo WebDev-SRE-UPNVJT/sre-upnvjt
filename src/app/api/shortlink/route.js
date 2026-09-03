@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { shortlink, user } from '@/db/schema';
+import { shortlink, user, department } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../auth/[...nextauth]/route'; // Adjust if authOptions is elsewhere
+import { authOptions } from '../auth/[...nextauth]/route';
+import { hasAccess } from '@/lib/permissions';
 
 export async function GET(req) {
   try {
@@ -18,11 +19,15 @@ export async function GET(req) {
       originalUrl: shortlink.originalUrl,
       description: shortlink.description,
       clicks: shortlink.clicks,
+      isActive: shortlink.isActive,
       createdAt: shortlink.createdAt,
       creatorName: user.name,
+      creatorEmail: user.email,
+      departmentName: department.name,
     })
     .from(shortlink)
     .leftJoin(user, eq(shortlink.createdById, user.id))
+    .leftJoin(department, eq(user.departmentId, department.id))
     .orderBy(desc(shortlink.createdAt));
 
     return NextResponse.json(links);
@@ -39,7 +44,7 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { slug, originalUrl, description } = await req.json();
+    const { slug, originalUrl, description, isActive } = await req.json();
 
     if (!slug || !originalUrl) {
       return NextResponse.json({ error: 'Slug and Original URL are required' }, { status: 400 });
@@ -54,7 +59,8 @@ export async function POST(req) {
     const newLink = await db.insert(shortlink).values({
       slug,
       originalUrl,
-      description,
+      description: description || null,
+      isActive: isActive !== undefined ? isActive : true,
       createdById: parseInt(session.user.id, 10)
     }).returning();
 

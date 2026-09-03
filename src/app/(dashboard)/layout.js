@@ -53,6 +53,7 @@ export default function DashboardLayout({ children }) {
     
     // Public & Media
     { name: t("sidebar.articles") || "Content / Berita", icon: Newspaper, href: "/content", module: "content" },
+    { name: t("sidebar.shortlinks") || "SRE Links (Shortlinks)", icon: Link2, href: "/shortlinks", module: "shortlinks" },
     { name: t("sidebar.analytics") || "Analytics", icon: BarChart2, href: "/dashboard/analytics", module: "analytics" },
     { name: "Testimonials", icon: Star, href: "/testimonials", module: "content" },
     { name: t("sidebar.merch"), icon: ShoppingBag, href: "/merch", module: "merchandise" },
@@ -95,7 +96,7 @@ export default function DashboardLayout({ children }) {
 
       <div className={`mb-6 flex items-center relative z-10 transition-all duration-300 ${isSidebarCollapsed ? 'justify-center' : 'justify-between'}`}>
         <Link href="/" className="font-display font-black text-[28px] tracking-tighter text-gray-900 dark:text-white flex items-center gap-1 group">
-          <div className={`bg-primary dark:bg-white transition-all duration-300 ${isSidebarCollapsed ? 'h-10 w-10' : 'h-12 w-40'}`} style={{ WebkitMaskImage: "url(/images/logo.png)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", WebkitMaskPosition: "left center", maskImage: "url(/images/logo.png)", maskSize: "contain", maskRepeat: "no-repeat", maskPosition: "left center" }}></div>
+          <div className={`bg-primary dark:bg-white transition-all duration-300 ${isSidebarCollapsed ? 'h-10 w-10' : 'h-12 w-40'}`} style={{ WebkitMaskImage: "url(/images/logo.webp)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", WebkitMaskPosition: "left center", maskImage: "url(/images/logo.webp)", maskSize: "contain", maskRepeat: "no-repeat", maskPosition: "left center" }}></div>
           
         </Link>
         {isMobileMenuOpen && (
@@ -305,7 +306,7 @@ export default function DashboardLayout({ children }) {
         {/* Mobile Header */}
         <div className="lg:hidden flex items-center justify-between px-4 py-3 bg-white/80 dark:bg-[#050e0a]/80 backdrop-blur-xl border-b border-gray-200 dark:border-white/10 sticky top-0 z-[60] transition-colors duration-500 min-w-0 w-full">
           <div className="font-display font-bold text-xl tracking-tight flex items-center gap-1 text-gray-900 dark:text-white min-w-0">
-            <div className="h-10 w-36 sm:h-12 sm:w-44 bg-primary dark:bg-white transition-all duration-300 shrink-0" style={{ WebkitMaskImage: "url(/images/logo.png)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", WebkitMaskPosition: "left center", maskImage: "url(/images/logo.png)", maskSize: "contain", maskRepeat: "no-repeat", maskPosition: "left center" }}></div>
+            <div className="h-10 w-36 sm:h-12 sm:w-44 bg-primary dark:bg-white transition-all duration-300 shrink-0" style={{ WebkitMaskImage: "url(/images/logo.webp)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", WebkitMaskPosition: "left center", maskImage: "url(/images/logo.webp)", maskSize: "contain", maskRepeat: "no-repeat", maskPosition: "left center" }}></div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <div className="flex items-center gap-1 px-2 py-1 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">

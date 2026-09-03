@@ -59,7 +59,7 @@ export default function MemberSidebarClient({ user, profile }) {
   const renderLogo = () => (
     <div className="flex items-center justify-between mb-8 shrink-0">
       <Link href="/" className="flex items-center gap-2 group">
-        <div className="h-10 w-24 bg-primary dark:bg-white" style={{ WebkitMaskImage: "url(/images/logo.png)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", WebkitMaskPosition: "left center", maskImage: "url(/images/logo.png)", maskSize: "contain", maskRepeat: "no-repeat", maskPosition: "left center" }} />
+        <div className="h-10 w-24 bg-primary dark:bg-white" style={{ WebkitMaskImage: "url(/images/logo.webp)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", WebkitMaskPosition: "left center", maskImage: "url(/images/logo.webp)", maskSize: "contain", maskRepeat: "no-repeat", maskPosition: "left center" }} />
       </Link>
       <button onClick={() => setIsOpen(!isOpen)} className="lg:hidden text-gray-400 hover:text-white transition-colors">
         {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -95,7 +95,7 @@ export default function MemberSidebarClient({ user, profile }) {
     <>
       {/* Mobile Top Header */}
       <div className="lg:hidden flex items-center justify-between p-4 border-b border-white/5 bg-[#050e0a] z-40 shrink-0">
-        <div className="h-8 w-20 bg-primary" style={{ WebkitMaskImage: "url(/images/logo.png)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", maskImage: "url(/images/logo.png)", maskSize: "contain", maskRepeat: "no-repeat" }} />
+        <div className="h-8 w-20 bg-primary" style={{ WebkitMaskImage: "url(/images/logo.webp)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", maskImage: "url(/images/logo.webp)", maskSize: "contain", maskRepeat: "no-repeat" }} />
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1 bg-primary/10 text-primary border border-primary/20 text-[10px] font-bold px-2 py-0.5 rounded">
             <Zap className="w-3 h-3" />

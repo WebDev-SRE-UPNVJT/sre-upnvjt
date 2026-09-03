@@ -459,6 +459,7 @@ export const shortlink = pgTable('shortlink', {
   originalUrl: text('originalUrl').notNull(),
   description: varchar('description', { length: 255 }),
   clicks: integer('clicks').default(0).notNull(),
+  isActive: boolean('isActive').default(true),
   createdById: integer('createdById').references(() => user.id, { onDelete: 'cascade' }).notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });

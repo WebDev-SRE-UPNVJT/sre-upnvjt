@@ -178,7 +178,7 @@ export default function LoginPage() {
               className="inline-flex items-center cursor-pointer"
             >
               <img
-                src="/images/logo.png"
+                src="/images/logo.webp"
                 alt="SRE Logo"
                 className="h-10 w-auto object-contain"
               />
@@ -215,7 +215,7 @@ export default function LoginPage() {
           <Link href="/">
             <div className="inline-flex items-center cursor-pointer">
               <img
-                src="/images/logo.png"
+                src="/images/logo.webp"
                 alt="SRE Logo"
                 className="h-7 w-auto object-contain brightness-0 invert opacity-90 transition-all duration-300"
               />

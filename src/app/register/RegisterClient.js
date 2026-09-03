@@ -157,7 +157,7 @@ export default function RegisterClient({ roles, departments, divisions }) {
               whileTap={{ scale: 0.95 }}
               className="inline-flex items-center cursor-pointer"
             >
-              <img src="/images/logo.png" alt="SRE Logo" className="h-10 w-auto object-contain" />
+              <img src="/images/logo.webp" alt="SRE Logo" className="h-10 w-auto object-contain" />
             </motion.div>
           </Link>
 
@@ -186,7 +186,7 @@ export default function RegisterClient({ roles, departments, divisions }) {
         <div className="absolute top-8 left-8 lg:hidden">
           <Link href="/">
             <div className="inline-flex items-center cursor-pointer">
-              <img src="/images/logo.png" alt="SRE Logo" className="h-8 w-auto object-contain" />
+              <img src="/images/logo.webp" alt="SRE Logo" className="h-8 w-auto object-contain" />
             </div>
           </Link>
         </div>

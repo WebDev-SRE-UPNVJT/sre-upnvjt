@@ -84,7 +84,7 @@ export default function StaffDashboardClient({
                 <div className="flex justify-between items-start">
                   {/* SRE Logo */}
                   <div className="w-24 h-10 relative ml-1 mt-1">
-                    <img src="/images/logo.png" alt="SRE Logo" className="w-full h-full object-contain object-left scale-[1.6] origin-left opacity-90 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
+                    <img src="/images/logo.webp" alt="SRE Logo" className="w-full h-full object-contain object-left scale-[1.6] origin-left opacity-90 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
                   </div>
                   
                   <div className="text-right pt-1">

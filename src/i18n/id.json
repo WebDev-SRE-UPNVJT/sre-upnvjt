@@ -21,6 +21,7 @@
     "merch": "Toko Merch",
     "partners": "Mitra",
     "logs": "Log Sistem",
+    "shortlinks": "SRE Links (Shortlinks)",
     "settings": "Pengaturan",
     "logout": "Keluar"
   },
@@ -904,7 +905,23 @@
     "slug_avail": "Slug tersedia untuk digunakan.",
     "desc_label": "Keterangan / Catatan Singkat",
     "desc_ph": "Contoh: Dokumen SOP Administrasi Periode 2026",
-    "url_ph": "https://drive.google.com/... atau https://..."
+    "url_ph": "https://drive.google.com/... atau https://...",
+    "admin_monitoring_title": "Monitoring SRE Links",
+    "admin_monitoring_subtitle": "Awasi seluruh tautan singkat yang dibuat oleh staf, pantau analitik klik, dan tangguhkan tautan yang tidak sesuai aturan.",
+    "status_active": "Aktif",
+    "status_suspended": "Ditangguhkan",
+    "status_all": "Semua Status",
+    "toggle_suspend": "Tangguhkan Tautan",
+    "toggle_activate": "Aktifkan Tautan",
+    "suspend_confirm_title": "Tangguhkan Tautan Ini?",
+    "suspend_confirm_desc": "Tautan /s/{slug} akan dinonaktifkan sementara dan tidak akan mengarahkan pengunjung ke URL tujuan.",
+    "activate_confirm_title": "Aktifkan Kembali Tautan?",
+    "activate_confirm_desc": "Tautan /s/{slug} akan kembali aktif dan dapat diakses seperti biasa.",
+    "stat_active_links": "Tautan Aktif",
+    "stat_suspended_links": "Tautan Ditangguhkan",
+    "suspended_toast": "Tautan /s/{slug} berhasil ditangguhkan!",
+    "activated_toast": "Tautan /s/{slug} berhasil diaktifkan kembali!",
+    "creator_dept": "Departemen: {dept}"
   },
   "member_dashboard": {
     "greeting": {
