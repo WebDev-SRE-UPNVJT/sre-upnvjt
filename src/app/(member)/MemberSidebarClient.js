@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
   LayoutDashboard, Presentation, FolderOpen, FolderKanban,
-  Target, Trophy, ClipboardCheck, User, LogOut, Menu, X, Zap, Award,
+  Target, Trophy, ClipboardCheck, User, LogOut, Menu, X, Zap, Award
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -128,8 +128,10 @@ export default function MemberSidebarClient({ user, profile }) {
 
         {/* Member Profile Widget */}
         <div className="mb-6 p-4 rounded-3xl bg-gradient-to-br from-white/10 to-white/5 border border-white/5">
-          <div className="text-[15px] font-black text-white leading-tight">{user?.name}</div>
-          <div className="text-[11px] text-gray-500 truncate mt-0.5">{user?.email}</div>
+          <div className="min-w-0">
+            <div className="text-[15px] font-black text-white leading-tight truncate">{user?.name}</div>
+            <div className="text-[11px] text-gray-500 truncate mt-0.5">{user?.email}</div>
+          </div>
           {renderProgress()}
         </div>
 
