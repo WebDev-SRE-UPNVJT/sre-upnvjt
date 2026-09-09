@@ -38,13 +38,27 @@ export async function POST(req) {
     let contentType;
 
     if (isImage) {
-      const sharp = (await import("sharp")).default;
-      filename = `${cleanBase}_${Date.now()}_${randomStr}.webp`;
-      processedBuffer = await sharp(buffer)
-        .rotate()
-        .webp({ quality: 82, effort: 4 })
-        .toBuffer();
-      contentType = "image/webp";
+      let converted = false;
+      try {
+        const sharpModule = await import("sharp");
+        const sharp = sharpModule.default || sharpModule;
+        processedBuffer = await sharp(buffer)
+          .rotate()
+          .webp({ quality: 82, effort: 4 })
+          .toBuffer();
+        filename = `${cleanBase}_${Date.now()}_${randomStr}.webp`;
+        contentType = "image/webp";
+        converted = true;
+      } catch (sharpErr) {
+        console.warn("Sharp image processing failed or unavailable, fallback to original buffer:", sharpErr?.message || sharpErr);
+      }
+
+      if (!converted) {
+        const ext = path.extname(file.name || '') || (file.type ? `.${file.type.split('/')[1]}` : '.jpg');
+        filename = `${cleanBase}_${Date.now()}_${randomStr}${ext}`;
+        processedBuffer = buffer;
+        contentType = file.type || "application/octet-stream";
+      }
     } else {
       const ext = path.extname(file.name || '');
       filename = `${cleanBase}_${Date.now()}_${randomStr}${ext}`;

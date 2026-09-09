@@ -10,12 +10,25 @@ const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || "https://cdn.webly.biz.id/";
 async function processAndUploadImage(file) {
   if (!file || file.size === 0) return null;
   try {
-    const sharp = (await import("sharp")).default;
     const buffer = Buffer.from(await file.arrayBuffer());
-    const filename = `featured-projects/${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
-    const processedBuffer = await sharp(buffer).webp({ quality: 82 }).toBuffer();
+    let processedBuffer = buffer;
+    let filename = `featured-projects/${Date.now()}-${Math.random().toString(36).substring(7)}`;
+    let contentType = file.type || "image/jpeg";
+
+    try {
+      const sharpModule = await import("sharp");
+      const sharp = sharpModule.default || sharpModule;
+      processedBuffer = await sharp(buffer).webp({ quality: 82 }).toBuffer();
+      filename += ".webp";
+      contentType = "image/webp";
+    } catch (sharpErr) {
+      console.warn("Sharp processing unavailable in featuredProjectActions, using original file:", sharpErr?.message || sharpErr);
+      const ext = file.name ? file.name.substring(file.name.lastIndexOf('.')) : '.jpg';
+      filename += ext;
+    }
+
     const { uploadToR2 } = await import("@/lib/r2");
-    const key = await uploadToR2(processedBuffer, filename, "image/webp");
+    const key = await uploadToR2(processedBuffer, filename, contentType);
     const base = R2_PUBLIC_URL.endsWith("/") ? R2_PUBLIC_URL : R2_PUBLIC_URL + "/";
     return `${base}${key}`;
   } catch (err) {
