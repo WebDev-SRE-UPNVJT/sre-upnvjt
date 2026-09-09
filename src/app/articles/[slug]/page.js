@@ -1,42 +1,128 @@
 import React from "react";
 import { db } from "@/lib/db";
-import { content, user } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { content, contentCategory, user } from "@/db/schema";
+import { eq, ne, desc, and } from "drizzle-orm";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { ChevronLeft, Calendar, User, FileText, Image as ImageIcon } from "lucide-react";
+import ArticleDetailClient from "./ArticleDetailClient";
 import { resolveImageUrl } from "@/lib/imageUrl";
 
 export const dynamic = "force-dynamic";
 
+const SITE_URL = process.env.NEXTAUTH_URL || "https://sreupnjatim.com";
+
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const data = await db.query.content.findFirst({
-    where: eq(content.slug, slug),
-  });
+  
+  const articleQuery = await db.select({
+    id: content.id,
+    title: content.title,
+    titleId: content.titleId,
+    body: content.body,
+    bodyId: content.bodyId,
+    imageUrl: content.imageUrl,
+    createdAt: content.createdAt,
+    categoryName: contentCategory.name,
+    authorName: user.name,
+  })
+  .from(content)
+  .leftJoin(user, eq(content.updatedById, user.id))
+  .leftJoin(contentCategory, eq(content.categoryId, contentCategory.id))
+  .where(eq(content.slug, slug))
+  .limit(1);
 
-  if (!data) return { title: "Article Not Found | SRE Portal" };
+  const data = articleQuery[0];
+
+  if (!data) {
+    return { 
+      title: "Artikel Tidak Ditemukan | SRE UPN Veteran Jawa Timur",
+      robots: { index: false, follow: false }
+    };
+  }
+
+  const plainText = (data.body || "").replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim();
+  const description = plainText.substring(0, 165) + (plainText.length > 165 ? "..." : "");
+  const resolvedCoverUrl = data.imageUrl ? resolveImageUrl(data.imageUrl) : "";
+  const absoluteCoverUrl = resolvedCoverUrl 
+    ? (resolvedCoverUrl.startsWith("http") ? resolvedCoverUrl : `${SITE_URL}${resolvedCoverUrl}`) 
+    : `${SITE_URL}/favicon-512.png`;
 
   return {
-    title: `${data.title} | SRE Portal`,
-    description: data.body.substring(0, 160).replace(/<[^>]*>?/gm, ''),
+    title: `${data.title} | SRE UPN Veteran Jawa Timur`,
+    description: description || "Artikel wawasan transisi energi bersih dan terbarukan dari Society of Renewable Energy UPN Veteran Jawa Timur.",
+    keywords: [
+      data.title,
+      data.categoryName || "Energi Terbarukan",
+      "SRE UPN Veteran Jawa Timur",
+      "SRE UPNVJT",
+      "Society of Renewable Energy",
+      "Clean Energy Transition",
+      "EBT Indonesia"
+    ],
+    authors: [{ name: data.authorName || "Editorial Team SRE UPNVJT" }],
+    creator: data.authorName || "SRE UPN Veteran Jawa Timur",
+    publisher: "SRE UPN Veteran Jawa Timur",
+    alternates: {
+      canonical: `/articles/${slug}`,
+    },
+    openGraph: {
+      title: data.title,
+      description: description,
+      url: `${SITE_URL}/articles/${slug}`,
+      siteName: "SRE UPN Veteran Jawa Timur",
+      locale: "id_ID",
+      type: "article",
+      publishedTime: data.createdAt ? new Date(data.createdAt).toISOString() : undefined,
+      authors: [data.authorName || "SRE UPN Veteran Jawa Timur"],
+      images: [
+        {
+          url: absoluteCoverUrl,
+          width: 1200,
+          height: 630,
+          alt: data.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: data.title,
+      description: description,
+      images: [absoluteCoverUrl],
+      creator: "@sreupnvjt",
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
   };
 }
 
 export default async function ContentDetailPage({ params }) {
   const { slug } = await params;
 
-  // Use a manual leftJoin select to safely fetch the article with its author.
-  // The Drizzle relation for `content` is named `updatedBy` (not `author`),
-  // but we alias the joined columns as `author` here to match the JSX below.
+  // 1. Fetch current article
   const articleQuery = await db.select({
     id: content.id,
     title: content.title,
+    titleId: content.titleId,
     slug: content.slug,
     body: content.body,
+    bodyId: content.bodyId,
     imageUrl: content.imageUrl,
     isPublished: content.isPublished,
     createdAt: content.createdAt,
+    category: {
+      id: contentCategory.id,
+      name: contentCategory.name,
+      slug: contentCategory.slug,
+      color: contentCategory.color,
+    },
     author: {
       name: user.name,
       profilePictureUrl: user.profilePictureUrl
@@ -44,6 +130,7 @@ export default async function ContentDetailPage({ params }) {
   })
   .from(content)
   .leftJoin(user, eq(content.updatedById, user.id))
+  .leftJoin(contentCategory, eq(content.categoryId, contentCategory.id))
   .where(eq(content.slug, slug))
   .limit(1);
 
@@ -53,54 +140,76 @@ export default async function ContentDetailPage({ params }) {
     notFound();
   }
 
+  // 2. Fetch up to 3 related / latest articles
+  const relatedQuery = await db.select({
+    id: content.id,
+    title: content.title,
+    titleId: content.titleId,
+    slug: content.slug,
+    body: content.body,
+    bodyId: content.bodyId,
+    imageUrl: content.imageUrl,
+    createdAt: content.createdAt,
+    category: {
+      id: contentCategory.id,
+      name: contentCategory.name,
+      slug: contentCategory.slug,
+      color: contentCategory.color,
+    },
+    author: {
+      name: user.name,
+    }
+  })
+  .from(content)
+  .leftJoin(user, eq(content.updatedById, user.id))
+  .leftJoin(contentCategory, eq(content.categoryId, contentCategory.id))
+  .where(and(eq(content.isPublished, true), ne(content.slug, slug)))
+  .orderBy(desc(content.createdAt))
+  .limit(3);
+
+  // 3. Automated JSON-LD Schema (Google Article & NewsArticle Structured Data)
+  const plainText = (articleData.body || "").replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim();
+  const description = plainText.substring(0, 165) + (plainText.length > 165 ? "..." : "");
+  const resolvedCoverUrl = articleData.imageUrl ? resolveImageUrl(articleData.imageUrl) : "";
+  const absoluteCoverUrl = resolvedCoverUrl 
+    ? (resolvedCoverUrl.startsWith("http") ? resolvedCoverUrl : `${SITE_URL}${resolvedCoverUrl}`) 
+    : `${SITE_URL}/favicon-512.png`;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    "headline": articleData.title,
+    "description": description,
+    "image": [absoluteCoverUrl],
+    "datePublished": articleData.createdAt ? new Date(articleData.createdAt).toISOString() : new Date().toISOString(),
+    "dateModified": articleData.createdAt ? new Date(articleData.createdAt).toISOString() : new Date().toISOString(),
+    "author": [{
+      "@type": "Person",
+      "name": articleData.author?.name || "SRE Editorial Team"
+    }],
+    "publisher": {
+      "@type": "Organization",
+      "name": "Society of Renewable Energy UPN Veteran Jawa Timur",
+      "url": SITE_URL,
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${SITE_URL}/icon-512.png`
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `${SITE_URL}/articles/${articleData.slug}`
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-white dark:bg-[#050e0a] text-gray-900 dark:text-white font-sans selection:bg-primary/30">
-      <main className="pt-32 pb-20 px-6 max-w-4xl mx-auto">
-        <Link href="/articles" className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-primary transition-colors mb-8">
-          <ChevronLeft className="w-4 h-4" /> Back to Articles
-        </Link>
-
-        <header className="mb-10 text-center">
-          <div className="flex items-center justify-center gap-4 text-xs font-bold uppercase tracking-wider text-primary mb-6">
-            <span className="flex items-center gap-1.5 bg-primary/10 px-3 py-1.5 rounded-full"><Calendar className="w-4 h-4" /> {new Date(articleData.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-          </div>
-          
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter mb-8 leading-[1.1]">
-            {articleData.title}
-          </h1>
-
-          <div className="flex items-center justify-center gap-4 text-gray-600 dark:text-white/60">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 flex items-center justify-center text-primary font-bold shadow-sm">
-                {articleData.author?.name ? articleData.author.name.charAt(0) : "A"}
-              </div>
-              <div className="text-left">
-                <div className="text-sm font-bold text-gray-900 dark:text-white">{articleData.author?.name || "Admin"}</div>
-                <div className="text-xs">SRE UPNVJT</div>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {articleData.imageUrl ? (
-          <div className="w-full h-[400px] md:h-[500px] rounded-[2rem] overflow-hidden mb-12 shadow-2xl shadow-primary/5">
-            <img 
-              src={resolveImageUrl(articleData.imageUrl)} 
-              alt={articleData.title} 
-              className="w-full h-full object-cover"
-            />
-          </div>
-        ) : (
-          <div className="w-full h-[300px] rounded-[2rem] bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 flex flex-col items-center justify-center mb-12 text-gray-400 dark:text-white/20">
-            <ImageIcon className="w-16 h-16 mb-4" />
-            <span className="text-sm font-medium">No cover image provided</span>
-          </div>
-        )}
-
-        <article className="prose prose-lg dark:prose-invert prose-emerald max-w-none prose-headings:font-black prose-p:leading-relaxed prose-img:rounded-3xl mx-auto whitespace-pre-wrap">
-          {articleData.body}
-        </article>
-      </main>
-    </div>
+    <>
+      {/* Automated Google Rich Snippets / Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <ArticleDetailClient articleData={articleData} relatedArticles={relatedQuery} />
+    </>
   );
 }

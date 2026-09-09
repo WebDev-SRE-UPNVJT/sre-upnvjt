@@ -75,12 +75,24 @@ export const announcement = pgTable('announcement', {
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
 
-// 4. Contents (Articles)
+// 4. Contents (Articles & Categories)
+export const contentCategory = pgTable('contentCategory', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 255 }).unique().notNull(),
+  slug: varchar('slug', { length: 255 }).unique().notNull(),
+  description: text('description'),
+  color: varchar('color', { length: 50 }).default('emerald'),
+  createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
+});
+
 export const content = pgTable('content', {
   id: serial('id').primaryKey(),
-  title: varchar('title', { length: 255 }).notNull(),
+  categoryId: integer('categoryId').references(() => contentCategory.id, { onDelete: 'set null' }),
+  title: varchar('title', { length: 255 }).notNull(), // English title (Default)
+  titleId: varchar('titleId', { length: 255 }),        // Indonesian title
   slug: varchar('slug', { length: 255 }).unique().notNull(),
-  body: text('body').notNull(),
+  body: text('body').notNull(),                        // English body (Default)
+  bodyId: text('bodyId'),                              // Indonesian body
   imageUrl: varchar('imageUrl', { length: 1000 }),
   isPublished: boolean('isPublished').default(false).notNull(),
   updatedById: integer('updatedById').references(() => user.id, { onDelete: 'cascade' }).notNull(),
@@ -252,8 +264,13 @@ export const announcementRelations = relations(announcement, ({ one }) => ({
   createdBy: one(user, { fields: [announcement.createdById], references: [user.id] }),
 }));
 
+export const contentCategoryRelations = relations(contentCategory, ({ many }) => ({
+  contents: many(content),
+}));
+
 export const contentRelations = relations(content, ({ one }) => ({
   updatedBy: one(user, { fields: [content.updatedById], references: [user.id] }),
+  category: one(contentCategory, { fields: [content.categoryId], references: [contentCategory.id] }),
 }));
 
 export const formTemplateRelations = relations(formTemplate, ({ one, many }) => ({

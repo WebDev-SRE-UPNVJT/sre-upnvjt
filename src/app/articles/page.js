@@ -1,6 +1,6 @@
 import React from "react";
 import ContentPublicClient from "./ContentPublicClient";
-import { getPublicContent } from "@/app/actions/contentActions";
+import { getPublicContent, getContentCategories } from "@/app/actions/contentActions";
 
 export const metadata = {
   title: "Articles & News | SRE UPNVJT",
@@ -10,8 +10,18 @@ export const metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function PublicContentPage() {
-  const result = await getPublicContent();
-  const articles = result.success ? result.data : [];
+  const [contentResult, catResult] = await Promise.all([
+    getPublicContent(),
+    getContentCategories(),
+  ]);
 
-  return <ContentPublicClient initialArticles={articles} />;
+  const articles = contentResult.success ? contentResult.data : [];
+  const categories = catResult.success ? catResult.data : [];
+
+  return (
+    <ContentPublicClient 
+      initialArticles={articles} 
+      initialCategories={categories}
+    />
+  );
 }

@@ -34,13 +34,13 @@ export default function FloatingThemeToggle() {
       initial={{ opacity: 0, scale: 0.8, y: 50 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="fixed bottom-20 right-6 z-[60]"
+      className="fixed bottom-6 right-4 sm:bottom-20 sm:right-6 z-[60]"
     >
       <motion.button
         whileHover={{ scale: 1.12, rotate: isDark ? 15 : -15 }}
         whileTap={{ scale: 0.88, rotate: isDark ? -25 : 25 }}
         onClick={() => setTheme(isDark ? "light" : "dark")}
-        className={`w-12 h-12 rounded-full flex items-center justify-center relative overflow-hidden backdrop-blur-xl border-2 shadow-xl transition-colors duration-500 focus:outline-none cursor-pointer group ${
+        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center relative overflow-hidden backdrop-blur-xl border-2 shadow-xl transition-colors duration-500 focus:outline-none cursor-pointer group ${
           isDark
             ? "bg-[#07130e]/90 border-emerald-400 text-emerald-400 shadow-emerald-950/50 hover:shadow-emerald-500/20"
             : "bg-[#0cc48a]/90 border-yellow-300 text-yellow-300 shadow-emerald-900/20 hover:shadow-yellow-300/20"
