@@ -124,10 +124,15 @@ export async function createContent(data) {
     return { success: true, data: { id: result.id, title, slug } };
   } catch (error) {
     console.error("Error creating content:", error);
-    if (error.code === '23505' || error.code === 'ER_DUP_ENTRY') {
-      return { success: false, error: "Slug already exists. Please choose a different title or slug." };
+    const pgError = error?.cause || error;
+    if (pgError.code === '23505' || pgError.code === 'ER_DUP_ENTRY' || error.code === '23505') {
+      return { success: false, error: "Slug sudah terdaftar. Silakan ubah judul atau slug agar unik." };
     }
-    return { success: false, error: error.message };
+    if (pgError.code === '23503' || error.code === '23503') {
+      return { success: false, error: `Foreign key error: ${pgError.detail || "User ID atau Kategori ID tidak valid."}` };
+    }
+    const errorMsg = pgError.detail || pgError.message || error.message;
+    return { success: false, error: errorMsg };
   }
 }
 
@@ -165,10 +170,15 @@ export async function updateContent(id, data) {
     return { success: true, data: { id, title, slug } };
   } catch (error) {
     console.error("Error updating content:", error);
-    if (error.code === '23505' || error.code === 'ER_DUP_ENTRY') {
-      return { success: false, error: "Slug already exists. Please choose a different title or slug." };
+    const pgError = error?.cause || error;
+    if (pgError.code === '23505' || pgError.code === 'ER_DUP_ENTRY' || error.code === '23505') {
+      return { success: false, error: "Slug sudah terdaftar. Silakan ubah judul atau slug agar unik." };
     }
-    return { success: false, error: error.message };
+    if (pgError.code === '23503' || error.code === '23503') {
+      return { success: false, error: `Foreign key error: ${pgError.detail || "User ID atau Kategori ID tidak valid."}` };
+    }
+    const errorMsg = pgError.detail || pgError.message || error.message;
+    return { success: false, error: errorMsg };
   }
 }
 
