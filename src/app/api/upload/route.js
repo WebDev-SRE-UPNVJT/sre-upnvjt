@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import path from 'path';
+import sharp from 'sharp';
+import { uploadToR2 } from "@/lib/r2";
 
 const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || "https://cdn.webly.biz.id/";
 
@@ -38,22 +40,16 @@ export async function POST(req) {
     let contentType;
 
     if (isImage) {
-      let converted = false;
       try {
-        const sharpModule = await import("sharp");
-        const sharp = sharpModule.default || sharpModule;
         processedBuffer = await sharp(buffer)
           .rotate()
           .webp({ quality: 82, effort: 4 })
           .toBuffer();
         filename = `${cleanBase}_${Date.now()}_${randomStr}.webp`;
         contentType = "image/webp";
-        converted = true;
       } catch (sharpErr) {
-        console.warn("Sharp image processing failed or unavailable, fallback to original buffer:", sharpErr?.message || sharpErr);
-      }
-
-      if (!converted) {
+        console.error("Sharp WebP conversion error:", sharpErr);
+        // Fallback to original buffer only if sharp fails to decode this specific image
         const ext = path.extname(file.name || '') || (file.type ? `.${file.type.split('/')[1]}` : '.jpg');
         filename = `${cleanBase}_${Date.now()}_${randomStr}${ext}`;
         processedBuffer = buffer;
@@ -69,7 +65,6 @@ export async function POST(req) {
     const r2Key = safeFolder ? `${safeFolder}/${filename}` : filename;
 
     // Upload to Cloudflare R2
-    const { uploadToR2 } = await import("@/lib/r2");
     const key = await uploadToR2(processedBuffer, r2Key, contentType);
 
     // Build full public URL
@@ -82,3 +77,4 @@ export async function POST(req) {
     return NextResponse.json({ error: error.message || "Failed to upload file" }, { status: 500 });
   }
 }
+

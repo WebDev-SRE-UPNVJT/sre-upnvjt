@@ -6,6 +6,9 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { hasAccess } from "@/lib/permissions";
 
+import sharp from "sharp";
+import { uploadToR2 } from "@/lib/r2";
+
 const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || "https://cdn.webly.biz.id/";
 
 async function processAndUploadImage(file) {
@@ -17,18 +20,15 @@ async function processAndUploadImage(file) {
     let contentType = file.type || "image/jpeg";
 
     try {
-      const sharpModule = await import("sharp");
-      const sharp = sharpModule.default || sharpModule;
-      processedBuffer = await sharp(buffer).webp({ quality: 80 }).toBuffer();
+      processedBuffer = await sharp(buffer).rotate().webp({ quality: 80, effort: 4 }).toBuffer();
       filename += ".webp";
       contentType = "image/webp";
     } catch (sharpErr) {
-      console.warn("Sharp processing unavailable in activityAction, using original file:", sharpErr?.message || sharpErr);
+      console.error("Sharp processing error in activityAction, using original file:", sharpErr);
       const ext = file.name ? file.name.substring(file.name.lastIndexOf('.')) : '.jpg';
       filename += ext;
     }
 
-    const { uploadToR2 } = await import("@/lib/r2");
     const key = await uploadToR2(processedBuffer, filename, contentType);
     // Build full public URL
     const base = R2_PUBLIC_URL.endsWith("/") ? R2_PUBLIC_URL : R2_PUBLIC_URL + "/";
