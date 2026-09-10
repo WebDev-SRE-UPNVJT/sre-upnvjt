@@ -97,17 +97,26 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
     setIsLoading(true);
     try {
       const res = await fetch("/api/upload", { method: "POST", body: fd });
-      const data = await res.json();
+      const text = await res.text();
+      let data = {};
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error(`HTTP ${res.status}: Gagal memproses respon server`);
+      }
+
       if (res.ok && data.url) {
         setter(prev => ({ ...prev, imageUrl: data.url }));
         notify("success", "Gambar berhasil diunggah!");
       } else {
-        notify("error", data.error || "Gagal mengunggah gambar");
+        notify("error", data.error || `Gagal mengunggah gambar (${res.status})`);
       }
-    } catch {
-      notify("error", "Terjadi kesalahan saat upload");
+    } catch (err) {
+      console.error("Upload error:", err);
+      notify("error", err.message || "Terjadi kesalahan saat upload");
     } finally {
       setIsLoading(false);
+      if (e.target) e.target.value = "";
     }
   };
 
