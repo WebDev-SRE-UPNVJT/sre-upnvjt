@@ -90,6 +90,10 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) { notify("error", "Harap pilih file gambar"); return; }
+    if (file.size > 4.5 * 1024 * 1024) {
+      notify("error", "Ukuran file maksimal 4.5 MB. Harap pilih gambar yang lebih kecil.");
+      return;
+    }
 
     const fd = new FormData();
     fd.append("file", file);

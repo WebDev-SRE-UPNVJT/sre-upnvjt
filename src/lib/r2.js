@@ -8,7 +8,7 @@ function getR2Config() {
   const publicUrl = process.env.R2_PUBLIC_URL || "https://cdn.webly.biz.id/";
 
   if (!accountId || !accessKeyId || !secretAccessKey) {
-    console.error("[R2 Config Error] Missing R2 credentials in environment variables (R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY).");
+    throw new Error("Kredensial Cloudflare R2 belum disetel di Environment Variables Vercel (R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY). Pastikan sudah ditambahkan di Vercel Project Settings > Environment Variables.");
   }
 
   const client = new S3Client({
