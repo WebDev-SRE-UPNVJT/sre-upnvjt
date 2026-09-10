@@ -1,18 +1,34 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 
-const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID;
-const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID;
-const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY;
-const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || "sre-upnvjt";
-const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || "https://cdn.webly.biz.id/";
+function getR2Config() {
+  const accountId = process.env.R2_ACCOUNT_ID;
+  const accessKeyId = process.env.R2_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
+  const bucketName = process.env.R2_BUCKET_NAME || "sre-upnvjt";
+  const publicUrl = process.env.R2_PUBLIC_URL || "https://cdn.webly.biz.id/";
 
-export const r2Client = new S3Client({
-  region: "auto",
-  endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  credentials: {
-    accessKeyId: R2_ACCESS_KEY_ID || "",
-    secretAccessKey: R2_SECRET_ACCESS_KEY || "",
-  },
+  if (!accountId || !accessKeyId || !secretAccessKey) {
+    console.error("[R2 Config Error] Missing R2 credentials in environment variables (R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY).");
+  }
+
+  const client = new S3Client({
+    region: "auto",
+    endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId: accessKeyId || "",
+      secretAccessKey: secretAccessKey || "",
+    },
+  });
+
+  return { client, bucketName, publicUrl };
+}
+
+export const r2Client = new Proxy({}, {
+  get(target, prop) {
+    const { client } = getR2Config();
+    const value = client[prop];
+    return typeof value === 'function' ? value.bind(client) : value;
+  }
 });
 
 /**
@@ -23,14 +39,15 @@ export const r2Client = new S3Client({
  * @returns {Promise<string>} Public URL of the uploaded file
  */
 export async function uploadToR2(buffer, key, contentType = "image/webp") {
+  const { client, bucketName } = getR2Config();
   const command = new PutObjectCommand({
-    Bucket: R2_BUCKET_NAME,
+    Bucket: bucketName,
     Key: key,
     Body: buffer,
     ContentType: contentType,
   });
 
-  await r2Client.send(command);
+  await client.send(command);
 
   // Return object key (relative path) so domain can be dynamically rendered/prepended anywhere
   return key;

@@ -5,6 +5,9 @@ import path from 'path';
 import sharp from 'sharp';
 import { uploadToR2 } from "@/lib/r2";
 
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || "https://cdn.webly.biz.id/";
 
 export async function POST(req) {
@@ -12,14 +15,14 @@ export async function POST(req) {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Sesi login tidak valid. Silakan login kembali." }, { status: 401 });
     }
 
     const data = await req.formData();
     const file = data.get('file');
 
     if (!file) {
-      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+      return NextResponse.json({ error: 'Tidak ada file yang diunggah' }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
@@ -36,20 +39,28 @@ export async function POST(req) {
     const randomStr = Math.random().toString(36).substring(2, 8);
 
     let filename;
-    let processedBuffer;
-    let contentType;
+    let processedBuffer = buffer;
+    let contentType = file.type || "application/octet-stream";
 
     if (isImage) {
+      let webpSuccess = false;
       try {
-        processedBuffer = await sharp(buffer)
+        let sharpFn = sharp;
+        if (typeof sharpFn !== "function" && sharpFn?.default) {
+          sharpFn = sharpFn.default;
+        }
+        processedBuffer = await sharpFn(buffer)
           .rotate()
           .webp({ quality: 82, effort: 4 })
           .toBuffer();
         filename = `${cleanBase}_${Date.now()}_${randomStr}.webp`;
         contentType = "image/webp";
+        webpSuccess = true;
       } catch (sharpErr) {
         console.error("Sharp WebP conversion error:", sharpErr);
-        // Fallback to original buffer only if sharp fails to decode this specific image
+      }
+
+      if (!webpSuccess) {
         const ext = path.extname(file.name || '') || (file.type ? `.${file.type.split('/')[1]}` : '.jpg');
         filename = `${cleanBase}_${Date.now()}_${randomStr}${ext}`;
         processedBuffer = buffer;
@@ -73,8 +84,8 @@ export async function POST(req) {
 
     return NextResponse.json({ success: true, url: publicUrl });
   } catch (error) {
-    console.error("Upload error:", error);
-    return NextResponse.json({ error: error.message || "Failed to upload file" }, { status: 500 });
+    console.error("Upload API route error:", error);
+    return NextResponse.json({ error: error.message || "Gagal mengunggah file ke server" }, { status: 500 });
   }
 }
 
