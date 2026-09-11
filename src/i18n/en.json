@@ -426,7 +426,13 @@
     "reset": "Reset",
     "apply": "Apply",
     "open": "Open Literature",
-    "year": "Year"
+    "year": "Year",
+    "abstract": "Abstract",
+    "abstract_en": "English",
+    "abstract_id": "Indonesian",
+    "abstract_copy": "Copy Abstract",
+    "abstract_copied": "Copied!",
+    "keywords": "Keywords"
   },
   "materi": {
     "badge_tag": "E-Academy",

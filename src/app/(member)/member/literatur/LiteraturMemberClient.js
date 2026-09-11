@@ -5,6 +5,7 @@ import { FolderOpen, Search, ExternalLink, Calendar, User, FileText, Sparkles, F
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/i18n/LanguageProvider";
 import { resolveImageUrl } from "@/lib/imageUrl";
+import LiteratureCover from "@/components/ui/LiteratureCover";
 
 const TYPE_COLORS = {
   PDF:    "bg-red-500/10 text-red-400 border-red-500/20",
@@ -31,7 +32,11 @@ export default function LiteraturMemberClient({ initialItems, categories }) {
     const q = searchQuery.toLowerCase();
     const matchSearch = !q ||
       (item.title || "").toLowerCase().includes(q) ||
-      (item.author || "").toLowerCase().includes(q);
+      (item.author || "").toLowerCase().includes(q) ||
+      (item.abstract || "").toLowerCase().includes(q) ||
+      (item.abstractId || "").toLowerCase().includes(q) ||
+      (item.keywords || "").toLowerCase().includes(q) ||
+      (item.keywordsId || "").toLowerCase().includes(q);
     const matchCat = (selectedCategoryId === null || selectedCategoryId === "all") 
       ? true 
       : (item.categoryId?.toString() === selectedCategoryId || item.category?.id?.toString() === selectedCategoryId);
@@ -333,26 +338,20 @@ export default function LiteraturMemberClient({ initialItems, categories }) {
                   href={`/member/literatur/${item.id}`}
                   className="relative bg-white dark:bg-[#090d14] border border-slate-200 dark:border-white/10 rounded-3xl overflow-hidden cursor-pointer group hover:border-emerald-500/50 transition-all duration-500 transform-gpu hover:-translate-y-1.5 flex flex-col h-full shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:shadow-none hover:shadow-[0_12px_30px_rgba(16,185,129,0.15)]"
                 >
-                  {/* Category Cover */}
-                  <div className="relative aspect-[16/9] w-full overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-900 border-b border-slate-100 dark:border-white/5">
-                    {item.category?.imageUrl ? (
-                      <img
-                        src={resolveImageUrl(item.category.imageUrl)}
-                        alt=""
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center text-emerald-500/40 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-[#090d14]">
-                        <FolderOpen className="w-14 h-14" />
-                      </div>
-                    )}
-                    
-                    {/* Subtle gradient vignette */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                    
+                  {/* Document Cover (Header / Kop from PDF) */}
+                  <div className="relative aspect-[16/10] w-full overflow-hidden shrink-0 bg-white dark:bg-[#07110c] border-b border-slate-100 dark:border-white/5">
+                    <LiteratureCover
+                      driveUrl={item.driveUrl}
+                      title={item.title}
+                      author={item.author}
+                      year={item.year}
+                      type={item.type}
+                      categoryName={item.category?.name}
+                    />
+
                     {/* Badges */}
-                    <div className="absolute top-3.5 left-3.5 z-10 flex gap-2">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 backdrop-blur-md shadow-sm border bg-white/95 dark:bg-black/70 ${
+                    <div className="absolute top-3 left-3 z-10 flex gap-2 pointer-events-none">
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 backdrop-blur-md shadow-sm border bg-white/95 dark:bg-black/80 ${
                         TYPE_COLORS[item.type] || TYPE_COLORS.OTHER
                       }`}>
                         {item.type || "OTHER"}

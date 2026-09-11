@@ -374,6 +374,10 @@ export const literatureItem = pgTable('literatureItem', {
   year: integer('year'),
   driveUrl: varchar('driveUrl', { length: 1000 }).notNull(),
   type: varchar('type', { length: 50 }),
+  abstract: text('abstract'),       // English / Default abstract (optional)
+  abstractId: text('abstractId'),   // Indonesian abstract (optional)
+  keywords: text('keywords'),       // English / Default keywords (optional)
+  keywordsId: text('keywordsId'),   // Indonesian keywords (optional)
   isPublished: boolean('isPublished').default(false).notNull(),
   uploadedById: integer('uploadedById').references(() => user.id, { onDelete: 'cascade' }).notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()),

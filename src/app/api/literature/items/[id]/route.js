@@ -15,7 +15,7 @@ export async function PUT(req, { params }) {
     const resolvedParams = await params;
     const id = parseInt(resolvedParams.id);
     const body = await req.json();
-    const { categoryId, title, author, year, driveUrl, type, isPublished } = body;
+    const { categoryId, title, author, year, driveUrl, type, abstract, abstractId, keywords, keywordsId, isPublished } = body;
 
     if (!title || !driveUrl || !categoryId) {
       return NextResponse.json({ error: "Judul, kategori, dan link wajib diisi" }, { status: 400 });
@@ -28,6 +28,10 @@ export async function PUT(req, { params }) {
       year: year ? parseInt(year) : null,
       driveUrl,
       type: type || null,
+      abstract: abstract || null,
+      abstractId: abstractId || null,
+      keywords: keywords || null,
+      keywordsId: keywordsId || null,
       isPublished: isPublished === true || isPublished === "true",
     }).where(eq(literatureItem.id, id));
 

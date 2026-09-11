@@ -426,7 +426,13 @@
     "reset": "Reset",
     "apply": "Terapkan",
     "open": "Buka Literatur",
-    "year": "Tahun"
+    "year": "Tahun",
+    "abstract": "Abstrak",
+    "abstract_en": "English",
+    "abstract_id": "Bahasa Indonesia",
+    "abstract_copy": "Salin Abstrak",
+    "abstract_copied": "Tersalin!",
+    "keywords": "Kata Kunci"
   },
   "materi": {
     "badge_tag": "E-Academy",

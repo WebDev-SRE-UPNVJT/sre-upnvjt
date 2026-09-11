@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, ExternalLink, Calendar, User, FileText, FolderOpen, Info, Search } from "lucide-react";
+import { ArrowLeft, ExternalLink, Calendar, User, FileText, FolderOpen, Info, Search, Copy, Check, Tag } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageProvider";
 import { useRouter } from "next/navigation";
 import dynamic from 'next/dynamic';
@@ -18,10 +18,39 @@ const TYPE_COLORS = {
 };
 
 export default function LiteraturDetailClient({ item }) {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const router = useRouter();
   const [iframeLoading, setIframeLoading] = useState(true);
   const [numPages, setNumPages] = useState(null);
+  const [copied, setCopied] = useState(false);
+  
+  // Default content language based on site language or available content
+  const hasAbstract = Boolean(item.abstract || item.abstractId);
+  const hasBilingualAbstract = Boolean(item.abstract && item.abstractId);
+  const hasKeywords = Boolean(item.keywords || item.keywordsId);
+  const hasBilingualKeywords = Boolean(item.keywords && item.keywordsId);
+
+  const [selectedLang, setSelectedLang] = useState(() => {
+    if (language === "id" && (item.abstractId || item.keywordsId)) return "id";
+    if (item.abstract || item.keywords) return "en";
+    if (item.abstractId || item.keywordsId) return "id";
+    return "en";
+  });
+
+  const currentAbstract = selectedLang === "id"
+    ? (item.abstractId || item.abstract)
+    : (item.abstract || item.abstractId);
+
+  const currentKeywords = selectedLang === "id"
+    ? (item.keywordsId || item.keywords)
+    : (item.keywords || item.keywordsId);
+
+  const handleCopyAbstract = () => {
+    if (!currentAbstract) return;
+    navigator.clipboard.writeText(currentAbstract);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages);
@@ -112,71 +141,185 @@ export default function LiteraturDetailClient({ item }) {
 
         {/* Right Side: Details Card (5 columns) */}
         <div className="lg:col-span-5 xl:col-span-4">
-          <div className="sticky top-24">
+          <div className="sticky top-20">
             <motion.div 
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="bg-white dark:bg-[#090d14] rounded-3xl border border-slate-200 dark:border-white/10 p-8 shadow-xl"
+              className="bg-white dark:bg-[#090d14] rounded-3xl border border-slate-200 dark:border-white/10 p-6 md:p-8 shadow-xl max-h-[calc(100vh-6rem)] overflow-y-auto custom-scrollbar flex flex-col"
             >
-              <div className="flex gap-2 mb-6">
-                <span className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-sm border ${
+              {/* Badges & Meta Top */}
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-sm border ${
                   TYPE_COLORS[item.type] || TYPE_COLORS.OTHER
                 }`}>
                   {item.type || "OTHER"}
                 </span>
                 {item.category && (
-                  <span className="px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-white/60">
+                  <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-white/60">
                     {item.category.name}
+                  </span>
+                )}
+                {item.year && (
+                  <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-white/60 flex items-center gap-1">
+                    <Calendar className="w-3 h-3 text-emerald-500" />
+                    {item.year}
                   </span>
                 )}
               </div>
 
-              <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-white leading-tight mb-8 tracking-tight">
+              {/* Title */}
+              <h1 className="text-xl lg:text-2xl font-black text-slate-900 dark:text-white leading-tight mb-4 tracking-tight">
                 {item.title}
               </h1>
 
-              <div className="space-y-6 mb-10">
-                {item.author && (
-                  <div className="flex items-center gap-4 text-slate-600 dark:text-white/70 font-medium">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 flex items-center justify-center shrink-0">
-                      <User className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-black text-slate-400 dark:text-white/40 tracking-wider mb-0.5">Penulis / Author</p>
-                      <p className="text-sm font-bold">{item.author}</p>
-                    </div>
+              {/* Author & Quick Info */}
+              {item.author && (
+                <div className="flex items-center gap-2.5 text-slate-600 dark:text-white/70 font-medium mb-6 pb-5 border-b border-slate-100 dark:border-white/10">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 flex items-center justify-center shrink-0">
+                    <User className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                )}
-
-                {item.year && (
-                  <div className="flex items-center gap-4 text-slate-600 dark:text-white/70 font-medium">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 flex items-center justify-center shrink-0">
-                      <Calendar className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-black text-slate-400 dark:text-white/40 tracking-wider mb-0.5">{t('literatur.year')} Terbit</p>
-                      <p className="text-sm font-bold">{item.year}</p>
-                    </div>
-                  </div>
-                )}
-                
-                <div className="flex items-center gap-4 text-slate-600 dark:text-white/70 font-medium">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 flex items-center justify-center shrink-0">
-                    <FolderOpen className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase font-black text-slate-400 dark:text-white/40 tracking-wider mb-0.5">{t('literatur.category')}</p>
-                    <p className="text-sm font-bold">{item.category?.name || "Uncategorized"}</p>
+                  <div className="min-w-0">
+                    <p className="text-[10px] uppercase font-black text-slate-400 dark:text-white/40 tracking-wider">Penulis / Author</p>
+                    <p className="text-xs font-bold truncate text-slate-800 dark:text-slate-200">{item.author}</p>
                   </div>
                 </div>
-              </div>
+              )}
 
-              <div className="pt-8 border-t border-slate-100 dark:border-white/10">
+              {/* Abstract Section (Bilingual) */}
+              {hasAbstract && (
+                <div className="mb-6 pb-6 border-b border-slate-100 dark:border-white/10">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-emerald-500" />
+                      <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
+                        {t('literatur.abstract')}
+                      </h3>
+                    </div>
+
+                    {/* Language Switcher */}
+                    {hasBilingualAbstract || hasBilingualKeywords ? (
+                      <div className="flex bg-slate-100 dark:bg-white/5 p-0.5 rounded-lg border border-slate-200 dark:border-white/10 shadow-sm">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedLang("en")}
+                          className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase transition-all ${
+                            selectedLang === "en"
+                              ? "bg-emerald-500 text-white shadow-sm"
+                              : "text-slate-500 dark:text-white/40 hover:text-slate-900 dark:hover:text-white"
+                          }`}
+                        >
+                          English (EN)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedLang("id")}
+                          className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase transition-all ${
+                            selectedLang === "id"
+                              ? "bg-emerald-500 text-white shadow-sm"
+                              : "text-slate-500 dark:text-white/40 hover:text-slate-900 dark:hover:text-white"
+                          }`}
+                        >
+                          Indonesia (ID)
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
+                        {item.abstract ? "EN" : "ID"}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="relative group/abs bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/70 dark:border-white/5 rounded-2xl p-4 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+                    <p className="whitespace-pre-line select-text font-normal leading-relaxed text-justify">
+                      {currentAbstract}
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={handleCopyAbstract}
+                      className="mt-3.5 flex items-center gap-1.5 text-[11px] font-bold text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-emerald-500" />
+                          <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{t('literatur.abstract_copied')}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>{t('literatur.abstract_copy')}</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Keywords (Kata Kunci) */}
+              {hasKeywords && currentKeywords && (
+                <div className="mb-6 pb-6 border-b border-slate-100 dark:border-white/10">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Tag className="w-4 h-4 text-emerald-500" />
+                      <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
+                        {t('literatur.keywords')}
+                      </h3>
+                    </div>
+                    {!hasAbstract && hasBilingualKeywords ? (
+                      <div className="flex bg-slate-100 dark:bg-white/5 p-0.5 rounded-lg border border-slate-200 dark:border-white/10">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedLang("en")}
+                          className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase transition-all ${
+                            selectedLang === "en"
+                              ? "bg-emerald-500 text-white shadow-sm"
+                              : "text-slate-500 dark:text-white/40 hover:text-slate-900 dark:hover:text-white"
+                          }`}
+                        >
+                          EN
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedLang("id")}
+                          className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase transition-all ${
+                            selectedLang === "id"
+                              ? "bg-emerald-500 text-white shadow-sm"
+                              : "text-slate-500 dark:text-white/40 hover:text-slate-900 dark:hover:text-white"
+                          }`}
+                        >
+                          ID
+                        </button>
+                      </div>
+                    ) : !hasAbstract ? (
+                      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
+                        {item.keywords ? "EN" : "ID"}
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {currentKeywords.split(',').map((kw, i) => {
+                      const cleanKw = kw.trim();
+                      if (!cleanKw) return null;
+                      return (
+                        <span
+                          key={i}
+                          className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-500/20 shadow-sm"
+                        >
+                          #{cleanKw}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Action Button */}
+              <div className="mt-auto pt-2">
                 <a
                   href={item.driveUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="w-full py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all shadow-lg shadow-emerald-500/25 group"
+                  className="w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all shadow-lg shadow-emerald-500/25 group"
                 >
                   {t('literatur.open')} Original File
                   <ExternalLink className="w-4 h-4 group-hover:scale-110 transition-transform" />

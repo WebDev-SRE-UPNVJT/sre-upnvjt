@@ -97,7 +97,7 @@ export async function deleteCategory(id) {
 
 export async function createLiteratureItem(data, uploadedById) {
   try {
-    const { categoryId, title, author, year, driveUrl, type, isPublished } = data;
+    const { categoryId, title, author, year, driveUrl, type, abstract, abstractId, keywords, keywordsId, isPublished } = data;
     const [result] = await db.insert(literatureItem).values({
       categoryId: parseInt(categoryId),
       title,
@@ -105,6 +105,10 @@ export async function createLiteratureItem(data, uploadedById) {
       year: year ? parseInt(year) : null,
       driveUrl,
       type: type || null,
+      abstract: abstract || null,
+      abstractId: abstractId || null,
+      keywords: keywords || null,
+      keywordsId: keywordsId || null,
       isPublished: Boolean(isPublished),
       uploadedById,
     }).returning();
@@ -115,6 +119,8 @@ export async function createLiteratureItem(data, uploadedById) {
     });
 
     revalidatePath("/literature");
+    revalidatePath("/member/literatur");
+    revalidatePath("/officer/literatur");
     return { success: true, item: full };
   } catch (error) {
     console.error("Error creating literature item:", error);
@@ -124,7 +130,7 @@ export async function createLiteratureItem(data, uploadedById) {
 
 export async function updateLiteratureItem(id, data) {
   try {
-    const { categoryId, title, author, year, driveUrl, type, isPublished } = data;
+    const { categoryId, title, author, year, driveUrl, type, abstract, abstractId, keywords, keywordsId, isPublished } = data;
     await db.update(literatureItem).set({
       categoryId: parseInt(categoryId),
       title,
@@ -132,6 +138,10 @@ export async function updateLiteratureItem(id, data) {
       year: year ? parseInt(year) : null,
       driveUrl,
       type: type || null,
+      abstract: abstract || null,
+      abstractId: abstractId || null,
+      keywords: keywords || null,
+      keywordsId: keywordsId || null,
       isPublished: Boolean(isPublished),
     }).where(eq(literatureItem.id, id));
 
@@ -141,6 +151,8 @@ export async function updateLiteratureItem(id, data) {
     });
 
     revalidatePath("/literature");
+    revalidatePath("/member/literatur");
+    revalidatePath("/officer/literatur");
     return { success: true, item: updated };
   } catch (error) {
     console.error("Error updating literature item:", error);

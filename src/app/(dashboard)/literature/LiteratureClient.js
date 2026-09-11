@@ -29,7 +29,7 @@ const TYPE_COLORS = {
 const EMPTY_CATEGORY = { name: "", imageUrl: "", description: "" };
 const EMPTY_ITEM = {
   title: "", author: "", year: "", categoryId: "",
-  driveUrl: "", type: "PDF", isPublished: false,
+  driveUrl: "", type: "PDF", abstract: "", abstractId: "", keywords: "", keywordsId: "", isPublished: false,
 };
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
@@ -71,6 +71,7 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
   // Item modal
   const [itemModal, setItemModal] = useState(false);
   const [itemForm, setItemForm] = useState(EMPTY_ITEM);
+  const [itemModalTab, setItemModalTab] = useState("en");
   const [itemDelModal, setItemDelModal] = useState(false);
   const [targetItem, setTargetItem] = useState(null);
 
@@ -174,10 +175,18 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
   // Item handlers
   const openItemModal = (item = null) => {
     setItemForm(item
-      ? { ...item, categoryId: item.categoryId?.toString() || item.category?.id?.toString() || "" }
+      ? {
+          ...item,
+          categoryId: item.categoryId?.toString() || item.category?.id?.toString() || "",
+          abstract: item.abstract || "",
+          abstractId: item.abstractId || "",
+          keywords: item.keywords || "",
+          keywordsId: item.keywordsId || "",
+        }
       : { ...EMPTY_ITEM }
     );
     setTargetItem(item);
+    setItemModalTab(item?.abstract || item?.keywords ? "en" : (item?.abstractId || item?.keywordsId ? "id" : "en"));
     setItemModal(true);
   };
   const closeItemModal = () => {
@@ -226,7 +235,11 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
     const q = searchQuery.toLowerCase();
     const matchSearch = !q ||
       (item.title || "").toLowerCase().includes(q) ||
-      (item.author || "").toLowerCase().includes(q);
+      (item.author || "").toLowerCase().includes(q) ||
+      (item.abstract || "").toLowerCase().includes(q) ||
+      (item.abstractId || "").toLowerCase().includes(q) ||
+      (item.keywords || "").toLowerCase().includes(q) ||
+      (item.keywordsId || "").toLowerCase().includes(q);
     const matchCat = filterCategory === "all" || item.categoryId?.toString() === filterCategory ||
       item.category?.id?.toString() === filterCategory;
     const matchType = filterType === "all" || item.type === filterType;
@@ -720,6 +733,98 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
                         {ITEM_TYPES.map(t => <option key={t} value={t} className="bg-white dark:bg-[#0a1612] text-gray-900 dark:text-white">{t}</option>)}
                       </select>
                     </InputField>
+
+                    {/* Bilingual Abstract & Keywords */}
+                    <div className="md:col-span-2 space-y-4 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 rounded-2xl p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="block text-[11px] font-bold tracking-wider text-gray-700 dark:text-white/70 uppercase">
+                            Konten Bilingual <span className="text-gray-400 dark:text-white/30 lowercase font-normal">(opsional)</span>
+                          </span>
+                          <span className="text-[10px] text-gray-400 dark:text-white/40">Abstrak & kata kunci untuk masing-masing bahasa</span>
+                        </div>
+                        <div className="flex bg-gray-100 dark:bg-white/5 p-0.5 rounded-xl border border-gray-200 dark:border-white/10 text-xs shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => setItemModalTab("en")}
+                            className={`px-3 py-1.5 rounded-lg font-bold transition-all text-[11px] ${
+                              itemModalTab === "en"
+                                ? "bg-primary text-[#050e0a] shadow-sm"
+                                : "text-gray-500 dark:text-white/40 hover:text-gray-900 dark:hover:text-white"
+                            }`}
+                          >
+                            English (EN) {itemForm.abstract || itemForm.keywords ? "✓" : ""}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setItemModalTab("id")}
+                            className={`px-3 py-1.5 rounded-lg font-bold transition-all text-[11px] ${
+                              itemModalTab === "id"
+                                ? "bg-primary text-[#050e0a] shadow-sm"
+                                : "text-gray-500 dark:text-white/40 hover:text-gray-900 dark:hover:text-white"
+                            }`}
+                          >
+                            Indonesia (ID) {itemForm.abstractId || itemForm.keywordsId ? "✓" : ""}
+                          </button>
+                        </div>
+                      </div>
+
+                      {itemModalTab === "en" ? (
+                        <div className="space-y-4 pt-1">
+                          <div>
+                            <label className="block text-[10px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase mb-1.5">
+                              Abstract (English)
+                            </label>
+                            <textarea
+                              rows={4}
+                              value={itemForm.abstract}
+                              onChange={e => setItemForm(p => ({ ...p, abstract: e.target.value }))}
+                              className={`${textareaCls} h-24 text-xs leading-relaxed`}
+                              placeholder="Paste the English research abstract here (optional)..."
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase mb-1.5">
+                              Keywords (English)
+                            </label>
+                            <input
+                              type="text"
+                              value={itemForm.keywords}
+                              onChange={e => setItemForm(p => ({ ...p, keywords: e.target.value }))}
+                              className={inputCls}
+                              placeholder="e.g. Biodiesel, B50, Transesterification, Palm Oil (comma separated)"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-4 pt-1">
+                          <div>
+                            <label className="block text-[10px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase mb-1.5">
+                              Abstrak (Bahasa Indonesia)
+                            </label>
+                            <textarea
+                              rows={4}
+                              value={itemForm.abstractId}
+                              onChange={e => setItemForm(p => ({ ...p, abstractId: e.target.value }))}
+                              className={`${textareaCls} h-24 text-xs leading-relaxed`}
+                              placeholder="Tempel abstrak dalam Bahasa Indonesia di sini (opsional)..."
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase mb-1.5">
+                              Kata Kunci (Bahasa Indonesia)
+                            </label>
+                            <input
+                              type="text"
+                              value={itemForm.keywordsId}
+                              onChange={e => setItemForm(p => ({ ...p, keywordsId: e.target.value }))}
+                              className={inputCls}
+                              placeholder="contoh: Biodiesel, B50, Transesterifikasi, Minyak Sawit (pisahkan dengan koma)"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
 
                     {/* Published toggle */}
                     <div className="flex items-center justify-between p-4 bg-white dark:bg-white/5 shadow-sm dark:shadow-none border border-gray-200 dark:border-white/10 rounded-xl">
