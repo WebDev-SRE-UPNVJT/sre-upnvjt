@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ExternalLink, Calendar, User, FileText, FolderOpen, Info, Zap, Copy, Check, Tag } from "lucide-react";
+import { ArrowLeft, ExternalLink, Calendar, User, FileText, FolderOpen, Zap, Copy, Check, Tag, ZoomIn, ZoomOut, Maximize2, Minimize2, RotateCcw } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageProvider";
 import { useRouter } from "next/navigation";
 import dynamic from 'next/dynamic';
@@ -23,6 +23,109 @@ export default function LiteraturDetailClient({ item }) {
   const [iframeLoading, setIframeLoading] = useState(true);
   const [numPages, setNumPages] = useState(null);
   const [copied, setCopied] = useState(false);
+
+  // Responsive PDF Viewer & Zoom controls
+  const viewerCardRef = useRef(null);
+  const viewerContainerRef = useRef(null);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [zoomScale, setZoomScale] = useState(1.0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 });
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', onFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', onFullscreenChange);
+    };
+  }, []);
+
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        if (viewerCardRef.current?.requestFullscreen) {
+          await viewerCardRef.current.requestFullscreen();
+        } else if (viewerCardRef.current?.webkitRequestFullscreen) {
+          await viewerCardRef.current.webkitRequestFullscreen();
+        } else {
+          setIsFullscreen(!isFullscreen);
+        }
+      } else {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          await document.webkitExitFullscreen();
+        }
+      }
+    } catch (err) {
+      console.error("Fullscreen toggle error:", err);
+      setIsFullscreen(prev => !prev);
+    }
+  };
+
+  useEffect(() => {
+    if (!viewerContainerRef.current) return;
+    const updateWidth = () => {
+      if (viewerContainerRef.current) {
+        const isMobile = window.innerWidth < 768;
+        const padding = isMobile ? 16 : 32;
+        const w = viewerContainerRef.current.clientWidth - padding;
+        setContainerWidth(Math.max(260, Math.floor(w)));
+      }
+    };
+    updateWidth();
+    const ro = new ResizeObserver(updateWidth);
+    ro.observe(viewerContainerRef.current);
+    window.addEventListener('resize', updateWidth);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', updateWidth);
+    };
+  }, [isFullscreen]);
+
+  const handleZoomIn = () => {
+    setZoomScale(prev => Math.min(2.5, +(prev + 0.15).toFixed(2)));
+  };
+  const handleZoomOut = () => {
+    setZoomScale(prev => Math.max(0.5, +(prev - 0.15).toFixed(2)));
+  };
+  const handleResetZoom = () => {
+    setZoomScale(1.0);
+  };
+
+  const handleMouseDown = (e) => {
+    if (!viewerContainerRef.current) return;
+    if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'A') return;
+    setIsDragging(true);
+    setDragStart({
+      x: e.pageX - viewerContainerRef.current.offsetLeft,
+      y: e.pageY - viewerContainerRef.current.offsetTop,
+      scrollLeft: viewerContainerRef.current.scrollLeft,
+      scrollTop: viewerContainerRef.current.scrollTop,
+    });
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging || !viewerContainerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - viewerContainerRef.current.offsetLeft;
+    const y = e.pageY - viewerContainerRef.current.offsetTop;
+    const walkX = (x - dragStart.x) * 1.2;
+    const walkY = (y - dragStart.y) * 1.2;
+    viewerContainerRef.current.scrollLeft = dragStart.scrollLeft - walkX;
+    viewerContainerRef.current.scrollTop = dragStart.scrollTop - walkY;
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const calculatedPageWidth = Math.round((containerWidth || 600) * zoomScale);
 
   // Default content language based on site language or available content
   const hasAbstract = Boolean(item.abstract || item.abstractId);
@@ -96,17 +199,93 @@ export default function LiteraturDetailClient({ item }) {
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 relative z-10">
         
-        {/* Left Side: A4 Portrait Preview (7 columns) */}
-        <div className="lg:col-span-7 xl:col-span-8">
+        {/* Left Side (Desktop) / Second (Mobile): PDF Document Viewer with Zoom Controls */}
+        <div className="order-2 lg:order-1 lg:col-span-7 xl:col-span-8">
           <motion.div 
+            ref={viewerCardRef}
             initial={{ opacity: 0, y: 30, rotateX: 10 }}
             animate={{ opacity: 1, y: 0, rotateX: 0 }}
             transition={{ duration: 0.6, type: "spring" }}
             style={{ perspective: 1000 }}
-            className="group w-full aspect-[1/1.414] bg-white/40 dark:bg-[#090d14]/40 backdrop-blur-2xl rounded-[2rem] border border-slate-200/50 dark:border-white/10 shadow-[0_20px_50px_-12px_rgba(16,185,129,0.2)] overflow-hidden relative flex flex-col"
+            className={`group w-full ${
+              isFullscreen 
+                ? 'fixed inset-0 z-[999] h-screen w-screen rounded-none bg-slate-950 border-none' 
+                : 'h-[600px] sm:h-[750px] lg:h-[820px] bg-white/40 dark:bg-[#090d14]/40 backdrop-blur-2xl rounded-[2rem] border border-slate-200/50 dark:border-white/10 shadow-[0_20px_50px_-12px_rgba(16,185,129,0.2)]'
+            } overflow-hidden relative flex flex-col`}
           >
             {/* Inner Glow */}
             <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/0 via-emerald-500/5 to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none z-30" />
+
+            {/* PDF Viewer Header Toolbar */}
+            {item.type === 'PDF' && (
+              <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 bg-slate-50/95 dark:bg-[#07100c]/95 backdrop-blur-md border-b border-slate-200/50 dark:border-white/10 z-30 shrink-0">
+                {/* Page Count */}
+                <div className="flex items-center gap-1.5 text-slate-500 dark:text-white/50 text-[11px] font-bold">
+                  <FileText className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>{numPages ? `${numPages} Halaman` : 'Dokumen PDF'}</span>
+                </div>
+
+                {/* Zoom Controls & Fullscreen */}
+                <div className="flex items-center gap-1 bg-white/80 dark:bg-white/5 p-1 rounded-xl border border-slate-200/50 dark:border-white/10 shadow-sm backdrop-blur-sm">
+                  <button
+                    type="button"
+                    onClick={handleZoomOut}
+                    disabled={zoomScale <= 0.5}
+                    title="Perkecil (Zoom Out)"
+                    className="p-1.5 rounded-lg text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/10 disabled:opacity-30 transition-all"
+                  >
+                    <ZoomOut className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleResetZoom}
+                    title="Reset Zoom (100% Lebar Layar)"
+                    className="px-2 py-0.5 rounded-lg text-[11px] font-black text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-all font-mono min-w-[46px] text-center"
+                  >
+                    {Math.round(zoomScale * 100)}%
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleZoomIn}
+                    disabled={zoomScale >= 2.5}
+                    title="Perbesar (Zoom In)"
+                    className="p-1.5 rounded-lg text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/10 disabled:opacity-30 transition-all"
+                  >
+                    <ZoomIn className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleResetZoom}
+                    title="Sesuaikan Lebar Layar (Fit Width)"
+                    className={`p-1.5 rounded-lg transition-all ${
+                      zoomScale === 1.0 
+                        ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" 
+                        : "text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/10"
+                    }`}
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                  </button>
+
+                  <div className="w-[1px] h-3.5 bg-slate-200 dark:border-white/10 mx-0.5" />
+
+                  <button
+                    type="button"
+                    onClick={toggleFullscreen}
+                    title={isFullscreen ? "Keluar Layar Penuh (Exit Fullscreen)" : "Layar Penuh (Fullscreen)"}
+                    className={`p-1.5 rounded-lg transition-all ${
+                      isFullscreen 
+                        ? "bg-emerald-500 text-white shadow-sm" 
+                        : "text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/10"
+                    }`}
+                  >
+                    {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+            )}
 
             {iframeLoading && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50/80 dark:bg-[#08120e]/80 backdrop-blur-sm z-10">
@@ -117,64 +296,64 @@ export default function LiteraturDetailClient({ item }) {
                 <span className="text-xs font-black text-slate-500 dark:text-emerald-400 tracking-[0.3em] uppercase animate-pulse">Memuat Dokumen</span>
               </div>
             )}
+
             {item.type === 'PDF' ? (
-              <div className="w-full h-full overflow-y-auto bg-slate-100/50 dark:bg-black/40 custom-scrollbar relative z-20 p-4 md:p-8">
-                <PDFViewerWrapper
-                  file={pdfUrl}
-                  onLoadSuccess={onDocumentLoadSuccess}
-                  numPages={numPages}
-                  renderPageWrapper={(Page, index) => (
-                    <motion.div
-                      key={`page_${index + 1}`}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, margin: "-50px" }}
-                    >
-                      <Page 
-                        pageNumber={index + 1} 
-                        width={800}
-                        renderTextLayer={true}
-                        renderAnnotationLayer={true}
-                        className="shadow-2xl rounded-lg overflow-hidden border border-slate-200/50 dark:border-white/10"
-                      />
-                    </motion.div>
-                  )}
-                />
+              <div 
+                ref={viewerContainerRef}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                className={`w-full flex-1 overflow-x-auto overflow-y-auto bg-slate-100/50 dark:bg-black/40 custom-scrollbar relative z-20 p-2 sm:p-4 md:p-6 touch-pan-x touch-pan-y ${
+                  zoomScale > 1.0 ? 'cursor-grab active:cursor-grabbing select-none' : ''
+                }`}
+                style={{
+                  WebkitOverflowScrolling: 'touch',
+                  overscrollBehavior: 'contain',
+                }}
+              >
+                <div 
+                  className="flex flex-col items-center pb-8 min-h-full"
+                  style={{
+                    minWidth: calculatedPageWidth > containerWidth ? calculatedPageWidth + 24 : '100%',
+                    width: calculatedPageWidth > containerWidth ? calculatedPageWidth + 24 : '100%',
+                    margin: calculatedPageWidth > containerWidth ? '0 auto' : undefined,
+                  }}
+                >
+                  <PDFViewerWrapper
+                    file={pdfUrl}
+                    onLoadSuccess={onDocumentLoadSuccess}
+                    numPages={numPages}
+                    renderPageWrapper={(Page, index) => (
+                      <div
+                        key={`page_${index + 1}`}
+                        className="my-3 shadow-2xl rounded-xl overflow-hidden border border-slate-200/60 dark:border-white/10 transition-all bg-white shrink-0"
+                        style={{ width: calculatedPageWidth }}
+                      >
+                        <Page 
+                          pageNumber={index + 1} 
+                          width={calculatedPageWidth}
+                          renderTextLayer={true}
+                          renderAnnotationLayer={true}
+                        />
+                      </div>
+                    )}
+                  />
+                </div>
               </div>
             ) : (
               <iframe 
                 src={previewUrl} 
-                className="w-full h-full border-none z-20 relative bg-white"
+                className="w-full flex-1 border-none z-20 relative bg-white"
                 allow="autoplay"
                 onLoad={() => setIframeLoading(false)}
               />
             )}
           </motion.div>
-          
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mt-6 flex items-start gap-4 p-6 rounded-[2rem] bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 text-slate-700 dark:text-emerald-100/70 shadow-lg shadow-emerald-500/5 relative overflow-hidden"
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl" />
-            <div className="p-3 bg-emerald-500/20 rounded-2xl shrink-0">
-              <Info className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <div className="relative z-10">
-              <h4 className="text-sm font-black text-emerald-700 dark:text-emerald-400 mb-2 uppercase tracking-widest">Tips Pintas</h4>
-              <p className="text-sm font-medium leading-relaxed mb-2">
-                Cari kata spesifik di dokumen ini dengan <kbd className="px-2 py-1 bg-white/80 dark:bg-black/50 border border-emerald-500/30 rounded-lg text-xs font-black shadow-sm mx-1 text-emerald-700 dark:text-emerald-400">Ctrl + F</kbd> (atau <kbd className="px-2 py-1 bg-white/80 dark:bg-black/50 border border-emerald-500/30 rounded-lg text-xs font-black shadow-sm mx-1 text-emerald-700 dark:text-emerald-400">Cmd + F</kbd> di Mac), atau klik ikon kaca pembesar di atas dokumen.
-              </p>
-              <p className="text-sm font-medium leading-relaxed text-emerald-600/80 dark:text-emerald-400/80">
-                <strong>Catatan:</strong> Jika teks di dalam kotak pratinjau (iframe/PDF) tidak dapat disalin (di-copy), silakan tekan tombol <strong>Buka Original File</strong> di panel kanan untuk mengakses dokumen penuh.
-              </p>
-            </div>
-          </motion.div>
         </div>
 
-        {/* Right Side: Gamified Details Card (5 columns) */}
-        <div className="lg:col-span-5 xl:col-span-4">
+        {/* Right Side (Desktop) / First (Mobile): Gamified Details Card */}
+        <div className="order-1 lg:order-2 lg:col-span-5 xl:col-span-4">
           <div className="sticky top-20">
             <motion.div 
               initial={{ opacity: 0, x: 30 }}
