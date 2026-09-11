@@ -13,7 +13,11 @@ const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || "https://cdn.webly.biz.id/";
 async function getSharp() {
   try {
     const mod = await import("sharp");
-    return mod.default || mod;
+    let fn = mod?.default || mod;
+    if (typeof fn !== "function" && fn?.default) {
+      fn = fn.default;
+    }
+    return typeof fn === "function" ? fn : null;
   } catch {
     return null;
   }

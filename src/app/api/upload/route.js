@@ -12,7 +12,15 @@ const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || "https://cdn.webly.biz.id/";
 async function getSharp() {
   try {
     const sharpModule = await import('sharp');
-    return sharpModule.default || sharpModule;
+    let fn = sharpModule?.default || sharpModule;
+    if (typeof fn !== 'function' && fn?.default) {
+      fn = fn.default;
+    }
+    if (typeof fn === 'function') {
+      return fn;
+    }
+    console.warn("[upload] Sharp module imported but no function found:", typeof fn);
+    return null;
   } catch (err) {
     console.warn("[upload] Sharp native library not available, skipping webp conversion:", err?.message || err);
     return null;
