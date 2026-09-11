@@ -25,10 +25,15 @@ if (!globalThis.globalDbClient) {
 }
 client = globalThis.globalDbClient;
 
-if (!globalThis.globalDb) {
-  globalThis.globalDb = drizzle(client, { schema });
+if (process.env.NODE_ENV === 'production') {
+  if (!globalThis.globalDb) {
+    globalThis.globalDb = drizzle(client, { schema });
+  }
+  db = globalThis.globalDb;
+} else {
+  // In development, recreate the drizzle schema wrapper on HMR so schema changes are picked up immediately
+  db = drizzle(client, { schema });
 }
-db = globalThis.globalDb;
 
 export { db };
 

@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm";
 import LiteraturDetailClient from "./LiteraturDetailClient";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function generateMetadata({ params }) {
   const { id } = await params;

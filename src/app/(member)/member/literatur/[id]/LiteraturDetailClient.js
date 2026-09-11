@@ -168,67 +168,109 @@ export default function LiteraturDetailClient({ item }) {
               </div>
 
               {/* Title */}
-              <h1 className="text-xl lg:text-2xl font-black text-slate-900 dark:text-white leading-tight mb-4 tracking-tight">
+              <h1 className="text-xl lg:text-2xl font-black text-slate-900 dark:text-white leading-tight mb-6 tracking-tight">
                 {item.title}
               </h1>
 
-              {/* Author & Quick Info */}
-              {item.author && (
-                <div className="flex items-center gap-2.5 text-slate-600 dark:text-white/70 font-medium mb-6 pb-5 border-b border-slate-100 dark:border-white/10">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 flex items-center justify-center shrink-0">
+              {/* Metadata Grid (Author, Year, Category, Type) */}
+              <div className="grid grid-cols-2 gap-3 mb-6 pb-6 border-b border-slate-100 dark:border-white/10">
+                {/* Author */}
+                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 flex items-center justify-center shrink-0">
                     <User className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[10px] uppercase font-black text-slate-400 dark:text-white/40 tracking-wider">Penulis / Author</p>
-                    <p className="text-xs font-bold truncate text-slate-800 dark:text-slate-200">{item.author}</p>
+                    <p className="text-[10px] uppercase font-black text-slate-400 dark:text-white/40 tracking-wider">Penulis</p>
+                    <p className="text-xs font-bold truncate text-slate-800 dark:text-slate-200" title={item.author || "-"}>
+                      {item.author || "-"}
+                    </p>
                   </div>
                 </div>
-              )}
+
+                {/* Year */}
+                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-teal-50 dark:bg-teal-500/10 border border-teal-100 dark:border-teal-500/20 flex items-center justify-center shrink-0">
+                    <Calendar className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] uppercase font-black text-slate-400 dark:text-white/40 tracking-wider">Tahun Terbit</p>
+                    <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                      {item.year || "-"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Category */}
+                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 flex items-center justify-center shrink-0">
+                    <FolderOpen className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] uppercase font-black text-slate-400 dark:text-white/40 tracking-wider">Kategori</p>
+                    <p className="text-xs font-bold truncate text-slate-800 dark:text-slate-200" title={item.category?.name || "Uncategorized"}>
+                      {item.category?.name || "Uncategorized"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Type */}
+                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-500/10 border border-purple-100 dark:border-purple-500/20 flex items-center justify-center shrink-0">
+                    <Zap className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] uppercase font-black text-slate-400 dark:text-white/40 tracking-wider">Tipe Dokumen</p>
+                    <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                      {item.type || "PDF"}
+                    </p>
+                  </div>
+                </div>
+              </div>
 
               {/* Abstract Section (Bilingual) */}
-              {hasAbstract && (
-                <div className="mb-6 pb-6 border-b border-slate-100 dark:border-white/10">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-emerald-500" />
-                      <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
-                        {t('literatur.abstract')}
-                      </h3>
-                    </div>
-
-                    {/* Language Switcher */}
-                    {hasBilingualAbstract || hasBilingualKeywords ? (
-                      <div className="flex bg-slate-100 dark:bg-white/5 p-0.5 rounded-lg border border-slate-200 dark:border-white/10 shadow-sm">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedLang("en")}
-                          className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase transition-all ${
-                            selectedLang === "en"
-                              ? "bg-emerald-500 text-white shadow-sm"
-                              : "text-slate-500 dark:text-white/40 hover:text-slate-900 dark:hover:text-white"
-                          }`}
-                        >
-                          English (EN)
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedLang("id")}
-                          className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase transition-all ${
-                            selectedLang === "id"
-                              ? "bg-emerald-500 text-white shadow-sm"
-                              : "text-slate-500 dark:text-white/40 hover:text-slate-900 dark:hover:text-white"
-                          }`}
-                        >
-                          Indonesia (ID)
-                        </button>
-                      </div>
-                    ) : (
-                      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
-                        {item.abstract ? "EN" : "ID"}
-                      </span>
-                    )}
+              <div className="mb-6 pb-6 border-b border-slate-100 dark:border-white/10">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-emerald-500" />
+                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
+                      {t('literatur.abstract')}
+                    </h3>
                   </div>
 
+                  {/* Language Switcher */}
+                  {hasBilingualAbstract || hasBilingualKeywords ? (
+                    <div className="flex bg-slate-100 dark:bg-white/5 p-0.5 rounded-lg border border-slate-200 dark:border-white/10 shadow-sm">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedLang("en")}
+                        className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase transition-all ${
+                          selectedLang === "en"
+                            ? "bg-emerald-500 text-white shadow-sm"
+                            : "text-slate-500 dark:text-white/40 hover:text-slate-900 dark:hover:text-white"
+                        }`}
+                      >
+                        EN
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedLang("id")}
+                        className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase transition-all ${
+                          selectedLang === "id"
+                            ? "bg-emerald-500 text-white shadow-sm"
+                            : "text-slate-500 dark:text-white/40 hover:text-slate-900 dark:hover:text-white"
+                        }`}
+                      >
+                        ID
+                      </button>
+                    </div>
+                  ) : hasAbstract ? (
+                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
+                      {item.abstract ? "EN" : "ID"}
+                    </span>
+                  ) : null}
+                </div>
+
+                {hasAbstract ? (
                   <div className="relative group/abs bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/70 dark:border-white/5 rounded-2xl p-4 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
                     <p className="whitespace-pre-line select-text font-normal leading-relaxed text-justify">
                       {currentAbstract}
@@ -252,50 +294,57 @@ export default function LiteraturDetailClient({ item }) {
                       )}
                     </button>
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="p-4 rounded-2xl bg-slate-50/50 dark:bg-white/[0.02] border border-dashed border-slate-200 dark:border-white/10 text-center">
+                    <p className="text-xs text-slate-400 dark:text-white/40 font-medium">
+                      Abstrak belum ditambahkan untuk dokumen ini.
+                    </p>
+                  </div>
+                )}
+              </div>
 
               {/* Keywords (Kata Kunci) */}
-              {hasKeywords && currentKeywords && (
-                <div className="mb-6 pb-6 border-b border-slate-100 dark:border-white/10">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <Tag className="w-4 h-4 text-emerald-500" />
-                      <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
-                        {t('literatur.keywords')}
-                      </h3>
-                    </div>
-                    {!hasAbstract && hasBilingualKeywords ? (
-                      <div className="flex bg-slate-100 dark:bg-white/5 p-0.5 rounded-lg border border-slate-200 dark:border-white/10">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedLang("en")}
-                          className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase transition-all ${
-                            selectedLang === "en"
-                              ? "bg-emerald-500 text-white shadow-sm"
-                              : "text-slate-500 dark:text-white/40 hover:text-slate-900 dark:hover:text-white"
-                          }`}
-                        >
-                          EN
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedLang("id")}
-                          className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase transition-all ${
-                            selectedLang === "id"
-                              ? "bg-emerald-500 text-white shadow-sm"
-                              : "text-slate-500 dark:text-white/40 hover:text-slate-900 dark:hover:text-white"
-                          }`}
-                        >
-                          ID
-                        </button>
-                      </div>
-                    ) : !hasAbstract ? (
-                      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
-                        {item.keywords ? "EN" : "ID"}
-                      </span>
-                    ) : null}
+              <div className="mb-6 pb-6 border-b border-slate-100 dark:border-white/10">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Tag className="w-4 h-4 text-emerald-500" />
+                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
+                      {t('literatur.keywords')}
+                    </h3>
                   </div>
+                  {!hasAbstract && hasBilingualKeywords ? (
+                    <div className="flex bg-slate-100 dark:bg-white/5 p-0.5 rounded-lg border border-slate-200 dark:border-white/10">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedLang("en")}
+                        className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase transition-all ${
+                          selectedLang === "en"
+                            ? "bg-emerald-500 text-white shadow-sm"
+                            : "text-slate-500 dark:text-white/40 hover:text-slate-900 dark:hover:text-white"
+                        }`}
+                      >
+                        EN
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedLang("id")}
+                        className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase transition-all ${
+                          selectedLang === "id"
+                            ? "bg-emerald-500 text-white shadow-sm"
+                            : "text-slate-500 dark:text-white/40 hover:text-slate-900 dark:hover:text-white"
+                        }`}
+                      >
+                        ID
+                      </button>
+                    </div>
+                  ) : !hasAbstract && hasKeywords ? (
+                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
+                      {item.keywords ? "EN" : "ID"}
+                    </span>
+                  ) : null}
+                </div>
+
+                {hasKeywords && currentKeywords ? (
                   <div className="flex flex-wrap gap-2">
                     {currentKeywords.split(',').map((kw, i) => {
                       const cleanKw = kw.trim();
@@ -305,13 +354,17 @@ export default function LiteraturDetailClient({ item }) {
                           key={i}
                           className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-500/20 shadow-sm"
                         >
-                          #{cleanKw}
+                          {cleanKw}
                         </span>
                       );
                     })}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <p className="text-xs text-slate-400 dark:text-white/40 font-medium italic">
+                    Tidak ada kata kunci yang dicantumkan.
+                  </p>
+                )}
+              </div>
 
               {/* Action Button */}
               <div className="mt-auto pt-2">
