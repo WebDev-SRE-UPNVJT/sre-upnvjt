@@ -10,6 +10,7 @@ import {
 import { useSession } from "next-auth/react";
 import { hasAccess } from "@/lib/permissions";
 import { resolveImageUrl } from "@/lib/imageUrl";
+import { compressImageToWebP } from "@/lib/imageCompressor";
 
 const EMPTY_EVENT = {
   title: "", description: "", bannerUrl: "", eventDate: "",
@@ -49,13 +50,12 @@ export default function EventsAdminClient({ initialEvents, initialRegistrations,
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) { notify("error", "Harap pilih file gambar"); return; }
-
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("folder", "events");
     setIsLoading(true);
     try {
+      const processedFile = await compressImageToWebP(file, { quality: 0.82, maxWidth: 1920 });
+      const fd = new FormData();
+      fd.append("file", processedFile);
+      fd.append("folder", "events");
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (res.ok && data.url) {

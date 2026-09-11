@@ -14,6 +14,7 @@ import {
 } from "@/app/actions/contentActions";
 import TinyMCEEditor from "@/components/editor/TinyMCEEditor";
 import { resolveImageUrl } from "@/lib/imageUrl";
+import { compressImageToWebP } from "@/lib/imageCompressor";
 
 const CATEGORY_COLORS = [
   { label: "Emerald", value: "emerald", bg: "bg-emerald-500" },
@@ -163,8 +164,9 @@ export default function ContentClient({ initialContents, initialCategories, curr
     setError("");
 
     try {
+      const processedFile = await compressImageToWebP(file, { quality: 0.82, maxWidth: 1920 });
       const uploadData = new FormData();
-      uploadData.append("file", file);
+      uploadData.append("file", processedFile);
       uploadData.append("folder", "content");
 
       const res = await fetch("/api/upload", {

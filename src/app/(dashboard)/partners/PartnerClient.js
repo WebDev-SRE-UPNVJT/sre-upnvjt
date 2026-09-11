@@ -9,6 +9,7 @@ import {
   XCircle, AlertTriangle, Handshake, ImageIcon, UploadCloud
 } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageProvider";
+import { compressImageToWebP } from "@/lib/imageCompressor";
 
 function resolveLogoUrl(url) {
   if (!url) return "";
@@ -89,11 +90,12 @@ export default function PartnerClient({ initialPartners }) {
     }
 
     setIsUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("folder", "partners");
-
     try {
+      const processedFile = await compressImageToWebP(file, { quality: 0.85, maxWidth: 1000 });
+      const formData = new FormData();
+      formData.append("file", processedFile);
+      formData.append("folder", "partners");
+
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,

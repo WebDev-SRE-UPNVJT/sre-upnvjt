@@ -10,6 +10,7 @@ import { createMerchandise, updateMerchandise, deleteMerchandise } from "@/app/a
 import { useSession } from "next-auth/react";
 import { hasAccess } from "@/lib/permissions";
 import { resolveImageUrl } from "@/lib/imageUrl";
+import { compressImageToWebP } from "@/lib/imageCompressor";
 
 const EMPTY_MERCH = {
   name: "",
@@ -46,12 +47,13 @@ export default function MerchClient({ initialMerchandise }) {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("folder", "merchandise");
-
     try {
       setIsLoading(true);
+      const processedFile = await compressImageToWebP(file, { quality: 0.82, maxWidth: 1600 });
+      const formData = new FormData();
+      formData.append("file", processedFile);
+      formData.append("folder", "merchandise");
+
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,

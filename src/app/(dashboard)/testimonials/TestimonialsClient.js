@@ -7,6 +7,8 @@ import {
   AlertTriangle, Star, UploadCloud, Check, Eye, EyeOff,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { resolveImageUrl } from "@/lib/imageUrl";
+import { compressImageToWebP } from "@/lib/imageCompressor";
 import { hasAccess } from "@/lib/permissions";
 
 const EMPTY_TESTIMONIAL = {
@@ -43,11 +45,12 @@ export default function TestimonialsClient({ initialTestimonials, currentUser })
     if (!file) return;
     if (!file.type.startsWith("image/")) { notify("error", "Harap pilih file gambar"); return; }
 
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("folder", "testimonials");
     setIsLoading(true);
     try {
+      const processedFile = await compressImageToWebP(file, { quality: 0.82, maxWidth: 1200 });
+      const fd = new FormData();
+      fd.append("file", processedFile);
+      fd.append("folder", "testimonials");
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (res.ok && data.url) {

@@ -14,6 +14,7 @@ import {
 import { useSession } from "next-auth/react";
 import { hasAccess } from "@/lib/permissions";
 import { resolveImageUrl } from "@/lib/imageUrl";
+import { compressImageToWebP } from "@/lib/imageCompressor";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const ITEM_TYPES = ["PDF", "SLIDES", "DOC", "VIDEO", "OTHER"];
@@ -91,16 +92,18 @@ export default function LiteratureClient({ initialCategories, initialItems, curr
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) { notify("error", "Harap pilih file gambar"); return; }
-    if (file.size > 4.5 * 1024 * 1024) {
-      notify("error", "Ukuran file maksimal 4.5 MB. Harap pilih gambar yang lebih kecil.");
+    if (file.size > 15 * 1024 * 1024) {
+      notify("error", "Ukuran file terlalu besar. Harap pilih gambar yang lebih kecil.");
       return;
     }
 
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("folder", "literature");
     setIsLoading(true);
     try {
+      const processedFile = await compressImageToWebP(file, { quality: 0.82, maxWidth: 1920 });
+      const fd = new FormData();
+      fd.append("file", processedFile);
+      fd.append("folder", "literature");
+
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const text = await res.text();
       let data = {};

@@ -18,6 +18,7 @@ import {
 import { useSession } from "next-auth/react";
 import { hasAccess } from "@/lib/permissions";
 import { resolveImageUrl } from "@/lib/imageUrl";
+import { compressImageToWebP } from "@/lib/imageCompressor";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const EMPTY_MODULE = { title: "", description: "", notes: "", coverImageUrl: "", isPublished: false };
@@ -86,11 +87,13 @@ export default function PptClient({ initialModules, currentUser }) {
     if (!file) return;
     if (!file.type.startsWith("image/")) { notify("error", "Harap pilih file gambar"); return; }
 
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("folder", "ppt-covers");
     setIsLoading(true);
     try {
+      const processedFile = await compressImageToWebP(file, { quality: 0.82, maxWidth: 1600 });
+      const fd = new FormData();
+      fd.append("file", processedFile);
+      fd.append("folder", "ppt-covers");
+
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (res.ok && data.url) {
@@ -112,8 +115,9 @@ export default function PptClient({ initialModules, currentUser }) {
 
     setIsLoading(true);
     try {
+      const processedFile = await compressImageToWebP(file, { quality: 0.82, maxWidth: 1920 });
       const fd = new FormData();
-      fd.append("file", file);
+      fd.append("file", processedFile);
       fd.append("folder", `ppt-slides/module-${activeModule.id}`);
 
       const res = await fetch("/api/upload", { method: "POST", body: fd });
