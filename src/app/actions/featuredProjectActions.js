@@ -5,10 +5,18 @@ import { featuredProjectService } from "@/lib/services/featuredProjectService";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 
-import sharp from "sharp";
 import { uploadToR2 } from "@/lib/r2";
 
 const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || "https://cdn.webly.biz.id/";
+
+async function getSharp() {
+  try {
+    const mod = await import("sharp");
+    return mod.default || mod;
+  } catch {
+    return null;
+  }
+}
 
 async function processAndUploadImage(file) {
   if (!file || file.size === 0) return null;
@@ -19,9 +27,15 @@ async function processAndUploadImage(file) {
     let contentType = file.type || "image/jpeg";
 
     try {
-      processedBuffer = await sharp(buffer).rotate().webp({ quality: 82, effort: 4 }).toBuffer();
-      filename += ".webp";
-      contentType = "image/webp";
+      const sharpFn = await getSharp();
+      if (sharpFn && typeof sharpFn === "function") {
+        processedBuffer = await sharpFn(buffer).rotate().webp({ quality: 82, effort: 4 }).toBuffer();
+        filename += ".webp";
+        contentType = "image/webp";
+      } else {
+        const ext = file.name ? file.name.substring(file.name.lastIndexOf('.')) : '.jpg';
+        filename += ext;
+      }
     } catch (sharpErr) {
       console.error("Sharp processing error in featuredProjectActions, using original file:", sharpErr);
       const ext = file.name ? file.name.substring(file.name.lastIndexOf('.')) : '.jpg';

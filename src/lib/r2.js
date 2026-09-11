@@ -105,13 +105,14 @@ export async function deleteFromR2(keyOrUrl) {
 
     if (!key) return;
 
+    const { client, bucketName } = getR2Config();
     const command = new DeleteObjectCommand({
-      Bucket: R2_BUCKET_NAME,
+      Bucket: bucketName,
       Key: key,
     });
 
-    await r2Client.send(command);
-    console.log(`[deleteFromR2] Deleted object from bucket '${R2_BUCKET_NAME}': ${key}`);
+    await client.send(command);
+    console.log(`[deleteFromR2] Deleted object from bucket '${bucketName}': ${key}`);
   } catch (err) {
     console.warn(`[deleteFromR2] Warning deleting ${keyOrUrl}:`, err?.message || err);
   }

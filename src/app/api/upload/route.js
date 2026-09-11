@@ -2,13 +2,22 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import path from 'path';
-import sharp from 'sharp';
 import { uploadToR2 } from "@/lib/r2";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || "https://cdn.webly.biz.id/";
+
+async function getSharp() {
+  try {
+    const sharpModule = await import('sharp');
+    return sharpModule.default || sharpModule;
+  } catch (err) {
+    console.warn("[upload] Sharp native library not available, skipping webp conversion:", err?.message || err);
+    return null;
+  }
+}
 
 export async function POST(req) {
   try {
@@ -45,17 +54,16 @@ export async function POST(req) {
     if (isImage) {
       let webpSuccess = false;
       try {
-        let sharpFn = sharp;
-        if (typeof sharpFn !== "function" && sharpFn?.default) {
-          sharpFn = sharpFn.default;
+        const sharpFn = await getSharp();
+        if (sharpFn && typeof sharpFn === "function") {
+          processedBuffer = await sharpFn(buffer)
+            .rotate()
+            .webp({ quality: 82, effort: 4 })
+            .toBuffer();
+          filename = `${cleanBase}_${Date.now()}_${randomStr}.webp`;
+          contentType = "image/webp";
+          webpSuccess = true;
         }
-        processedBuffer = await sharpFn(buffer)
-          .rotate()
-          .webp({ quality: 82, effort: 4 })
-          .toBuffer();
-        filename = `${cleanBase}_${Date.now()}_${randomStr}.webp`;
-        contentType = "image/webp";
-        webpSuccess = true;
       } catch (sharpErr) {
         console.error("Sharp WebP conversion error:", sharpErr);
       }
@@ -88,4 +96,3 @@ export async function POST(req) {
     return NextResponse.json({ error: error.message || "Gagal mengunggah file ke server" }, { status: 500 });
   }
 }
-
