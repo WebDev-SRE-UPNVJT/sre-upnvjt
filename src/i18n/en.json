@@ -461,7 +461,7 @@
   "leaderboard": {
     "badge_hof": "Hall of Fame",
     "title": "Activity Leaderboard",
-    "subtitle": "List of the most active SRE UPNVJT officers and members with the highest accumulated XP points.",
+    "subtitle": "List of the most active SRE UPNVJT members with the highest accumulated XP points.",
     "period_all": "All Time",
     "period_month": "This Month",
     "period_week": "This Week",

@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Leaderboard Poin & Ranking | SRE Portal",
-  description: "Lihat daftar peringkat keaktifan pengurus dan kumpulkan poin keaktifan XP.",
+  description: "Lihat daftar peringkat keaktifan member dan kumpulkan poin keaktifan XP.",
 };
 
 export default async function MemberLeaderboardPage() {
