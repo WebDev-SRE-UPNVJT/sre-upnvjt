@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, ExternalLink, Calendar, User, FileText, FolderOpen, Search, Copy, Check, Tag, ZoomIn, ZoomOut, Maximize2, Minimize2, RotateCcw } from "lucide-react";
+import { ArrowLeft, ExternalLink, Calendar, User, FileText, FolderOpen, Zap, Search, Copy, Check, Tag, ZoomIn, ZoomOut, Maximize2, Minimize2, RotateCcw } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageProvider";
 import { useRouter } from "next/navigation";
 import dynamic from 'next/dynamic';
