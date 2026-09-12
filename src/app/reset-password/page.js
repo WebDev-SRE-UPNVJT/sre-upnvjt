@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -20,7 +20,7 @@ import { useTheme } from "next-themes";
 
 export const dynamic = "force-dynamic";
 
-export default function ResetPasswordPage() {
+function ResetPasswordFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t, language } = useLanguage();
@@ -456,5 +456,19 @@ export default function ResetPasswordPage() {
         <p>© {new Date().getFullYear()} SRE UPN Veteran Jawa Timur. All rights reserved.</p>
       </footer>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="h-screen w-screen flex items-center justify-center bg-[#0bb37e] dark:bg-[#0a1c15] text-white">
+          <Loader2 className="w-8 h-8 animate-spin text-yellow-300" />
+        </div>
+      }
+    >
+      <ResetPasswordFormContent />
+    </Suspense>
   );
 }
