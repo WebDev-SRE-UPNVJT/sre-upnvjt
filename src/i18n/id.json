@@ -1401,7 +1401,17 @@
       "btn_logging_in": "Masuk...",
       "no_account": "Belum punya akun?",
       "create_account": "Buat Akun",
-      "back": "Kembali"
+      "back": "Kembali",
+      "forgot_password": "Lupa Password?",
+      "forgot_title": "Lupa Password",
+      "forgot_subtitle": "Kami akan kirim link reset ke email Anda",
+      "forgot_desc": "Masukkan alamat email yang terdaftar di akun Anda. Kami akan mengirimkan link untuk mereset password Anda.",
+      "forgot_send_btn": "Kirim Link Reset",
+      "forgot_sending": "Mengirim...",
+      "forgot_sent_title": "Cek Email Anda!",
+      "forgot_sent_desc": "Jika akun dengan email tersebut terdaftar, kami telah mengirimkan link reset password. Link berlaku selama 60 menit.",
+      "forgot_close": "Kembali ke Login",
+      "forgot_note": "Link reset akan kadaluarsa dalam 60 menit."
     }
   }
 }

@@ -39,6 +39,7 @@ const hiddenHeaderRoutes = [
   "/featured-projects",
   "/shortlinks",
   "/f",
+  "/reset-password",
 ];
 
 function isHiddenHeaderRoute(pathname) {

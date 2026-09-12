@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, ArrowLeft, Eye, EyeOff, Loader2, ShieldCheck, Zap, Sparkles, Lock } from "lucide-react";
+import { ArrowRight, ArrowLeft, Eye, EyeOff, Loader2, ShieldCheck, Zap, Sparkles, Lock, Mail, X, CheckCircle2, Send } from "lucide-react";
 import { signIn, getSession, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/i18n/LanguageProvider";
@@ -22,8 +22,43 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
   const { data: session, status } = useSession();
-  const [isPublicRegistrationEnabled, setIsPublicRegistrationEnabled] =
-    useState(false);
+  const [isPublicRegistrationEnabled, setIsPublicRegistrationEnabled] = useState(false);
+
+  // Forgot password modal states
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotStatus, setForgotStatus] = useState(null); // null | "loading" | "success" | "error"
+  const [forgotError, setForgotError] = useState("");
+
+  const handleForgotSubmit = async (e) => {
+    e.preventDefault();
+    setForgotError("");
+    setForgotStatus("loading");
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setForgotStatus("success");
+      } else {
+        setForgotError(data.error || "Terjadi kesalahan.");
+        setForgotStatus("error");
+      }
+    } catch {
+      setForgotError("Gagal terhubung ke server.");
+      setForgotStatus("error");
+    }
+  };
+
+  const closeForgotModal = () => {
+    setShowForgotModal(false);
+    setForgotEmail("");
+    setForgotStatus(null);
+    setForgotError("");
+  };
 
   const loginStages = [
     {
@@ -311,6 +346,15 @@ export default function LoginPage() {
                   {t("visitor.login.remember_me")}
                 </span>
               </label>
+
+              {/* Forgot Password Link */}
+              <button
+                type="button"
+                onClick={() => setShowForgotModal(true)}
+                className="text-[13px] text-yellow-300/80 dark:text-[#e8ecc4]/70 hover:text-yellow-300 dark:hover:text-[#e8ecc4] transition-colors font-medium cursor-pointer"
+              >
+                {t("visitor.login.forgot_password")}
+              </button>
             </div>
 
             {error && (
@@ -477,6 +521,165 @@ export default function LoginPage() {
           )}
         </motion.div>
       </div>
+
+      {/* ============ FORGOT PASSWORD MODAL ============ */}
+      <AnimatePresence>
+        {showForgotModal && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={closeForgotModal}
+              className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm"
+            />
+
+            {/* Modal */}
+            <motion.div
+              key="modal"
+              initial={{ opacity: 0, scale: 0.95, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 16 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="fixed inset-0 z-[70] flex items-center justify-center p-4"
+            >
+              <div className="w-full max-w-[440px] bg-[#0d2318] border border-[#1a3a2a] rounded-2xl overflow-hidden shadow-2xl">
+                {/* Accent bar */}
+                <div className="h-1 bg-gradient-to-r from-emerald-600 via-yellow-400 to-emerald-600" />
+
+                <div className="p-8">
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-yellow-300/15 dark:bg-yellow-300/10 flex items-center justify-center shrink-0">
+                        <Mail className="w-5 h-5 text-yellow-300" />
+                      </div>
+                      <div>
+                        <h2 className="text-[18px] font-bold text-white leading-tight">
+                          {t("visitor.login.forgot_title")}
+                        </h2>
+                        <p className="text-white/50 text-[12px] mt-0.5">
+                          {t("visitor.login.forgot_subtitle")}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={closeForgotModal}
+                      className="text-white/40 hover:text-white/80 transition-colors p-1 cursor-pointer rounded-lg hover:bg-white/10"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* Success State */}
+                  {forgotStatus === "success" ? (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex flex-col items-center gap-4 py-4 text-center"
+                    >
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 200, damping: 14, delay: 0.1 }}
+                        className="w-16 h-16 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center"
+                      >
+                        <CheckCircle2 className="w-8 h-8 text-emerald-400" />
+                      </motion.div>
+                      <div>
+                        <p className="text-white font-semibold text-[16px] mb-1">
+                          {t("visitor.login.forgot_sent_title")}
+                        </p>
+                        <p className="text-white/60 text-[13px] leading-relaxed">
+                          {t("visitor.login.forgot_sent_desc")}
+                        </p>
+                      </div>
+                      <button
+                        onClick={closeForgotModal}
+                        className="mt-2 w-full bg-yellow-300 dark:bg-[#e8ecc4] text-[#0a1c15] font-bold py-3 rounded-full text-[13px] hover:bg-yellow-200 dark:hover:bg-white transition-all cursor-pointer"
+                      >
+                        {t("visitor.login.forgot_close")}
+                      </button>
+                    </motion.div>
+                  ) : (
+                    /* Email Form */
+                    <form onSubmit={handleForgotSubmit} className="flex flex-col gap-6">
+                      <p className="text-white/65 text-[13px] leading-relaxed -mt-2">
+                        {t("visitor.login.forgot_desc")}
+                      </p>
+
+                      {/* Email input */}
+                      <div className="relative group">
+                        <input
+                          type="email"
+                          id="forgot-email"
+                          value={forgotEmail}
+                          onChange={(e) => setForgotEmail(e.target.value)}
+                          placeholder=" "
+                          required
+                          className="block w-full px-0 py-3 text-white bg-transparent border-0 border-b-2 border-white/30 appearance-none focus:outline-none focus:ring-0 focus:border-yellow-300 peer transition-colors"
+                        />
+                        <label
+                          htmlFor="forgot-email"
+                          className="absolute text-[15px] text-white/70 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-yellow-300 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+                        >
+                          {t("visitor.login.email_label")}
+                        </label>
+                      </div>
+
+                      {/* Error */}
+                      {forgotError && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="bg-red-950/20 border border-red-500/30 text-red-400 text-[12px] px-3 py-2.5 rounded-lg text-center"
+                        >
+                          {forgotError}
+                        </motion.div>
+                      )}
+
+                      {/* Submit */}
+                      <button
+                        type="submit"
+                        disabled={forgotStatus === "loading"}
+                        className={`relative w-full flex items-center justify-center gap-2 text-[13px] font-black tracking-widest uppercase rounded-full px-6 py-3.5 overflow-hidden transition-all duration-300 ${
+                          forgotStatus === "loading"
+                            ? "bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 text-slate-950 cursor-wait"
+                            : "bg-yellow-300 dark:bg-[#e8ecc4] text-[#0a1c15] hover:bg-yellow-200 dark:hover:bg-white active:scale-95 cursor-pointer"
+                        }`}
+                      >
+                        {forgotStatus === "loading" ? (
+                          <>
+                            <motion.div
+                              animate={{ rotate: 360 }}
+                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            >
+                              <Loader2 className="w-4 h-4" />
+                            </motion.div>
+                            <span>{t("visitor.login.forgot_sending")}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-4 h-4" />
+                            <span>{t("visitor.login.forgot_send_btn")}</span>
+                          </>
+                        )}
+                      </button>
+
+                      <p className="text-center text-[11px] text-white/40 -mt-2">
+                        {t("visitor.login.forgot_note")}
+                      </p>
+                    </form>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

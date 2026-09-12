@@ -1401,7 +1401,17 @@
       "btn_logging_in": "Signing In...",
       "no_account": "Don't have an account?",
       "create_account": "Create Account",
-      "back": "Back"
+      "back": "Back",
+      "forgot_password": "Forgot Password?",
+      "forgot_title": "Forgot Password",
+      "forgot_subtitle": "We'll send a reset link to your email",
+      "forgot_desc": "Enter the email address associated with your account and we will send you a link to reset your password.",
+      "forgot_send_btn": "Send Reset Link",
+      "forgot_sending": "Sending...",
+      "forgot_sent_title": "Check Your Email!",
+      "forgot_sent_desc": "If an account with that email exists, we've sent a password reset link. The link will expire in 60 minutes.",
+      "forgot_close": "Back to Login",
+      "forgot_note": "The reset link will expire in 60 minutes."
     }
   }
 }

@@ -626,3 +626,19 @@ export const featuredProjectRelations = relations(featuredProject, ({ one }) => 
   }),
 }));
 
+// Password Reset Tokens
+export const passwordResetToken = pgTable('passwordResetToken', {
+  id: serial('id').primaryKey(),
+  userId: integer('userId').references(() => user.id, { onDelete: 'cascade' }).notNull(),
+  token: varchar('token', { length: 255 }).unique().notNull(),
+  expiresAt: timestamp('expiresAt', { mode: 'date' }).notNull(),
+  used: boolean('used').default(false).notNull(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
+});
+
+export const passwordResetTokenRelations = relations(passwordResetToken, ({ one }) => ({
+  user: one(user, {
+    fields: [passwordResetToken.userId],
+    references: [user.id],
+  }),
+}));
