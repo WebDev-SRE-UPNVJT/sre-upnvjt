@@ -5,6 +5,8 @@ import { eq, desc, gte, sql } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 
+import { getAugmentedLeaderboard } from "@/lib/dummyLeaderboard";
+
 /**
  * GET /api/leaderboard?period=all|month|week
  */
@@ -40,7 +42,7 @@ export async function GET(req) {
         .where(sql`LOWER(${role.name}) = 'member'`)
         .orderBy(desc(memberProfile.xp));
 
-      ranked = data.map((item, idx) => ({ ...item, rank: idx + 1 }));
+      ranked = data;
 
     } else {
       // Period-based query from xpTransaction
@@ -72,7 +74,7 @@ export async function GET(req) {
         .orderBy(desc(sumExpr));
 
       if (xpByUser.length === 0) {
-        return NextResponse.json([]);
+        return NextResponse.json(getAugmentedLeaderboard([]));
       }
 
       // Join dengan data user (hanya role MEMBER)
@@ -96,14 +98,14 @@ export async function GET(req) {
 
       ranked = xpByUser
         .filter((row) => Boolean(userMap[row.userId])) // Filter hanya user ber-role MEMBER
-        .map((row, idx) => ({
+        .map((row) => ({
           ...userMap[row.userId],
           xp:   Number(row.totalXp),
-          rank: idx + 1,
         }));
     }
 
-    return NextResponse.json(ranked);
+    const result = getAugmentedLeaderboard(ranked);
+    return NextResponse.json(result);
   } catch (error) {
     console.error("[leaderboard] error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });

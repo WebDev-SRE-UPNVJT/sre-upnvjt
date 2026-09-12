@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { user, memberProfile, division } from "@/db/schema";
 import { eq, desc, asc } from "drizzle-orm";
 import LeaderboardClient from "./LeaderboardClient";
+import { getAugmentedLeaderboard } from "@/lib/dummyLeaderboard";
 
 export const dynamic = "force-dynamic";
 
@@ -38,10 +39,7 @@ export default async function LeaderboardAdminPage() {
     .leftJoin(division, eq(division.id, user.divisionId))
     .orderBy(desc(memberProfile.xp));
 
-  const ranked = data.map((item, idx) => ({
-    ...item,
-    rank: idx + 1,
-  }));
+  const ranked = getAugmentedLeaderboard(data);
 
   // Fetch users list for manual XP award modal
   const members = await db.query.user.findMany({

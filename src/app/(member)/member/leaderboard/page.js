@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { user, memberProfile, division, role } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import LeaderboardMemberClient from "./LeaderboardMemberClient";
+import { getAugmentedLeaderboard } from "@/lib/dummyLeaderboard";
 
 export const dynamic = "force-dynamic";
 
@@ -40,10 +41,7 @@ export default async function MemberLeaderboardPage() {
     .where(sql`LOWER(${role.name}) = 'member'`)
     .orderBy(desc(memberProfile.xp));
 
-  const ranked = data.map((item, idx) => ({
-    ...item,
-    rank: idx + 1,
-  }));
+  const ranked = getAugmentedLeaderboard(data);
 
   return (
     <LeaderboardMemberClient

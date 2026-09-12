@@ -3,9 +3,10 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { user, memberProfile, task, taskSubmission, attendance, pptModule, literatureItem, xpTransaction } from "@/db/schema";
+import { user, memberProfile, task, taskSubmission, attendance, pptModule, literatureItem, xpTransaction, division } from "@/db/schema";
 import { eq, desc, asc, and } from "drizzle-orm";
 import MemberDashboardClient from "./MemberDashboardClient";
+import { getAugmentedLeaderboard } from "@/lib/dummyLeaderboard";
 
 export const dynamic = "force-dynamic";
 
@@ -43,16 +44,24 @@ export default async function MemberDashboardPage() {
   }
 
   // Fetch leaderboard to calculate rank
-  const allProfiles = await db
+  const dbProfiles = await db
     .select({
-      userId: memberProfile.userId,
+      id: user.id,
+      name: user.name,
+      npm: user.npm,
+      profilePictureUrl: user.profilePictureUrl,
       xp: memberProfile.xp,
+      level: memberProfile.level,
+      divisionName: division.name,
     })
     .from(memberProfile)
+    .innerJoin(user, eq(user.id, memberProfile.userId))
+    .leftJoin(division, eq(division.id, user.divisionId))
     .orderBy(desc(memberProfile.xp));
 
-  const userRankIdx = allProfiles.findIndex(p => p.userId === userIdInt);
-  const currentRank = userRankIdx !== -1 ? userRankIdx + 1 : allProfiles.length + 1;
+  const augmented = getAugmentedLeaderboard(dbProfiles);
+  const userRankObj = augmented.find(item => item.id === userIdInt);
+  const currentRank = userRankObj ? userRankObj.rank : augmented.length;
 
   // Fetch all tasks and user's submissions
   const allTasks = await db.query.task.findMany({
