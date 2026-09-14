@@ -22,12 +22,21 @@ export default async function TasksAdminPage() {
     redirect("/dashboard");
   }
 
-  // Fetch tasks with submission counts cleanly without SQL GROUP BY errors
+  // Fetch tasks with relations
   const rawTasks = await db.query.task.findMany({
     orderBy: [asc(task.deadline)],
     with: {
       submissions: {
         columns: { id: true }
+      },
+      ttsCrossword: {
+        columns: { id: true, title: true, slug: true, timeLimitMinutes: true, rewardXp: true }
+      },
+      formTemplate: {
+        columns: { id: true, title: true }
+      },
+      prerequisiteTask: {
+        columns: { id: true, title: true }
       }
     }
   });
@@ -37,15 +46,36 @@ export default async function TasksAdminPage() {
     title: t.title,
     description: t.description,
     rewardXp: t.rewardXp,
+    category: t.category || "MAIN",
+    isRequired: t.isRequired ?? true,
     deadline: t.deadline,
     folderId: t.folderId,
+    spreadsheetId: t.spreadsheetId,
+    spreadsheetUrl: t.spreadsheetUrl,
     maxUploadSizeMb: t.maxUploadSizeMb,
     allowMultipleFiles: t.allowMultipleFiles,
     submissionType: t.submissionType,
+    formTemplateId: t.formTemplateId,
+    ttsCrosswordId: t.ttsCrosswordId,
+    ttsCrossword: t.ttsCrossword,
+    formTemplate: t.formTemplate,
+    prerequisiteTaskId: t.prerequisiteTaskId,
+    prerequisiteTask: t.prerequisiteTask,
     createdById: t.createdById,
     createdAt: t.createdAt,
     submissionCount: t.submissions?.length || 0,
   }));
+
+  // Fetch available TTS Puzzles and Form Templates for task relation selection
+  const availablePuzzles = await db.query.ttsCrossword.findMany({
+    orderBy: (c, { desc }) => [desc(c.createdAt)],
+    columns: { id: true, title: true, slug: true, rewardXp: true, isPublished: true },
+  });
+
+  const availableForms = await db.query.formTemplate.findMany({
+    orderBy: (f, { desc }) => [desc(f.createdAt)],
+    columns: { id: true, title: true, uuid: true, isPublished: true },
+  });
 
   // Fetch all submissions
   const rawSubmissions = await db.query.taskSubmission.findMany({
@@ -91,6 +121,8 @@ export default async function TasksAdminPage() {
     <TasksClient
       initialTasks={tasks}
       initialSubmissions={submissions}
+      availablePuzzles={availablePuzzles || []}
+      availableForms={availableForms || []}
       currentUser={session.user}
     />
   );

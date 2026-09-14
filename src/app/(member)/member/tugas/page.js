@@ -10,8 +10,8 @@ import TugasClient from "./TugasClient";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Tugas Pengurus | SRE Portal",
-  description: "Lihat daftar penugasan dan kumpulkan laporan hasil pengerjaan tugas Anda.",
+  title: "Quest & Misi | SRE Portal",
+  description: "Daftar Main Quest dan Side Quest untuk pengurus dan anggota SRE UPNVJT.",
 };
 
 export default async function MemberTugasPage() {
@@ -21,9 +21,14 @@ export default async function MemberTugasPage() {
     redirect("/login");
   }
 
-  // Fetch all tasks
+  // Fetch all tasks with prerequisite relations
   const tasks = await db.query.task.findMany({
     orderBy: [asc(task.deadline)],
+    with: {
+      prerequisiteTask: {
+        columns: { id: true, title: true, rewardXp: true }
+      }
+    }
   });
 
   // Fetch only this member's submissions

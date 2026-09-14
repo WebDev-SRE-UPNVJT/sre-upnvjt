@@ -406,8 +406,8 @@ export default function EditForm() {
       {showPreview ? (
         // PREVIEW MODE
         <div className="max-w-3xl mx-auto space-y-6">
-          <div className="bg-white dark:bg-[#07140f] border border-gray-200 dark:border-white/10 rounded-3xl p-8 shadow-sm">
-            <div className="h-2 bg-gradient-to-r from-emerald-500 via-primary to-teal-400 -mt-8 -mx-8 mb-6 rounded-t-3xl" />
+          <div className="bg-white dark:bg-[#07140f] border border-gray-200 dark:border-white/10 rounded-3xl p-8 shadow-sm overflow-hidden">
+            <div className="h-2 bg-gradient-to-r from-emerald-500 via-primary to-teal-400 -mt-8 -mx-8 mb-6" />
             <h1 className="text-3xl font-black font-display mb-3 text-gray-900 dark:text-white">{title || 'Judul Formulir'}</h1>
             <p className="text-gray-600 dark:text-white/70 text-sm whitespace-pre-wrap">{description || 'Tidak ada deskripsi'}</p>
           </div>

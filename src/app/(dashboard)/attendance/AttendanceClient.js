@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { hasAccess } from "@/lib/permissions";
+import TimePicker24 from "@/components/ui/TimePicker24";
 
 const STATUS_OPTIONS = ["PRESENT", "ABSENT", "LATE", "EXCUSED"];
 
@@ -961,25 +962,19 @@ const formatTimeInput = (dStr) => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase mb-2">Waktu Mulai (24 Jam)</label>
-                      <input
-                        type="time"
-                        step="60"
+                      <label className="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase mb-2">Waktu Mulai (24 Jam WIB)</label>
+                      <TimePicker24
                         value={sessionForm.startTime}
                         onChange={e => setSessionForm(p => ({ ...p, startTime: e.target.value }))}
-                        className={inputCls}
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase mb-2">Waktu Selesai (24 Jam)</label>
-                      <input
-                        type="time"
-                        step="60"
+                      <label className="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-white/50 uppercase mb-2">Waktu Selesai (24 Jam WIB)</label>
+                      <TimePicker24
                         value={sessionForm.endTime}
                         onChange={e => setSessionForm(p => ({ ...p, endTime: e.target.value }))}
-                        className={inputCls}
                       />
                     </div>
                   </div>

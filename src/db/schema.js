@@ -133,12 +133,21 @@ export const task = pgTable('task', {
   title: varchar('title', { length: 255 }).notNull(),
   description: text('description').notNull(),
   rewardXp: integer('rewardXp').default(0).notNull(),
+  category: varchar('category', { length: 50 }).default('MAIN').notNull(), // 'MAIN' | 'SIDE'
+  isRequired: boolean('isRequired').default(true).notNull(), // true = Wajib, false = Opsional
   formTemplateId: integer('formTemplateId').references(() => formTemplate.id, { onDelete: 'set null' }),
+  ttsCrosswordId: integer('ttsCrosswordId').references(() => ttsCrossword.id, { onDelete: 'set null' }),
+  ttsScoringMode: varchar('ttsScoringMode', { length: 50 }).default('COMPLETION').notNull(), // 'COMPLETION' | 'PROPORTIONAL' | 'PERFECT'
   folderId: varchar('folderId', { length: 255 }),
+  spreadsheetId: varchar('spreadsheetId', { length: 255 }),
+  spreadsheetUrl: varchar('spreadsheetUrl', { length: 500 }),
   maxUploadSizeMb: integer('maxUploadSizeMb'),
   allowMultipleFiles: boolean('allowMultipleFiles').default(false),
-  submissionType: varchar('submissionType', { length: 50 }).default('BOTH'),
+  submissionType: varchar('submissionType', { length: 50 }).default('FILE'), // 'FILE' | 'LINK' | 'TTS' | 'FORM' | 'BOTH'
+  prerequisiteTaskId: integer('prerequisiteTaskId').references(() => task.id, { onDelete: 'set null' }),
   deadline: timestamp('deadline', { mode: 'date' }).notNull(),
+  enableSpeedBonus: boolean('enableSpeedBonus').default(true).notNull(),
+  allowLateSubmission: boolean('allowLateSubmission').default(true).notNull(),
   createdById: integer('createdById').references(() => user.id, { onDelete: 'cascade' }).notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
@@ -150,6 +159,13 @@ export const taskSubmission = pgTable('taskSubmission', {
   fileUrl: varchar('fileUrl', { length: 1000 }),
   status: varchar('status', { length: 50 }).notNull(), // 'PENDING', 'APPROVED', 'REJECTED'
   feedback: text('feedback'),
+  answers: jsonb('answers'), // For TTS / Form answers details
+  score: integer('score'), // Score percentage (0 - 100)
+  correctCount: integer('correctCount'),
+  wrongCount: integer('wrongCount'),
+  totalQuestions: integer('totalQuestions'),
+  xpEarned: integer('xpEarned'),
+  timeTakenSeconds: integer('timeTakenSeconds'),
   reviewedById: integer('reviewedById').references(() => user.id, { onDelete: 'set null' }),
   submittedAt: timestamp('submittedAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
@@ -288,6 +304,8 @@ export const formSubmissionRelations = relations(formSubmission, ({ one, many })
 export const taskRelations = relations(task, ({ one, many }) => ({
   createdBy: one(user, { fields: [task.createdById], references: [user.id] }),
   formTemplate: one(formTemplate, { fields: [task.formTemplateId], references: [formTemplate.id] }),
+  ttsCrossword: one(ttsCrossword, { fields: [task.ttsCrosswordId], references: [ttsCrossword.id] }),
+  prerequisiteTask: one(task, { fields: [task.prerequisiteTaskId], references: [task.id] }),
   submissions: many(taskSubmission),
 }));
 
@@ -642,3 +660,46 @@ export const passwordResetTokenRelations = relations(passwordResetToken, ({ one 
     references: [user.id],
   }),
 }));
+
+// 20. Teka-Teki Silang (TTS)
+export const ttsCrossword = pgTable('ttsCrossword', {
+  id: serial('id').primaryKey(),
+  title: varchar('title', { length: 255 }).notNull(),
+  slug: varchar('slug', { length: 255 }).unique().notNull(),
+  description: text('description'),
+  timeLimitMinutes: integer('timeLimitMinutes'),
+  rewardXp: integer('rewardXp').default(10).notNull(),
+  validationMode: varchar('validationMode', { length: 50 }).default('MODAL').notNull(), // 'MODAL' | 'END'
+  wrongAnswerBehavior: varchar('wrongAnswerBehavior', { length: 50 }).default('RETRY').notNull(), // 'RETRY' | 'REVEAL'
+  isPublished: boolean('isPublished').default(true).notNull(),
+  createdById: integer('createdById').references(() => user.id, { onDelete: 'cascade' }).notNull(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
+});
+
+export const ttsQuestion = pgTable('ttsQuestion', {
+  id: serial('id').primaryKey(),
+  crosswordId: integer('crosswordId').references(() => ttsCrossword.id, { onDelete: 'cascade' }).notNull(),
+  clue: text('clue').notNull(),
+  answer: varchar('answer', { length: 100 }).notNull(),
+  points: integer('points').default(10).notNull(),
+  order: integer('order').default(0).notNull(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
+});
+
+export const ttsCrosswordRelations = relations(ttsCrossword, ({ one, many }) => ({
+  createdBy: one(user, {
+    fields: [ttsCrossword.createdById],
+    references: [user.id],
+  }),
+  questions: many(ttsQuestion),
+  tasks: many(task),
+}));
+
+export const ttsQuestionRelations = relations(ttsQuestion, ({ one }) => ({
+  crossword: one(ttsCrossword, {
+    fields: [ttsQuestion.crosswordId],
+    references: [ttsCrossword.id],
+  }),
+}));
+

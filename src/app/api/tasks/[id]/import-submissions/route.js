@@ -76,11 +76,14 @@ export async function POST(req, { params }) {
       let speedBonusXp = 0;
 
       if (nowApproved && !wasApproved) {
-        speedBonusXp = calculateSpeedBonusXp(
-          taskData.createdAt,
-          taskData.deadline,
-          sub.submittedAt
-        );
+        const isSpeedBonusEnabled = taskData.enableSpeedBonus !== false;
+        if (isSpeedBonusEnabled) {
+          speedBonusXp = calculateSpeedBonusXp(
+            taskData.createdAt,
+            taskData.deadline,
+            sub.submittedAt
+          );
+        }
 
         if (taskData.rewardXp > 0) {
           totalGainedXp += taskData.rewardXp;
@@ -141,6 +144,14 @@ export async function POST(req, { params }) {
       ...s,
       bonusXp: bonusXpMap.get(s.id) || 0,
     }));
+
+    // Sync with Google Spreadsheet if connected
+    if (taskData.spreadsheetId) {
+      const { syncAllTaskSubmissionsToSheet } = await import("@/lib/googleSheets");
+      syncAllTaskSubmissionsToSheet(taskData.spreadsheetId, fullSubmissions).catch(sheetErr => {
+        console.warn("[Import Submissions] Background Sheet sync error:", sheetErr.message);
+      });
+    }
 
     return NextResponse.json({
       success: true,

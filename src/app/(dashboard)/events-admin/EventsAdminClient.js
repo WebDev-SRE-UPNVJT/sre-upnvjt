@@ -11,6 +11,7 @@ import { useSession } from "next-auth/react";
 import { hasAccess } from "@/lib/permissions";
 import { resolveImageUrl } from "@/lib/imageUrl";
 import { compressImageToWebP } from "@/lib/imageCompressor";
+import DateTimePicker24 from "@/components/ui/DateTimePicker24";
 
 const EMPTY_EVENT = {
   title: "", description: "", bannerUrl: "", eventDate: "",
@@ -486,11 +487,14 @@ export default function EventsAdminClient({ initialEvents, initialRegistrations,
                       className={`${textareaCls} h-20`} placeholder="Detail rincian kegiatan..." />
                   </InputField>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <InputField label="Tanggal Pelaksanaan *">
-                      <input type="datetime-local" required value={eventForm.eventDate}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <InputField label="Tanggal & Waktu Acara * (24 Jam WIB • Jakarta)">
+                      <DateTimePicker24
+                        required
+                        value={eventForm.eventDate}
                         onChange={e => setEventForm(p => ({ ...p, eventDate: e.target.value }))}
-                        className={inputCls} />
+                        placeholder="Pilih Tanggal & Jam Acara 24 Jam..."
+                      />
                     </InputField>
 
                     <InputField label="Lokasi / Platform">

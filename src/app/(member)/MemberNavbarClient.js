@@ -60,7 +60,7 @@ export default function MemberNavbarClient({ user, profile }) {
 
   const navLinks = [
     { name: t("member_nav.home") || "Beranda", href: "/member" },
-    { name: t("member_nav.tasks") || "Tugas", href: "/member/tugas", icon: FolderKanban },
+    { name: "Quest", href: "/member/tugas", icon: FolderKanban },
     { name: t("member_nav.leaderboard") || "Leaderboard", href: "/member/leaderboard", icon: Trophy },
     { name: t("member_nav.attendance") || "Presensi", href: "/member/absensi", icon: ClipboardCheck },
   ];

@@ -46,6 +46,12 @@ export async function PUT(req, { params }) {
       where: (t, { eq, and }) => and(eq(t.id, parseInt(submissionId)), eq(t.taskId, taskId)),
       with: {
         task: true,
+        member: {
+          with: {
+            department: true,
+            division: true,
+          }
+        },
       },
     });
 
@@ -100,6 +106,26 @@ export async function PUT(req, { params }) {
       .where(eq(taskSubmission.id, parseInt(submissionId)))
       .returning();
 
+    // Realtime Sync to Google Spreadsheet if connected
+    if (submission.task?.spreadsheetId) {
+      const { appendOrUpdateTaskSubmissionToSheet } = await import("@/lib/googleSheets");
+      appendOrUpdateTaskSubmissionToSheet(submission.task.spreadsheetId, {
+        id: updated.id,
+        memberId: submission.memberId,
+        memberName: submission.member?.name || `User ${submission.memberId}`,
+        memberEmail: submission.member?.email || "",
+        departmentName: submission.member?.department?.name || "-",
+        divisionName: submission.member?.division?.name || "-",
+        status: updated.status,
+        fileUrl: updated.fileUrl,
+        feedback: updated.feedback,
+        submittedAt: submission.submittedAt,
+        taskDeadline: submission.task?.deadline,
+      }).catch(sheetErr => {
+        console.warn("[Task Review] Background Sheet sync error:", sheetErr.message);
+      });
+    }
+
     // Reward XP if transitioned to APPROVED or if bonusXp > 0
     const parsedBonusXp = parseInt(bonusXp) || 0;
     let totalGainedXp = 0;
@@ -107,11 +133,14 @@ export async function PUT(req, { params }) {
     let speedBonusXp = 0;
 
     if (nowApproved && !wasApproved) {
-      speedBonusXp = calculateSpeedBonusXp(
-        submission.task?.createdAt,
-        submission.task?.deadline,
-        submission.submittedAt
-      );
+      const isSpeedBonusEnabled = submission.task?.enableSpeedBonus !== false;
+      if (isSpeedBonusEnabled) {
+        speedBonusXp = calculateSpeedBonusXp(
+          submission.task?.createdAt,
+          submission.task?.deadline,
+          submission.submittedAt
+        );
+      }
 
       if (submission.task?.rewardXp > 0) {
         totalGainedXp += submission.task.rewardXp;
@@ -180,6 +209,32 @@ export async function POST(req, { params }) {
 
     if (!taskData) {
       return NextResponse.json({ error: "Tugas tidak ditemukan" }, { status: 404 });
+    }
+
+    // Validasi Tenggat Waktu jika pengumpulan terlambat tidak diizinkan
+    if (taskData.allowLateSubmission === false && taskData.deadline && new Date() > new Date(taskData.deadline)) {
+      return NextResponse.json(
+        { error: "Tenggat waktu pengumpulan tugas ini telah berakhir. Submisi sudah ditutup." },
+        { status: 400 }
+      );
+    }
+
+    // Validasi Prasyarat Main Quest jika tugas ini adalah Side Quest terkunci
+    if (taskData.prerequisiteTaskId) {
+      const prereqSub = await db.query.taskSubmission.findFirst({
+        where: (s, { and, eq }) => and(
+          eq(s.taskId, taskData.prerequisiteTaskId),
+          eq(s.memberId, parseInt(session.user.id)),
+          eq(s.status, "APPROVED")
+        ),
+      });
+
+      if (!prereqSub) {
+        return NextResponse.json(
+          { error: "Side Quest ini masih terkunci. Anda harus menyelesaikan dan menunggu persetujuan (APPROVED) pada Main Quest prasyarat terlebih dahulu." },
+          { status: 403 }
+        );
+      }
     }
 
     const targetFolderId = taskData.folderId || process.env.GOOGLE_DRIVE_FOLDER_ID;
@@ -294,6 +349,34 @@ export async function POST(req, { params }) {
         submittedAt: new Date(),
       }).returning();
       result = inserted;
+    }
+
+    // Realtime sync to Google Spreadsheet if task is connected
+    if (taskData?.spreadsheetId) {
+      const userRecord = await db.query.user.findFirst({
+        where: (u, { eq }) => eq(u.id, parseInt(session.user.id)),
+        with: {
+          department: true,
+          division: true,
+        },
+      });
+
+      const { appendOrUpdateTaskSubmissionToSheet } = await import("@/lib/googleSheets");
+      appendOrUpdateTaskSubmissionToSheet(taskData.spreadsheetId, {
+        id: result.id,
+        memberId: result.memberId,
+        memberName: userRecord?.name || session.user.name,
+        memberEmail: userRecord?.email || session.user.email,
+        departmentName: userRecord?.department?.name || "-",
+        divisionName: userRecord?.division?.name || "-",
+        status: result.status,
+        fileUrl: result.fileUrl,
+        feedback: result.feedback,
+        submittedAt: result.submittedAt,
+        taskDeadline: taskData.deadline,
+      }).catch(sheetErr => {
+        console.warn("[Task Submit] Background Sheet sync error:", sheetErr.message);
+      });
     }
 
     return NextResponse.json({ success: true, submission: result }, { status: 201 });

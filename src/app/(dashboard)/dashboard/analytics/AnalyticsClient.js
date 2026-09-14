@@ -1214,7 +1214,7 @@ export default function AnalyticsClient({ stats, dailyTraffic, hourlyTraffic, de
             No pageview data recorded yet.
           </p>
         ) : (
-          <div className="overflow-x-auto w-full -mx-2 px-2">
+          <div className="overflow-x-auto w-full">
             <table className="w-full text-sm min-w-[500px]">
               <thead>
                 <tr className="text-left border-b border-gray-100 dark:border-white/5">

@@ -6,22 +6,35 @@ import {
   Plus, Edit2, Trash2, X, Search, CheckCircle2, XCircle,
   AlertTriangle, FolderKanban, FileText, Calendar, Award,
   Clock, Check, Eye, ExternalLink, ShieldCheck, ChevronDown, ChevronUp, Filter,
-  Download, FileSpreadsheet, Upload, RefreshCw,
+  Download, FileSpreadsheet, Upload, RefreshCw, Crown, Swords, Gamepad2, Puzzle,
+  UploadCloud, Link2 as LinkIcon, Lock, Zap,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { hasAccess } from "@/lib/permissions";
 import * as XLSX from "xlsx";
 import { calculateSpeedBonusXp } from "@/lib/xpUtils";
+import DateTimePicker24 from "@/components/ui/DateTimePicker24";
 
 const EMPTY_TASK = {
   title: "",
   description: "",
   rewardXp: "30",
+  category: "MAIN",
+  isRequired: true,
   deadline: "",
   folderId: "",
-  submissionType: "FILE",
+  createSpreadsheet: true,
+  spreadsheetId: "",
+  spreadsheetUrl: "",
+  submissionType: "FILE", // "FILE" | "LINK" | "TTS" | "FORM"
+  formTemplateId: "",
+  ttsCrosswordId: "",
+  ttsScoringMode: "COMPLETION", // "COMPLETION" | "PROPORTIONAL" | "PERFECT"
+  prerequisiteTaskId: "",
   maxUploadSizeMb: "10",
   allowMultipleFiles: false,
+  enableSpeedBonus: true,
+  allowLateSubmission: true,
 };
 
 function CustomSelect({ value, onChange, options, icon: Icon, placeholder = "Pilih..." }) {
@@ -77,7 +90,7 @@ function CustomSelect({ value, onChange, options, icon: Icon, placeholder = "Pil
   );
 }
 
-export default function TasksClient({ initialTasks, initialSubmissions, currentUser }) {
+export default function TasksClient({ initialTasks, initialSubmissions, availablePuzzles = [], availableForms = [], currentUser }) {
   const { data: session } = useSession();
   const user = session?.user ?? currentUser;
 
@@ -87,6 +100,9 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [notification, setNotification] = useState(null);
+
+  // Google Sheets integration state
+  const [connectingSheetId, setConnectingSheetId] = useState(null);
 
   // Submission Filter & Collapse state
   const [selectedTaskFilter, setSelectedTaskFilter] = useState("ALL");
@@ -128,6 +144,29 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
     setTimeout(() => setNotification(null), 3000);
   };
 
+  const handleConnectSheet = async (tk) => {
+    setConnectingSheetId(tk.id);
+    try {
+      const res = await fetch(`/api/tasks/${tk.id}/create-sheet`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setTasks(prev => prev.map(t => t.id === tk.id ? { ...t, spreadsheetId: data.spreadsheetId, spreadsheetUrl: data.spreadsheetUrl } : t));
+        notify("success", `Google Spreadsheet berhasil dibuat & ${data.syncedCount || 0} submisi otomatis disinkronkan!`);
+        if (data.spreadsheetUrl) {
+          window.open(data.spreadsheetUrl, "_blank");
+        }
+      } else {
+        notify("error", data.error || "Gagal membuat Google Spreadsheet");
+      }
+    } catch {
+      notify("error", "Terjadi kesalahan saat menghubungkan Google Spreadsheet");
+    } finally {
+      setConnectingSheetId(null);
+    }
+  };
+
   const handleOpenTaskModal = (tk = null) => {
     if (tk) {
       const date = new Date(tk.deadline);
@@ -138,11 +177,22 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
         title: tk.title,
         description: tk.description,
         rewardXp: tk.rewardXp?.toString() || "30",
+        category: tk.category || "MAIN",
+        isRequired: tk.isRequired ?? true,
         deadline: localISOTime,
         folderId: tk.folderId || "",
-        submissionType: tk.submissionType === "LINK" ? "LINK" : "FILE",
+        spreadsheetId: tk.spreadsheetId || "",
+        spreadsheetUrl: tk.spreadsheetUrl || "",
+        createSpreadsheet: !tk.spreadsheetId,
+        submissionType: tk.submissionType || (tk.ttsCrosswordId ? "TTS" : tk.formTemplateId ? "FORM" : "FILE"),
+        formTemplateId: tk.formTemplateId ? String(tk.formTemplateId) : "",
+        ttsCrosswordId: tk.ttsCrosswordId ? String(tk.ttsCrosswordId) : "",
+        ttsScoringMode: tk.ttsScoringMode || "COMPLETION",
+        prerequisiteTaskId: tk.prerequisiteTaskId ? String(tk.prerequisiteTaskId) : "",
         maxUploadSizeMb: tk.maxUploadSizeMb?.toString() || "10",
         allowMultipleFiles: tk.allowMultipleFiles ?? false,
+        enableSpeedBonus: tk.enableSpeedBonus !== undefined ? Boolean(tk.enableSpeedBonus) : true,
+        allowLateSubmission: tk.allowLateSubmission !== undefined ? Boolean(tk.allowLateSubmission) : true,
       });
     } else {
       setTaskForm({ ...EMPTY_TASK });
@@ -172,11 +222,20 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
           title: taskForm.title,
           description: taskForm.description,
           rewardXp: parseInt(taskForm.rewardXp),
+          category: taskForm.category || "MAIN",
+          isRequired: Boolean(taskForm.isRequired),
           deadline: taskForm.deadline,
           folderId: taskForm.folderId ? taskForm.folderId.trim() : null,
-          submissionType: taskForm.submissionType === "LINK" ? "LINK" : "FILE",
+          createSpreadsheet: Boolean(taskForm.createSpreadsheet),
+          submissionType: taskForm.submissionType,
+          formTemplateId: taskForm.submissionType === "FORM" && taskForm.formTemplateId ? parseInt(taskForm.formTemplateId) : null,
+          ttsCrosswordId: taskForm.submissionType === "TTS" && taskForm.ttsCrosswordId ? parseInt(taskForm.ttsCrosswordId) : null,
+          ttsScoringMode: taskForm.submissionType === "TTS" ? taskForm.ttsScoringMode || "COMPLETION" : "COMPLETION",
+          prerequisiteTaskId: taskForm.category === "SIDE" && taskForm.prerequisiteTaskId ? parseInt(taskForm.prerequisiteTaskId) : null,
           maxUploadSizeMb: parseInt(taskForm.maxUploadSizeMb) || 10,
           allowMultipleFiles: Boolean(taskForm.allowMultipleFiles),
+          enableSpeedBonus: Boolean(taskForm.enableSpeedBonus),
+          allowLateSubmission: Boolean(taskForm.allowLateSubmission),
         }),
       });
 
@@ -770,6 +829,45 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
                   ) : filteredTasks.map(tk => (
                     <tr key={tk.id} className="hover:bg-white/60 dark:hover:bg-white/[0.03] transition-all">
                       <td className="px-6 py-4">
+                        <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${
+                            (tk.category || "MAIN") === "MAIN"
+                              ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25"
+                              : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25"
+                          }`}>
+                            {(tk.category || "MAIN") === "MAIN" ? (
+                              <><Crown className="w-3 h-3 text-amber-500" /> Main Quest</>
+                            ) : (
+                              <><Swords className="w-3 h-3 text-emerald-500" /> Side Quest</>
+                            )}
+                          </span>
+
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold ${
+                            tk.isRequired !== false
+                              ? "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
+                              : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
+                          }`}>
+                            {tk.isRequired !== false ? "Wajib" : "Opsional"}
+                          </span>
+
+                          {tk.submissionType === "TTS" && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 text-[10px] font-bold">
+                              <Gamepad2 className="w-3 h-3" /> TTS Game
+                            </span>
+                          )}
+
+                          {tk.submissionType === "FORM" && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 text-[10px] font-bold">
+                              <FileSpreadsheet className="w-3 h-3" /> Form
+                            </span>
+                          )}
+
+                          {tk.allowLateSubmission === false && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[10px] font-bold" title="Submisi otomatis ditutup saat tenggat waktu berakhir">
+                              <Clock className="w-3 h-3" /> Strict DL
+                            </span>
+                          )}
+                        </div>
                         <div className="font-bold text-gray-900 dark:text-white text-sm">{tk.title}</div>
                         <span className="text-xs text-gray-400 dark:text-white/30 line-clamp-1 mt-0.5 max-w-[320px]">
                           {tk.description}
@@ -807,15 +905,51 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
                         })()}
                       </td>
                       <td className="px-6 py-4">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 text-xs font-bold">
-                          <Award className="w-3.5 h-3.5" /> +{tk.rewardXp} XP
-                        </span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 text-xs font-bold">
+                            <Award className="w-3.5 h-3.5" /> +{tk.rewardXp} XP
+                          </span>
+                          {tk.enableSpeedBonus !== false && (
+                            <span
+                              title="Bonus Kecepatan Aktif (+1 s/d +10 XP jika submit sebelum deadline)"
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 text-[10px] font-bold"
+                            >
+                              <Zap className="w-3 h-3 text-blue-500" /> +Bonus
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-white/70">
                         {tk.submissionCount || 0} Submisi
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex gap-2">
+                        <div className="flex items-center gap-2">
+                          {tk.spreadsheetUrl ? (
+                            <a
+                              href={tk.spreadsheetUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              title="Buka Google Spreadsheet Realtime"
+                              className="w-8 h-8 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20 transition-all hover:scale-105"
+                            >
+                              <FileSpreadsheet className="w-4 h-4 text-emerald-500" />
+                            </a>
+                          ) : canUpdate ? (
+                            <button
+                              type="button"
+                              onClick={() => handleConnectSheet(tk)}
+                              disabled={connectingSheetId === tk.id}
+                              title="Hubungkan Google Spreadsheet (Auto-Sync Realtime)"
+                              className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-white/5 hover:bg-emerald-500/15 text-gray-400 hover:text-emerald-500 flex items-center justify-center transition-all"
+                            >
+                              {connectingSheetId === tk.id ? (
+                                <div className="w-3.5 h-3.5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                <FileSpreadsheet className="w-4 h-4" />
+                              )}
+                            </button>
+                          ) : null}
+
                           {canUpdate && (
                             <button
                               onClick={() => handleOpenTaskModal(tk)}
@@ -951,16 +1085,42 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
                         )}
                       </div>
 
-                      {/* Export & Import Excel (.xlsx) Buttons */}
+                      {/* Google Sheets, Export & Import Buttons */}
                       <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
+                        {/* Google Sheets Realtime Auto-Sync Button */}
+                        {tk.spreadsheetUrl ? (
+                          <a
+                            href={tk.spreadsheetUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            title="Buka Google Spreadsheet (Tersinkronisasi Realtime)"
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-xs font-bold transition-all shadow-sm hover:scale-105"
+                          >
+                            <FileSpreadsheet className="w-4 h-4 text-emerald-500" />
+                            <span>Buka Spreadsheet</span>
+                            <ExternalLink className="w-3 h-3 opacity-70" />
+                          </a>
+                        ) : canUpdate ? (
+                          <button
+                            type="button"
+                            onClick={() => handleConnectSheet(tk)}
+                            disabled={connectingSheetId === tk.id}
+                            title="Hubungkan ke Google Spreadsheet (Auto-Sync Realtime)"
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gray-100 dark:bg-white/5 hover:bg-emerald-500 hover:text-white dark:hover:bg-primary dark:hover:text-[#050e0a] text-gray-700 dark:text-white/80 border border-gray-200 dark:border-white/10 text-xs font-bold transition-all shadow-sm"
+                          >
+                            <FileSpreadsheet className="w-4 h-4 text-emerald-500" />
+                            <span>{connectingSheetId === tk.id ? "Menghubungkan..." : "Hubungkan Sheets"}</span>
+                          </button>
+                        ) : null}
+
                         <button
                           type="button"
                           onClick={() => exportTaskToExcel(tk, groupSubs)}
                           title="Export ke file Excel (.xlsx)"
-                          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 text-xs font-bold transition-all shadow-sm hover:scale-105"
+                          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-white/80 border border-gray-200 dark:border-white/10 text-xs font-bold transition-all shadow-sm hover:scale-105"
                         >
-                          <FileSpreadsheet className="w-4 h-4 text-emerald-500" />
-                          <span>Export Excel (.xlsx)</span>
+                          <Download className="w-4 h-4 text-gray-500 dark:text-white/60" />
+                          <span>Export Excel</span>
                         </button>
 
                         {canUpdate && (
@@ -1014,7 +1174,26 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
                                   ) : "—"}
                                 </td>
                                 <td className="px-6 py-4 text-sm">
-                                  {sub.fileUrl ? (
+                                  {sub.score !== null && sub.score !== undefined ? (
+                                    <div className="flex flex-col gap-1">
+                                      <div className="flex items-center gap-1.5 flex-wrap">
+                                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/30 text-xs font-bold">
+                                          <Gamepad2 className="w-3 h-3" /> Skor {sub.score}%
+                                        </span>
+                                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                                          ✓ {sub.correctCount ?? 0} Benar
+                                        </span>
+                                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-500 bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/20">
+                                          ✕ {sub.wrongCount ?? 0} Salah
+                                        </span>
+                                      </div>
+                                      {sub.xpEarned !== null && sub.xpEarned !== undefined && (
+                                        <span className="text-[11px] text-amber-500 font-bold flex items-center gap-1 mt-0.5">
+                                          <Zap className="w-3 h-3 fill-amber-400" /> +{sub.xpEarned} XP diperoleh
+                                        </span>
+                                      )}
+                                    </div>
+                                  ) : sub.fileUrl ? (
                                     <div className="flex flex-wrap items-center gap-1.5">
                                       {sub.fileUrl.split(",").map((rawUrl, idx, arr) => {
                                         const url = rawUrl.trim();
@@ -1195,11 +1374,14 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
                       className={`${textareaCls} h-28`} placeholder="Instruksi dan rincian pengerjaan tugas..." />
                   </InputField>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <InputField label="Tenggat Waktu * (Format 24 Jam)">
-                      <input type="datetime-local" required step="60" value={taskForm.deadline}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <InputField label="Tenggat Waktu * (24 Jam WIB • Jakarta)">
+                      <DateTimePicker24
+                        required
+                        value={taskForm.deadline}
                         onChange={e => setTaskForm(p => ({ ...p, deadline: e.target.value }))}
-                        className={inputCls} />
+                        placeholder="Pilih Tenggat Waktu 24 Jam..."
+                      />
                     </InputField>
                     <InputField label="XP Reward">
                       <input type="number" required min="0" value={taskForm.rewardXp}
@@ -1208,27 +1390,292 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
                     </InputField>
                   </div>
 
-                  <InputField label="Tipe Pengumpulan Tugas *">
-                    <div className="grid grid-cols-2 gap-3">
-                      {[
-                        { value: "FILE", label: "File / Berkas Upload" },
-                        { value: "LINK", label: "Link / Tautan URL" },
-                      ].map(opt => (
-                        <button
-                          key={opt.value}
-                          type="button"
-                          onClick={() => setTaskForm(p => ({ ...p, submissionType: opt.value }))}
-                          className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all ${
-                            taskForm.submissionType === opt.value
-                              ? "bg-primary/15 text-primary border-primary dark:text-primary-light shadow-sm"
-                              : "bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-700 dark:text-white/70 hover:bg-gray-50 dark:hover:bg-white/10"
-                          }`}
+                  {/* Speed Bonus & Late Submission Settings Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    {/* Speed Bonus Toggle Card */}
+                    <div className="p-4 rounded-2xl border transition-all bg-gradient-to-r from-blue-500/5 via-indigo-500/5 to-cyan-500/5 dark:from-blue-500/10 dark:via-indigo-500/10 dark:to-cyan-500/10 border-blue-500/25 flex flex-col justify-between gap-3">
+                      <div className="flex items-start gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-blue-500/20 text-blue-500 flex items-center justify-center shrink-0 mt-0.5">
+                          <Zap className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <span>Bonus Kecepatan</span>
+                            <span className="px-1.5 py-0.5 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 text-[10px] font-black tracking-wide">+1 - 10 XP</span>
+                          </div>
+                          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                            {taskForm.enableSpeedBonus
+                              ? "Aktif: Anggota yang mengumpulkan lebih awal mendapat bonus XP."
+                              : "Nonaktif: Hanya dapat XP pokok."}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between pt-2 border-t border-blue-500/15">
+                        <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
+                          {taskForm.enableSpeedBonus ? "Status: Aktif" : "Status: Nonaktif"}
+                        </span>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={taskForm.enableSpeedBonus}
+                            onChange={e => setTaskForm(p => ({ ...p, enableSpeedBonus: e.target.checked }))}
+                            className="sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-gray-300 dark:bg-white/15 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600" />
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Late Submission Toggle Card */}
+                    <div className="p-4 rounded-2xl border transition-all bg-gradient-to-r from-amber-500/5 via-orange-500/5 to-rose-500/5 dark:from-amber-500/10 dark:via-orange-500/10 dark:to-rose-500/10 border-amber-500/25 flex flex-col justify-between gap-3">
+                      <div className="flex items-start gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center shrink-0 mt-0.5">
+                          <Clock className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <span>Pengumpulan Lewat DL</span>
+                            <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black tracking-wide ${
+                              taskForm.allowLateSubmission
+                                ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                                : "bg-rose-500/15 text-rose-600 dark:text-rose-400"
+                            }`}>
+                              {taskForm.allowLateSubmission ? "Diizinkan" : "Tenggat Ketat"}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                            {taskForm.allowLateSubmission
+                              ? "Aktif: Anggota masih bisa submit meski telah lewat deadline."
+                              : "Nonaktif: Submisi otomatis ditutup & dikunci begitu deadline berakhir."}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between pt-2 border-t border-amber-500/15">
+                        <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">
+                          {taskForm.allowLateSubmission ? "Terima Submisi Terlambat" : "Kunci Saat Deadline"}
+                        </span>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={taskForm.allowLateSubmission}
+                            onChange={e => setTaskForm(p => ({ ...p, allowLateSubmission: e.target.checked }))}
+                            className="sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-gray-300 dark:bg-white/15 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600" />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <InputField label="Kategori Quest *">
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { value: "MAIN", label: "Main Quest", icon: Crown },
+                          { value: "SIDE", label: "Side Quest", icon: Swords },
+                        ].map(opt => {
+                          const Icon = opt.icon;
+                          const isSelected = (taskForm.category || "MAIN") === opt.value;
+                          return (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              onClick={() => setTaskForm(p => ({ ...p, category: opt.value }))}
+                              className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                                isSelected
+                                  ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/40 shadow-sm"
+                                  : "bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-700 dark:text-white/70 hover:bg-gray-50 dark:hover:bg-white/10"
+                              }`}
+                            >
+                              <Icon className={`w-3.5 h-3.5 ${isSelected ? "text-amber-500" : "text-gray-400"}`} />
+                              <span>{opt.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </InputField>
+
+                    <InputField label="Sifat Pengerjaan *">
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { value: true, label: "Wajib", icon: CheckCircle2, activeCls: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/40" },
+                          { value: false, label: "Opsional", icon: Check, activeCls: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/40" },
+                        ].map(opt => {
+                          const Icon = opt.icon;
+                          const isSelected = taskForm.isRequired === opt.value;
+                          return (
+                            <button
+                              key={String(opt.value)}
+                              type="button"
+                              onClick={() => setTaskForm(p => ({ ...p, isRequired: opt.value }))}
+                              className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                                isSelected
+                                  ? `${opt.activeCls} shadow-sm`
+                                  : "bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-700 dark:text-white/70 hover:bg-gray-50 dark:hover:bg-white/10"
+                              }`}
+                            >
+                              <Icon className="w-3.5 h-3.5" />
+                              <span>{opt.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </InputField>
+                  </div>
+
+                  {/* Prerequisite Main Quest Selector for Side Quest */}
+                  {taskForm.category === "SIDE" && (
+                    <div className="p-4 bg-amber-500/10 border border-amber-500/25 rounded-2xl space-y-2">
+                      <InputField label="Prasyarat Misi Utama (Main Quest) 🔒">
+                        <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-1.5 leading-relaxed">
+                          Side Quest ini hanya akan terbuka bagi anggota jika Main Quest prasyarat telah disetujui (APPROVED).
+                        </p>
+                        <select
+                          value={taskForm.prerequisiteTaskId}
+                          onChange={e => setTaskForm(p => ({ ...p, prerequisiteTaskId: e.target.value }))}
+                          className={inputCls}
                         >
-                          {opt.label}
-                        </button>
-                      ))}
+                          <option value="">-- Tanpa Prasyarat (Langsung Terbuka) --</option>
+                          {tasks
+                            .filter(t => (t.category === "MAIN" || (!t.category && t.rewardXp >= 50)) && t.id !== targetTask?.id)
+                            .map(mainTask => (
+                              <option key={mainTask.id} value={mainTask.id}>
+                                🔒 Wajib Selesai: {mainTask.title} (+{mainTask.rewardXp} XP)
+                              </option>
+                            ))}
+                        </select>
+                      </InputField>
+                    </div>
+                  )}
+
+                  <InputField label="Tipe Pengumpulan / Jenis Task *">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                      {[
+                        { value: "FILE", label: "Upload Berkas", icon: UploadCloud },
+                        { value: "LINK", label: "Tautan URL", icon: LinkIcon },
+                        { value: "TTS", label: "Game TTS", icon: Gamepad2 },
+                        { value: "FORM", label: "Formulir", icon: FileSpreadsheet },
+                      ].map(opt => {
+                        const Icon = opt.icon;
+                        const isSelected = taskForm.submissionType === opt.value;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => setTaskForm(p => ({ ...p, submissionType: opt.value }))}
+                            className={`py-2.5 px-2 rounded-xl border text-xs font-bold transition-all flex flex-col items-center gap-1.5 ${
+                              isSelected
+                                ? "bg-primary/15 text-primary border-primary dark:text-primary-light shadow-sm"
+                                : "bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-700 dark:text-white/70 hover:bg-gray-50 dark:hover:bg-white/10"
+                            }`}
+                          >
+                            <Icon className="w-4 h-4" />
+                            <span className="text-[11px] text-center leading-tight">{opt.label}</span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </InputField>
+
+                  {/* TTS Relation Selector */}
+                  {taskForm.submissionType === "TTS" && (
+                    <div className="p-4 bg-purple-500/5 border border-purple-500/20 rounded-2xl space-y-4">
+                      <InputField label="Hubungkan ke Teka-Teki Silang (TTS) *">
+                        <select
+                          required
+                          value={taskForm.ttsCrosswordId}
+                          onChange={e => {
+                            const puzzleId = e.target.value;
+                            const found = availablePuzzles.find(p => String(p.id) === String(puzzleId));
+                            setTaskForm(p => ({
+                              ...p,
+                              ttsCrosswordId: puzzleId,
+                              rewardXp: found?.rewardXp ? String(found.rewardXp) : p.rewardXp,
+                              title: (!p.title && found?.title) ? found.title : p.title,
+                            }));
+                          }}
+                          className={inputCls}
+                        >
+                          <option value="">-- Pilih Puzzle TTS yang Tersedia --</option>
+                          {availablePuzzles.map(puz => (
+                            <option key={puz.id} value={puz.id}>
+                              {puz.title} ({puz.rewardXp} XP) {puz.isPublished ? "• Published" : "• Draft"}
+                            </option>
+                          ))}
+                        </select>
+                      </InputField>
+
+                      <InputField label="Mode Penilaian & Perolehan XP TTS *">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          {[
+                            {
+                              value: "COMPLETION",
+                              label: "Flat (Penuh)",
+                              desc: "Dapat seluruh XP tugas saat selesai, meskipun ada jawaban salah",
+                            },
+                            {
+                              value: "PROPORTIONAL",
+                              label: "Sesuai Jawaban Benar",
+                              desc: "XP dibagi sesuai rasio jawaban benar (pembulatan ke atas jika ada koma)",
+                            },
+                            {
+                              value: "PERFECT",
+                              label: "100% Sempurna",
+                              desc: "Hanya mendapat XP jika semua soal dijawab benar (0 salah)",
+                            },
+                          ].map(mode => {
+                            const isSelected = (taskForm.ttsScoringMode || "COMPLETION") === mode.value;
+                            return (
+                              <button
+                                key={mode.value}
+                                type="button"
+                                onClick={() => setTaskForm(p => ({ ...p, ttsScoringMode: mode.value }))}
+                                className={`p-3 rounded-xl border text-left transition-all ${
+                                  isSelected
+                                    ? "bg-purple-500/20 border-purple-500 text-purple-800 dark:text-purple-200 shadow-sm"
+                                    : "bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-700 dark:text-white/70 hover:bg-gray-50 dark:hover:bg-white/10"
+                                }`}
+                              >
+                                <div className="text-xs font-bold flex items-center justify-between">
+                                  <span>{mode.label}</span>
+                                  {isSelected && <Check className="w-3.5 h-3.5 text-purple-500" />}
+                                </div>
+                                <div className="text-[10px] mt-1 opacity-75 leading-tight">{mode.desc}</div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </InputField>
+
+                      <p className="text-[11px] text-purple-700 dark:text-purple-300 font-medium">
+                        Anggota yang membuka quest ini akan langsung diarahkan untuk memainkan game TTS interaktif dan memperoleh XP sesuai aturan di atas.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Form Template Relation Selector */}
+                  {taskForm.submissionType === "FORM" && (
+                    <div className="p-4 bg-teal-500/5 border border-teal-500/20 rounded-2xl space-y-3">
+                      <InputField label="Hubungkan ke Template Formulir *">
+                        <select
+                          required
+                          value={taskForm.formTemplateId}
+                          onChange={e => setTaskForm(p => ({ ...p, formTemplateId: e.target.value }))}
+                          className={inputCls}
+                        >
+                          <option value="">-- Pilih Template Formulir --</option>
+                          {availableForms.map(f => (
+                            <option key={f.id} value={f.id}>
+                              {f.title}
+                            </option>
+                          ))}
+                        </select>
+                      </InputField>
+                      <p className="text-[11px] text-teal-700 dark:text-teal-300 font-medium">
+                        Anggota akan mengisi formulir kustom dinamis untuk menyelesaikan tugas ini.
+                      </p>
+                    </div>
+                  )}
 
                   {taskForm.submissionType === "FILE" && (
                     <div className="p-4 bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 rounded-2xl space-y-4">
@@ -1256,6 +1703,53 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
                           </label>
                         </div>
                       </div>
+                    </div>
+                  )}
+
+                  {/* Google Spreadsheet Integration */}
+                  {taskForm.spreadsheetUrl ? (
+                    <div className="p-4 bg-emerald-500/10 border border-emerald-500/25 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-500 shrink-0">
+                          <FileSpreadsheet className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+                            <span>Google Spreadsheet Terhubung</span>
+                            <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-wider">Realtime</span>
+                          </div>
+                          <div className="text-[11px] text-gray-500 dark:text-white/50">Submisi anggota otomatis disinkronkan ke spreadsheet</div>
+                        </div>
+                      </div>
+                      <a
+                        href={taskForm.spreadsheetUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm shrink-0"
+                      >
+                        <span>Buka Sheet</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 rounded-2xl">
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={taskForm.createSpreadsheet}
+                          onChange={e => setTaskForm(p => ({ ...p, createSpreadsheet: e.target.checked }))}
+                          className="w-4 h-4 mt-0.5 rounded text-primary focus:ring-primary accent-emerald-500"
+                        />
+                        <div>
+                          <div className="text-xs font-bold text-gray-800 dark:text-white flex items-center gap-1.5">
+                            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-500" />
+                            <span>Auto Clone & Buat Google Spreadsheet Otomatis</span>
+                          </div>
+                          <p className="text-[11px] text-gray-500 dark:text-white/40 mt-0.5 leading-relaxed">
+                            Sistem akan otomatis membuat Google Spreadsheet untuk tugas ini dan menyinkronkan seluruh submisi anggota secara realtime.
+                          </p>
+                        </div>
+                      </label>
                     </div>
                   )}
 
@@ -1330,11 +1824,14 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
                 {(() => {
                   const targetTaskObj = tasks.find(t => t.id === targetSubmission.taskId);
                   const baseRewardXp = targetTaskObj?.rewardXp || 0;
-                  const speedBonusXp = calculateSpeedBonusXp(
-                    targetTaskObj?.createdAt,
-                    targetTaskObj?.deadline,
-                    targetSubmission.submittedAt
-                  );
+                  const isSpeedBonusEnabled = targetTaskObj?.enableSpeedBonus !== false;
+                  const speedBonusXp = isSpeedBonusEnabled
+                    ? calculateSpeedBonusXp(
+                        targetTaskObj?.createdAt,
+                        targetTaskObj?.deadline,
+                        targetSubmission.submittedAt
+                      )
+                    : 0;
                   const addedBonusXp = parseInt(reviewBonusXp) || 0;
                   const isApproved = reviewStatus === "APPROVED";
                   const totalXpGained = isApproved ? (baseRewardXp + speedBonusXp + addedBonusXp) : 0;
@@ -1383,14 +1880,18 @@ export default function TasksClient({ initialTasks, initialSubmissions, currentU
 
                         <div className="flex items-center justify-between text-gray-600 dark:text-white/70">
                           <span className="flex items-center gap-1.5">
-                            <span>Bonus Kecepatan Pengumpulkan:</span>
-                            {isLate ? (
+                            <span>Bonus Kecepatan Pengumpulan:</span>
+                            {!isSpeedBonusEnabled ? (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-500/10 text-gray-400 font-semibold border border-gray-500/20">Dinonaktifkan (0 XP)</span>
+                            ) : isLate ? (
                               <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-500 font-semibold border border-red-500/20">Terlambat (0 XP)</span>
                             ) : (
                               <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 font-semibold border border-blue-500/20">Tepat Waktu (+{speedBonusXp} XP)</span>
                             )}
                           </span>
-                          <span className="font-bold text-blue-500">+{speedBonusXp} XP</span>
+                          <span className={`font-bold ${isSpeedBonusEnabled && speedBonusXp > 0 ? "text-blue-500" : "text-gray-400"}`}>
+                            +{speedBonusXp} XP
+                          </span>
                         </div>
 
                         {addedBonusXp > 0 && (

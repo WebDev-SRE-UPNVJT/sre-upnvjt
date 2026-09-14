@@ -19,7 +19,8 @@ export default function FloatingThemeToggle() {
     "/login", "/dashboard", "/member", "/officer", "/users", "/roles",
     "/tasks", "/departments", "/forms", "/content", "/testimonials",
     "/merch", "/partners", "/literature", "/ppt", "/quiz", "/activities",
-    "/leaderboard", "/attendance", "/events-admin", "/applications", "/settings"
+    "/leaderboard", "/attendance", "/events-admin", "/applications", "/settings",
+    "/games"
   ];
 
   const isHidden = hiddenPrefixes.some((p) => pathname === p || pathname.startsWith(p + "/"));

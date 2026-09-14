@@ -40,6 +40,8 @@ const hiddenHeaderRoutes = [
   "/shortlinks",
   "/f",
   "/reset-password",
+  "/tts",
+  "/games",
 ];
 
 function isHiddenHeaderRoute(pathname) {

@@ -7,7 +7,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   LayoutDashboard, Users, FileText, CheckSquare, Shield,
-  Settings, LogOut, Menu, X, CreditCard, Box, ChevronLeft, ChevronRight, FolderKanban, ClipboardCheck, FolderOpen, Newspaper, Presentation, ShoppingBag, Handshake, Activity, Trophy, Star, Target, ShieldCheck, Link2, BarChart2, Rocket
+  Settings, LogOut, Menu, X, CreditCard, Box, ChevronLeft, ChevronRight, FolderKanban, ClipboardCheck, FolderOpen, Newspaper, Presentation, ShoppingBag, Handshake, Activity, Trophy, Star, Target, ShieldCheck, Link2, BarChart2, Rocket, Grid3X3
 } from "lucide-react";
 
 import { hasAccess } from "@/lib/permissions";
@@ -27,6 +27,36 @@ export default function DashboardLayout({ children }) {
       router.push("/login");
     }
   }, [status, router]);
+
+  // Lock dashboard background scroll whenever any modal / popup is open
+  React.useEffect(() => {
+    const updateScrollLock = () => {
+      // Find modal overlays (exclude regular small dropdown click-outs if any)
+      const modal = document.querySelector(
+        '.fixed.inset-0.z-50:not(.z-30), .fixed.inset-0.z-\\[50\\], .fixed.inset-0.z-\\[60\\], .fixed.inset-0.z-\\[100\\], [role="dialog"]'
+      );
+      const mainEl = document.getElementById("dashboard-main-scroll");
+      if (modal) {
+        if (mainEl) mainEl.style.overflowY = "hidden";
+        document.body.style.overflow = "hidden";
+      } else {
+        if (mainEl) mainEl.style.overflowY = "auto";
+        document.body.style.overflow = "";
+      }
+    };
+
+    updateScrollLock();
+
+    const observer = new MutationObserver(updateScrollLock);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+
+    return () => {
+      observer.disconnect();
+      const mainEl = document.getElementById("dashboard-main-scroll");
+      if (mainEl) mainEl.style.overflowY = "auto";
+      document.body.style.overflow = "";
+    };
+  }, []);
 
   if (status === "loading") {
     return (
@@ -50,6 +80,7 @@ export default function DashboardLayout({ children }) {
     { name: t("sidebar.users"), icon: Users, href: "/users", module: "users" },
     { name: t("sidebar.roles"), icon: Shield, href: "/roles", module: "roles" },
     { name: "Form Builder", icon: ClipboardCheck, href: "/forms", module: "forms" },
+    { name: "TTS Builder", icon: Grid3X3, href: "/tts", module: "quiz" },
     
     // Public & Media
     { name: t("sidebar.articles") || "Content / Berita", icon: Newspaper, href: "/content", module: "content" },
@@ -83,8 +114,8 @@ export default function DashboardLayout({ children }) {
     if (item.module === "documents") return hasAccess(session?.user, "documents", "read") || role === "SUPER_ADMIN" || role === "ADMIN";
     return hasAccess(session?.user, item.module, "read");
   }).sort((a, b) => {
-    if (a.module === "overview") return -1;
-    if (b.module === "overview") return 1;
+    if (a.href === "/dashboard") return -1;
+    if (b.href === "/dashboard") return 1;
     return a.name.localeCompare(b.name);
   });
 
@@ -190,8 +221,11 @@ export default function DashboardLayout({ children }) {
 
   return (
     <div className="fixed inset-0 w-full max-w-full h-screen bg-gray-50 dark:bg-[#020806] text-gray-900 dark:text-white overflow-hidden selection:bg-primary/30 transition-colors duration-500 flex overscroll-none">
-      <div className="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px] pointer-events-none overflow-hidden" />
-      <div className="fixed bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px] pointer-events-none overflow-hidden" />
+      {/* Background Decorative Glow Blobs (contained strictly within viewport) */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden max-w-full z-0">
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px]" />
+      </div>
       
       {/* Desktop Sidebar (Floating & Fixed Height) */}
       <motion.aside 
@@ -292,7 +326,7 @@ export default function DashboardLayout({ children }) {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main className="flex-1 min-w-0 w-full max-w-full flex flex-col h-full overflow-y-auto overflow-x-hidden overscroll-contain relative">
+      <main id="dashboard-main-scroll" className="flex-1 min-w-0 w-full max-w-full flex flex-col h-full overflow-y-auto overflow-x-hidden overscroll-contain relative">
         {/* Top Action Bar (Desktop Theme Toggle on Top-Right Corner) */}
         <div className="hidden lg:flex justify-end items-center px-6 md:px-10 pt-5 pb-1 sticky top-0 z-30 pointer-events-none">
           <div className="pointer-events-auto flex items-center gap-2.5 px-3 py-1.5 rounded-2xl bg-white/80 dark:bg-[#08120e]/80 backdrop-blur-xl border border-gray-200 dark:border-white/10 shadow-sm hover:border-primary/30 transition-all duration-300">

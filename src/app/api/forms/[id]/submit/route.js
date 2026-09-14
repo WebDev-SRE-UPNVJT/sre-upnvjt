@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { formTemplate, formSubmission } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { formTemplate, formSubmission, task, taskSubmission } from '@/db/schema';
+import { and, eq } from 'drizzle-orm';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
-import { appendFormResponseToSheet } from '@/lib/googleSheets';
+import { appendFormResponseToSheet, appendOrUpdateTaskSubmissionToSheet } from '@/lib/googleSheets';
 
 export async function POST(req, { params }) {
   try {
@@ -86,7 +86,7 @@ export async function POST(req, { params }) {
       }
     }
 
-    // 1. Simpan ke database PostgreSQL
+    // 1. Simpan ke database PostgreSQL (Form Response)
     const [inserted] = await db.insert(formSubmission).values({
       formTemplateId: formId,
       memberId: memberId || null,
@@ -96,9 +96,8 @@ export async function POST(req, { params }) {
       submittedAt: new Date(),
     }).returning();
 
-    // 2. Realtime Append ke Google Spreadsheet (jika terhubung)
+    // 2. Realtime Append ke Tab 2 ("Respon Form Detail") Google Spreadsheet (jika terhubung)
     if (form.spreadsheetId) {
-      // Jalankan sinkronisasi spreadsheet
       appendFormResponseToSheet(
         form.spreadsheetId,
         {
@@ -107,8 +106,73 @@ export async function POST(req, { params }) {
         },
         form.questions
       ).catch((sheetErr) => {
-        console.error('[FormSubmit] Background Sheet sync error:', sheetErr);
+        console.error('[FormSubmit] Background Tab 2 Sheet sync error:', sheetErr);
       });
+    }
+
+    // 3. Jika responden adalah Member login & Formulir terhubung dengan Task / Quest
+    if (memberId) {
+      try {
+        const linkedTasks = await db.query.task.findMany({
+          where: eq(task.formTemplateId, formId),
+        });
+
+        for (const lTask of linkedTasks) {
+          // Cari apakah sudah pernah submit tugas ini
+          const existingTaskSub = await db.query.taskSubmission.findFirst({
+            where: and(
+              eq(taskSubmission.taskId, lTask.id),
+              eq(taskSubmission.memberId, memberId)
+            ),
+          });
+
+          let taskSubRecord = existingTaskSub;
+          const formResponseUrl = `/f/${form.uuid || form.id}`;
+
+          if (!existingTaskSub) {
+            const [createdSub] = await db.insert(taskSubmission).values({
+              taskId: lTask.id,
+              memberId: memberId,
+              fileUrl: formResponseUrl,
+              status: "PENDING",
+              score: null,
+              xpEarned: null,
+              submittedAt: new Date(),
+            }).returning();
+            taskSubRecord = createdSub;
+          } else {
+            const [updatedSub] = await db.update(taskSubmission)
+              .set({
+                fileUrl: formResponseUrl,
+                status: "PENDING",
+                submittedAt: new Date(),
+              })
+              .where(eq(taskSubmission.id, existingTaskSub.id))
+              .returning();
+            taskSubRecord = updatedSub;
+          }
+
+          // Sinkronkan ke Tab 1 ("Submisi Tugas") Google Spreadsheet jika Task memiliki spreadsheet
+          const targetSpreadsheetId = lTask.spreadsheetId || form.spreadsheetId;
+          if (targetSpreadsheetId && taskSubRecord) {
+            appendOrUpdateTaskSubmissionToSheet(targetSpreadsheetId, {
+              id: taskSubRecord.id,
+              memberId: memberId,
+              memberName: responderName || autoName,
+              memberEmail: responderEmail || autoEmail,
+              status: "PENDING",
+              fileUrl: formResponseUrl,
+              feedback: taskSubRecord.feedback || "",
+              submittedAt: taskSubRecord.submittedAt || new Date(),
+              taskDeadline: lTask.deadline,
+            }).catch((taskSheetErr) => {
+              console.error('[FormSubmit] Background Tab 1 Sheet sync error:', taskSheetErr);
+            });
+          }
+        }
+      } catch (taskLinkErr) {
+        console.warn('[FormSubmit] Task submission link warning:', taskLinkErr.message);
+      }
     }
 
     return NextResponse.json({

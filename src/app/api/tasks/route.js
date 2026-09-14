@@ -12,6 +12,15 @@ export async function GET() {
       with: {
         submissions: {
           columns: { id: true }
+        },
+        ttsCrossword: {
+          columns: { id: true, title: true, slug: true, timeLimitMinutes: true, rewardXp: true }
+        },
+        formTemplate: {
+          columns: { id: true, title: true }
+        },
+        prerequisiteTask: {
+          columns: { id: true, title: true }
         }
       }
     });
@@ -21,11 +30,22 @@ export async function GET() {
       title: t.title,
       description: t.description,
       rewardXp: t.rewardXp,
+      category: t.category || "MAIN",
+      isRequired: t.isRequired ?? true,
       deadline: t.deadline,
       folderId: t.folderId,
+      spreadsheetId: t.spreadsheetId,
+      spreadsheetUrl: t.spreadsheetUrl,
       maxUploadSizeMb: t.maxUploadSizeMb,
       allowMultipleFiles: t.allowMultipleFiles,
       submissionType: t.submissionType,
+      formTemplateId: t.formTemplateId,
+      ttsCrosswordId: t.ttsCrosswordId,
+      ttsScoringMode: t.ttsScoringMode || "COMPLETION",
+      ttsCrossword: t.ttsCrossword,
+      formTemplate: t.formTemplate,
+      prerequisiteTaskId: t.prerequisiteTaskId,
+      prerequisiteTask: t.prerequisiteTask,
       createdById: t.createdById,
       createdAt: t.createdAt,
       submissionCount: t.submissions?.length || 0,
@@ -45,19 +65,80 @@ export async function POST(req) {
     }
 
     const body = await req.json();
-    const { title, description, rewardXp, deadline, folderId, submissionType, maxUploadSizeMb, allowMultipleFiles } = body;
+    const {
+      title,
+      description,
+      rewardXp,
+      category,
+      isRequired,
+      deadline,
+      folderId,
+      submissionType,
+      formTemplateId,
+      ttsCrosswordId,
+      ttsScoringMode,
+      prerequisiteTaskId,
+      maxUploadSizeMb,
+      allowMultipleFiles,
+      enableSpeedBonus,
+      allowLateSubmission,
+      createSpreadsheet,
+    } = body;
 
     if (!title || !description || !deadline) {
       return NextResponse.json({ error: "Judul, deskripsi, dan tenggat waktu wajib diisi" }, { status: 400 });
+    }
+
+    let spreadsheetId = body.spreadsheetId || null;
+    let spreadsheetUrl = body.spreadsheetUrl || null;
+
+    if (createSpreadsheet && !spreadsheetId) {
+      try {
+        let formQuestions = [];
+        if (formTemplateId) {
+          const { formTemplate } = await import("@/db/schema");
+          const formRec = await db.query.formTemplate.findFirst({
+            where: eq(formTemplate.id, parseInt(formTemplateId)),
+          });
+          if (formRec && Array.isArray(formRec.questions)) {
+            formQuestions = formRec.questions;
+          }
+        }
+
+        const { createTaskSpreadsheet } = await import("@/lib/googleSheets");
+        const sheetRes = await createTaskSpreadsheet(title, formQuestions);
+        spreadsheetId = sheetRes.spreadsheetId;
+        spreadsheetUrl = sheetRes.spreadsheetUrl;
+
+        // Sync to formTemplate as well if linked
+        if (formTemplateId && spreadsheetId) {
+          const { formTemplate } = await import("@/db/schema");
+          await db.update(formTemplate)
+            .set({ spreadsheetId, spreadsheetUrl })
+            .where(eq(formTemplate.id, parseInt(formTemplateId)));
+        }
+      } catch (sheetErr) {
+        console.warn("[Tasks POST] Failed to auto-create Google Spreadsheet:", sheetErr.message);
+      }
     }
 
     const [result] = await db.insert(task).values({
       title,
       description,
       rewardXp: rewardXp ? parseInt(rewardXp) : 0,
+      category: category ? String(category).toUpperCase() : "MAIN",
+      isRequired: isRequired !== undefined ? Boolean(isRequired) : true,
+      formTemplateId: formTemplateId ? parseInt(formTemplateId) : null,
+      ttsCrosswordId: ttsCrosswordId ? parseInt(ttsCrosswordId) : null,
+      ttsScoringMode: ttsScoringMode ? String(ttsScoringMode).toUpperCase() : "COMPLETION",
+      prerequisiteTaskId: (category === "SIDE" && prerequisiteTaskId) ? parseInt(prerequisiteTaskId) : null,
       deadline: new Date(deadline),
+      enableSpeedBonus: enableSpeedBonus !== undefined ? Boolean(enableSpeedBonus) : true,
+      allowLateSubmission: allowLateSubmission !== undefined ? Boolean(allowLateSubmission) : true,
       folderId: folderId ? String(folderId).trim() : null,
-      submissionType: submissionType || "BOTH",
+      spreadsheetId,
+      spreadsheetUrl,
+      submissionType: submissionType || "FILE",
       maxUploadSizeMb: maxUploadSizeMb ? parseInt(maxUploadSizeMb) : 10,
       allowMultipleFiles: Boolean(allowMultipleFiles),
       createdById: session.user.id,

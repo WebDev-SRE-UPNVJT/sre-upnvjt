@@ -36,6 +36,19 @@ export async function POST(req, { params }) {
       .where(eq(formTemplate.id, formId))
       .returning();
 
+    // Sinkronkan ke Task yang terhubung jika ada
+    try {
+      const { task } = await import('@/db/schema');
+      await db.update(task)
+        .set({
+          spreadsheetId: sheetRes.spreadsheetId,
+          spreadsheetUrl: sheetRes.spreadsheetUrl,
+        })
+        .where(eq(task.formTemplateId, formId));
+    } catch (tErr) {
+      // ignore
+    }
+
     return NextResponse.json({
       success: true,
       spreadsheetId: sheetRes.spreadsheetId,

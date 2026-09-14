@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
-  LayoutDashboard, Presentation, FolderOpen, FolderKanban,
+  LayoutDashboard, Presentation, FolderOpen, Swords,
   Target, Trophy, ClipboardCheck, User, LogOut, Menu, X, Zap, Award
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,7 +15,7 @@ const SIDEBAR_ITEMS = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Materi", href: "/member/materi", icon: Presentation },
   { name: "Bank Literatur", href: "/member/literatur", icon: FolderOpen },
-  { name: "Tugas", href: "/member/tugas", icon: FolderKanban },
+  { name: "Quest", href: "/member/tugas", icon: Swords },
   { name: "Quiz", href: "/member/quiz", icon: Target },
   { name: "Leaderboard", href: "/member/leaderboard", icon: Trophy },
   { name: "Presensi", href: "/member/absensi", icon: ClipboardCheck },
