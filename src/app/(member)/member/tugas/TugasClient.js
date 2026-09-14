@@ -158,7 +158,7 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      className={`group relative bg-white dark:bg-[#08120e] border rounded-3xl p-5.5 transition-all duration-300 cursor-pointer hover:scale-[1.008] overflow-hidden ${
+      className={`group relative bg-white dark:bg-[#08120e] border rounded-2xl sm:rounded-3xl p-4 sm:p-5.5 transition-all duration-300 cursor-pointer hover:scale-[1.008] overflow-hidden ${
         isLocked
           ? "border-amber-500/20 dark:border-amber-500/15 opacity-85 hover:border-amber-500/40 shadow-sm"
           : isMain
@@ -179,69 +179,71 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
       />
 
       {/* Top Status Dot Indicator */}
-      <div className={`absolute top-4 right-4 w-2 h-2 rounded-full ${isLocked ? "bg-amber-400" : cfg.dot}`} />
+      <div className={`absolute top-3.5 sm:top-4 right-3.5 sm:right-4 w-2 h-2 rounded-full ${isLocked ? "bg-amber-400" : cfg.dot}`} />
 
-      <div className="flex items-start gap-4 relative z-10">
+      <div className="flex items-start gap-3 sm:gap-4 relative z-10">
         {/* Quest Icon Badge */}
         <div
-          className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 border shadow-sm ${
+          className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 border shadow-sm ${
             isLocked
-              ? "bg-amber-500/10 border-amber-500/25 text-amber-500 dark:text-amber-400 group-hover:scale-108"
+              ? "bg-amber-500/10 border-amber-500/25 text-amber-500 dark:text-amber-400 group-hover:scale-105"
               : isMain
-              ? "bg-amber-500/10 border-amber-500/25 text-amber-500 dark:text-amber-300 group-hover:scale-108"
-              : "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400 group-hover:scale-108"
+              ? "bg-amber-500/10 border-amber-500/25 text-amber-500 dark:text-amber-300 group-hover:scale-105"
+              : "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400 group-hover:scale-105"
           }`}
         >
           {isLocked ? (
-            <Lock className="w-5 h-5 stroke-[2.2]" />
+            <Lock className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]" />
           ) : isMain ? (
-            <Crown className="w-5 h-5 stroke-[2.2]" />
+            <Crown className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]" />
           ) : (
-            <Swords className="w-5 h-5 stroke-[2.2]" />
+            <Swords className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]" />
           )}
         </div>
 
-        <div className="flex-1 min-w-0 pr-4">
-          {/* Quest Category, Mandatory Tag & XP Bounty */}
-          <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
-            <span
-              className={`inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full border ${
-                isLocked
-                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-300 border-amber-500/25"
-                  : isMain
-                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-300 border-amber-500/25"
-                  : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border-emerald-500/20"
-              }`}
-            >
-              {isLocked ? (
-                <Lock className="w-2.5 h-2.5" />
-              ) : isMain ? (
-                <Crown className="w-2.5 h-2.5 fill-current" />
-              ) : (
-                <Sparkles className="w-2.5 h-2.5" />
-              )}
-              {isMain
-                ? (t("member_tasks.main_quest_badge") || "Main Quest")
-                : (t("member_tasks.side_quest_badge") || "Side Quest")}
-            </span>
+        <div className="flex-1 min-w-0 pr-2 sm:pr-4">
+          {/* Quest Category, Mandatory Tag & XP Bounty Row */}
+          <div className="flex items-center justify-between gap-1.5 mb-1.5 w-full flex-wrap">
+            <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+              <span
+                className={`inline-flex items-center gap-1 text-[8px] sm:text-[9px] font-black uppercase tracking-wider px-2 sm:px-2.5 py-0.5 rounded-full border ${
+                  isLocked
+                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-300 border-amber-500/25"
+                    : isMain
+                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-300 border-amber-500/25"
+                    : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border-emerald-500/20"
+                }`}
+              >
+                {isLocked ? (
+                  <Lock className="w-2.5 h-2.5" />
+                ) : isMain ? (
+                  <Crown className="w-2.5 h-2.5 fill-current" />
+                ) : (
+                  <Sparkles className="w-2.5 h-2.5" />
+                )}
+                {isMain
+                  ? (t("member_tasks.main_quest_badge") || "Main Quest")
+                  : (t("member_tasks.side_quest_badge") || "Side Quest")}
+              </span>
 
-            <span
-              className={`inline-flex items-center text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
-                task.isRequired !== false
-                  ? "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20"
-                  : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
-              }`}
-            >
-              {task.isRequired !== false
-                ? (t("member_tasks.badge_mandatory") || "Wajib")
-                : (t("member_tasks.badge_optional") || "Opsional")}
-            </span>
+              <span
+                className={`inline-flex items-center text-[8px] sm:text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                  task.isRequired !== false
+                    ? "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20"
+                    : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
+                }`}
+              >
+                {task.isRequired !== false
+                  ? (t("member_tasks.badge_mandatory") || "Wajib")
+                  : (t("member_tasks.badge_optional") || "Opsional")}
+              </span>
+            </div>
 
             {/* XP Bounty */}
-            <span className="flex items-center gap-1 text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 font-mono ml-auto">
+            <span className="flex items-center gap-1 text-[9px] sm:text-[10px] font-black px-2 sm:px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 font-mono shrink-0">
               <Zap className="w-3 h-3 fill-amber-400" />+{task.rewardXp} XP
               {task.enableSpeedBonus !== false && (
-                <span className="text-[9px] font-bold text-blue-500 ml-0.5" title={language === "en" ? "Speed bonus up to +10 XP for early submission" : "Bonus kecepatan hingga +10 XP jika submit sebelum deadline"}>
+                <span className="text-[8px] sm:text-[9px] font-bold text-blue-500 ml-0.5" title={language === "en" ? "Speed bonus up to +10 XP for early submission" : "Bonus kecepatan hingga +10 XP jika submit sebelum deadline"}>
                   +Bonus
                 </span>
               )}
@@ -249,9 +251,9 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
           </div>
 
           {/* Title */}
-          <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-white group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors truncate flex items-center gap-1.5">
+          <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-white group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors line-clamp-1 leading-snug flex items-center gap-1.5">
             {isLocked && <Lock className="w-3.5 h-3.5 text-amber-500 shrink-0" />}
-            <span>{task.title}</span>
+            <span className="truncate">{task.title}</span>
           </h4>
 
           {/* Description */}
@@ -261,7 +263,7 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
 
           {/* Prerequisite Tag if locked */}
           {isLocked && task.prerequisiteTask && (
-            <div className="mt-2.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
+            <div className="mt-2.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[10px] sm:text-[11px] font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
               <Lock className="w-3 h-3 shrink-0" />
               <span className="truncate">
                 {language === "en"
@@ -272,41 +274,43 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
           )}
 
           {/* Bottom Metas */}
-          <div className="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-slate-100 dark:border-white/5">
-            {/* Deadline chip */}
-            <span
-              className={`flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-xl border transition-all ${
-                dlInfo.isOverdue
-                  ? "bg-rose-500/10 text-rose-500 border-rose-500/25 font-black"
-                  : dlInfo.isUrgent
-                  ? "bg-rose-500/10 text-rose-400 border-rose-500/20 font-bold animate-pulse"
-                  : dlInfo.isSoon
-                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 font-bold"
-                  : "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/50 border-slate-200 dark:border-white/10"
-              }`}
-            >
-              <Clock className="w-3 h-3" />
-              {dlInfo.text}
-            </span>
-
-            {/* Task Type badge (TTS / Form) */}
-            {(task.submissionType === "TTS" || task.ttsCrosswordId) && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 text-[10px] font-bold">
-                <Gamepad2 className="w-3 h-3" />
-                <span>TTS Game</span>
+          <div className="flex items-center justify-between gap-2 mt-3.5 pt-3 border-t border-slate-100 dark:border-white/5 flex-wrap">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {/* Deadline chip */}
+              <span
+                className={`flex items-center gap-1 text-[9px] sm:text-[10px] font-bold px-2 sm:px-2.5 py-1 rounded-xl border transition-all ${
+                  dlInfo.isOverdue
+                    ? "bg-rose-500/10 text-rose-500 border-rose-500/25 font-black"
+                    : dlInfo.isUrgent
+                    ? "bg-rose-500/10 text-rose-400 border-rose-500/20 font-bold animate-pulse"
+                    : dlInfo.isSoon
+                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 font-bold"
+                    : "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/50 border-slate-200 dark:border-white/10"
+                }`}
+              >
+                <Clock className="w-3 h-3" />
+                {dlInfo.text}
               </span>
-            )}
 
-            {(task.submissionType === "FORM" || task.formTemplateId) && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 text-[10px] font-bold">
-                <FileText className="w-3 h-3" />
-                <span>Formulir</span>
-              </span>
-            )}
+              {/* Task Type badge (TTS / Form) */}
+              {(task.submissionType === "TTS" || task.ttsCrosswordId) && (
+                <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 text-[9px] sm:text-[10px] font-bold">
+                  <Gamepad2 className="w-3 h-3" />
+                  <span>TTS Game</span>
+                </span>
+              )}
+
+              {(task.submissionType === "FORM" || task.formTemplateId) && (
+                <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 text-[9px] sm:text-[10px] font-bold">
+                  <FileText className="w-3 h-3" />
+                  <span>Formulir</span>
+                </span>
+              )}
+            </div>
 
             {/* Status badge */}
             <span
-              className={`text-[10px] font-black px-2.5 py-1 rounded-xl border uppercase tracking-wider ml-auto flex items-center gap-1 ${
+              className={`text-[9px] sm:text-[10px] font-black px-2.5 py-1 rounded-xl border uppercase tracking-wider shrink-0 flex items-center gap-1 ${
                 isLocked
                   ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/25"
                   : isLateBlocked
@@ -321,13 +325,13 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
           </div>
         </div>
 
-        {/* Action Arrow */}
-        <ChevronRight className="w-5 h-5 text-slate-300 dark:text-white/20 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all flex-shrink-0 mt-1.5" />
+        {/* Action Arrow (hidden on tiny screens for maximum space) */}
+        <ChevronRight className="hidden sm:block w-5 h-5 text-slate-300 dark:text-white/20 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all flex-shrink-0 mt-1.5" />
       </div>
 
       {/* Rejected feedback preview */}
       {status === "REJECTED" && submission?.feedback && (
-        <div className="mt-3 ml-16 pl-4 border-l-2 border-rose-500/40 relative z-10">
+        <div className="mt-3 ml-12 sm:ml-16 pl-3 sm:pl-4 border-l-2 border-rose-500/40 relative z-10">
           <p className="text-[11px] text-rose-500 dark:text-rose-400 font-medium italic line-clamp-1">
             &quot;{submission.feedback}&quot;
           </p>
@@ -349,6 +353,18 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isDragging, setIsDragging] = useState(false);
+
+  // Lock body scroll when modal is active
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    const originalTouch = document.body.style.touchAction;
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.touchAction = originalTouch;
+    };
+  }, []);
 
   const status = getStatus(task.id, submission ? [submission] : []);
   const isOverdue = task.deadline && new Date(task.deadline) < new Date();
@@ -469,22 +485,22 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md select-none"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 md:p-6 bg-black/75 backdrop-blur-md select-none overflow-hidden"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0.94, y: 20 }}
+        initial={{ opacity: 0, scale: 0.94, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.94, y: 20 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="w-full max-w-2xl max-h-[92vh] overflow-y-auto bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-[32px] shadow-[0_30px_70px_rgba(0,0,0,0.45)] relative"
+        exit={{ opacity: 0, scale: 0.94, y: 15 }}
+        transition={{ type: "spring", stiffness: 320, damping: 28 }}
+        className="w-full max-w-2xl max-h-[88vh] sm:max-h-[90vh] flex flex-col bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-2xl sm:rounded-[32px] shadow-[0_30px_70px_rgba(0,0,0,0.5)] overflow-hidden relative my-auto"
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-start justify-between p-6 pb-4 bg-white dark:bg-[#07130e] border-b border-slate-100 dark:border-white/5">
-          <div className="flex-1 pr-4">
-            <div className="flex items-center gap-2 mb-2 flex-wrap">
+        <div className="flex items-start justify-between p-4 sm:p-6 pb-3 sm:pb-4 bg-white dark:bg-[#07130e] border-b border-slate-100 dark:border-white/5 shrink-0">
+          <div className="flex-1 pr-3 min-w-0">
+            <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
               <span
-                className={`inline-flex items-center gap-1 text-[10px] font-black px-2.5 py-1 rounded-full border uppercase tracking-wider ${
+                className={`inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-black px-2.5 py-0.5 sm:py-1 rounded-full border uppercase tracking-wider ${
                   isMain
                     ? "bg-amber-500/10 text-amber-600 dark:text-amber-300 border-amber-500/25"
                     : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border-emerald-500/20"
@@ -497,7 +513,7 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
               </span>
 
               <span
-                className={`inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${
+                className={`inline-flex items-center text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 sm:py-1 rounded-full border ${
                   task.isRequired !== false
                     ? "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20"
                     : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
@@ -509,7 +525,7 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
               </span>
 
               <span
-                className={`text-[10px] font-black px-2.5 py-1 rounded-lg border uppercase tracking-wider flex items-center gap-1 ${
+                className={`text-[9px] sm:text-[10px] font-black px-2.5 py-0.5 sm:py-1 rounded-lg border uppercase tracking-wider flex items-center gap-1 ${
                   isLocked
                     ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/25"
                     : statusCfg.badge
@@ -519,25 +535,25 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
                 {statusLabel}
               </span>
 
-              <span className="flex items-center gap-1 text-[11px] font-black text-amber-600 dark:text-amber-400 font-mono ml-auto">
+              <span className="flex items-center gap-1 text-[10px] sm:text-[11px] font-black text-amber-600 dark:text-amber-400 font-mono ml-auto">
                 <Zap className="w-3.5 h-3.5 fill-amber-400" />+{task.rewardXp} XP
               </span>
             </div>
-            <h2 className="text-xl font-black text-slate-900 dark:text-white leading-tight flex items-center gap-2">
-              {isLocked && <Lock className="w-5 h-5 text-amber-500 shrink-0" />}
-              <span>{task.title}</span>
+            <h2 className="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-snug flex items-center gap-1.5 truncate">
+              {isLocked && <Lock className="w-4 h-4 text-amber-500 shrink-0" />}
+              <span className="truncate">{task.title}</span>
             </h2>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2.5 rounded-2xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-400 dark:text-white/40 transition-colors cursor-pointer"
+            className="p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-400 dark:text-white/40 transition-colors cursor-pointer shrink-0"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 
-        <div className="p-6 space-y-5">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto flex-1 overscroll-contain">
           {/* Prerequisite Locked Alert Banner */}
           {isLocked && (
             <div className="p-4.5 bg-amber-500/10 border border-amber-500/25 rounded-2xl flex items-start gap-3.5 shadow-sm">

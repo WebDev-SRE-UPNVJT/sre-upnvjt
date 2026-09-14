@@ -100,12 +100,6 @@ const playSound = (type, isMuted = false, noteIndex = 0) => {
   } catch (e) {}
 };
 
-const KEYBOARD_ROWS = [
-  ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
-  ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
-  ["Z", "X", "C", "V", "B", "N", "M"]
-];
-
 // Particle Explosion Component
 function ParticleExplosion({ count = 28 }) {
   const particles = useMemo(() => {
@@ -150,7 +144,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
   const { theme: globalTheme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showVirtualKeyboard, setShowVirtualKeyboard] = useState(false);
+  const hiddenInputRef = useRef(null);
 
   useEffect(() => {
     setMounted(true);
@@ -283,6 +277,21 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
+  // Lock body scroll when activeWord or showWinModal is open
+  useEffect(() => {
+    if (activeWord || showWinModal) {
+      document.body.style.overflow = "hidden";
+      document.body.style.touchAction = "none";
+    } else {
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    };
+  }, [activeWord, showWinModal]);
+
   // Timer interval
   useEffect(() => {
     if (!isTimerRunning || showWinModal) return;
@@ -333,6 +342,10 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
     // Focus first empty slot
     const firstEmpty = currentLetters.findIndex((l) => !l);
     setActiveSlotIdx(firstEmpty !== -1 ? firstEmpty : 0);
+
+    setTimeout(() => {
+      hiddenInputRef.current?.focus();
+    }, 120);
   };
 
   // Click on a cell on the board
@@ -703,12 +716,12 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
       {/* ========================================================================= */}
       {/* 1. TOP BAR HUD (TIMER, LEVEL/RANK, STREAK, XP, SINGLE THEME TOGGLE) */}
       {/* ========================================================================= */}
-      <header className="relative z-20 w-full px-4 sm:px-6 py-3.5 flex items-center justify-between backdrop-blur-md border-b border-white/5">
+      <header className="relative z-20 w-full px-3 sm:px-6 py-2.5 sm:py-3.5 flex items-center justify-between backdrop-blur-md border-b border-white/5 shrink-0">
         {/* LEFT: TIMER & LEVEL RANK BADGE */}
-        <div className="flex items-center gap-2.5 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* DIGITAL TIMER */}
-          <div className="flex items-center gap-2 font-mono font-black text-base sm:text-lg tracking-tight">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_#34d399]" />
+          <div className="flex items-center gap-1.5 sm:gap-2 font-mono font-black text-sm sm:text-lg tracking-tight">
+            <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_#34d399]" />
             <span className="drop-shadow-md">
               {timeLimitMinutes ? formatSeconds(timeRemaining) : formatSeconds(elapsedTime)}
             </span>
@@ -724,7 +737,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
         </div>
 
         {/* CENTER: SUBTITLE (PICK A WORD / TYPE THE LETTERS) */}
-        <div className="font-bold text-xs sm:text-base tracking-wider text-center drop-shadow">
+        <div className="font-bold text-xs sm:text-base tracking-wider text-center drop-shadow hidden xs:block">
           <AnimatePresence mode="wait">
             {activeWord ? (
               <motion.span
@@ -751,27 +764,27 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
         </div>
 
         {/* RIGHT: REAL REWARD XP & SOLVED COUNTER */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3">
           {/* REAL REWARD XP BADGE */}
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-500 dark:text-amber-400 font-mono font-black text-xs shadow-sm">
-            <Zap className="w-3.5 h-3.5 fill-amber-400" />
-            <span>+{puzzleData?.rewardXp || 10} XP Reward</span>
+          <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-500 dark:text-amber-400 font-mono font-black text-[11px] sm:text-xs shadow-sm">
+            <Zap className="w-3.5 h-3.5 fill-amber-400 shrink-0" />
+            <span>+{puzzleData?.rewardXp || 10} XP<span className="hidden sm:inline"> Reward</span></span>
           </div>
 
           {/* SOLVED CHECK COUNTER (✓ 0 or ✓ 3/10) */}
-          <div className="flex items-center gap-1.5 font-black text-sm sm:text-base px-3 py-1 rounded-xl bg-black/20 dark:bg-white/10 border border-current/10 backdrop-blur-md">
-            <Check className="w-4 h-4 stroke-[3.5] text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+          <div className="flex items-center gap-1 sm:gap-1.5 font-black text-xs sm:text-base px-2 sm:px-3 py-1 rounded-xl bg-black/20 dark:bg-white/10 border border-current/10 backdrop-blur-md">
+            <Check className="w-3.5 sm:w-4 h-3.5 sm:h-4 stroke-[3.5] text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.8)] shrink-0" />
             <span>{correctWordsCount}</span>
-            <span className="opacity-40 text-xs">/{totalWords}</span>
+            <span className="opacity-40 text-[10px] sm:text-xs">/{totalWords}</span>
           </div>
 
-          {/* SINGLE INTEGRATED THEME TOGGLE (EXACTLY 1 TOGGLE) */}
+          {/* SINGLE INTEGRATED THEME TOGGLE */}
           {mounted && (
             <motion.button
               whileHover={{ scale: 1.12, rotate: isDark ? 15 : -15 }}
               whileTap={{ scale: 0.88, rotate: isDark ? -25 : 25 }}
               onClick={() => setTheme(isDark ? "light" : "dark")}
-              className={`w-9 h-9 rounded-full flex items-center justify-center border-2 shadow-lg transition-all cursor-pointer ${
+              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center border-2 shadow-lg transition-all cursor-pointer shrink-0 ${
                 isDark
                   ? "bg-[#07130e]/90 border-emerald-400 text-emerald-400 shadow-emerald-950/50 hover:shadow-emerald-500/40"
                   : "bg-[#0cc48a]/90 border-yellow-300 text-yellow-300 shadow-emerald-900/20 hover:shadow-yellow-300/50"
@@ -786,7 +799,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
                     animate={{ rotate: 0, opacity: 1, scale: 1 }}
                     exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
                   >
-                    <Sun className="w-4 h-4 drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                    <Sun className="w-3.5 sm:w-4 h-3.5 sm:h-4 drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
                   </motion.div>
                 ) : (
                   <motion.div
@@ -795,7 +808,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
                     animate={{ rotate: 0, opacity: 1, scale: 1 }}
                     exit={{ rotate: -90, opacity: 0, scale: 0.5 }}
                   >
-                    <Moon className="w-4 h-4 drop-shadow-[0_0_8px_rgba(253,224,71,0.8)] fill-current" />
+                    <Moon className="w-3.5 sm:w-4 h-3.5 sm:h-4 drop-shadow-[0_0_8px_rgba(253,224,71,0.8)] fill-current" />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -807,75 +820,78 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
       {/* ========================================================================= */}
       {/* 2. MAIN INTERACTIVE VIEW (CRISP SQUARE GRID vs FULL-SCREEN FOCUS QUESTION) */}
       {/* ========================================================================= */}
-      <main className="relative z-10 flex-1 w-full max-w-[1500px] mx-auto flex items-center justify-center p-4 overflow-auto">
+      <main className="relative z-10 flex-1 w-full max-w-[1500px] mx-auto flex items-center justify-center p-2 sm:p-6 overflow-auto">
         {/* ------------------------------------------------------------- */}
         {/* A. BOARD VIEW ("Pick a word") */}
         {/* ------------------------------------------------------------- */}
         <div
           className={`relative transition-all duration-500 w-full flex items-center justify-center ${
-            activeWord ? "filter blur-[6px] opacity-25 pointer-events-none scale-95" : "opacity-100 scale-100"
+            activeWord ? "filter blur-[8px] opacity-20 pointer-events-none scale-95" : "opacity-100 scale-100"
           }`}
         >
           {crosswordData.grid && crosswordData.grid.length > 0 ? (
-            <div
-              className="grid gap-[5px] sm:gap-[7px] select-none p-4 sm:p-6"
-              style={{
-                gridTemplateColumns: `repeat(${crosswordData.cols}, minmax(0, 1fr))`,
-                width: `${Math.min(crosswordData.cols * 52, 1000)}px`,
-              }}
-            >
-              {crosswordData.grid.map((row, rIdx) =>
-                row.map((cell, cIdx) => {
-                  const cellKey = `${rIdx},${cIdx}`;
-                  const isLetterCell = Boolean(cell && cell.char);
-                  const userLetter = userInputs[cellKey] || "";
-                  const isWordHovered = hoveredWordCells.has(cellKey);
+            <div className="w-full overflow-auto flex justify-center items-center py-2 px-1 max-h-full">
+              <div
+                className="grid gap-[4px] sm:gap-[7px] select-none p-2 sm:p-5 md:p-6 bg-black/10 dark:bg-white/5 rounded-2xl sm:rounded-3xl border border-current/10 shadow-inner"
+                style={{
+                  gridTemplateColumns: `repeat(${crosswordData.cols}, minmax(0, 1fr))`,
+                  width: `${Math.min(crosswordData.cols * (typeof window !== "undefined" && window.innerWidth < 640 ? 38 : 50), 960)}px`,
+                  maxWidth: "100%",
+                }}
+              >
+                {crosswordData.grid.map((row, rIdx) =>
+                  row.map((cell, cIdx) => {
+                    const cellKey = `${rIdx},${cIdx}`;
+                    const isLetterCell = Boolean(cell && cell.char);
+                    const userLetter = userInputs[cellKey] || "";
+                    const isWordHovered = hoveredWordCells.has(cellKey);
 
-                  if (!isLetterCell) {
-                    return <div key={cellKey} className="aspect-square w-full opacity-0 pointer-events-none" />;
-                  }
+                    if (!isLetterCell) {
+                      return <div key={cellKey} className="aspect-square w-full opacity-0 pointer-events-none" />;
+                    }
 
-                  return (
-                    <motion.div
-                      key={cellKey}
-                      whileHover={{ scale: 1.08, y: -3 }}
-                      whileTap={{ scale: 0.92 }}
-                      onMouseEnter={() => setHoveredCell({ row: rIdx, col: cIdx })}
-                      onMouseLeave={() => setHoveredCell(null)}
-                      onClick={() => handleCellClick(cell, rIdx, cIdx)}
-                      className={`relative aspect-square w-full rounded-lg sm:rounded-xl flex items-center justify-center font-black text-base sm:text-2xl transition-all cursor-pointer ${
-                        isDark
-                          ? userLetter
-                            ? "border-2 border-emerald-400 bg-gradient-to-b from-[#123e2d] to-[#0a271c] text-emerald-300 shadow-[0_6px_0_#051811] shadow-emerald-950/80"
+                    return (
+                      <motion.div
+                        key={cellKey}
+                        whileHover={{ scale: 1.08, y: -2 }}
+                        whileTap={{ scale: 0.92 }}
+                        onMouseEnter={() => setHoveredCell({ row: rIdx, col: cIdx })}
+                        onMouseLeave={() => setHoveredCell(null)}
+                        onClick={() => handleCellClick(cell, rIdx, cIdx)}
+                        className={`relative aspect-square w-full rounded-lg sm:rounded-2xl flex items-center justify-center font-black text-xs sm:text-2xl transition-all cursor-pointer ${
+                          isDark
+                            ? userLetter
+                              ? "border-2 border-emerald-400 bg-gradient-to-b from-[#123e2d] to-[#0a271c] text-emerald-300 shadow-[0_3px_0_#051811] sm:shadow-[0_4px_0_#051811] shadow-emerald-950/80"
+                              : isWordHovered
+                              ? "border-2 border-emerald-400 bg-[#0f2e21] text-white shadow-[0_3px_0_#061a12] sm:shadow-[0_4px_0_#061a12] shadow-emerald-500/20"
+                              : "border-2 border-white/40 bg-[#091a13]/85 text-white hover:border-emerald-400 hover:bg-[#113324] shadow-[0_3px_0_#040d09] sm:shadow-[0_4px_0_#040d09]"
+                            : userLetter
+                            ? "border-2 border-emerald-600 bg-emerald-100 text-emerald-950 shadow-[0_3px_0_#047857] sm:shadow-[0_4px_0_#047857]"
                             : isWordHovered
-                            ? "border-2 border-emerald-400 bg-[#0f2e21] text-white shadow-[0_6px_0_#061a12] shadow-emerald-500/20"
-                            : "border-2 border-white/40 bg-[#091a13]/85 text-white hover:border-emerald-400 hover:bg-[#113324] shadow-[0_5px_0_#040d09]"
-                          : userLetter
-                          ? "border-2 border-emerald-600 bg-emerald-100 text-emerald-950 shadow-[0_6px_0_#047857]"
-                          : isWordHovered
-                          ? "border-2 border-emerald-600 bg-emerald-50 text-slate-900 shadow-[0_6px_0_#94a3b8]"
-                          : "border-2 border-slate-400/80 bg-white/95 text-slate-900 hover:border-emerald-600 hover:bg-emerald-50 shadow-[0_5px_0_#cbd5e1]"
-                      }`}
-                    >
-                      {/* CRISP NUMBER IN TOP-LEFT (MATCHING REFERENCE) */}
-                      {cell.number && (
-                        <span
-                          className={`absolute top-0.5 left-1 text-[9px] sm:text-[11px] font-black leading-none drop-shadow ${
-                            isDark ? "text-white" : "text-slate-800"
-                          }`}
-                        >
-                          {cell.number}
-                        </span>
-                      )}
+                            ? "border-2 border-emerald-600 bg-emerald-50 text-slate-900 shadow-[0_3px_0_#94a3b8] sm:shadow-[0_4px_0_#94a3b8]"
+                            : "border-2 border-slate-400/80 bg-white/95 text-slate-900 hover:border-emerald-600 hover:bg-emerald-50 shadow-[0_3px_0_#cbd5e1] sm:shadow-[0_4px_0_#cbd5e1]"
+                        }`}
+                      >
+                        {/* CRISP NUMBER IN TOP-LEFT */}
+                        {cell.number && (
+                          <span
+                            className={`absolute top-0.5 left-0.5 sm:left-1 text-[7px] sm:text-[11px] font-black leading-none drop-shadow ${
+                              isDark ? "text-white" : "text-slate-800"
+                            }`}
+                          >
+                            {cell.number}
+                          </span>
+                        )}
 
-                      {/* USER SOLVED LETTER */}
-                      <span className="mt-0.5 font-mono font-black tracking-wider drop-shadow">
-                        {userLetter}
-                      </span>
-                    </motion.div>
-                  );
-                })
-              )}
+                        {/* USER SOLVED LETTER */}
+                        <span className="mt-0.5 font-mono font-black tracking-wider drop-shadow">
+                          {userLetter}
+                        </span>
+                      </motion.div>
+                    );
+                  })
+                )}
+              </div>
             </div>
           ) : (
             <div className="text-center py-12 opacity-60 text-sm">
@@ -885,194 +901,248 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
         </div>
 
         {/* ------------------------------------------------------------- */}
-        {/* B. FOCUS QUESTION VIEW ("Type the letters" - EXACT MATCH) */}
+        {/* B. FOCUS QUESTION VIEW - PERFECTLY CENTERED & NON-SCROLLABLE */}
         {/* ------------------------------------------------------------- */}
         <AnimatePresence>
           {activeWord && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.94, y: 25 }}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{
                 opacity: 1,
                 scale: 1,
-                y: 0,
                 x: shakeWord ? [-16, 16, -12, 12, -6, 6, 0] : 0,
               }}
-              exit={{ opacity: 0, scale: 0.94, y: 25 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-              onClick={(e) => {
-                // If clicked on backdrop area outside interactive boxes, return to board
-                if (e.target === e.currentTarget) {
-                  setActiveWord(null);
-                  setAnswerState("typing");
-                }
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              onClick={() => {
+                // Clicking anywhere refocuses the native phone keyboard
+                hiddenInputRef.current?.focus();
               }}
-              className="absolute inset-0 flex flex-col items-center justify-center p-6 max-w-5xl mx-auto z-30"
+              className={`fixed inset-0 z-50 flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 overflow-hidden backdrop-blur-3xl select-none ${
+                isDark ? "bg-[#06140e]/95 text-white" : "bg-slate-50/98 text-slate-900"
+              }`}
             >
-              {/* TOP HEADER CLUE BADGE */}
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-400 text-xs sm:text-sm font-black uppercase tracking-widest mb-4 shadow-lg backdrop-blur-md">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Soal #{activeWord.number}</span>
-                <span>•</span>
-                <span>{activeWord.direction === "ACROSS" ? "Mendatar" : "Menurun"}</span>
-                <span>•</span>
-                <span>{activeWord.length} Huruf</span>
-              </div>
+              {/* REAL HIDDEN INPUT TO TRIGGER NATIVE PHONE KEYBOARD */}
+              <input
+                ref={hiddenInputRef}
+                type="text"
+                inputMode="text"
+                autoFocus
+                autoCapitalize="characters"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck="false"
+                value=""
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val) {
+                    const char = val.slice(-1);
+                    handleInputLetter(char);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Backspace") {
+                    e.preventDefault();
+                    handleBackspace();
+                  }
+                }}
+                className="opacity-0 absolute -top-10 left-0 w-1 h-1 pointer-events-none"
+                aria-label="Ketik jawaban Anda"
+              />
 
-              {/* HUGE, ULTRA-PROMINENT QUESTION TEXT (MATCHING REFERENCE) */}
-              <div className="w-full text-center max-w-3xl px-4 py-4 pointer-events-none">
-                <h2 className="text-3xl sm:text-5xl md:text-6xl font-black leading-tight tracking-tight drop-shadow-2xl">
-                  {activeWord.clue}
-                </h2>
-              </div>
+              {/* CENTERED COMPACT CONTENT WRAPPER */}
+              <div className="w-full max-w-lg mx-auto flex flex-col items-center justify-center my-auto space-y-3 sm:space-y-4 px-1">
+                {/* TOP HEADER: BACK BUTTON & CLUE INFO */}
+                <div className="w-full flex items-center justify-between gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveWord(null);
+                      setAnswerState("typing");
+                    }}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-md ${
+                      isDark
+                        ? "bg-white/10 hover:bg-white/20 border-white/20 text-white"
+                        : "bg-white hover:bg-slate-100 border-slate-300 text-slate-800"
+                    }`}
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>Kembali ke Papan</span>
+                  </button>
 
-              {/* BOTTOM ROW: CLUE NUMBER + SQUARE LETTER BOXES (MATCHING REFERENCE) */}
-              <div className="flex items-center justify-center gap-3 sm:gap-4 flex-wrap mt-8 py-4">
-                {/* Word number on the left */}
-                <div className="text-2xl sm:text-4xl font-black opacity-90 drop-shadow pr-1">
-                  {activeWord.number}
+                  <div
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border text-xs font-black uppercase tracking-wider shadow-md ${
+                      isDark
+                        ? "bg-emerald-500/25 border-emerald-400/50 text-emerald-300"
+                        : "bg-emerald-100 border-emerald-400 text-emerald-800"
+                    }`}
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
+                    <span>Soal #{activeWord.number}</span>
+                    <span>•</span>
+                    <span>{activeWord.direction === "ACROSS" ? "Mendatar" : "Menurun"}</span>
+                  </div>
                 </div>
 
-                {/* Chunky tactile letter boxes */}
-                {typedLetters.map((letter, idx) => {
-                  const isActive = activeSlotIdx === idx;
-                  const isFilled = Boolean(letter);
+                {/* QUESTION CARD */}
+                <div
+                  className={`w-full p-4 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl border shadow-xl backdrop-blur-md text-center shrink-0 ${
+                    isDark
+                      ? "bg-[#081f16] border-emerald-500/30 text-white"
+                      : "bg-white border-emerald-500/30 text-slate-900 shadow-slate-200/80"
+                  }`}
+                >
+                  <span
+                    className={`text-[10px] sm:text-[11px] font-black uppercase tracking-widest block mb-1.5 opacity-90 ${
+                      isDark ? "text-emerald-400" : "text-emerald-600"
+                    }`}
+                  >
+                    Pertanyaan ({activeWord.length} Huruf)
+                  </span>
+                  <h2
+                    className={`text-base sm:text-2xl md:text-3xl font-black leading-snug tracking-tight drop-shadow-sm ${
+                      isDark ? "text-white" : "text-slate-900"
+                    }`}
+                  >
+                    {activeWord.clue}
+                  </h2>
+                </div>
 
-                  return (
-                    <motion.button
-                      key={idx}
-                      whileHover={{ scale: 1.08, y: -3 }}
-                      whileTap={{ scale: 0.92 }}
-                      onClick={() => setActiveSlotIdx(idx)}
-                      className={`w-12 h-14 sm:w-16 sm:h-20 md:w-20 md:h-24 rounded-xl sm:rounded-2xl flex items-center justify-center text-2xl sm:text-3xl md:text-5xl font-black font-mono uppercase transition-all relative cursor-pointer ${
-                        answerState === "correct"
-                          ? "bg-emerald-400 border-2 border-emerald-200 text-slate-950 shadow-[0_8px_0_#047857] scale-105"
-                          : answerState === "wrong"
-                          ? "bg-rose-600 border-2 border-rose-300 text-white shadow-[0_8px_0_#9f1239]"
-                          : isFilled
-                          ? isDark
-                            ? "bg-gradient-to-b from-[#144230] to-[#092419] border-2 border-emerald-400 text-emerald-300 shadow-[0_7px_0_#051710] translate-y-[-2px]"
-                            : "bg-white border-2 border-emerald-600 text-emerald-950 shadow-[0_7px_0_#047857] translate-y-[-2px]"
-                          : isActive
-                          ? isDark
-                            ? "bg-[#0b261b] border-2 border-emerald-400 text-white shadow-[0_7px_0_#05150f] ring-4 ring-emerald-500/40 translate-y-[-2px]"
-                            : "bg-white border-2 border-emerald-600 text-slate-900 shadow-[0_7px_0_#047857] ring-4 ring-emerald-500/30 translate-y-[-2px]"
-                          : isDark
-                          ? "border-2 border-white/40 bg-[#081811]/90 text-white/50 shadow-[0_5px_0_#030b07]"
-                          : "border-2 border-slate-400 bg-white text-slate-400 shadow-[0_5px_0_#cbd5e1]"
-                      }`}
-                    >
-                      {letter ? (
-                        <motion.span
-                          initial={{ scale: 0.6, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{ type: "spring", stiffness: 500, damping: 20 }}
-                          className="drop-shadow"
+                {/* LETTER BOXES / SLOTS (RESPONSIVE FOR ALL SCREEN SIZES) */}
+                <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 md:gap-3 flex-wrap py-1 max-w-full">
+                  {typedLetters.map((letter, idx) => {
+                    const isActive = activeSlotIdx === idx;
+                    const isFilled = Boolean(letter);
+                    const isLongWord = typedLetters.length > 7;
+
+                    return (
+                      <motion.button
+                        key={idx}
+                        type="button"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveSlotIdx(idx);
+                          hiddenInputRef.current?.focus();
+                        }}
+                        className={`${
+                          isLongWord
+                            ? "w-9 h-11 text-lg sm:w-12 sm:h-14 sm:text-2xl md:w-15 md:h-18 md:text-3xl"
+                            : "w-11 h-13 text-xl sm:w-14 sm:h-16 sm:text-2xl md:w-16 md:h-20 md:text-3xl"
+                        } rounded-xl sm:rounded-2xl flex items-center justify-center font-black font-mono uppercase transition-all relative cursor-pointer select-none ${
+                          answerState === "correct"
+                            ? "bg-emerald-400 border-2 border-emerald-200 text-slate-950 shadow-[0_4px_0_#047857] scale-105"
+                            : answerState === "wrong"
+                            ? "bg-rose-600 border-2 border-rose-300 text-white shadow-[0_4px_0_#9f1239]"
+                            : isFilled
+                            ? isDark
+                              ? "bg-gradient-to-b from-[#144230] to-[#092419] border-2 border-emerald-400 text-emerald-300 shadow-[0_4px_0_#051710]"
+                              : "bg-emerald-100 border-2 border-emerald-600 text-emerald-950 shadow-[0_4px_0_#047857]"
+                            : isActive
+                            ? isDark
+                              ? "bg-[#0b261b] border-2 border-emerald-400 text-white shadow-[0_4px_0_#05150f] ring-2 sm:ring-4 ring-emerald-500/40 scale-105"
+                              : "bg-white border-2 border-emerald-600 text-slate-900 shadow-[0_4px_0_#047857] ring-2 sm:ring-4 ring-emerald-500/30 scale-105"
+                            : isDark
+                            ? "bg-[#081811]/90 border-2 border-white/30 text-white/40 shadow-[0_3px_0_#030b07]"
+                            : "bg-white border-2 border-slate-300 text-slate-400 shadow-[0_3px_0_#cbd5e1]"
+                        }`}
+                      >
+                        {letter ? (
+                          <motion.span
+                            initial={{ scale: 0.5, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                            className="drop-shadow-md"
+                          >
+                            {letter}
+                          </motion.span>
+                        ) : (
+                          isActive && (
+                            <span className="w-3 sm:w-5 h-1 rounded-full bg-emerald-500 opacity-90 animate-pulse" />
+                          )
+                        )}
+
+                        {/* Slot Index Number */}
+                        <span
+                          className={`absolute -bottom-1 text-[7px] sm:text-[8px] font-bold select-none ${
+                            isDark ? "opacity-60 text-white" : "opacity-60 text-slate-600"
+                          }`}
                         >
-                          {letter}
-                        </motion.span>
-                      ) : (
-                        isActive && (
-                          <span className="w-5 sm:w-8 h-1.5 rounded-full bg-emerald-400 opacity-90 animate-pulse" />
-                        )
-                      )}
-                    </motion.button>
-                  );
-                })}
-              </div>
+                          {idx + 1}
+                        </span>
+                      </motion.button>
+                    );
+                  })}
+                </div>
 
-              {/* HINT SUBTITLE */}
-              <p className="text-xs sm:text-sm opacity-60 mt-4 tracking-wide font-medium">
-                Ketik huruf jawaban menggunakan keyboard • Klik di luar untuk kembali ke papan
-              </p>
+                {/* HELPER QUICK ACTION BUTTONS */}
+                <div className="flex items-center justify-center gap-2.5 pt-1 shrink-0">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleBackspace();
+                      hiddenInputRef.current?.focus();
+                    }}
+                    className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-md ${
+                      isDark
+                        ? "bg-rose-950/70 hover:bg-rose-900 border-rose-500/40 text-rose-300 hover:text-white shadow-[0_3px_0_#4c0519]"
+                        : "bg-rose-100 hover:bg-rose-200 border-rose-300 text-rose-800 shadow-[0_3px_0_#fca5a5]"
+                    }`}
+                  >
+                    <Delete className="w-3.5 h-3.5" />
+                    <span>Hapus (⌫)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setTypedLetters(new Array(activeWord.length).fill(""));
+                      setActiveSlotIdx(0);
+                      hiddenInputRef.current?.focus();
+                    }}
+                    className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-md ${
+                      isDark
+                        ? "bg-slate-800/80 hover:bg-slate-700 border-white/15 text-slate-300 hover:text-white shadow-[0_3px_0_#0f172a]"
+                        : "bg-slate-200 hover:bg-slate-300 border-slate-300 text-slate-800 shadow-[0_3px_0_#cbd5e1]"
+                    }`}
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Kosongkan</span>
+                  </button>
+                </div>
+
+                <p className={`text-[11px] sm:text-xs tracking-wide font-medium text-center shrink-0 ${isDark ? "opacity-50 text-white" : "opacity-60 text-slate-600"}`}>
+                  Ketik jawaban langsung menggunakan keyboard HP Anda
+                </p>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
       </main>
 
       {/* ========================================================================= */}
-      {/* 3. VIRTUAL KEYBOARD (TOGGLEABLE ON BOTTOM) */}
+      {/* 4. BOTTOM ACTION BAR (BACK/PAUSE, SOUND, FULLSCREEN) */}
       {/* ========================================================================= */}
-      <AnimatePresence>
-        {showVirtualKeyboard && (
-          <motion.div
-            initial={{ opacity: 0, y: 70 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 70 }}
-            className={`relative z-30 w-full max-w-xl mx-auto p-4 rounded-3xl mb-3 backdrop-blur-2xl border-2 shadow-2xl ${
-              isDark
-                ? "bg-[#07130e]/95 border-emerald-500/40 text-white shadow-emerald-950/80"
-                : "bg-white/95 border-emerald-500/30 text-slate-900 shadow-slate-300/60"
-            }`}
-          >
-            <div className="space-y-1.5">
-              {KEYBOARD_ROWS.map((row, rIdx) => (
-                <div key={rIdx} className="flex justify-center gap-1 sm:gap-1.5">
-                  {row.map((letter) => (
-                    <button
-                      key={letter}
-                      onClick={() => handleInputLetter(letter)}
-                      className={`w-8 sm:w-10 h-10 sm:h-12 rounded-xl font-black text-sm sm:text-base transition-all active:scale-90 cursor-pointer ${
-                        isDark
-                          ? "bg-slate-800 hover:bg-emerald-500 hover:text-black text-white border border-white/10 shadow-[0_3px_0_#0f172a]"
-                          : "bg-slate-200 hover:bg-emerald-600 hover:text-white text-slate-800 border border-slate-300 shadow-[0_3px_0_#94a3b8]"
-                      }`}
-                    >
-                      {letter}
-                    </button>
-                  ))}
-
-                  {rIdx === 2 && (
-                    <button
-                      onClick={handleBackspace}
-                      className={`px-3.5 h-10 sm:h-12 rounded-xl font-bold text-xs flex items-center justify-center transition-all active:scale-90 cursor-pointer ${
-                        isDark
-                          ? "bg-rose-950/60 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 shadow-[0_3px_0_#4c0519]"
-                          : "bg-rose-100 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 shadow-[0_3px_0_#fca5a5]"
-                      }`}
-                      title="Hapus"
-                    >
-                      <Delete className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ========================================================================= */}
-      {/* 4. BOTTOM ACTION BAR (BACK/PAUSE, KEYBOARD TOGGLE, SOUND, FULLSCREEN) */}
-      {/* ========================================================================= */}
-      <footer className="relative z-20 w-full px-6 py-4 flex items-center justify-between backdrop-blur-md border-t border-white/5">
-        {/* LEFT: BACK / PAUSE */}
+      <footer className="relative z-20 w-full px-4 sm:px-6 py-2.5 sm:py-3.5 flex items-center justify-between backdrop-blur-md border-t border-white/5 shrink-0">
+        {/* LEFT: BACK */}
         <Link
           href={onBackUrl}
-          className="p-2.5 rounded-xl border border-current/15 bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 transition-all cursor-pointer opacity-80 hover:opacity-100"
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full border border-current/15 bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 transition-all cursor-pointer text-xs font-bold opacity-80 hover:opacity-100"
           title="Kembali ke Daftar TTS"
         >
           <ArrowLeft className="w-4 h-4" />
+          <span>Kembali</span>
         </Link>
-
-        {/* CENTER: KEYBOARD TOGGLE */}
-        <button
-          onClick={() => setShowVirtualKeyboard(!showVirtualKeyboard)}
-          className={`p-2.5 sm:px-4 sm:py-2 rounded-xl border font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
-            showVirtualKeyboard
-              ? "bg-emerald-500 text-slate-950 border-emerald-400 shadow-lg shadow-emerald-500/40"
-              : "bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 border-current/15 opacity-80 hover:opacity-100"
-          }`}
-          title="Toggle Keyboard Virtual"
-        >
-          <KeyboardIcon className="w-4 h-4" />
-          <span className="hidden sm:inline">Keyboard</span>
-        </button>
 
         {/* RIGHT: SOUND & FULLSCREEN */}
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsMuted(!isMuted)}
-            className="p-2.5 rounded-xl border border-current/15 bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 transition-all cursor-pointer opacity-80 hover:opacity-100"
+            className="p-2 sm:p-2.5 rounded-full border border-current/15 bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 transition-all cursor-pointer opacity-80 hover:opacity-100"
             title={isMuted ? "Aktifkan Suara" : "Matikan Suara"}
           >
             {isMuted ? <VolumeX className="w-4 h-4 opacity-50" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
@@ -1080,7 +1150,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
 
           <button
             onClick={toggleFullscreen}
-            className="p-2.5 rounded-xl border border-current/15 bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 transition-all cursor-pointer opacity-80 hover:opacity-100"
+            className="p-2 sm:p-2.5 rounded-full border border-current/15 bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 transition-all cursor-pointer opacity-80 hover:opacity-100"
             title={isFullscreen ? "Keluar Layar Penuh" : "Layar Penuh"}
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4 text-emerald-400" /> : <Maximize2 className="w-4 h-4" />}
@@ -1093,12 +1163,12 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
       {/* ========================================================================= */}
       <AnimatePresence>
         {showWinModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-3xl">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-3xl overflow-hidden select-none">
             <motion.div
               initial={{ opacity: 0, scale: 0.85, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.85, y: 20 }}
-              className={`border-2 rounded-[40px] p-6 sm:p-10 max-w-lg w-full text-center space-y-6 relative overflow-hidden backdrop-blur-3xl shadow-2xl ${
+              className={`border-2 rounded-3xl sm:rounded-[40px] p-5 sm:p-8 max-w-lg w-full text-center space-y-4 sm:space-y-6 relative overflow-hidden backdrop-blur-3xl shadow-2xl ${
                 isDark ? "bg-[#081812] border-emerald-400/50 text-white" : "bg-white border-emerald-500/40 text-slate-900"
               }`}
             >
