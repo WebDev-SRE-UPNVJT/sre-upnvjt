@@ -31,10 +31,10 @@ function DocCard({ doc, index }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      className="group bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 hover:border-primary/30 rounded-2xl p-4 transition-all duration-300 hover:shadow-[0_0_25px_rgba(16,185,129,0.08)] flex gap-4 items-start"
+      className="group bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 hover:border-primary/30 rounded-xl p-4 transition-all duration-300 hover:shadow-[0_0_25px_rgba(16,185,129,0.08)] flex gap-4 items-start"
     >
       {/* File type badge */}
-      <div className={`w-11 h-11 rounded-xl border flex items-center justify-center flex-shrink-0 ${style.bg}`}>
+      <div className={`w-11 h-11 rounded-lg border flex items-center justify-center flex-shrink-0 ${style.bg}`}>
         <span className={`text-[10px] font-black ${style.color}`}>{style.label}</span>
       </div>
 
@@ -65,7 +65,7 @@ function DocCard({ doc, index }) {
         href={doc.fileUrl}
         target="_blank"
         rel="noreferrer"
-        className="p-2 rounded-xl hover:bg-primary/10 text-slate-300 dark:text-white/20 hover:text-primary transition-colors flex-shrink-0"
+        className="p-2 rounded-lg hover:bg-primary/10 text-slate-300 dark:text-white/20 hover:text-primary transition-colors flex-shrink-0"
         title="Buka file"
       >
         <ExternalLink className="w-4 h-4" />
@@ -149,7 +149,7 @@ export default function DokumenClient({ categories, initialDocuments }) {
           </div>
           <button
             onClick={() => { setShowForm(true); setError(""); setSuccess(""); }}
-            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-primary to-emerald-400 text-[#050e0a] font-black text-sm tracking-widest uppercase shadow-[0_0_20px_rgba(16,185,129,0.25)] hover:shadow-[0_0_30px_rgba(16,185,129,0.45)] hover:scale-[1.02] transition-all"
+            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-primary to-emerald-400 text-[#050e0a] font-black text-sm tracking-widest uppercase shadow-[0_0_20px_rgba(16,185,129,0.25)] hover:shadow-[0_0_30px_rgba(16,185,129,0.45)] hover:scale-[1.02] transition-all"
           >
             <Plus className="w-4 h-4" /> Upload Baru
           </button>
@@ -167,7 +167,7 @@ export default function DokumenClient({ categories, initialDocuments }) {
             color: "text-primary",
           })),
         ].map((s) => (
-          <div key={s.label} className="flex flex-col items-center px-5 py-3 bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-2xl shadow-sm">
+          <div key={s.label} className="flex flex-col items-center px-5 py-3 bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-xl shadow-sm">
             <span className={`text-xl font-black ${s.color}`}>{s.val}</span>
             <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/30 mt-0.5 whitespace-nowrap">{s.label}</span>
           </div>
@@ -177,10 +177,10 @@ export default function DokumenClient({ categories, initialDocuments }) {
       {/* ── Filter + Search ───────────────────────────────────── */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}
         className="flex flex-col sm:flex-row gap-3">
-        <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/8 rounded-2xl overflow-x-auto flex-wrap">
+        <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/8 rounded-xl overflow-x-auto flex-wrap">
           <button
             onClick={() => setCat("ALL")}
-            className={`px-3.5 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all ${catFilter === "ALL" ? "bg-white dark:bg-[#0d1f17] text-primary border border-primary/20 shadow-sm" : "text-slate-500 dark:text-white/40"}`}
+            className={`px-3.5 py-2 rounded-lg text-xs font-black whitespace-nowrap transition-all ${catFilter === "ALL" ? "bg-white dark:bg-[#0d1f17] text-primary border border-primary/20 shadow-sm" : "text-slate-500 dark:text-white/40"}`}
           >
             Semua ({docs.length})
           </button>
@@ -188,7 +188,7 @@ export default function DokumenClient({ categories, initialDocuments }) {
             <button
               key={c.id}
               onClick={() => setCat(c.id.toString())}
-              className={`px-3.5 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all ${catFilter === c.id.toString() ? "bg-white dark:bg-[#0d1f17] text-primary border border-primary/20 shadow-sm" : "text-slate-500 dark:text-white/40"}`}
+              className={`px-3.5 py-2 rounded-lg text-xs font-black whitespace-nowrap transition-all ${catFilter === c.id.toString() ? "bg-white dark:bg-[#0d1f17] text-primary border border-primary/20 shadow-sm" : "text-slate-500 dark:text-white/40"}`}
             >
               {c.name} ({docs.filter((d) => d.categoryId === c.id).length})
             </button>
@@ -200,7 +200,7 @@ export default function DokumenClient({ categories, initialDocuments }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari dokumen..."
-            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/8 rounded-2xl text-sm font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/25 focus:outline-none focus:border-primary/50 transition-all"
+            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/8 rounded-xl text-sm font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/25 focus:outline-none focus:border-primary/50 transition-all"
           />
         </div>
       </motion.div>
@@ -215,7 +215,7 @@ export default function DokumenClient({ categories, initialDocuments }) {
           icon={FolderOpen}
           title="Belum ada dokumen"
           description={search || catFilter !== "ALL" ? "Tidak ditemukan dokumen dengan filter ini." : "Upload dokumen pertamamu sekarang!"}
-          className="py-20 bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-3xl"
+          className="py-20 bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/10 rounded-xl"
         />
       )}
 
@@ -234,7 +234,7 @@ export default function DokumenClient({ categories, initialDocuments }) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.94, y: 20 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="w-full max-w-lg bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-3xl shadow-[0_40px_80px_rgba(0,0,0,0.4)] overflow-hidden"
+              className="w-full max-w-lg bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden"
             >
               {/* Modal Header */}
               <div className="flex items-center justify-between p-6 pb-4 border-b border-slate-100 dark:border-white/5">
@@ -243,7 +243,7 @@ export default function DokumenClient({ categories, initialDocuments }) {
                   <p className="text-xs text-slate-400 dark:text-white/40 mt-0.5">File akan diupload ke Google Drive SRE</p>
                 </div>
                 {!loading && (
-                  <button onClick={() => setShowForm(false)} className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 text-slate-400 transition-colors">
+                  <button onClick={() => setShowForm(false)} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-400 transition-colors">
                     <X className="w-5 h-5" />
                   </button>
                 )}
@@ -258,7 +258,7 @@ export default function DokumenClient({ categories, initialDocuments }) {
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Contoh: Notulensi Rapat 17 Juli 2025"
                     required
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:border-primary/50 transition-all"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:border-primary/50 transition-all"
                   />
                 </div>
 
@@ -270,7 +270,7 @@ export default function DokumenClient({ categories, initialDocuments }) {
                       <select
                         value={catId}
                         onChange={(e) => setCatId(e.target.value)}
-                        className="w-full appearance-none px-4 py-3 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:border-primary/50 transition-all pr-10"
+                        className="w-full appearance-none px-4 py-3 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:border-primary/50 transition-all pr-10"
                       >
                         {categories.map((c) => (
                           <option key={c.id} value={c.id}>{c.name}</option>
@@ -292,7 +292,7 @@ export default function DokumenClient({ categories, initialDocuments }) {
                     value={desc}
                     onChange={(e) => setDesc(e.target.value)}
                     placeholder="Keterangan singkat tentang dokumen ini..."
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:border-primary/50 transition-all"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:border-primary/50 transition-all"
                   />
                 </div>
 
@@ -304,7 +304,7 @@ export default function DokumenClient({ categories, initialDocuments }) {
                     onDragLeave={() => setDragging(false)}
                     onDrop={(e) => { e.preventDefault(); setDragging(false); setFile(e.dataTransfer.files[0] ?? null); }}
                     onClick={() => fileRef.current?.click()}
-                    className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all duration-300
+                    className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-300
                       ${isDragging ? "border-primary bg-primary/5" :
                         file ? "border-emerald-500/50 bg-emerald-500/5" :
                                "border-slate-300 dark:border-white/15 hover:border-primary/50 hover:bg-primary/5"}`}
@@ -353,7 +353,7 @@ export default function DokumenClient({ categories, initialDocuments }) {
                 <button
                   type="submit"
                   disabled={loading || categories.length === 0}
-                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-primary to-emerald-400 text-[#050e0a] font-black text-sm tracking-widest uppercase transition-all hover:scale-[1.01] shadow-[0_0_25px_rgba(16,185,129,0.25)] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2.5"
+                  className="w-full py-4 rounded-xl bg-gradient-to-r from-primary to-emerald-400 text-[#050e0a] font-black text-sm tracking-widest uppercase transition-all hover:scale-[1.01] shadow-[0_0_25px_rgba(16,185,129,0.25)] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2.5"
                 >
                   {loading ? (
                     <><div className="w-4 h-4 rounded-full border-2 border-[#050e0a]/30 border-t-[#050e0a] animate-spin" />Mengupload ke Google Drive...</>
@@ -369,3 +369,4 @@ export default function DokumenClient({ categories, initialDocuments }) {
     </div>
   );
 }
+

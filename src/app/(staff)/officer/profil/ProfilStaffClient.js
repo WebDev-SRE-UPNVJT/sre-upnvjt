@@ -141,7 +141,7 @@ export default function ProfilStaffClient({ user }) {
             initial={{ opacity: 0, y: -50, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            className={`fixed top-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl backdrop-blur-xl border ${
+            className={`fixed top-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-2xl backdrop-blur-xl border ${
               notification.type === "success" 
                 ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold bg-white dark:bg-[#071a12]" 
                 : "bg-red-500/15 border-red-500/30 text-red-600 dark:text-red-400 font-bold bg-white dark:bg-[#1a0707]"
@@ -162,14 +162,14 @@ export default function ProfilStaffClient({ user }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between relative overflow-hidden shadow-xl dark:shadow-2xl gap-6"
+        className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-xl p-5 sm:p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between relative overflow-hidden shadow-xl dark:shadow-2xl gap-6"
       >
         <div className="absolute -left-16 -top-16 w-48 h-48 rounded-full bg-emerald-500/20 dark:bg-emerald-500/10 blur-[50px] pointer-events-none" />
 
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-5">
           {/* Static Avatar */}
           <div className="shrink-0">
-            <div className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-gradient-to-tr from-emerald-600 to-teal-500 border-2 border-emerald-500/30 flex items-center justify-center text-white font-black text-2xl md:text-3xl shadow-lg shadow-emerald-500/20 overflow-hidden">
+            <div className="w-18 h-18 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 border-2 border-emerald-500/30 flex items-center justify-center text-white font-black text-2xl md:text-3xl shadow-lg shadow-emerald-500/20 overflow-hidden">
               {profileData.profilePictureUrl ? (
                 <img 
                   src={profileData.profilePictureUrl} 
@@ -196,7 +196,7 @@ export default function ProfilStaffClient({ user }) {
               )}
             </div>
 
-            <h1 className="text-2xl md:text-3xl font-display font-black tracking-tight text-slate-900 dark:text-white">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-display font-black tracking-tight text-slate-900 dark:text-white">
               {profileData.name}
             </h1>
             <p className="text-xs md:text-sm text-slate-500 dark:text-white/50 font-medium">
@@ -206,19 +206,19 @@ export default function ProfilStaffClient({ user }) {
             {/* Position / Dept / Div Badges */}
             <div className="flex flex-wrap items-center gap-2 pt-1">
               {user.positionName && (
-                <span className="text-[11px] font-bold px-2.5 py-1 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center gap-1">
+                <span className="text-[11px] font-bold px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center gap-1">
                   <Briefcase className="w-3 h-3" />
                   {user.positionName}
                 </span>
               )}
               {user.departmentName && (
-                <span className="text-[11px] font-bold px-2.5 py-1 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center gap-1">
+                <span className="text-[11px] font-bold px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center gap-1">
                   <Building2 className="w-3 h-3" />
                   {user.departmentName}
                 </span>
               )}
               {user.divisionName && (
-                <span className="text-[11px] font-bold px-2.5 py-1 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 flex items-center gap-1">
+                <span className="text-[11px] font-bold px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 flex items-center gap-1">
                   <Layers className="w-3 h-3" />
                   {user.divisionName}
                 </span>
@@ -232,7 +232,7 @@ export default function ProfilStaffClient({ user }) {
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/30">
             {t("officer_profile.account_status") || "Status Akun"}
           </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-xs border border-emerald-500/20">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-xs border border-emerald-500/20">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             {t("officer_profile.account_verified") || "Aktif Terverifikasi"}
           </span>
@@ -250,10 +250,10 @@ export default function ProfilStaffClient({ user }) {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.1 }}
-            className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-3xl p-6 shadow-xl dark:shadow-2xl"
+            className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-xl p-5 sm:p-6 shadow-xl dark:shadow-2xl"
           >
             <div className="flex items-center gap-3 mb-5 pb-3.5 border-b border-slate-100 dark:border-white/5">
-              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500">
                 <Briefcase className="w-4 h-4" />
               </div>
               <div>
@@ -266,9 +266,9 @@ export default function ProfilStaffClient({ user }) {
               </div>
             </div>
 
-            <div className="space-y-3.5">
+            <div className="space-y-3">
               {/* Position */}
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
                 <div className="flex items-center gap-2 text-slate-500 dark:text-white/50 text-xs font-semibold">
                   <Briefcase className="w-3.5 h-3.5 text-amber-500" />
                   <span>{t("officer_profile.position") || "Posisi / Jabatan"}</span>
@@ -279,7 +279,7 @@ export default function ProfilStaffClient({ user }) {
               </div>
 
               {/* Department */}
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
                 <div className="flex items-center gap-2 text-slate-500 dark:text-white/50 text-xs font-semibold">
                   <Building2 className="w-3.5 h-3.5 text-blue-500" />
                   <span>{t("officer_profile.department") || "Departemen"}</span>
@@ -290,7 +290,7 @@ export default function ProfilStaffClient({ user }) {
               </div>
 
               {/* Division */}
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
                 <div className="flex items-center gap-2 text-slate-500 dark:text-white/50 text-xs font-semibold">
                   <Layers className="w-3.5 h-3.5 text-purple-500" />
                   <span>{t("officer_profile.division") || "Divisi"}</span>
@@ -301,7 +301,7 @@ export default function ProfilStaffClient({ user }) {
               </div>
 
               {/* Role */}
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5">
                 <div className="flex items-center gap-2 text-slate-500 dark:text-white/50 text-xs font-semibold">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
                   <span>{t("officer_profile.account_role") || "Peran Akun"}</span>
@@ -318,7 +318,7 @@ export default function ProfilStaffClient({ user }) {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.15 }}
-            className="bg-emerald-500/5 border border-emerald-500/20 rounded-3xl p-5"
+            className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4 sm:p-5"
           >
             <div className="flex items-start gap-3">
               <ShieldAlert className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
@@ -339,11 +339,11 @@ export default function ProfilStaffClient({ user }) {
         <div className="lg:col-span-8 space-y-6">
           
           {/* Tabs Switcher */}
-          <div className="flex items-center gap-2 bg-white/70 dark:bg-[#08120e]/70 border border-slate-200/80 dark:border-white/5 p-1.5 rounded-2xl backdrop-blur-xl w-full sm:w-fit shadow-sm">
+          <div className="flex items-center gap-2 bg-white/70 dark:bg-[#08120e]/70 border border-slate-200/80 dark:border-white/5 p-1.5 rounded-xl backdrop-blur-xl w-full sm:w-fit shadow-sm">
             <button
               type="button"
               onClick={() => setActiveTab("biodata")}
-              className={`flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer ${
+              className={`flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-lg text-xs md:text-sm font-bold transition-all cursor-pointer ${
                 activeTab === "biodata"
                   ? "bg-emerald-500 text-slate-950 font-black shadow-md shadow-emerald-500/20"
                   : "text-slate-600 dark:text-white/60 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
@@ -356,7 +356,7 @@ export default function ProfilStaffClient({ user }) {
             <button
               type="button"
               onClick={() => setActiveTab("security")}
-              className={`flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer ${
+              className={`flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-lg text-xs md:text-sm font-bold transition-all cursor-pointer ${
                 activeTab === "security"
                   ? "bg-emerald-500 text-slate-950 font-black shadow-md shadow-emerald-500/20"
                   : "text-slate-600 dark:text-white/60 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
@@ -375,14 +375,14 @@ export default function ProfilStaffClient({ user }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.25 }}
-              className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-3xl p-6 md:p-8 shadow-xl dark:shadow-2xl"
+              className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-xl p-5 sm:p-6 md:p-8 shadow-xl dark:shadow-2xl"
             >
               <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-white/5">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
-                  <User className="w-5 h-5" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                  <User className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                  <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
                     {t("officer_profile.biodata_title") || "Informasi Biodata & NPM"}
                   </h2>
                   <p className="text-xs text-slate-500 dark:text-white/40">
@@ -391,7 +391,7 @@ export default function ProfilStaffClient({ user }) {
                 </div>
               </div>
 
-              <form onSubmit={handleProfileSubmit} className="space-y-5">
+              <form onSubmit={handleProfileSubmit} className="space-y-4 sm:space-y-5">
                 {/* Nama Lengkap */}
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold tracking-wider text-slate-600 dark:text-white/70 uppercase">
@@ -404,7 +404,7 @@ export default function ProfilStaffClient({ user }) {
                       value={profileData.name}
                       onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
                       placeholder={t("officer_profile.name_placeholder") || "Contoh: Budi Prasetyo"}
-                      className="w-full h-12 pl-11 pr-4 bg-slate-50 dark:bg-[#060e0a] border border-slate-200 dark:border-white/10 rounded-2xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 text-xs md:text-sm font-semibold focus:outline-none focus:border-emerald-500 transition-all"
+                      className="w-full h-11 sm:h-12 pl-11 pr-4 bg-slate-50 dark:bg-[#060e0a] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 text-xs md:text-sm font-semibold focus:outline-none focus:border-emerald-500 transition-all"
                     />
                     <User className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                   </div>
@@ -421,7 +421,7 @@ export default function ProfilStaffClient({ user }) {
                       value={profileData.npm}
                       onChange={(e) => setProfileData({ ...profileData, npm: e.target.value.replace(/[^0-9]/g, '') })}
                       placeholder={t("officer_profile.npm_placeholder") || "Contoh: 22081010045"}
-                      className="w-full h-12 pl-11 pr-4 bg-slate-50 dark:bg-[#060e0a] border border-slate-200 dark:border-white/10 rounded-2xl text-slate-900 dark:text-white font-mono placeholder:text-slate-400 dark:placeholder:text-white/20 text-xs md:text-sm font-semibold focus:outline-none focus:border-emerald-500 transition-all"
+                      className="w-full h-11 sm:h-12 pl-11 pr-4 bg-slate-50 dark:bg-[#060e0a] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white font-mono placeholder:text-slate-400 dark:placeholder:text-white/20 text-xs md:text-sm font-semibold focus:outline-none focus:border-emerald-500 transition-all"
                     />
                     <Hash className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                   </div>
@@ -440,7 +440,7 @@ export default function ProfilStaffClient({ user }) {
                       type="email"
                       disabled
                       value={profileData.email}
-                      className="w-full h-12 pl-11 pr-4 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-2xl text-slate-500 dark:text-white/40 text-xs md:text-sm font-medium cursor-not-allowed"
+                      className="w-full h-11 sm:h-12 pl-11 pr-4 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-lg text-slate-500 dark:text-white/40 text-xs md:text-sm font-medium cursor-not-allowed"
                     />
                     <Mail className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                   </div>
@@ -454,7 +454,7 @@ export default function ProfilStaffClient({ user }) {
                   <button
                     type="submit"
                     disabled={isSavingProfile}
-                    className="w-full h-12 rounded-2xl bg-emerald-500 text-slate-950 font-black text-xs md:text-sm uppercase tracking-wider hover:bg-emerald-400 transition-all shadow-[0_4px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_6px_25px_rgba(16,185,129,0.45)] flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                    className="w-full h-11 sm:h-12 rounded-lg bg-emerald-500 text-slate-950 font-black text-xs md:text-sm uppercase tracking-wider hover:bg-emerald-400 transition-all shadow-[0_4px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_6px_25px_rgba(16,185,129,0.45)] flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                   >
                     {isSavingProfile ? (
                       <Loader2 className="w-5 h-5 animate-spin" />
@@ -478,14 +478,14 @@ export default function ProfilStaffClient({ user }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.25 }}
-              className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-3xl p-6 md:p-8 shadow-xl dark:shadow-2xl"
+              className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-xl p-5 sm:p-6 md:p-8 shadow-xl dark:shadow-2xl"
             >
               <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-white/5">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
-                  <KeyRound className="w-5 h-5" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                  <KeyRound className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                  <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
                     {t("officer_profile.security_title") || "Ganti Kata Sandi"}
                   </h2>
                   <p className="text-xs text-slate-500 dark:text-white/40">
@@ -494,7 +494,7 @@ export default function ProfilStaffClient({ user }) {
                 </div>
               </div>
 
-              <form onSubmit={handlePasswordSubmit} className="space-y-5">
+              <form onSubmit={handlePasswordSubmit} className="space-y-4 sm:space-y-5">
                 {/* Password Saat Ini */}
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold tracking-wider text-slate-600 dark:text-white/70 uppercase">
@@ -507,7 +507,7 @@ export default function ProfilStaffClient({ user }) {
                       value={passwordData.currentPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
                       placeholder={t("officer_profile.current_password_ph") || "Masukkan kata sandi lama Anda"}
-                      className="w-full h-12 pl-11 pr-11 bg-slate-50 dark:bg-[#060e0a] border border-slate-200 dark:border-white/10 rounded-2xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 text-xs md:text-sm font-semibold focus:outline-none focus:border-emerald-500 transition-all"
+                      className="w-full h-11 sm:h-12 pl-11 pr-11 bg-slate-50 dark:bg-[#060e0a] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 text-xs md:text-sm font-semibold focus:outline-none focus:border-emerald-500 transition-all"
                     />
                     <Lock className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                     <button
@@ -532,7 +532,7 @@ export default function ProfilStaffClient({ user }) {
                       value={passwordData.newPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
                       placeholder={t("officer_profile.new_password_ph") || "Masukkan kata sandi baru (min. 6 karakter)"}
-                      className="w-full h-12 pl-11 pr-11 bg-slate-50 dark:bg-[#060e0a] border border-slate-200 dark:border-white/10 rounded-2xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 text-xs md:text-sm font-semibold focus:outline-none focus:border-emerald-500 transition-all"
+                      className="w-full h-11 sm:h-12 pl-11 pr-11 bg-slate-50 dark:bg-[#060e0a] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 text-xs md:text-sm font-semibold focus:outline-none focus:border-emerald-500 transition-all"
                     />
                     <KeyRound className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                     <button
@@ -557,7 +557,7 @@ export default function ProfilStaffClient({ user }) {
                       value={passwordData.confirmPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
                       placeholder={t("officer_profile.confirm_password_ph") || "Ketik ulang kata sandi baru"}
-                      className="w-full h-12 pl-11 pr-11 bg-slate-50 dark:bg-[#060e0a] border border-slate-200 dark:border-white/10 rounded-2xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 text-xs md:text-sm font-semibold focus:outline-none focus:border-emerald-500 transition-all"
+                      className="w-full h-11 sm:h-12 pl-11 pr-11 bg-slate-50 dark:bg-[#060e0a] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 text-xs md:text-sm font-semibold focus:outline-none focus:border-emerald-500 transition-all"
                     />
                     <KeyRound className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                     <button
@@ -575,7 +575,7 @@ export default function ProfilStaffClient({ user }) {
                   <button
                     type="submit"
                     disabled={isSavingPassword}
-                    className="w-full h-12 rounded-2xl bg-emerald-500 text-slate-950 font-black text-xs md:text-sm uppercase tracking-wider hover:bg-emerald-400 transition-all shadow-[0_4px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_6px_25px_rgba(16,185,129,0.45)] flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                    className="w-full h-11 sm:h-12 rounded-lg bg-emerald-500 text-slate-950 font-black text-xs md:text-sm uppercase tracking-wider hover:bg-emerald-400 transition-all shadow-[0_4px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_6px_25px_rgba(16,185,129,0.45)] flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                   >
                     {isSavingPassword ? (
                       <Loader2 className="w-5 h-5 animate-spin" />

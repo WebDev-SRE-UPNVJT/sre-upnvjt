@@ -39,7 +39,7 @@ export default function StaffDashboardClient({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="lg:col-span-2 bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-3xl p-6 md:p-8 flex flex-col justify-between relative overflow-hidden shadow-xl dark:shadow-2xl transition-colors duration-500"
+          className="lg:col-span-2 bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-xl p-6 md:p-8 flex flex-col justify-between relative overflow-hidden shadow-xl dark:shadow-2xl transition-colors duration-500"
         >
           <div className="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-emerald-500/20 dark:bg-emerald-500/10 blur-[50px] pointer-events-none" />
           
@@ -62,10 +62,10 @@ export default function StaffDashboardClient({
 
         {/* Ultra-Premium Physical-style ID Card (Remains purely dark/black for both modes) */}
         <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } } }} className="w-full md:w-[380px] perspective h-[220px] group">
-          <div className="w-full h-full relative transition-all duration-1000 ease-[0.22,1,0.36,1] transform-gpu group-hover:rotate-y-12 group-hover:-rotate-x-4 shadow-[0_20px_40px_rgba(0,0,0,0.15)] dark:shadow-[0_30px_60px_rgba(0,0,0,0.4)] rounded-[20px]">
+          <div className="w-full h-full relative transition-all duration-1000 ease-[0.22,1,0.36,1] transform-gpu group-hover:rotate-y-12 group-hover:-rotate-x-4 shadow-[0_20px_40px_rgba(0,0,0,0.15)] dark:shadow-[0_30px_60px_rgba(0,0,0,0.4)] rounded-xl">
             
             {/* Card Physical Body */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#0a0a0a] via-[#111111] to-[#151515] rounded-[20px] border border-black/20 dark:border-white/[0.08] overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#0a0a0a] via-[#111111] to-[#151515] rounded-xl border border-black/20 dark:border-white/[0.08] overflow-hidden">
               
               {/* Physical Texture */}
               <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/brushed-alum.png')]" />
@@ -123,7 +123,7 @@ export default function StaffDashboardClient({
       </div>
 
       {/* Gamified Stat/Action Cards Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Shortcut to Documents (Indigo Gamified) */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -132,14 +132,14 @@ export default function StaffDashboardClient({
         >
           <Link href="/officer/dokumen" className="block h-full">
             <div className="group relative h-full">
-              <div className="absolute inset-0 bg-emerald-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="h-full bg-white/80 dark:bg-[#08120e]/80 backdrop-blur-md border border-slate-200 dark:border-white/5 rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-none transition-all duration-500 group-hover:border-emerald-500/30">
+              <div className="absolute inset-0 bg-emerald-500/20 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="h-full bg-white/80 dark:bg-[#08120e]/80 backdrop-blur-md border border-slate-200 dark:border-white/5 rounded-xl p-5 sm:p-6 relative overflow-hidden flex flex-col justify-between shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-none transition-all duration-500 group-hover:border-emerald-500/30">
                 <div className="absolute -right-10 -bottom-10 opacity-5 dark:opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-700">
                   <FileText className="w-40 h-40 text-emerald-500" />
                 </div>
                 <div className="relative z-10 flex justify-between items-start mb-4">
-                  <div className="p-4 bg-emerald-500/10 text-emerald-500 rounded-2xl border border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-500">
-                    <FileText className="w-8 h-8" />
+                  <div className="p-3 sm:p-4 bg-emerald-500/10 text-emerald-500 rounded-lg border border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-500">
+                    <FileText className="w-7 h-7 sm:w-8 sm:h-8" />
                   </div>
                   <ArrowRight className="w-6 h-6 text-slate-300 dark:text-white/20 group-hover:text-emerald-500 dark:group-hover:text-white group-hover:translate-x-1 transition-all" />
                 </div>
@@ -160,14 +160,14 @@ export default function StaffDashboardClient({
         >
           <Link href="/officer/literatur" className="block h-full">
             <div className="group relative h-full">
-              <div className="absolute inset-0 bg-emerald-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="h-full bg-white/80 dark:bg-[#08120e]/80 backdrop-blur-md border border-slate-200 dark:border-white/5 rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-none transition-all duration-500 group-hover:border-emerald-500/30">
+              <div className="absolute inset-0 bg-emerald-500/20 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="h-full bg-white/80 dark:bg-[#08120e]/80 backdrop-blur-md border border-slate-200 dark:border-white/5 rounded-xl p-5 sm:p-6 relative overflow-hidden flex flex-col justify-between shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-none transition-all duration-500 group-hover:border-emerald-500/30">
                 <div className="absolute -right-10 -bottom-10 opacity-5 dark:opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-700">
                   <BookOpen className="w-40 h-40 text-emerald-500" />
                 </div>
                 <div className="relative z-10 flex justify-between items-start mb-4">
-                  <div className="p-4 bg-emerald-500/10 text-emerald-500 rounded-2xl border border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-500">
-                    <BookOpen className="w-8 h-8" />
+                  <div className="p-3 sm:p-4 bg-emerald-500/10 text-emerald-500 rounded-lg border border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-500">
+                    <BookOpen className="w-7 h-7 sm:w-8 sm:h-8" />
                   </div>
                   <ArrowRight className="w-6 h-6 text-slate-300 dark:text-white/20 group-hover:text-emerald-500 dark:group-hover:text-white group-hover:translate-x-1 transition-all" />
                 </div>
@@ -185,17 +185,18 @@ export default function StaffDashboardClient({
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.6 }}
+          className="sm:col-span-2 lg:col-span-1"
         >
           <Link href="/officer/links" className="block h-full">
             <div className="group relative h-full">
-              <div className="absolute inset-0 bg-emerald-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="h-full bg-white/80 dark:bg-[#08120e]/80 backdrop-blur-md border border-slate-200 dark:border-white/5 rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-none transition-all duration-500 group-hover:border-emerald-500/30">
+              <div className="absolute inset-0 bg-emerald-500/20 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="h-full bg-white/80 dark:bg-[#08120e]/80 backdrop-blur-md border border-slate-200 dark:border-white/5 rounded-xl p-5 sm:p-6 relative overflow-hidden flex flex-col justify-between shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-none transition-all duration-500 group-hover:border-emerald-500/30">
                 <div className="absolute -right-10 -bottom-10 opacity-5 dark:opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-700">
                   <LinkIcon className="w-40 h-40 text-emerald-500" />
                 </div>
                 <div className="relative z-10 flex justify-between items-start mb-4">
-                  <div className="p-4 bg-emerald-500/10 text-emerald-500 rounded-2xl border border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-500">
-                    <LinkIcon className="w-8 h-8" />
+                  <div className="p-3 sm:p-4 bg-emerald-500/10 text-emerald-500 rounded-lg border border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-500">
+                    <LinkIcon className="w-7 h-7 sm:w-8 sm:h-8" />
                   </div>
                   <ArrowRight className="w-6 h-6 text-slate-300 dark:text-white/20 group-hover:text-emerald-500 dark:group-hover:text-white group-hover:translate-x-1 transition-all" />
                 </div>
@@ -216,7 +217,7 @@ export default function StaffDashboardClient({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.7 }}
-          className="bg-white/60 dark:bg-[#08120e]/60 backdrop-blur-md border border-slate-200 dark:border-white/5 rounded-3xl p-6 relative shadow-xl dark:shadow-none"
+          className="bg-white/60 dark:bg-[#08120e]/60 backdrop-blur-md border border-slate-200 dark:border-white/5 rounded-xl p-5 sm:p-6 relative shadow-xl dark:shadow-none"
         >
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500"><Zap className="w-5 h-5" /></div>
@@ -224,10 +225,10 @@ export default function StaffDashboardClient({
           </div>
           
           {latestLiterature && latestLiterature.length > 0 ? (
-            <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {latestLiterature.map((lit) => (
                 <Link key={lit.id} href={`/officer/literatur/${lit.id}`} className="block">
-                  <div className="group cursor-pointer p-4 rounded-2xl bg-white dark:bg-white/5 border border-slate-100 dark:border-white/10 hover:border-emerald-500/50 transition-colors h-full">
+                  <div className="group cursor-pointer p-4 rounded-xl bg-white dark:bg-white/5 border border-slate-100 dark:border-white/10 hover:border-emerald-500/50 transition-colors h-full">
                     <h4 className="font-bold text-slate-900 dark:text-white truncate mb-1 group-hover:text-emerald-500 transition-colors">{lit.title}</h4>
                     <p className="text-xs text-slate-500 dark:text-white/50 mb-3">{t('staff_dashboard.by')} {lit.author}</p>
                     <div className="flex items-center justify-between">
@@ -244,7 +245,7 @@ export default function StaffDashboardClient({
               ))}
             </div>
           ) : (
-            <div className="p-8 text-center text-slate-400 text-sm font-medium border border-dashed border-slate-200 dark:border-white/10 rounded-2xl">
+            <div className="p-8 text-center text-slate-400 text-sm font-medium border border-dashed border-slate-200 dark:border-white/10 rounded-xl">
               {t('staff_dashboard.empty_lit')}
             </div>
           )}

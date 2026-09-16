@@ -87,7 +87,7 @@ function SubmissionItem({ sub, index }) {
       {/* Card */}
       <div className="flex-1 min-w-0 pb-5 sm:pb-6">
         <div
-          className={`bg-white dark:bg-[#08120e] border border-slate-200/80 dark:border-white/5 rounded-2xl overflow-hidden shadow-sm transition-all duration-300 ${
+          className={`bg-white dark:bg-[#08120e] border border-slate-200/80 dark:border-white/5 rounded-xl overflow-hidden shadow-sm transition-all duration-300 ${
             sub.status === "APPROVED"
               ? "hover:border-emerald-500/30 hover:shadow-[0_4px_20px_rgba(16,185,129,0.08)]"
               : sub.status === "REJECTED"
@@ -150,11 +150,12 @@ function SubmissionItem({ sub, index }) {
                 className="overflow-hidden"
               >
                 <div className="px-3.5 sm:px-4.5 pb-4 space-y-3 border-t border-slate-100 dark:border-white/5 pt-3">
-                  {/* Task description */}
-                  {sub.task?.description && (
-                    <p className="text-xs text-slate-600 dark:text-white/50 leading-relaxed whitespace-pre-line">
-                      {sub.task.description}
-                    </p>
+                  {/* Task details */}
+                  {(sub.task?.instructions || sub.task?.introduction) && (
+                    <div
+                      className="text-xs text-slate-600 dark:text-white/60 leading-relaxed prose prose-sm dark:prose-invert max-w-none break-words [&_p]:mb-1 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
+                      dangerouslySetInnerHTML={{ __html: sub.task.instructions || sub.task.introduction }}
+                    />
                   )}
 
                   {/* Submitted file/link */}
@@ -307,7 +308,7 @@ export default function RiwayatTugasClient({ submissions = [] }) {
         ].map((s) => (
           <div
             key={s.label}
-            className={`flex flex-col items-center justify-center py-3 sm:py-4 px-2 sm:px-3 rounded-2xl border ${s.bg} text-center min-w-0`}
+            className={`flex flex-col items-center justify-center py-3 sm:py-4 px-2 sm:px-3 rounded-xl border ${s.bg} text-center min-w-0`}
           >
             <span className={`text-xl sm:text-3xl font-black ${s.cls}`}>{s.val}</span>
             <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-white/40 mt-1 truncate max-w-full">
@@ -322,9 +323,9 @@ export default function RiwayatTugasClient({ submissions = [] }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.1 }}
-        className="w-full overflow-x-auto no-scrollbar py-0.5"
+        className="w-full max-w-full min-w-0 overflow-x-auto no-scrollbar py-0.5"
       >
-        <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/8 rounded-2xl w-max min-w-0">
+        <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/8 rounded-xl w-max min-w-0">
           {filterOpts.map(({ key, label }) => {
             const count =
               key === "ALL"
@@ -334,7 +335,7 @@ export default function RiwayatTugasClient({ submissions = [] }) {
               <button
                 key={key}
                 onClick={() => setFilter(key)}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-black whitespace-nowrap transition-all duration-200 cursor-pointer ${
                   filter === key
                     ? "bg-white dark:bg-[#0d1f17] text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-sm"
                     : "text-slate-500 dark:text-white/40 hover:text-slate-700 dark:hover:text-white/70"
@@ -378,7 +379,7 @@ export default function RiwayatTugasClient({ submissions = [] }) {
           }
           actionLabel={t("member_task_history.btn_view_tasks") || "Lihat Daftar Quest"}
           actionHref="/member/tugas"
-          className="py-16 sm:py-20 bg-white dark:bg-[#08120e] border border-slate-200/80 dark:border-white/5 rounded-3xl"
+          className="py-16 sm:py-20 bg-white dark:bg-[#08120e] border border-slate-200/80 dark:border-white/10 rounded-xl"
         />
       )}
     </div>

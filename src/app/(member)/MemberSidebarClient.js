@@ -37,7 +37,7 @@ export default function MemberSidebarClient({ user, profile }) {
   else if (level >= 31) levelTitle = "Forest";
 
   const renderProgress = () => (
-    <div className="mt-4 p-4 rounded-2xl bg-white/5 border border-white/5 relative overflow-hidden group">
+    <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/5 relative overflow-hidden group">
       <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       <div className="flex justify-between items-center mb-2 relative z-10">
         <span className="text-xs font-bold text-gray-400">Level {level}</span>
@@ -77,7 +77,7 @@ export default function MemberSidebarClient({ user, profile }) {
             key={item.href}
             href={item.href}
             onClick={() => setIsOpen(false)}
-            className={`flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all duration-300 border ${
+            className={`flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 border ${
               isActive
                 ? "bg-primary text-[#050e0a] border-primary shadow-[0_0_20px_rgba(16,185,129,0.25)]"
                 : "bg-transparent text-gray-400 border-transparent hover:text-white hover:bg-white/5"
@@ -127,7 +127,7 @@ export default function MemberSidebarClient({ user, profile }) {
         {renderLogo()}
 
         {/* Member Profile Widget */}
-        <div className="mb-6 p-4 rounded-3xl bg-gradient-to-br from-white/10 to-white/5 border border-white/5">
+        <div className="mb-6 p-4 rounded-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/5">
           <div className="min-w-0">
             <div className="text-[15px] font-black text-white leading-tight truncate">{user?.name}</div>
             <div className="text-[11px] text-gray-500 truncate mt-0.5">{user?.email}</div>
@@ -146,7 +146,7 @@ export default function MemberSidebarClient({ user, profile }) {
           </div>
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-sm font-semibold border border-transparent text-red-400 hover:bg-red-500/10 hover:border-red-500/20 transition-all cursor-pointer"
+            className="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold border border-transparent text-red-400 hover:bg-red-500/10 hover:border-red-500/20 transition-all cursor-pointer"
           >
             <LogOut className="w-5 h-5 shrink-0" />
             <span>Keluar</span>

@@ -99,7 +99,7 @@ export default function QuizMemberClient({ initialQuizzes, initialSubmissions })
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8 p-4 rounded-2xl bg-rose-100 dark:bg-rose-500/10 border-l-4 border-rose-500 text-rose-600 dark:text-rose-400 text-sm font-bold flex gap-3 items-center relative z-10 shadow-md"
+          className="mb-8 p-4 rounded-xl bg-rose-100 dark:bg-rose-500/10 border-l-4 border-rose-500 text-rose-600 dark:text-rose-400 text-sm font-bold flex gap-3 items-center relative z-10 shadow-md"
         >
           <AlertTriangle className="w-6 h-6 shrink-0" />
           <span>{error}</span>
@@ -110,7 +110,7 @@ export default function QuizMemberClient({ initialQuizzes, initialSubmissions })
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="py-24 flex flex-col items-center justify-center text-center bg-white/50 dark:bg-[#08120e]/50 backdrop-blur-md border-2 border-dashed border-slate-300 dark:border-white/10 rounded-3xl relative z-10 shadow-sm dark:shadow-none"
+          className="py-24 flex flex-col items-center justify-center text-center bg-white/50 dark:bg-[#08120e]/50 backdrop-blur-md border border-dashed border-slate-300 dark:border-white/10 rounded-xl relative z-10 shadow-sm dark:shadow-none"
         >
           <div className="w-24 h-24 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-6">
             <HelpCircle className="w-12 h-12 text-slate-300 dark:text-white/20 animate-pulse" />
@@ -133,12 +133,9 @@ export default function QuizMemberClient({ initialQuizzes, initialSubmissions })
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.1 }}
                   key={qz.id}
-                  className="group relative rounded-[2rem] transition-all duration-300 hover:-translate-y-2 hover:scale-[1.02] z-10 hover:z-20"
+                  className="group relative rounded-xl transition-all duration-300 hover:-translate-y-1 z-10 hover:z-20"
                 >
-                  {/* Ambient Glow Effect */}
-                  <div className="absolute -inset-2 bg-primary/30 dark:bg-primary/40 rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none" />
-
-                  <div className="relative bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 group-hover:border-primary/50 rounded-[2rem] h-full p-6 flex flex-col justify-between overflow-hidden transition-colors duration-500 shadow-xl shadow-slate-200/50 dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+                  <div className="relative bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/10 group-hover:border-primary/50 rounded-xl h-full p-5 sm:p-6 flex flex-col justify-between overflow-hidden transition-colors duration-300 shadow-sm hover:shadow-md">
                     {/* Card Background Pattern */}
                     <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none opacity-50" />
                     <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 dark:from-[#08120e] dark:via-[#08120e]/80 to-transparent pointer-events-none" />
@@ -175,7 +172,7 @@ export default function QuizMemberClient({ initialQuizzes, initialSubmissions })
                         </p>
                       )}
 
-                      <div className="space-y-3 mb-6 bg-slate-50 dark:bg-black/30 p-4 rounded-2xl border border-slate-100 dark:border-white/5">
+                      <div className="space-y-3 mb-6 bg-slate-50 dark:bg-black/30 p-3.5 sm:p-4 rounded-xl border border-slate-100 dark:border-white/5">
                         <div className="flex justify-between items-center text-xs">
                           <div className="flex items-center gap-2 text-slate-600 dark:text-white/60 font-bold">
                             <Clock className="w-4 h-4 text-primary" /> Waktu
@@ -248,11 +245,11 @@ export default function QuizMemberClient({ initialQuizzes, initialSubmissions })
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-md bg-white dark:bg-[#08120e] border-2 border-slate-200 dark:border-white/10 rounded-3xl p-8 text-center shadow-2xl z-10 overflow-hidden"
+              className="relative w-full max-w-md bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/10 rounded-xl p-6 sm:p-8 text-center shadow-2xl z-10 overflow-hidden"
             >
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-500/10 to-amber-500/30 flex items-center justify-center mx-auto mb-6 border-2 border-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.3)]">
-                <Target className="w-10 h-10 text-amber-500 animate-pulse" />
+              <div className="w-16 h-16 rounded-xl bg-amber-500/10 flex items-center justify-center mx-auto mb-5 border border-amber-500/30">
+                <Target className="w-8 h-8 text-amber-500" />
               </div>
               <h3 className="text-2xl font-black text-slate-800 dark:text-white mb-3 uppercase tracking-tight">
                 {t("member_quiz.modal_start_title")}

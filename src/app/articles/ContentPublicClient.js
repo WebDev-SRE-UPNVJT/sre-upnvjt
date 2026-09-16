@@ -108,7 +108,7 @@ export default function ContentPublicClient({ initialArticles = [], initialCateg
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-yellow-300 dark:text-emerald-400 text-xs font-bold uppercase tracking-widest mt-6 sm:mt-0 mb-6">
               <FileText className="w-4 h-4" aria-hidden="true" /> {t("visitor.articles.latest_updates")}
             </div>
-            <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-6 text-white dark:text-white font-display">
+            <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter mb-6 text-white dark:text-white font-display">
               {t("visitor.articles.title").split(" & ")[0]} &{" "}
               <span className="text-yellow-300 dark:text-emerald-400">
                 {t("visitor.articles.title").split(" & ")[1]}
@@ -196,7 +196,7 @@ export default function ContentPublicClient({ initialArticles = [], initialCateg
                 initial="hidden"
                 animate="show"
                 exit={{ opacity: 0 }}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
               >
                 {filteredArticles.map((article) => {
                   // Prefer Indonesian if site is in ID and translation exists, otherwise English (default)

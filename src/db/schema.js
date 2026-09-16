@@ -131,7 +131,9 @@ export const formSubmission = pgTable('formSubmission', {
 export const task = pgTable('task', {
   id: serial('id').primaryKey(),
   title: varchar('title', { length: 255 }).notNull(),
-  description: text('description').notNull(),
+  introduction: text('introduction'),
+  instructions: text('instructions'),
+  submissionGuidelines: text('submissionGuidelines'),
   rewardXp: integer('rewardXp').default(0).notNull(),
   category: varchar('category', { length: 50 }).default('MAIN').notNull(), // 'MAIN' | 'SIDE'
   isRequired: boolean('isRequired').default(true).notNull(), // true = Wajib, false = Opsional

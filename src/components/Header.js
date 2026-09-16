@@ -24,7 +24,7 @@ function HamburgerIcon({ isOpen, onClick, useDarkText }) {
     <button
       onClick={onClick}
       aria-label="Toggle menu"
-      className="md:hidden relative w-12 h-12 flex flex-col items-center justify-center z-[70] group rounded-full overflow-hidden"
+      className="lg:hidden relative w-12 h-12 flex flex-col items-center justify-center z-[70] group rounded-full overflow-hidden"
     >
       {/* Glassmorphic background when open */}
       <div 
@@ -121,7 +121,7 @@ export default function Header() {
             : `bg-transparent border-b border-transparent text-white`
         }`}
       >
-        <div className="max-w-7xl mx-auto h-full px-6 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto h-full px-4 sm:px-6 md:px-8 flex items-center justify-between">
           {/* Logo */}
           <Link href="/">
             <motion.div
@@ -138,7 +138,7 @@ export default function Header() {
           </Link>
 
           {/* Desktop Links Center */}
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden lg:flex items-center gap-6 xl:gap-8">
             {navItems.map((item) => {
               const isActive =
                 pathname === item.path ||
@@ -147,7 +147,7 @@ export default function Header() {
                 <Link
                   key={item.name}
                   href={item.path}
-                  className="relative text-[14px] font-medium tracking-wide transition-colors duration-300"
+                  className="relative text-[14px] xl:text-[15px] font-medium tracking-wide transition-colors duration-300"
                 >
                   {isActive && (
                     <motion.div
@@ -179,7 +179,7 @@ export default function Header() {
           </div>
 
           {/* Desktop CTA — Language toggle + Login */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-4">
             {/* Language Switcher */}
             <button
               onClick={() => setLanguage(language === "id" ? "en" : "id")}
@@ -209,7 +209,7 @@ export default function Header() {
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`border text-[14px] font-semibold tracking-tight rounded-full px-6 py-2.5 transition-all duration-300 flex items-center gap-2 group shadow-lg cursor-pointer ${
+                className={`border text-[14px] font-semibold tracking-tight rounded-full px-5 xl:px-6 py-2 xl:py-2.5 transition-all duration-300 flex items-center gap-2 group shadow-lg cursor-pointer ${
                   useDarkText
                     ? "border-[#07130e]/30 text-[#07130e] hover:bg-[#07130e] hover:text-white"
                     : "border-white/30 text-white hover:bg-white hover:text-[#07130e]"
@@ -225,11 +225,11 @@ export default function Header() {
 
       <motion.div 
         animate={{ 
-          opacity: 1,
+          opacity: 1, 
           pointerEvents: "auto" 
         }}
         transition={{ duration: 0.3 }}
-        className="fixed top-0 right-6 h-20 flex items-center z-[70] md:hidden"
+        className="fixed top-0 right-4 sm:right-6 h-20 flex items-center z-[70] lg:hidden"
       >
         <HamburgerIcon
           isOpen={mobileMenuOpen}
@@ -249,7 +249,7 @@ export default function Header() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
               onClick={close}
-              className="fixed inset-0 z-40 md:hidden bg-black/60 backdrop-blur-md"
+              className="fixed inset-0 z-40 lg:hidden bg-black/60 backdrop-blur-md"
             />
             {/* Menu Panel – Fullscreen backdrop blur overlay */}
             <motion.div
@@ -258,8 +258,8 @@ export default function Header() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
-              className="fixed inset-0 z-50 md:hidden h-[100dvh] flex flex-col justify-between px-7 pt-20 pb-6 overflow-y-auto bg-black/50 backdrop-blur-xl text-white transition-colors duration-500"
-            >
+              className="fixed inset-0 z-50 lg:hidden h-[100dvh] flex flex-col justify-between px-6 sm:px-12 pt-20 pb-6 overflow-y-auto bg-black/50 backdrop-blur-xl text-white transition-colors duration-500"
+            > 
               {/* Glowing Background Ambient Orbs */}
               <div
                 className={`absolute top-1/4 -left-20 w-72 h-72 rounded-full blur-[100px] pointer-events-none transition-colors duration-500 ${
@@ -291,7 +291,7 @@ export default function Header() {
                     },
                   },
                 }}
-                className="my-auto flex flex-col justify-center w-full px-2 relative z-10 py-2"
+                className="my-auto flex flex-col justify-center w-full max-w-xl mx-auto px-2 relative z-10 py-2"
               >
                 <motion.div
                   variants={{
@@ -475,7 +475,7 @@ export default function Header() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.45, duration: 0.35 }}
-                className={`mt-auto shrink-0 flex justify-between items-end text-[11px] sm:text-[12px] px-2 relative z-10 pt-4 border-t transition-colors duration-500 ${
+                className={`mt-auto shrink-0 flex justify-between items-end text-[11px] sm:text-[12px] px-2 relative z-10 pt-4 border-t transition-colors duration-500 max-w-xl mx-auto w-full ${
                   mounted && theme === "light"
                     ? "border-white/20 text-white/70"
                     : "border-white/10 text-white/50"

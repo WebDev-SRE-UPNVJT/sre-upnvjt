@@ -70,7 +70,7 @@ export default function ProfilClient({ user, recentTasks, recentQuizzes }) {
     <div className="space-y-8 pb-12">
       {/* Dynamic Profile Notification Toast */}
       {notification && (
-        <div className={`p-4 rounded-2xl flex items-center justify-between border ${
+        <div className={`p-4 rounded-xl flex items-center justify-between border ${
           notification.type === "success" 
             ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
             : "bg-red-500/10 border-red-500/20 text-red-400"
@@ -87,20 +87,18 @@ export default function ProfilClient({ user, recentTasks, recentQuizzes }) {
 
       {/* Main Profile Header Banner - Glassmorphism & Cyber Aesthetics */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 relative rounded-3xl p-6 md:p-8 bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 overflow-hidden shadow-xl dark:shadow-2xl">
-          {/* Ambient light glow behind avatar */}
-          <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-[90px] pointer-events-none" />
-          <div className="absolute -bottom-10 -left-10 w-60 h-60 bg-teal-500/10 rounded-full blur-[80px] pointer-events-none" />
+        <div className="lg:col-span-2 relative rounded-xl p-6 md:p-8 bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/10 overflow-hidden shadow-sm dark:shadow-none">
+          {/* Subtle ambient light behind avatar */}
+          <div className="absolute top-0 right-0 w-60 h-60 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
 
           <div className="relative flex flex-col md:flex-row items-center gap-6 md:gap-8">
 
             {/* Profile Picture */}
             <div className="relative shrink-0 select-none z-10 group/avatar">
-              <div className="absolute inset-0 bg-emerald-500 rounded-full blur-md opacity-20 group-hover/avatar:opacity-50 transition-opacity duration-500 animate-pulse" />
               {profileData.profilePictureUrl ? (
-                <img src={profileData.profilePictureUrl} alt="" className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.3)] relative z-10 group-hover/avatar:scale-105 transition-transform duration-500" />
+                <img src={profileData.profilePictureUrl} alt="" className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-2 border-emerald-500/40 shadow-md relative z-10 group-hover/avatar:scale-105 transition-transform duration-300" />
               ) : (
-                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-emerald-500/10 flex items-center justify-center border-4 border-emerald-500 text-4xl font-black text-emerald-500 relative z-10 shadow-[0_0_30px_rgba(16,185,129,0.3)] group-hover/avatar:scale-105 transition-transform duration-500">
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-emerald-500/10 flex items-center justify-center border-2 border-emerald-500/40 text-4xl font-black text-emerald-500 relative z-10 shadow-md group-hover/avatar:scale-105 transition-transform duration-300">
                   {profileData.name?.charAt(0)}
                 </div>
               )}
@@ -137,7 +135,7 @@ export default function ProfilClient({ user, recentTasks, recentQuizzes }) {
         </div>
 
         {/* Level & Badge Gamified Card */}
-        <div className="relative rounded-3xl p-6 bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 shadow-xl">
+        <div className="relative rounded-xl p-6 bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-none">
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/honey_im_subtle.png')] opacity-10 pointer-events-none mix-blend-overlay" />
             
             <div className="relative z-10">
@@ -178,11 +176,11 @@ export default function ProfilClient({ user, recentTasks, recentQuizzes }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         {/* Recent Tasks Card */}
-        <div className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-3xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/10 rounded-xl p-6 shadow-sm dark:shadow-none relative overflow-hidden flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100 dark:border-white/5">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500">
                   <FileText className="w-5 h-5" />
                 </div>
                 <div>
@@ -198,7 +196,7 @@ export default function ProfilClient({ user, recentTasks, recentQuizzes }) {
             <div className="space-y-3">
               {recentTasks && recentTasks.length > 0 ? (
                 recentTasks.map((tItem, i) => (
-                  <div key={i} className="p-3.5 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 flex items-center justify-between gap-3">
+                  <div key={i} className="p-3.5 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{tItem.task?.title || "Tugas SRE"}</p>
                       <span className="text-[10px] text-slate-400 dark:text-white/40 block mt-0.5 font-medium">
@@ -227,11 +225,11 @@ export default function ProfilClient({ user, recentTasks, recentQuizzes }) {
         </div>
 
         {/* Recent Quizzes Card */}
-        <div className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-3xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/10 rounded-xl p-6 shadow-sm dark:shadow-none relative overflow-hidden flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100 dark:border-white/5">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
                   <Zap className="w-5 h-5" />
                 </div>
                 <div>
@@ -247,7 +245,7 @@ export default function ProfilClient({ user, recentTasks, recentQuizzes }) {
             <div className="space-y-3">
               {recentQuizzes && recentQuizzes.length > 0 ? (
                 recentQuizzes.map((qItem, i) => (
-                  <div key={i} className="p-3.5 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 flex items-center justify-between gap-3">
+                  <div key={i} className="p-3.5 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{qItem.quiz?.title || "Quiz Akademik"}</p>
                       <span className="text-[10px] text-slate-400 dark:text-white/40 block mt-0.5 font-medium">
@@ -284,7 +282,7 @@ export default function ProfilClient({ user, recentTasks, recentQuizzes }) {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-lg bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-3xl overflow-hidden shadow-2xl"
+              className="w-full max-w-lg bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden shadow-2xl"
             >
               <div className="p-6 border-b border-slate-200 dark:border-white/5 flex items-center justify-between">
                 <div>
@@ -376,7 +374,7 @@ function Toast({ notification, onClose }) {
           initial={{ opacity: 0, y: 50, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.9 }}
-          className={`fixed bottom-6 right-6 z-[70] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-md ${
+          className={`fixed bottom-6 right-6 z-[70] flex items-center gap-3 px-6 py-4 rounded-xl shadow-2xl border backdrop-blur-md ${
             notification.type === "success"
               ? "bg-green-500/10 border-green-500/20 text-green-400"
               : "bg-red-500/10 border-red-500/20 text-red-400"

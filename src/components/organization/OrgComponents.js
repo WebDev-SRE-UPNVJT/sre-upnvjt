@@ -67,8 +67,8 @@ export function DepartmentCard({ dept, index, isExecutive = false }) {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: index * 0.08 }}
-        className={`bg-gradient-to-br from-[#09a071] to-[#078c62] border-2 border-[#e8ecc4] dark:border-emerald-500/30 dark:from-[#0a1f15] dark:to-[#05140e] rounded-3xl p-8 relative overflow-hidden group hover:border-yellow-300 dark:hover:border-emerald-400 hover:shadow-2xl transition-all duration-500 flex flex-col justify-between shadow-md cursor-pointer hover:brightness-[1.03] active:scale-[0.99] hover:-translate-y-1 h-full ${
-          isExecutive ? "md:p-10" : ""
+        className={`bg-gradient-to-br from-[#09a071] to-[#078c62] border-2 border-[#e8ecc4] dark:border-emerald-500/30 dark:from-[#0a1f15] dark:to-[#05140e] rounded-2xl p-5 sm:p-6 md:p-8 relative overflow-hidden group hover:border-yellow-300 dark:hover:border-emerald-400 hover:shadow-2xl transition-all duration-500 flex flex-col justify-between shadow-md cursor-pointer hover:brightness-[1.03] active:scale-[0.99] hover:-translate-y-1 h-full ${
+          isExecutive ? "p-6 sm:p-8 md:p-10" : ""
         }`}
       >
         {/* Decorative Watermark Icon (Combination of org structure and energy grid) */}
@@ -234,7 +234,7 @@ export function MemberCard({ member, fallbackRole }) {
   const batch = getAngkatanByNpm(npm);
 
   return (
-    <div className="group relative bg-white/10 dark:bg-gradient-to-br dark:from-[#0a1f15] dark:to-[#05140e] border border-[#e8ecc4]/80 dark:border-emerald-500/30 rounded-2xl sm:rounded-3xl overflow-hidden hover:border-yellow-300 dark:hover:border-emerald-400 hover:brightness-[1.03] transition-all duration-300 hover:shadow-xl flex flex-col w-[200px] sm:w-[220px] md:w-[240px] h-[330px] sm:h-[355px] md:h-[375px] shrink-0 select-none">
+    <div className="group relative bg-white/10 dark:bg-gradient-to-br dark:from-[#0a1f15] dark:to-[#05140e] border border-[#e8ecc4]/80 dark:border-emerald-500/30 rounded-2xl overflow-hidden hover:border-yellow-300 dark:hover:border-emerald-400 hover:brightness-[1.03] transition-all duration-300 hover:shadow-xl flex flex-col w-[200px] sm:w-[220px] md:w-[240px] h-[330px] sm:h-[355px] md:h-[375px] shrink-0 select-none">
       {/* Square Image container (Strict 1:1) */}
       <div className="w-full aspect-square bg-black/40 overflow-hidden relative shrink-0">
         <Image
@@ -272,7 +272,7 @@ export function DirectorCard({ director, fallbackRole }) {
   const { t } = useLanguage();
   if (!director) {
     return (
-      <div className="max-w-md mx-auto text-center p-8 bg-white/5 border border-white/10 rounded-3xl">
+      <div className="max-w-md mx-auto text-center p-8 bg-white/5 border border-white/10 rounded-2xl">
         <User className="w-12 h-12 mx-auto text-white/20 mb-3" />
         <h3 className="text-lg font-black text-white/50">{t("visitor.org.no_members")}</h3>
         <p className="text-xs text-white/40 mt-1">{t("visitor.org.not_assigned")}</p>
@@ -291,7 +291,7 @@ export function DirectorCard({ director, fallbackRole }) {
   const batch = getAngkatanByNpm(npm);
 
   return (
-    <div className="w-[230px] sm:w-[250px] md:w-[270px] h-[385px] sm:h-[415px] md:h-[435px] bg-white/10 dark:bg-gradient-to-br dark:from-[#0a1f15] dark:to-[#05140e] border-2 border-[#e8ecc4] dark:border-emerald-500/40 hover:border-yellow-300 dark:hover:border-emerald-300 hover:brightness-[1.03] transition-all duration-300 rounded-3xl overflow-hidden shadow-2xl flex flex-col mx-auto group select-none shrink-0">
+    <div className="w-[230px] sm:w-[250px] md:w-[270px] h-[385px] sm:h-[415px] md:h-[435px] bg-white/10 dark:bg-gradient-to-br dark:from-[#0a1f15] dark:to-[#05140e] border-2 border-[#e8ecc4] dark:border-emerald-500/40 hover:border-yellow-300 dark:hover:border-emerald-300 hover:brightness-[1.03] transition-all duration-300 rounded-2xl overflow-hidden shadow-2xl flex flex-col mx-auto group select-none shrink-0">
       {/* Square Image (Strict 1:1) */}
       <div className="w-full aspect-square bg-black/40 overflow-hidden relative shrink-0">
         <Image

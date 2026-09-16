@@ -74,7 +74,7 @@ export default function Footer() {
         {/* Subtle ambient glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" aria-hidden="true" />
 
-        <div className="w-full max-w-[1400px] mx-auto px-6 md:px-12 relative z-10 flex flex-col items-center text-center">
+        <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-8 md:px-12 relative z-10 flex flex-col items-center text-center">
           {/* Logo */}
           <Link href="/" className="mb-6 sm:mb-8 inline-block" aria-label="SRE UPNVJT Home">
             <Image
@@ -82,13 +82,13 @@ export default function Footer() {
               alt="SRE UPNVJT Logo"
               width={140}
               height={50}
-              className="h-10 sm:h-12 md:h-14 w-auto object-contain brightness-0 invert dark:brightness-0 dark:invert dark:opacity-50 opacity-95 hover:opacity-100 dark:hover:opacity-80 transition-opacity"
+              className="h-9 sm:h-11 md:h-12 w-auto object-contain brightness-0 invert dark:brightness-0 dark:invert dark:opacity-50 opacity-95 hover:opacity-100 dark:hover:opacity-80 transition-opacity"
             />
           </Link>
 
           {/* Navigation Links — Responsive & Professional Font Hierarchy */}
           <nav className="mb-6 sm:mb-8 w-full max-w-2xl mx-auto" aria-label="Footer navigation">
-            <ul className="flex flex-wrap justify-center items-center gap-x-5 sm:gap-x-8 md:gap-x-10 gap-y-2.5 sm:gap-y-3">
+            <ul className="flex flex-wrap justify-center items-center gap-x-4 sm:gap-x-6 md:gap-x-8 gap-y-2 sm:gap-y-3">
               {[
                 { label: t("visitor.footer.home"), href: "/" },
                 { label: t("visitor.footer.about"), href: "/about" },

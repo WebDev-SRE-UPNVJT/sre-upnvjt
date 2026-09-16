@@ -56,13 +56,13 @@ function BadgeCard({ badge, unlocked, index }) {
       initial={{ opacity: 0, scale: 0.88 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: index * 0.05, type: "spring", stiffness: 200, damping: 20 }}
-      className={`relative flex flex-col items-center text-center p-4 rounded-2xl border transition-all duration-300 group
+      className={`relative flex flex-col items-center text-center p-4 rounded-xl border transition-all duration-300 group
         ${unlocked
           ? `bg-gradient-to-b ${badge.bg} ${badge.border} shadow-sm hover:shadow-md hover:scale-[1.03]`
           : "bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 opacity-50 grayscale"}`}
     >
       {/* Icon */}
-      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-110
+      <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-110
         ${unlocked ? `bg-gradient-to-br ${badge.bg} border ${badge.border}` : "bg-slate-200 dark:bg-white/10 border-slate-300 dark:border-white/10"}`}>
         {unlocked
           ? <Icon className={`w-6 h-6 ${badge.color}`} />
@@ -76,7 +76,7 @@ function BadgeCard({ badge, unlocked, index }) {
 
       {/* Unlocked glow */}
       {unlocked && (
-        <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${badge.bg} opacity-0 group-hover:opacity-30 transition-opacity pointer-events-none`} />
+        <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${badge.bg} opacity-0 group-hover:opacity-30 transition-opacity pointer-events-none`} />
       )}
     </motion.div>
   );
@@ -94,16 +94,16 @@ function XpLogItem({ log, index }) {
       initial={{ opacity: 0, x: -12 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.04, duration: 0.3 }}
-      className="group flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-white/[0.025] transition-all duration-200"
+      className="group flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 dark:hover:bg-white/[0.025] transition-all duration-200"
     >
-      <div className={`w-9 h-9 rounded-xl border flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform ${src.bg}`}>
+      <div className={`w-9 h-9 rounded-lg border flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform ${src.bg}`}>
         <Icon className={`w-4 h-4 ${src.color}`} />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-xs font-black text-slate-900 dark:text-white truncate">{log.reason}</p>
         <p className="text-[9px] text-slate-400 dark:text-white/30 mt-0.5">{date} · {time}</p>
       </div>
-      <span className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black text-emerald-500 dark:text-emerald-400 font-mono">
+      <span className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black text-emerald-500 dark:text-emerald-400 font-mono">
         <Zap className="w-2.5 h-2.5" />+{log.amount}
       </span>
     </motion.div>
@@ -137,7 +137,7 @@ export default function AchievementClient({ profile, xpLogs, taskSubs, attendanc
       <motion.div
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative bg-gradient-to-br from-[#050e0a] to-[#071510] border border-primary/20 rounded-3xl p-7 md:p-9 overflow-hidden shadow-[0_20px_60px_rgba(16,185,129,0.12)]"
+        className="relative bg-gradient-to-br from-[#050e0a] to-[#071510] border border-primary/20 rounded-xl p-6 sm:p-8 md:p-9 overflow-hidden shadow-lg"
       >
         {/* Glows */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-primary/15 rounded-full blur-[100px] pointer-events-none" />
@@ -171,7 +171,7 @@ export default function AchievementClient({ profile, xpLogs, taskSubs, attendanc
               { label: "Tugas Selesai", val: approvedTasks,             color: "text-emerald-400", icon: Trophy },
               { label: "Quiz Lulus",  val: quizPassed,                color: "text-blue-400",    icon: BookOpen },
             ].map(({ label, val, color, icon: Icon }) => (
-              <div key={label} className="bg-white/5 border border-white/10 rounded-2xl p-4">
+              <div key={label} className="bg-white/5 border border-white/10 rounded-xl p-4">
                 <div className="flex items-center gap-1.5 mb-1">
                   <Icon className={`w-3.5 h-3.5 ${color}`} />
                   <span className="text-[9px] font-black uppercase tracking-widest text-white/40">{label}</span>
@@ -186,7 +186,7 @@ export default function AchievementClient({ profile, xpLogs, taskSubs, attendanc
       {/* Level Roadmap */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <SectionHeader icon={TrendingUp} title="Level Roadmap" className="mb-4" />
-        <div className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-3xl p-6 shadow-xl dark:shadow-2xl">
+        <div className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/10 rounded-xl p-6 shadow-sm dark:shadow-none">
           <div className="flex items-stretch gap-0">
             {[...LEVEL_TIERS].reverse().map((tier, i) => {
               const isUnlocked = levelData.currentLevel >= tier.level;
@@ -196,7 +196,7 @@ export default function AchievementClient({ profile, xpLogs, taskSubs, attendanc
               return (
                 <React.Fragment key={tier.level}>
                   <div className={`flex flex-col items-center flex-1 min-w-0 ${isCurrent ? "scale-[1.05] z-10" : ""} transition-transform`}>
-                    <div className={`w-10 h-10 rounded-2xl border-2 flex items-center justify-center text-xs font-black mb-2 transition-all
+                    <div className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center text-xs font-black mb-2 transition-all
                       ${isUnlocked
                         ? isCurrent
                           ? "bg-primary border-primary text-[#050e0a] shadow-[0_0_20px_rgba(16,185,129,0.5)]"
@@ -227,7 +227,7 @@ export default function AchievementClient({ profile, xpLogs, taskSubs, attendanc
       </motion.div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/8 rounded-2xl w-fit">
+      <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/8 rounded-xl w-fit">
         {[
           { key: "badges", label: `Badge (${unlockedBadges.length}/${BADGE_DEFS.length})`, icon: Award },
           { key: "xp",     label: `Riwayat XP (${xpLogs?.length ?? 0})`,                  icon: Zap },
@@ -235,7 +235,7 @@ export default function AchievementClient({ profile, xpLogs, taskSubs, attendanc
           <button
             key={key}
             onClick={() => setTab(key)}
-            className={`flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-black transition-all duration-200 ${
+            className={`flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-xs font-black transition-all duration-200 ${
               activeTab === key
                 ? "bg-white dark:bg-[#0d1f17] text-primary border border-primary/20 shadow-sm"
                 : "text-slate-500 dark:text-white/40 hover:text-slate-700 dark:hover:text-white/70"}`}
@@ -275,7 +275,7 @@ export default function AchievementClient({ profile, xpLogs, taskSubs, attendanc
           </motion.div>
         ) : (
           <motion.div key="xp" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-            <div className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-3xl overflow-hidden shadow-xl dark:shadow-2xl divide-y divide-slate-100 dark:divide-white/[0.04]">
+            <div className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden shadow-sm dark:shadow-none divide-y divide-slate-100 dark:divide-white/[0.04]">
               {xpLogs?.length > 0 ? (
                 xpLogs.map((log, i) => <XpLogItem key={log.id} log={log} index={i} />)
               ) : (

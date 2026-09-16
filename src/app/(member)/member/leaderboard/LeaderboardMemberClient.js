@@ -146,13 +146,13 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
         </div>
 
         {/* Period Tabs */}
-        <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/8 rounded-2xl">
+        <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/8 rounded-xl">
           {periods.map(({ key, label, icon: Icon }) => (
             <button
               key={key}
               onClick={() => handlePeriodChange(key)}
               className={[
-                "relative flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black transition-all duration-300",
+                "relative flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-black transition-all duration-300",
                 period === key
                   ? "bg-white dark:bg-[#0d1f17] text-primary border border-primary/20 shadow-sm"
                   : "text-slate-500 dark:text-white/40 hover:text-slate-700 dark:hover:text-white/70",
@@ -172,7 +172,7 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 dark:bg-[#07130e]/50 backdrop-blur-sm rounded-3xl"
+            className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 dark:bg-[#07130e]/50 backdrop-blur-sm rounded-xl"
           >
             <div className="flex flex-col items-center gap-3">
               <div className="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
@@ -272,7 +272,7 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
                   <LevelBadge xp={item.xp} size="sm" showLabel={false} animated={isGold} className="mb-3" />
 
                   {/* Pedestal */}
-                  <div className={`w-full ${cfg.height} bg-gradient-to-b ${cfg.pedestalBg} border ${cfg.pedestalBorder} border-b-0 rounded-t-[22px] flex flex-col justify-end items-center p-3 relative overflow-hidden ${cfg.glow} group-hover:brightness-110 transition-all duration-500`}>
+                  <div className={`w-full ${cfg.height} bg-gradient-to-b ${cfg.pedestalBg} border ${cfg.pedestalBorder} border-b-0 rounded-t-xl flex flex-col justify-end items-center p-3 relative overflow-hidden ${cfg.glow} group-hover:brightness-110 transition-all duration-500`}>
                     {/* Sweep light */}
                     <div className={`absolute top-0 left-[-120%] w-[50%] h-full bg-gradient-to-r from-transparent ${cfg.sweepColor} to-transparent skew-x-[25deg] ${isGold ? "animate-[sweep_2.5s_ease-in-out_infinite]" : "animate-[sweep_4s_ease-in-out_infinite]"}`} />
 
@@ -298,7 +298,7 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
       )}
 
       {/* Rank List */}
-      <div className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-3xl overflow-hidden shadow-xl dark:shadow-2xl">
+      <div className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden shadow-sm dark:shadow-none">
 
         {/* Table header */}
         <div className="grid grid-cols-[45px_1fr_100px] md:grid-cols-[60px_1fr_auto_160px] gap-2 md:gap-4 px-4 md:px-6 py-3.5 md:py-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/[0.015]">
@@ -427,18 +427,15 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
               className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-2xl z-[9999] pointer-events-none"
             >
               <div className="relative group pointer-events-auto">
-                {/* Pulsing border glow */}
-                <div className="absolute -inset-1 rounded-[28px] bg-gradient-to-r from-primary via-emerald-400 to-teal-500 opacity-25 group-hover:opacity-45 blur-md transition-opacity duration-500 animate-[pulse_3s_ease-in-out_infinite]" />
-
-                <div className="relative bg-white/96 dark:bg-[#07130e]/96 backdrop-blur-xl border border-slate-200 dark:border-white/10 px-4 sm:px-6 py-3.5 sm:py-4 rounded-3xl shadow-[0_20px_50px_-10px_rgba(16,185,129,0.35)] flex items-center justify-between gap-3 sm:gap-4 hover:scale-[1.015] transition-transform duration-300">
+                <div className="relative bg-white/95 dark:bg-[#07130e]/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 px-4 sm:px-6 py-3.5 sm:py-4 rounded-xl shadow-xl flex items-center justify-between gap-3 sm:gap-4 hover:scale-[1.01] transition-transform duration-200">
 
                   {/* Left: avatar + info */}
                   <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
                     <div className="relative shrink-0">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-emerald-500/10 border border-primary/30 flex items-center justify-center">
-                        <Flame className="w-5 h-5 sm:w-6 sm:h-6 text-primary fill-primary/20 animate-pulse" />
+                      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-lg bg-gradient-to-br from-primary/20 to-emerald-500/10 border border-primary/30 flex items-center justify-center">
+                        <Flame className="w-5 h-5 text-primary fill-primary/20" />
                       </div>
-                      <div className="absolute -top-2 -right-2 sm:-top-2.5 sm:-right-2.5 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-amber-400 text-amber-900 border-2 border-white dark:border-[#07130e] flex items-center justify-center font-black text-[8px] sm:text-[9px] shadow-[0_0_8px_rgba(251,191,36,0.6)]">
+                      <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-amber-400 text-amber-900 border border-white dark:border-[#07130e] flex items-center justify-center font-black text-[8px] sm:text-[9px] shadow-sm">
                         #{currentUser.rank}
                       </div>
                     </div>
@@ -466,7 +463,7 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl bg-amber-500/10 border border-amber-500/25 shrink-0">
+                    <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-amber-500/10 border border-amber-500/25 shrink-0">
                       <Crown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 fill-amber-500/50 animate-bounce" />
                       <span className="text-[11px] sm:text-xs font-black text-amber-600 dark:text-amber-400">{t("leaderboard.rank_first") || "Peringkat #1!"}</span>
                     </div>

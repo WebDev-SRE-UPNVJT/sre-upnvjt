@@ -14,10 +14,13 @@ import { hasAccess } from "@/lib/permissions";
 import * as XLSX from "xlsx";
 import { calculateSpeedBonusXp } from "@/lib/xpUtils";
 import DateTimePicker24 from "@/components/ui/DateTimePicker24";
+import TinyMCEEditor from "@/components/editor/TinyMCEEditor";
 
 const EMPTY_TASK = {
   title: "",
-  description: "",
+  introduction: "",
+  instructions: "",
+  submissionGuidelines: "",
   rewardXp: "30",
   category: "MAIN",
   isRequired: true,
@@ -175,7 +178,9 @@ export default function TasksClient({ initialTasks, initialSubmissions, availabl
       
       setTaskForm({
         title: tk.title,
-        description: tk.description,
+        introduction: tk.introduction || "",
+        instructions: tk.instructions || "",
+        submissionGuidelines: tk.submissionGuidelines || "",
         rewardXp: tk.rewardXp?.toString() || "30",
         category: tk.category || "MAIN",
         isRequired: tk.isRequired ?? true,
@@ -220,7 +225,9 @@ export default function TasksClient({ initialTasks, initialSubmissions, availabl
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: taskForm.title,
-          description: taskForm.description,
+          introduction: taskForm.introduction,
+          instructions: taskForm.instructions,
+          submissionGuidelines: taskForm.submissionGuidelines,
           rewardXp: parseInt(taskForm.rewardXp),
           category: taskForm.category || "MAIN",
           isRequired: Boolean(taskForm.isRequired),
@@ -706,7 +713,9 @@ export default function TasksClient({ initialTasks, initialSubmissions, availabl
 
   const filteredTasks = tasks.filter(t =>
     (t.title || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (t.description || "").toLowerCase().includes(searchQuery.toLowerCase())
+    (t.introduction || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (t.instructions || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (t.submissionGuidelines || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const filteredSubmissions = submissions.filter(s => {
@@ -870,7 +879,7 @@ export default function TasksClient({ initialTasks, initialSubmissions, availabl
                         </div>
                         <div className="font-bold text-gray-900 dark:text-white text-sm">{tk.title}</div>
                         <span className="text-xs text-gray-400 dark:text-white/30 line-clamp-1 mt-0.5 max-w-[320px]">
-                          {tk.description}
+                          {(tk.introduction || tk.instructions || tk.submissionGuidelines || "").replace(/<[^>]*>?/gm, "").trim() || "Tidak ada deskripsi"}
                         </span>
                         {tk.folderId && (
                           <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 text-[10px] font-mono font-bold">
@@ -1348,31 +1357,92 @@ export default function TasksClient({ initialTasks, initialSubmissions, availabl
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-lg bg-white dark:bg-[#0a1612] border border-gray-200 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+              className="relative w-full max-w-4xl bg-white dark:bg-[#0a1612] border border-gray-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
             >
               <div className="p-6 border-b border-gray-200 dark:border-white/10 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02]">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                   <FolderKanban className="w-5 h-5 text-primary" />
-                  {targetTask ? "Edit Tugas" : "Tugas Baru"}
+                  {targetTask ? "Edit Tugas / Quest" : "Buat Tugas / Quest Baru"}
                 </h2>
                 <button onClick={handleCloseTaskModal} className="text-gray-400 hover:text-gray-900 dark:hover:text-white">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="p-6 overflow-y-auto flex-1 space-y-5">
-                <form id="taskForm" onSubmit={handleSaveTask} className="space-y-5">
-                  <InputField label="Judul Tugas *">
+              <div className="p-6 overflow-y-auto flex-1 space-y-6">
+                <form id="taskForm" onSubmit={handleSaveTask} className="space-y-6">
+                  <InputField label="Judul Tugas / Quest *">
                     <input type="text" required value={taskForm.title}
                       onChange={e => setTaskForm(p => ({ ...p, title: e.target.value }))}
                       className={inputCls} placeholder="e.g. Laporan Kegiatan Divisi ACE" />
                   </InputField>
 
-                  <InputField label="Deskripsi Tugas *">
-                    <textarea required rows={4} value={taskForm.description}
-                      onChange={e => setTaskForm(p => ({ ...p, description: e.target.value }))}
-                      className={`${textareaCls} h-28`} placeholder="Instruksi dan rincian pengerjaan tugas..." />
-                  </InputField>
+                  {/* 3 Rich HTML Sections (TinyMCE) */}
+                  <div className="space-y-5 p-4 sm:p-5 rounded-2xl bg-gray-50/70 dark:bg-white/[0.02] border border-gray-200/80 dark:border-white/10">
+                    <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 pb-2 border-b border-gray-200/60 dark:border-white/10">
+                      <FileText className="w-4 h-4" />
+                      <span>Rincian Deskripsi & Instruksi Tugas (3 Bagian)</span>
+                    </div>
+
+                    {/* 1. Pendahuluan */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="block text-xs font-bold text-gray-800 dark:text-white/90">
+                          1. Pendahuluan (Introduction)
+                        </label>
+                        <span className="text-[10px] text-gray-400 dark:text-white/40 font-medium">Opsional</span>
+                      </div>
+                      <p className="text-[11px] text-gray-500 dark:text-white/50 mb-1">
+                        Latar belakang, konteks, atau pengantar misi yang menginspirasi anggota.
+                      </p>
+                      <TinyMCEEditor
+                        value={taskForm.introduction}
+                        onChange={val => setTaskForm(p => ({ ...p, introduction: val }))}
+                        placeholder="Tulis latar belakang, konteks pengantar, atau cerita misi..."
+                        height={190}
+                      />
+                    </div>
+
+                    {/* 2. Tugas / Pertanyaan (Main) or Arahan Pengerjaan (Side) */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="block text-xs font-bold text-gray-800 dark:text-white/90">
+                          {taskForm.category === "SIDE" ? "2. Arahan Pengerjaan (Side Quest) *" : "2. Tugas & Pertanyaan (Main Quest) *"}
+                        </label>
+                        <span className="text-[10px] text-amber-500 font-bold">Wajib diisi</span>
+                      </div>
+                      <p className="text-[11px] text-gray-500 dark:text-white/50 mb-1">
+                        {taskForm.category === "SIDE"
+                          ? "Instruksi dan langkah pengerjaan tugas side quest."
+                          : "Soal pertanyaan, problem statement, atau tugas inti yang harus dikerjakan anggota."}
+                      </p>
+                      <TinyMCEEditor
+                        value={taskForm.instructions}
+                        onChange={val => setTaskForm(p => ({ ...p, instructions: val }))}
+                        placeholder="Tulis butir pertanyaan, studi kasus, atau instruksi teknis pengerjaan tugas..."
+                        height={240}
+                      />
+                    </div>
+
+                    {/* 3. Arahan Pengumpulan */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="block text-xs font-bold text-gray-800 dark:text-white/90">
+                          3. Arahan Pengumpulan (Submission Guidelines)
+                        </label>
+                        <span className="text-[10px] text-gray-400 dark:text-white/40 font-medium">Opsional</span>
+                      </div>
+                      <p className="text-[11px] text-gray-500 dark:text-white/50 mb-1">
+                        Ketentuan format berkas, penamaan file (e.g. SRE_Nama_NPM.pdf), link template, atau kriteria pengumpulan.
+                      </p>
+                      <TinyMCEEditor
+                        value={taskForm.submissionGuidelines}
+                        onChange={val => setTaskForm(p => ({ ...p, submissionGuidelines: val }))}
+                        placeholder="Tulis format file, penamaan berkas, link template, atau kriteria pengumpulan..."
+                        height={190}
+                      />
+                    </div>
+                  </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <InputField label="Tenggat Waktu * (24 Jam WIB • Jakarta)">

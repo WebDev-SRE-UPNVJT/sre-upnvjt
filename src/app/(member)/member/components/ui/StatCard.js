@@ -43,7 +43,7 @@ export default function StatCard({
       className={[
         "group relative bg-white dark:bg-[#08120e]",
         "border border-slate-200 dark:border-white/5",
-        "rounded-2xl p-3.5 sm:p-5 flex items-center gap-3 sm:gap-4",
+        "rounded-xl p-3.5 sm:p-5 flex items-center gap-3 sm:gap-4",
         "overflow-hidden shadow-sm dark:shadow-none",
         "hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)]",
         "hover:border-slate-300 dark:hover:border-white/10",
@@ -52,12 +52,12 @@ export default function StatCard({
       ].join(" ")}
     >
       {/* Subtle background glow on hover */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-transparent group-hover:from-primary/5 transition-all duration-500 pointer-events-none rounded-2xl" />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-transparent group-hover:from-primary/5 transition-all duration-500 pointer-events-none rounded-xl" />
 
       {/* Icon */}
       <div
         className={[
-          "relative z-10 p-2.5 sm:p-3 rounded-xl border flex-shrink-0",
+          "relative z-10 p-2.5 sm:p-3 rounded-lg border flex-shrink-0",
           "group-hover:scale-110 transition-transform duration-300",
           iconBg,
           iconColor,

@@ -42,13 +42,13 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row md:items-end justify-between relative overflow-hidden shadow-xl dark:shadow-2xl gap-6"
+        className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-xl p-5 sm:p-6 md:p-8 flex flex-col md:flex-row md:items-end justify-between relative overflow-hidden shadow-xl dark:shadow-2xl gap-6"
       >
         <div className="absolute -left-16 -top-16 w-48 h-48 rounded-full bg-emerald-500/20 dark:bg-emerald-500/10 blur-[50px] pointer-events-none" />
 
         <div className="relative z-10 flex-1">
           <div className="flex flex-wrap items-center gap-3 mb-4">
-            <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500">
+            <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-500">
               <FileText className="w-5 h-5" />
             </div>
             <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-500 uppercase tracking-widest">
@@ -56,13 +56,13 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
             </span>
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-display font-black tracking-tighter text-slate-900 dark:text-white leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-black tracking-tighter text-slate-900 dark:text-white leading-tight">
             {t("documents.title_doc")} <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-400">
               {t("documents.title_sre")}
             </span>
           </h1>
-          <p className="text-slate-500 dark:text-white/60 text-sm md:text-base font-medium mt-3 max-w-xl leading-relaxed">
+          <p className="text-slate-500 dark:text-white/60 text-xs sm:text-sm md:text-base font-medium mt-3 max-w-xl leading-relaxed">
             {t("documents.desc")}
           </p>
         </div>
@@ -73,7 +73,7 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
             href="https://drive.google.com/drive/folders/15sMY8AdyF2f2Sk_4lfvmT2yTBen7JEGh"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs md:text-sm tracking-wide shadow-[0_4px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_6px_25px_rgba(16,185,129,0.45)] hover:scale-[1.02] active:scale-95 transition-all shrink-0 cursor-pointer group"
+            className="inline-flex items-center justify-center gap-2.5 px-4 sm:px-5 py-3 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs md:text-sm tracking-wide shadow-[0_4px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_6px_25px_rgba(16,185,129,0.45)] hover:scale-[1.02] active:scale-95 transition-all shrink-0 cursor-pointer group"
           >
             <FolderOpen className="w-4 h-4 text-emerald-100 group-hover:scale-110 transition-transform" />
             <span>{t("documents.consultation") || "Konsultasi Administrasi"}</span>
@@ -82,13 +82,13 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
 
           {/* Search Bar */}
           <div className="relative flex-1 sm:w-72 md:w-80">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-white/30" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-white/30" />
             <input
               type="text"
               placeholder={t("documents.search_ph") || "Cari berkas dokumen..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-[#0a1610] border border-slate-200 dark:border-white/10 rounded-2xl pl-11 pr-4 py-3.5 text-xs md:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all shadow-sm"
+              className="w-full bg-slate-50 dark:bg-[#0a1610] border border-slate-200 dark:border-white/10 rounded-lg pl-10 pr-4 py-3 text-xs md:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all shadow-sm"
             />
           </div>
         </div>
@@ -99,7 +99,7 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="w-full bg-white/60 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/5 rounded-2xl p-2.5 md:p-3 backdrop-blur-xl shadow-sm"
+        className="w-full bg-white/60 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/5 rounded-xl p-2.5 md:p-3 backdrop-blur-xl shadow-sm"
       >
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 px-1">
           {/* Label Filter */}
@@ -112,7 +112,7 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
           <button
             type="button"
             onClick={() => setActiveCategory("all")}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition-all shrink-0 cursor-pointer ${
+            className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs md:text-sm font-bold transition-all shrink-0 cursor-pointer ${
               activeCategory === "all"
                 ? "bg-emerald-500 text-slate-950 font-black shadow-[0_0_15px_rgba(16,185,129,0.35)] scale-[1.02]"
                 : "bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-white/70 hover:bg-slate-200 dark:hover:bg-white/10 border border-transparent dark:border-white/5"
@@ -138,7 +138,7 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
                 type="button"
                 onClick={() => setActiveCategory(cat.id?.toString())}
                 title={cat.name}
-                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition-all shrink-0 max-w-[200px] sm:max-w-[260px] md:max-w-[300px] cursor-pointer ${
+                className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs md:text-sm font-bold transition-all shrink-0 max-w-[200px] sm:max-w-[260px] md:max-w-[300px] cursor-pointer ${
                   isSelected
                     ? "bg-emerald-500 text-slate-950 font-black shadow-[0_0_15px_rgba(16,185,129,0.35)] scale-[1.02]"
                     : "bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-white/70 hover:bg-slate-200 dark:hover:bg-white/10 border border-transparent dark:border-white/5"
@@ -159,7 +159,7 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
 
       {/* Documents Grid */}
       {filteredDocs.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
           <AnimatePresence mode="popLayout">
             {filteredDocs.map((doc, index) => (
               <motion.div
@@ -169,19 +169,19 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.3, delay: index * 0.04 }}
-                className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 hover:border-emerald-500/30 rounded-3xl p-6 group relative overflow-hidden shadow-sm hover:shadow-xl dark:hover:shadow-[0_10px_30px_rgba(16,185,129,0.1)] transition-all duration-300 flex flex-col justify-between"
+                className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 hover:border-emerald-500/30 rounded-xl p-5 sm:p-6 group relative overflow-hidden shadow-sm hover:shadow-xl dark:hover:shadow-[0_10px_30px_rgba(16,185,129,0.1)] transition-all duration-300 flex flex-col justify-between"
               >
                 <div className="relative z-10 flex flex-col h-full justify-between">
                   <div>
                     {/* Card Header: Icon & Category Badge */}
                     <div className="flex items-start justify-between gap-3 mb-4">
-                      <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300 shrink-0">
+                      <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300 shrink-0">
                         <FileText className="w-5 h-5" />
                       </div>
                       
                       {/* Truncated Category Badge */}
                       <span 
-                        className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 text-slate-600 dark:text-white/60 max-w-[180px] sm:max-w-[200px] truncate group-hover:border-emerald-500/20 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors"
+                        className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-md bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 text-slate-600 dark:text-white/60 max-w-[180px] sm:max-w-[200px] truncate group-hover:border-emerald-500/20 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors"
                         title={doc.category?.name || (t("documents.uncategorized") || "Uncategorized")}
                       >
                         <Folder className="w-3 h-3 shrink-0 opacity-70" />
@@ -190,7 +190,7 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
                     </div>
 
                     {/* Title & Description */}
-                    <h3 className="text-base md:text-lg font-bold text-slate-900 dark:text-white leading-snug mb-2 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors line-clamp-2">
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white leading-snug mb-2 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors line-clamp-2">
                       {doc.title}
                     </h3>
                     <p className="text-xs text-slate-500 dark:text-white/50 line-clamp-2 mb-4 leading-relaxed">
@@ -216,7 +216,7 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
                       href={doc.fileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500 hover:text-black text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-bold transition-all shadow-sm shrink-0"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 hover:text-black text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-bold transition-all shadow-sm shrink-0"
                       title={t("documents.download") || "Buka / Unduh Dokumen"}
                     >
                       <Download className="w-3.5 h-3.5" />
@@ -232,7 +232,7 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="w-full p-12 flex flex-col items-center justify-center bg-white/50 dark:bg-white/5 border border-dashed border-slate-300 dark:border-white/10 rounded-3xl"
+          className="w-full p-12 flex flex-col items-center justify-center bg-white/50 dark:bg-white/5 border border-dashed border-slate-300 dark:border-white/10 rounded-xl"
         >
           <FileText className="w-12 h-12 text-slate-300 dark:text-white/20 mx-auto mb-4" />
           <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
@@ -247,7 +247,7 @@ export default function DokumenClient({ initialCategories, initialDocuments, use
             <button
               type="button"
               onClick={() => setActiveCategory("all")}
-              className="mt-4 px-4 py-2 rounded-xl bg-emerald-500/10 text-emerald-500 text-xs font-bold hover:bg-emerald-500/20 transition-colors"
+              className="mt-4 px-4 py-2 rounded-lg bg-emerald-500/10 text-emerald-500 text-xs font-bold hover:bg-emerald-500/20 transition-colors"
             >
               {t("documents.view_all_docs") || "Lihat Semua Dokumen"}
             </button>

@@ -285,20 +285,20 @@ export default function ActivityCarousel({ activities }) {
                 {renderCardItem(
                   carouselItems[getIndex(-1)],
                   false,
-                  "hidden md:flex md:w-[28%] lg:w-[26%] max-w-[280px]",
+                  "hidden md:flex md:w-[26%] lg:w-[26%] max-w-[260px]",
                   prev
                 )}
                 {/* Active Card (Center) */}
                 {renderCardItem(
                   carouselItems[current],
                   true,
-                  "w-full md:w-[44%] lg:w-[38%] max-w-[420px]"
+                  "w-full md:w-[48%] lg:w-[38%] max-w-[420px]"
                 )}
                 {/* Next Card (Right) */}
                 {renderCardItem(
                   carouselItems[getIndex(1)],
                   false,
-                  "hidden md:flex md:w-[28%] lg:w-[26%] max-w-[280px]",
+                  "hidden md:flex md:w-[26%] lg:w-[26%] max-w-[260px]",
                   next
                 )}
               </>

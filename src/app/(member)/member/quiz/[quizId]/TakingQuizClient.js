@@ -513,7 +513,7 @@ export default function TakingQuizClient({ quiz, user }) {
           className="relative z-20 w-full max-w-lg"
         >
           {/* Main result card */}
-          <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-8 md:p-10 text-center shadow-[0_40px_80px_rgba(0,0,0,0.5)] ring-1 ring-emerald-500/10">
+          <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-xl p-8 md:p-10 text-center shadow-[0_40px_80px_rgba(0,0,0,0.5)] ring-1 ring-emerald-500/10">
             {/* Status Icon */}
             <motion.div
               initial={{ scale: 0 }}
@@ -583,7 +583,7 @@ export default function TakingQuizClient({ quiz, user }) {
               className="grid grid-cols-2 gap-3 mb-8"
             >
               {/* Score */}
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 md:p-5 relative overflow-hidden">
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4 md:p-5 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent" />
                 <div className="text-[9px] uppercase tracking-[0.3em] text-white/40 font-bold mb-2 relative z-10">
                   Final Score
@@ -604,7 +604,7 @@ export default function TakingQuizClient({ quiz, user }) {
               </div>
 
               {/* XP Reward */}
-              <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 md:p-5 relative overflow-hidden">
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 md:p-5 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent" />
                 <div className="absolute top-2 right-2">
                   <motion.div
@@ -840,7 +840,7 @@ export default function TakingQuizClient({ quiz, user }) {
               </div>
 
               {/* Question card — fills all remaining height, text scrolls inside */}
-              <div className="relative bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.4)] overflow-hidden" style={{ height: 'calc(100% - 32px)' }}>
+              <div className="relative bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.4)] overflow-hidden" style={{ height: 'calc(100% - 32px)' }}>
                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-teal-500/3 pointer-events-none" />
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
                {/* Scrollable text area inside card — custom styled scrollbar */}
@@ -914,7 +914,7 @@ export default function TakingQuizClient({ quiz, user }) {
                             if (feedback.status === "incorrect" && !isSelected && !isCorrect) return null;
                             return (
                               <motion.div key={opt.id} initial={{ scale: 0.95 }} animate={{ scale: 1 }}
-                                className={`flex-1 relative rounded-2xl overflow-hidden flex flex-col border-2 ${
+                                className={`flex-1 relative rounded-xl overflow-hidden flex flex-col border-2 ${
                                   isCorrect ? "bg-emerald-500/20 border-emerald-400/70 shadow-[0_0_30px_rgba(16,185,129,0.25)]" : "bg-rose-500/15 border-rose-400/50"
                                 }`}
                               >
@@ -937,7 +937,7 @@ export default function TakingQuizClient({ quiz, user }) {
                           return (
                             <motion.button key={opt.id} whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.97 }}
                               onClick={() => handleSelectOption(currentQ.id, opt.id, currentQ.type)}
-                              className={`flex-1 relative rounded-2xl overflow-hidden flex flex-col border-2 text-left transition-all ${
+                              className={`flex-1 relative rounded-xl overflow-hidden flex flex-col border-2 text-left transition-all ${
                                 isSelected
                                   ? "bg-emerald-500/25 border-emerald-400/80 shadow-[0_0_25px_rgba(16,185,129,0.25)]"
                                   : `bg-gradient-to-br ${theme.base} ${theme.shadow}`
@@ -974,7 +974,7 @@ export default function TakingQuizClient({ quiz, user }) {
                             if (feedback.status === "incorrect" && !isSelected && !isCorrect) return null;
                             return (
                               <motion.div key={opt.id} initial={{ scale: 0.95 }} animate={{ scale: 1 }}
-                                className={`shrink-0 relative rounded-2xl overflow-hidden flex flex-row items-center gap-3 border-2 ${
+                                className={`shrink-0 relative rounded-xl overflow-hidden flex flex-row items-center gap-3 border-2 ${
                                   isCorrect ? "bg-emerald-500/20 border-emerald-400/70" : "bg-rose-500/15 border-rose-400/50"
                                 }`}
                               style={{ height: '120px' }}
@@ -998,7 +998,7 @@ export default function TakingQuizClient({ quiz, user }) {
                           return (
                             <motion.button key={opt.id} whileTap={{ scale: 0.97 }}
                               onClick={() => handleSelectOption(currentQ.id, opt.id, currentQ.type)}
-                              className={`shrink-0 relative w-full rounded-2xl overflow-hidden flex flex-row items-center gap-3 border-2 text-left transition-all ${
+                              className={`shrink-0 relative w-full rounded-xl overflow-hidden flex flex-row items-center gap-3 border-2 text-left transition-all ${
                                 isSelected
                                   ? "bg-emerald-500/25 border-emerald-400/80 shadow-[0_0_20px_rgba(16,185,129,0.25)]"
                                   : `bg-gradient-to-r ${theme.base}`
@@ -1044,7 +1044,7 @@ export default function TakingQuizClient({ quiz, user }) {
                           return (
                             <motion.button key={opt.id} whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.97 }}
                               onClick={() => handleSelectOption(currentQ.id, opt.id, "multiple_choice_complex")}
-                              className={`flex-1 relative rounded-2xl overflow-hidden flex flex-col border-2 text-left transition-all ${
+                              className={`flex-1 relative rounded-xl overflow-hidden flex flex-col border-2 text-left transition-all ${
                                 isSelected ? "bg-emerald-500/25 border-emerald-400/80 shadow-[0_0_25px_rgba(16,185,129,0.2)]" : `bg-gradient-to-br ${theme.base}`
                               }`}
                             >
@@ -1073,7 +1073,7 @@ export default function TakingQuizClient({ quiz, user }) {
                           return (
                             <motion.button key={opt.id} whileTap={{ scale: 0.97 }}
                               onClick={() => handleSelectOption(currentQ.id, opt.id, "multiple_choice_complex")}
-                              className={`shrink-0 relative w-full rounded-2xl overflow-hidden flex flex-row items-center gap-3 border-2 text-left transition-all ${
+                              className={`shrink-0 relative w-full rounded-xl overflow-hidden flex flex-row items-center gap-3 border-2 text-left transition-all ${
                                 isSelected ? "bg-emerald-500/25 border-emerald-400/80 shadow-[0_0_20px_rgba(16,185,129,0.2)]" : `bg-gradient-to-r ${theme.base}`
                               }`}
                               style={{ height: '120px' }}
@@ -1113,7 +1113,7 @@ export default function TakingQuizClient({ quiz, user }) {
                           }
                         }}
                         disabled={feedback.status !== "none"}
-                        className="w-full bg-white/5 border-2 border-white/10 focus:border-emerald-500/50 rounded-2xl px-6 py-4 text-center text-lg md:text-xl font-bold text-white placeholder:text-white/20 focus:outline-none focus:bg-white/8 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
+                        className="w-full bg-white/5 border-2 border-white/10 focus:border-emerald-500/50 rounded-xl px-6 py-4 text-center text-lg md:text-xl font-bold text-white placeholder:text-white/20 focus:outline-none focus:bg-white/8 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
                         placeholder="Ketik jawaban Anda di sini..."
                       />
                       <div className="text-[10px] text-center text-emerald-400/40 uppercase tracking-widest font-black mt-3">

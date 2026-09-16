@@ -50,7 +50,7 @@ export default function MerchPublicClient({ merchandise = [] }) {
               <ShoppingBag className="w-4 h-4" /> {t("visitor.merchandise.hero_badge")}
             </div>
 
-            <h1 className="text-4xl md:text-6xl font-display font-black leading-tight tracking-tight uppercase">
+            <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl font-display font-black leading-tight tracking-tight uppercase">
               {t("visitor.merchandise.title").split(" SRE ")[0]} <br className="hidden md:inline" />
               <span className="text-yellow-300 dark:text-emerald-400">SRE {t("visitor.merchandise.title").split(" SRE ")[1]}</span>
             </h1>
@@ -194,7 +194,7 @@ export default function MerchPublicClient({ merchandise = [] }) {
               </p>
             </motion.div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
               {(regularProducts.length > 0 ? regularProducts : merchandise).map((item) => (
                 <motion.div
                   key={item.id}

@@ -17,7 +17,9 @@ export async function PUT(req, { params }) {
     const body = await req.json();
     const {
       title,
-      description,
+      introduction,
+      instructions,
+      submissionGuidelines,
       rewardXp,
       category,
       isRequired,
@@ -35,8 +37,8 @@ export async function PUT(req, { params }) {
       createSpreadsheet,
     } = body;
 
-    if (!title || !description || !deadline) {
-      return NextResponse.json({ error: "Judul, deskripsi, dan tenggat waktu wajib diisi" }, { status: 400 });
+    if (!title || !deadline || (!instructions && !introduction && !submissionGuidelines)) {
+      return NextResponse.json({ error: "Judul, rincian instruksi/tugas, dan tenggat waktu wajib diisi" }, { status: 400 });
     }
 
     let spreadsheetId = body.spreadsheetId !== undefined ? body.spreadsheetId : undefined;
@@ -74,7 +76,9 @@ export async function PUT(req, { params }) {
 
     const updateData = {
       title,
-      description,
+      introduction: introduction !== undefined ? introduction || null : undefined,
+      instructions: instructions !== undefined ? instructions || null : undefined,
+      submissionGuidelines: submissionGuidelines !== undefined ? submissionGuidelines || null : undefined,
       rewardXp: rewardXp ? parseInt(rewardXp) : 0,
       category: category ? String(category).toUpperCase() : "MAIN",
       isRequired: isRequired !== undefined ? Boolean(isRequired) : true,

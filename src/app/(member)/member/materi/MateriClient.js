@@ -73,7 +73,7 @@ export default function MateriClient({ initialModules }) {
       </div>
 
       {modules.length === 0 ? (
-        <div className="py-24 flex flex-col items-center justify-center text-center bg-slate-50 dark:bg-[#08120e] border border-dashed border-slate-200 dark:border-white/5 rounded-3xl">
+        <div className="py-24 flex flex-col items-center justify-center text-center bg-slate-50 dark:bg-[#08120e] border border-dashed border-slate-200 dark:border-white/5 rounded-xl">
           <BookOpen className="w-12 h-12 text-slate-300 dark:text-white/10 mb-4 animate-pulse" />
           <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1">{t('materi.empty_title')}</h3>
           <p className="text-slate-500 dark:text-white/40 text-xs max-w-xs leading-relaxed mt-1">{t('materi.empty_desc')}</p>
@@ -100,7 +100,7 @@ export default function MateriClient({ initialModules }) {
                 transition={{ type: "spring", stiffness: 100, delay: (index % 4) * 0.1 }}
                 key={mod.id}
                 onClick={() => handleOpenModule(mod)}
-                className="relative bg-white/95 dark:bg-[#07130e]/95 backdrop-blur-xl border border-slate-200/80 dark:border-white/10 rounded-[2rem] overflow-hidden cursor-pointer group hover:border-emerald-500/50 transition-all duration-500 transform-gpu hover:-translate-y-2 flex flex-col h-full shadow-[0_10px_35px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_50px_rgba(16,185,129,0.2)]"
+                className="relative bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden cursor-pointer group hover:border-emerald-500/50 transition-all duration-300 transform-gpu hover:-translate-y-1 flex flex-col h-full shadow-sm hover:shadow-md"
               >
                 {/* Cover Banner */}
                 <div className="relative aspect-[16/10] w-full overflow-hidden shrink-0 bg-slate-900/60">
@@ -121,7 +121,7 @@ export default function MateriClient({ initialModules }) {
 
                   {/* Slide Count Badge */}
                   <div className="absolute top-3.5 right-3.5 z-10">
-                    <span className="px-3 py-1.5 rounded-full bg-emerald-500/90 border border-emerald-300/40 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 text-white shadow-[0_0_20px_rgba(16,185,129,0.5)] backdrop-blur-md">
+                    <span className="px-2.5 py-1 rounded-md bg-emerald-950/80 border border-emerald-400/30 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 text-emerald-300 backdrop-blur-md">
                       <Layers className="w-3.5 h-3.5" />
                       {mod.slideCount || 0} HALAMAN
                     </span>

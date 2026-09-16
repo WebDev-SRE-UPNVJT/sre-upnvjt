@@ -55,12 +55,15 @@ function CheckInModal({ session, onClose, onSuccess }) {
   const [done, setDone]       = useState(false);
   const router = useRouter();
 
-  // Lock body scroll when modal is open
+  // Lock body & document scroll when modal is open
   useEffect(() => {
-    const prevOverflow = document.body.style.overflow;
+    const prevBodyOverflow = document.body.style.overflow;
+    const prevHtmlOverflow = document.documentElement.style.overflow;
     document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = prevOverflow;
+      document.body.style.overflow = prevBodyOverflow;
+      document.documentElement.style.overflow = prevHtmlOverflow;
     };
   }, []);
 
@@ -111,7 +114,7 @@ function CheckInModal({ session, onClose, onSuccess }) {
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.94, y: 20 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="w-full max-w-lg bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-3xl shadow-[0_40px_80px_rgba(0,0,0,0.6)] overflow-hidden my-auto max-h-[90vh] flex flex-col"
+        className="w-full max-w-lg bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden my-auto max-h-[90vh] flex flex-col"
       >
         {/* Header */}
         <div className="flex items-start justify-between p-6 pb-4 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/[0.02] shrink-0">
@@ -124,7 +127,7 @@ function CheckInModal({ session, onClose, onSuccess }) {
             </p>
           </div>
           {!loading && !done && (
-            <button onClick={onClose} className="p-2 rounded-xl hover:bg-slate-200 dark:hover:bg-white/10 text-slate-400 dark:text-white/40 transition-colors">
+            <button onClick={onClose} className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-white/10 text-slate-400 dark:text-white/40 transition-colors">
               <X className="w-5 h-5" />
             </button>
           )}
@@ -164,7 +167,7 @@ function CheckInModal({ session, onClose, onSuccess }) {
                       key={key}
                       type="button"
                       onClick={() => { setStatus(key); setError(""); }}
-                      className={`flex flex-col items-center gap-2.5 p-4 rounded-2xl border-2 transition-all duration-200 ${
+                      className={`flex flex-col items-center gap-2.5 p-4 rounded-xl border-2 transition-all duration-200 ${
                         status === key ? active : "border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20"}`}
                     >
                       <div className={`p-2.5 rounded-full transition-colors ${status === key ? icon_active : "bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-white/30"}`}>
@@ -198,7 +201,7 @@ function CheckInModal({ session, onClose, onSuccess }) {
                       value={token}
                       onChange={(e) => setToken(e.target.value.toUpperCase())}
                       placeholder={t("attendance_member.modal.token_placeholder") || "Contoh: SRE2026"}
-                      className="w-full px-4 py-3.5 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl text-sm font-mono font-black tracking-widest text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 uppercase focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
+                      className="w-full px-4 py-3.5 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-mono font-black tracking-widest text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 uppercase focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all"
                     />
                   </motion.div>
                 ) : (
@@ -219,7 +222,7 @@ function CheckInModal({ session, onClose, onSuccess }) {
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       placeholder={t("attendance_member.modal.notes_placeholder") || "Jelaskan alasan izin / sakit kamu..."}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all resize-none"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all resize-none"
                     />
                   </motion.div>
                 )}
@@ -236,14 +239,14 @@ function CheckInModal({ session, onClose, onSuccess }) {
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder={t("attendance_member.modal.notes_late_placeholder") || "Tuliskan alasan keterlambatan bila ada..."}
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 focus:outline-none focus:border-primary/50 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-lg text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 focus:outline-none focus:border-primary/50 transition-all"
                   />
                 </div>
               )}
 
               {/* Error */}
               {error && (
-                <div className="flex items-center gap-2 p-3.5 bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold rounded-2xl">
+                <div className="flex items-center gap-2 p-3.5 bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold rounded-lg">
                   <AlertTriangle className="w-4 h-4 flex-shrink-0" />
                   <span>{error}</span>
                 </div>
@@ -253,7 +256,7 @@ function CheckInModal({ session, onClose, onSuccess }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-primary to-emerald-400 hover:from-primary-focus hover:to-emerald-500 text-[#050e0a] font-black text-xs uppercase tracking-widest transition-all duration-300 shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-xl bg-gradient-to-r from-primary to-emerald-400 hover:from-primary-focus hover:to-emerald-500 text-[#050e0a] font-black text-xs uppercase tracking-widest transition-all duration-300 shadow-md hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -368,12 +371,12 @@ export default function AbsensiClient({ initialSessions, validSessions, initialA
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -16, scale: 0.98 }}
             transition={{ duration: 0.35, ease: "easeOut" }}
-            className="relative rounded-3xl p-[1.5px] overflow-hidden bg-gradient-to-r from-amber-500/80 via-orange-400 to-amber-500/80 shadow-[0_15px_45px_rgba(245,158,11,0.18)]"
+            className="relative rounded-xl p-[1.5px] overflow-hidden bg-gradient-to-r from-amber-500/80 via-orange-400 to-amber-500/80 shadow-md"
           >
             {/* Ambient Background Gradient & Glow */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-amber-400/20 via-transparent to-transparent pointer-events-none" />
             
-            <div className="relative bg-gradient-to-br from-slate-900/95 via-[#120e06]/98 to-[#0b1410]/95 dark:from-[#0d0a02]/98 dark:via-[#09120e]/98 dark:to-[#040a08]/98 backdrop-blur-2xl rounded-[calc(1.5rem-1px)] p-6 sm:p-7 md:p-8 overflow-hidden">
+            <div className="relative bg-gradient-to-br from-slate-900/95 via-[#120e06]/98 to-[#0b1410]/95 dark:from-[#0d0a02]/98 dark:via-[#09120e]/98 dark:to-[#040a08]/98 backdrop-blur-2xl rounded-xl p-6 sm:p-7 md:p-8 overflow-hidden">
               
               {/* Decorative radial glows */}
               <div className="absolute -top-16 -left-16 w-52 h-52 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
@@ -425,7 +428,7 @@ export default function AbsensiClient({ initialSessions, validSessions, initialA
                   <div className="relative z-10 pt-2 lg:pt-0 shrink-0">
                     <button
                       onClick={() => setActiveSession(pendingSessions[0])}
-                      className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 px-7 py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 hover:from-amber-300 hover:via-orange-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-widest transition-all duration-300 shadow-[0_0_25px_rgba(245,158,11,0.35)] hover:shadow-[0_0_35px_rgba(245,158,11,0.55)] hover:scale-[1.02] active:scale-95 cursor-pointer"
+                      className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 px-7 py-4 rounded-xl bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 hover:from-amber-300 hover:via-orange-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-widest transition-all duration-300 shadow-md hover:scale-[1.02] active:scale-95 cursor-pointer"
                     >
                       <Key className="w-4 h-4 text-slate-950/80 group-hover:rotate-12 transition-transform duration-300" />
                       <span>{t("attendance_member.modal.title") || "Isi Presensi Sekarang"}</span>
@@ -456,7 +459,7 @@ export default function AbsensiClient({ initialSessions, validSessions, initialA
                     {pendingSessions.map((sess) => (
                       <div
                         key={sess.id}
-                        className="bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-amber-500/40 rounded-2xl p-4 sm:p-5 transition-all duration-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                        className="bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-amber-500/40 rounded-xl p-4 sm:p-5 transition-all duration-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
                       >
                         <div className="min-w-0 flex-1 space-y-1">
                           <div className="flex items-center gap-2">
@@ -470,7 +473,7 @@ export default function AbsensiClient({ initialSessions, validSessions, initialA
                         </div>
                         <button
                           onClick={() => setActiveSession(sess)}
-                          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-300 hover:to-orange-300 text-slate-950 font-black text-xs uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-95 shadow-md shadow-amber-500/20 shrink-0 cursor-pointer"
+                          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-300 hover:to-orange-300 text-slate-950 font-black text-xs uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-95 shadow-md shadow-amber-500/20 shrink-0 cursor-pointer"
                         >
                           <span>{t("attendance_member.modal.title") || "Isi Presensi"}</span>
                           <ChevronRight className="w-3.5 h-3.5" />
@@ -524,7 +527,7 @@ export default function AbsensiClient({ initialSessions, validSessions, initialA
                 <button
                   key={tab.key}
                   onClick={() => setStatusFilter(tab.key)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 shrink-0 ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5 shrink-0 ${
                     isActive
                       ? "bg-primary text-slate-950 shadow-md shadow-primary/20 scale-[1.02]"
                       : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white/60 hover:bg-slate-200 dark:hover:bg-white/10"
@@ -540,7 +543,7 @@ export default function AbsensiClient({ initialSessions, validSessions, initialA
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-3xl overflow-hidden shadow-xl dark:shadow-2xl">
+        <div className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden shadow-sm dark:shadow-none">
           {displayedRecords.length === 0 ? (
             <EmptyState
               icon={ClipboardCheck}

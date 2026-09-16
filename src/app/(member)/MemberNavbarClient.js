@@ -141,7 +141,7 @@ export default function MemberNavbarClient({ user, profile }) {
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute left-0 mt-2 w-56 rounded-2xl bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 shadow-2xl p-2 z-[60] overflow-hidden"
+                      className="absolute left-0 mt-2 w-56 rounded-xl bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 shadow-2xl p-2 z-[60] overflow-hidden"
                     >
                       <Link
                         href="/member/literatur"
@@ -229,7 +229,7 @@ export default function MemberNavbarClient({ user, profile }) {
               <div className="relative" ref={profileRef}>
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-3 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 rounded-2xl pl-3 pr-4 py-1.5 text-left transition-all"
+                  className="flex items-center gap-3 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 rounded-xl pl-3 pr-4 py-1.5 text-left transition-all"
                 >
                   {user?.profilePictureUrl || user?.image ? (
                     <img
@@ -259,7 +259,7 @@ export default function MemberNavbarClient({ user, profile }) {
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 mt-2 w-64 rounded-3xl bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 shadow-2xl p-4 z-[60] overflow-hidden"
+                      className="absolute right-0 mt-2 w-64 rounded-xl bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/10 shadow-xl p-4 z-[60] overflow-hidden"
                     >
                       {/* User summary details */}
                       <div className="pb-4 mb-4 border-b border-slate-200 dark:border-white/5 flex items-center gap-3">
@@ -314,7 +314,7 @@ export default function MemberNavbarClient({ user, profile }) {
                       {/* Sign out */}
                       <button
                         onClick={() => signOut({ callbackUrl: "/login" })}
-                        className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl text-red-400 bg-red-500/10 border border-red-500/15 hover:bg-red-500/25 font-bold transition-all text-xs"
+                        className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-red-500 dark:text-red-400 bg-red-500/10 border border-red-500/15 hover:bg-red-500/20 font-bold transition-all text-xs"
                       >
                         <LogOut className="w-4 h-4" />
                         Sign Out
@@ -402,7 +402,7 @@ export default function MemberNavbarClient({ user, profile }) {
                 <Link
                   href="/member"
                   onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl text-[15px] font-bold tracking-wide transition-all ${
+                  className={`flex items-center gap-4 px-4 py-3.5 rounded-xl text-[15px] font-bold tracking-wide transition-all ${
                     pathname === "/member"
                       ? "bg-primary/10 text-primary"
                       : "text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white"
@@ -421,7 +421,7 @@ export default function MemberNavbarClient({ user, profile }) {
                 <Link
                   href="/member/literatur"
                   onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl text-[15px] font-bold tracking-wide transition-all ${
+                  className={`flex items-center gap-4 px-4 py-3.5 rounded-xl text-[15px] font-bold tracking-wide transition-all ${
                     pathname.startsWith("/member/literatur")
                       ? "bg-primary/10 text-primary"
                       : "text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white"
@@ -436,7 +436,7 @@ export default function MemberNavbarClient({ user, profile }) {
                 <Link
                   href="/member/materi"
                   onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl text-[15px] font-bold tracking-wide transition-all ${
+                  className={`flex items-center gap-4 px-4 py-3.5 rounded-xl text-[15px] font-bold tracking-wide transition-all ${
                     pathname.startsWith("/member/materi")
                       ? "bg-primary/10 text-primary"
                       : "text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white"
@@ -451,7 +451,7 @@ export default function MemberNavbarClient({ user, profile }) {
                 <Link
                   href="/member/quiz"
                   onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl text-[15px] font-bold tracking-wide transition-all ${
+                  className={`flex items-center gap-4 px-4 py-3.5 rounded-xl text-[15px] font-bold tracking-wide transition-all ${
                     pathname.startsWith("/member/quiz")
                       ? "bg-primary/10 text-primary"
                       : "text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white"
@@ -475,7 +475,7 @@ export default function MemberNavbarClient({ user, profile }) {
                       key={link.name}
                       href={link.href}
                       onClick={() => setIsOpen(false)}
-                      className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl text-[15px] font-bold tracking-wide transition-all ${
+                      className={`flex items-center gap-4 px-4 py-3.5 rounded-xl text-[15px] font-bold tracking-wide transition-all ${
                         isActive
                           ? "bg-primary/10 text-primary"
                           : "text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white"

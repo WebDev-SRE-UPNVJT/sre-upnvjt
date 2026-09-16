@@ -103,7 +103,7 @@ export default function StaffNavbarClient({ user }) {
                   <Link
                     key={link.name}
                     href={link.href}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold tracking-wide transition-all duration-300 ${
+                    className={`px-4 py-2 rounded-lg text-sm font-bold tracking-wide transition-all duration-300 ${
                       isActive
                         ? "bg-primary/10 text-primary border border-primary/20"
                         : "text-slate-500 dark:text-white/60 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent"
@@ -121,7 +121,7 @@ export default function StaffNavbarClient({ user }) {
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setLanguage(language === "id" ? "en" : "id")}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-white/70 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-white/5 transition-colors text-xs font-bold"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-white/70 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-white/5 transition-colors text-xs font-bold cursor-pointer"
               >
                 <Globe className="w-4 h-4" />
                 {language.toUpperCase()}
@@ -131,7 +131,7 @@ export default function StaffNavbarClient({ user }) {
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="flex items-center justify-center p-2 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-white/70 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-white/5 transition-colors"
+                className="flex items-center justify-center p-2 rounded-lg bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-white/70 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-white/5 transition-colors cursor-pointer"
               >
                 {!mounted ? null : theme === "dark" ? (
                   <Sun className="w-4 h-4" />
@@ -144,7 +144,7 @@ export default function StaffNavbarClient({ user }) {
               <div className="relative" ref={profileRef}>
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-3 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 rounded-2xl pl-3 pr-4 py-1.5 text-left transition-all"
+                  className="flex items-center gap-3 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 rounded-lg pl-3 pr-4 py-1.5 text-left transition-all cursor-pointer"
                 >
                   {user?.profilePictureUrl || user?.image ? (
                     <img
@@ -174,7 +174,7 @@ export default function StaffNavbarClient({ user }) {
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 mt-2 w-64 rounded-3xl bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 shadow-2xl p-4 z-[60] overflow-hidden"
+                      className="absolute right-0 mt-2 w-64 rounded-xl bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 shadow-2xl p-4 z-[60] overflow-hidden"
                     >
                       {/* User summary details */}
                       <div className="pb-4 mb-4 border-b border-slate-200 dark:border-white/5 flex items-center gap-3">
@@ -203,7 +203,7 @@ export default function StaffNavbarClient({ user }) {
                       <div className="flex flex-col gap-1 mb-4">
                         <Link
                           href="/officer/profil"
-                          className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-all"
+                          className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-bold text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-all"
                         >
                           <User className="w-4 h-4 text-primary" />
                           {t("staff_nav.profile_detail") || "Detail Profil"}
@@ -213,7 +213,7 @@ export default function StaffNavbarClient({ user }) {
                       {/* Sign out */}
                       <button
                         onClick={() => signOut({ callbackUrl: "/login" })}
-                        className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl text-red-400 bg-red-500/10 border border-red-500/15 hover:bg-red-500/25 font-bold transition-all text-xs"
+                        className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-red-400 bg-red-500/10 border border-red-500/15 hover:bg-red-500/25 font-bold transition-all text-xs cursor-pointer"
                       >
                         <LogOut className="w-4 h-4" />
                         {t("staff_nav.sign_out") || "Sign Out"}
@@ -230,7 +230,7 @@ export default function StaffNavbarClient({ user }) {
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setLanguage(language === "id" ? "en" : "id")}
-                className="flex items-center gap-1 px-3 py-2 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white/70 hover:bg-slate-200 hover:text-slate-900 dark:hover:text-white transition-colors border border-slate-200 dark:border-white/5 font-bold text-xs"
+                className="flex items-center gap-1 px-3 py-2 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white/70 hover:bg-slate-200 hover:text-slate-900 dark:hover:text-white transition-colors border border-slate-200 dark:border-white/5 font-bold text-xs cursor-pointer"
               >
                 <Globe className="w-4 h-4" />
                 <span>{language.toUpperCase()}</span>
@@ -239,7 +239,7 @@ export default function StaffNavbarClient({ user }) {
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="flex items-center justify-center p-2 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-white/70 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-white/5 transition-colors"
+                className="flex items-center justify-center p-2 rounded-lg bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-white/70 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-white/5 transition-colors cursor-pointer"
               >
                 {!mounted ? null : theme === "dark" ? (
                   <Sun className="w-4 h-4" />
@@ -249,7 +249,7 @@ export default function StaffNavbarClient({ user }) {
               </motion.button>
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="p-2.5 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white/70 hover:bg-slate-200 hover:text-slate-900 dark:hover:text-white transition-all border border-slate-200 dark:border-white/5"
+                className="p-2.5 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white/70 hover:bg-slate-200 hover:text-slate-900 dark:hover:text-white transition-all border border-slate-200 dark:border-white/5 cursor-pointer"
               >
                 {isOpen ? (
                   <X className="w-5 h-5" />
@@ -290,7 +290,7 @@ export default function StaffNavbarClient({ user }) {
                 </span>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-2 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white/70 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-all"
+                  className="p-2 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white/70 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -308,7 +308,7 @@ export default function StaffNavbarClient({ user }) {
                       key={link.name}
                       href={link.href}
                       onClick={() => setIsOpen(false)}
-                      className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl text-[15px] font-bold tracking-wide transition-all ${
+                      className={`flex items-center gap-4 px-4 py-3 rounded-lg text-[15px] font-bold tracking-wide transition-all ${
                         isActive
                           ? "bg-primary/10 text-primary"
                           : "text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white"
@@ -353,14 +353,14 @@ export default function StaffNavbarClient({ user }) {
                   <Link
                     href="/officer/profil"
                     onClick={() => setIsOpen(false)}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold text-slate-600 dark:text-white bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 transition-all"
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-xs font-bold text-slate-600 dark:text-white bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 transition-all"
                   >
                     <User className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
                     {t("staff_nav.profile") || "Profil"}
                   </Link>
                   <button
                     onClick={() => signOut({ callbackUrl: "/login" })}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 transition-all"
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-xs font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 transition-all cursor-pointer"
                   >
                     <LogOut className="w-4 h-4" />
                     {t("staff_nav.logout") || "Keluar"}

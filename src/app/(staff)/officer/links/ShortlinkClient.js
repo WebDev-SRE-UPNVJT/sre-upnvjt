@@ -223,7 +223,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
               initial={{ opacity: 0, y: -20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
-              className={`fixed top-6 right-6 z-[99999] px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 text-sm font-semibold border backdrop-blur-xl ${
+              className={`fixed top-6 right-6 z-[99999] px-4 sm:px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-xs sm:text-sm font-semibold border backdrop-blur-xl ${
                 notification.type === "success"
                   ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-white dark:bg-[#071a12]"
                   : "bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400 bg-white dark:bg-[#1a0707]"
@@ -246,13 +246,13 @@ export default function ShortlinkClient({ initialLinks = [] }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row md:items-end justify-between relative overflow-hidden shadow-xl dark:shadow-2xl gap-6"
+        className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-xl p-5 sm:p-6 md:p-8 flex flex-col md:flex-row md:items-end justify-between relative overflow-hidden shadow-xl dark:shadow-2xl gap-6"
       >
         <div className="absolute -left-16 -top-16 w-48 h-48 rounded-full bg-emerald-500/20 dark:bg-emerald-500/10 blur-[50px] pointer-events-none" />
         
         <div className="relative z-10 flex-1">
           <div className="flex flex-wrap items-center gap-3 mb-4">
-            <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500">
+            <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-500">
               <Link2 className="w-5 h-5" />
             </div>
             <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-500 uppercase tracking-widest">
@@ -260,13 +260,13 @@ export default function ShortlinkClient({ initialLinks = [] }) {
             </span>
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-display font-black tracking-tighter text-slate-900 dark:text-white leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-black tracking-tighter text-slate-900 dark:text-white leading-tight">
             {t('shortlinks.link_center') || "Manajemen Tautan Singkat"} <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-400">
               SRE UPN Veteran Jawa Timur
             </span>
           </h1>
-          <p className="text-slate-500 dark:text-white/60 text-sm md:text-base font-medium mt-3 max-w-xl leading-relaxed">
+          <p className="text-slate-500 dark:text-white/60 text-xs sm:text-sm md:text-base font-medium mt-3 max-w-xl leading-relaxed">
             {t('shortlinks.desc') || "Buat, kelola, bagikan, dan pantau metrik analitik klik tautan resmi organisasi."}
           </p>
         </div>
@@ -274,7 +274,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
         <div className="relative z-10 w-full md:w-auto flex items-center gap-3">
           <button
             onClick={() => handleOpenForm()}
-            className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs md:text-sm tracking-wider uppercase shadow-[0_4px_20px_rgba(16,185,129,0.35)] hover:shadow-[0_6px_25px_rgba(16,185,129,0.5)] hover:scale-[1.02] active:scale-95 transition-all shrink-0 cursor-pointer"
+            className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs md:text-sm tracking-wider uppercase shadow-[0_4px_20px_rgba(16,185,129,0.35)] hover:shadow-[0_6px_25px_rgba(16,185,129,0.5)] hover:scale-[1.02] active:scale-95 transition-all shrink-0 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>{t('shortlinks.create_new') || "Buat Tautan Baru"}</span>
@@ -283,19 +283,19 @@ export default function ShortlinkClient({ initialLinks = [] }) {
       </motion.div>
 
       {/* KPI Stats Grid - Responsive Mobile & Desktop Layout */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
         {/* Card 1: Total Links */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="col-span-1 bg-white/70 dark:bg-[#08120e]/70 backdrop-blur-xl border border-slate-200/80 dark:border-white/5 rounded-2xl md:rounded-3xl p-4 md:p-5 shadow-sm hover:border-emerald-500/30 transition-all flex flex-col justify-between"
+          className="bg-white/70 dark:bg-[#08120e]/70 backdrop-blur-xl border border-slate-200/80 dark:border-white/5 rounded-xl p-4 sm:p-5 shadow-sm hover:border-emerald-500/30 transition-all flex flex-col justify-between"
         >
           <div className="flex items-center justify-between gap-2 mb-2">
             <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/40">
               {t('shortlinks.stat_total_links') || "Total Tautan"}
             </span>
-            <div className="w-7 h-7 md:w-8 md:h-8 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center justify-center shrink-0">
+            <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center justify-center shrink-0">
               <Globe className="w-3.5 h-3.5 md:w-4 md:h-4" />
             </div>
           </div>
@@ -312,13 +312,13 @@ export default function ShortlinkClient({ initialLinks = [] }) {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="col-span-1 bg-white/70 dark:bg-[#08120e]/70 backdrop-blur-xl border border-slate-200/80 dark:border-white/5 rounded-2xl md:rounded-3xl p-4 md:p-5 shadow-sm hover:border-teal-500/30 transition-all flex flex-col justify-between"
+          className="bg-white/70 dark:bg-[#08120e]/70 backdrop-blur-xl border border-slate-200/80 dark:border-white/5 rounded-xl p-4 sm:p-5 shadow-sm hover:border-teal-500/30 transition-all flex flex-col justify-between"
         >
           <div className="flex items-center justify-between gap-2 mb-2">
             <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/40">
               {t('shortlinks.stat_total_clicks') || "Total Klik"}
             </span>
-            <div className="w-7 h-7 md:w-8 md:h-8 rounded-xl bg-teal-500/10 text-teal-500 border border-teal-500/20 flex items-center justify-center shrink-0">
+            <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-teal-500/10 text-teal-500 border border-teal-500/20 flex items-center justify-center shrink-0">
               <MousePointerClick className="w-3.5 h-3.5 md:w-4 md:h-4" />
             </div>
           </div>
@@ -330,18 +330,18 @@ export default function ShortlinkClient({ initialLinks = [] }) {
           </div>
         </motion.div>
 
-        {/* Card 3: Top Performer (Span 2 cols on mobile, 1 col on desktop) */}
+        {/* Card 3: Top Performer (Span 2 cols on tablet sm, 1 col on desktop lg) */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="col-span-2 lg:col-span-1 bg-white/70 dark:bg-[#08120e]/70 backdrop-blur-xl border border-slate-200/80 dark:border-white/5 rounded-2xl md:rounded-3xl p-4 md:p-5 shadow-sm hover:border-primary/30 transition-all flex flex-col justify-between"
+          className="sm:col-span-2 lg:col-span-1 bg-white/70 dark:bg-[#08120e]/70 backdrop-blur-xl border border-slate-200/80 dark:border-white/5 rounded-xl p-4 sm:p-5 shadow-sm hover:border-primary/30 transition-all flex flex-col justify-between"
         >
           <div className="flex items-center justify-between gap-2 mb-2">
             <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/40">
               {t('shortlinks.stat_top_performer') || "Tautan Terpopuler"}
             </span>
-            <div className="w-7 h-7 md:w-8 md:h-8 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0">
+            <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0">
               <TrendingUp className="w-3.5 h-3.5 md:w-4 md:h-4" />
             </div>
           </div>
@@ -357,7 +357,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
       </div>
 
       {/* Search & Action Bar */}
-      <div className="flex flex-col sm:flex-row gap-3 justify-between items-center bg-white/60 dark:bg-[#08120e]/60 border border-slate-200/80 dark:border-white/5 rounded-2xl p-3 backdrop-blur-xl shadow-sm">
+      <div className="flex flex-col sm:flex-row gap-3 justify-between items-center bg-white/60 dark:bg-[#08120e]/60 border border-slate-200/80 dark:border-white/5 rounded-xl p-3 backdrop-blur-xl shadow-sm">
         <div className="relative w-full sm:w-96">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-white/30" />
           <input
@@ -365,20 +365,20 @@ export default function ShortlinkClient({ initialLinks = [] }) {
             placeholder={t('shortlinks.search_ph') || "Cari tautan, slug, atau tujuan URL..."}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-50 dark:bg-[#0a1610] border border-slate-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs md:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-medium"
+            className="w-full bg-slate-50 dark:bg-[#0a1610] border border-slate-200 dark:border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-xs md:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-medium"
           />
         </div>
         
         <div className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-white/60 whitespace-nowrap">
           <span>{t('shortlinks.showing') || "Menampilkan:"}</span>
-          <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-black">
+          <span className="px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-black">
             {t('shortlinks.links_count', { count: filteredLinks.length }) || `${filteredLinks.length} Tautan`}
           </span>
         </div>
       </div>
 
       {/* Links Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
         <AnimatePresence mode="popLayout">
           {filteredLinks.map((link, index) => (
             <motion.div
@@ -388,7 +388,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ delay: index * 0.04, duration: 0.3 }}
-              className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 hover:border-emerald-500/30 rounded-3xl p-6 group relative overflow-hidden shadow-sm hover:shadow-xl dark:hover:shadow-[0_10px_30px_rgba(16,185,129,0.1)] transition-all duration-300 flex flex-col justify-between"
+              className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 hover:border-emerald-500/30 rounded-xl p-5 sm:p-6 group relative overflow-hidden shadow-sm hover:shadow-xl dark:hover:shadow-[0_10px_30px_rgba(16,185,129,0.1)] transition-all duration-300 flex flex-col justify-between"
             >
               <div>
                 {/* Header: Slug & Copy Action */}
@@ -399,7 +399,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                         SHORTLINK
                       </span>
                     </div>
-                    <h3 className="text-lg md:text-xl font-black font-mono text-slate-900 dark:text-white truncate group-hover:text-emerald-500 transition-colors">
+                    <h3 className="text-base sm:text-lg md:text-xl font-black font-mono text-slate-900 dark:text-white truncate group-hover:text-emerald-500 transition-colors">
                       /s/{link.slug}
                     </h3>
                   </div>
@@ -408,7 +408,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                     <button
                       type="button"
                       onClick={() => setQrModal({ isOpen: true, link })}
-                      className="p-2 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-emerald-500/10 hover:text-emerald-500 text-slate-500 dark:text-white/60 transition-colors cursor-pointer"
+                      className="p-2 rounded-lg bg-slate-100 dark:bg-white/5 hover:bg-emerald-500/10 hover:text-emerald-500 text-slate-500 dark:text-white/60 transition-colors cursor-pointer"
                       title={t('shortlinks.view_qr') || "Lihat QR Code"}
                     >
                       <QrCode className="w-4 h-4" />
@@ -416,7 +416,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                     <button
                       type="button"
                       onClick={() => handleCopy(link.slug, link.id)}
-                      className={`p-2 rounded-xl transition-all cursor-pointer ${
+                      className={`p-2 rounded-lg transition-all cursor-pointer ${
                         copiedId === link.id 
                           ? 'bg-emerald-500 text-black shadow-md shadow-emerald-500/30' 
                           : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/60 hover:text-emerald-500 hover:bg-emerald-500/10'
@@ -441,17 +441,17 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                 </a>
 
                 {/* Metrics & Info Card */}
-                <div className="grid grid-cols-2 gap-2.5 mb-4">
-                  <div className="bg-slate-50 dark:bg-black/30 p-3 rounded-2xl border border-slate-100 dark:border-white/5">
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                  <div className="bg-slate-50 dark:bg-black/30 p-2.5 sm:p-3 rounded-lg border border-slate-100 dark:border-white/5">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/30 block mb-0.5">
                       {t('shortlinks.clicks_count_label') || "Jumlah Klik"}
                     </span>
-                    <span className="text-xl font-black text-slate-900 dark:text-white tabular-nums">
+                    <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tabular-nums">
                       {(link.clicks || 0).toLocaleString()}
                     </span>
                   </div>
 
-                  <div className="bg-slate-50 dark:bg-black/30 p-3 rounded-2xl border border-slate-100 dark:border-white/5 flex flex-col justify-center">
+                  <div className="bg-slate-50 dark:bg-black/30 p-2.5 sm:p-3 rounded-lg border border-slate-100 dark:border-white/5 flex flex-col justify-center">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/30 block mb-1">
                       {t('shortlinks.created_by') || "Dibuat Oleh"}
                     </span>
@@ -487,7 +487,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                   <button
                     type="button"
                     onClick={() => handleOpenForm(link)}
-                    className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-500/10 rounded-xl transition-colors cursor-pointer"
+                    className="p-1.5 sm:p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-colors cursor-pointer"
                     title={t('shortlinks.edit_tooltip') || "Edit Tautan"}
                   >
                     <Edit3 className="w-4 h-4" />
@@ -495,7 +495,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                   <button
                     type="button"
                     onClick={() => handleDelete(link.id)}
-                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer"
+                    className="p-1.5 sm:p-2 text-slate-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
                     title={t('shortlinks.delete_tooltip') || "Hapus Tautan"}
                   >
                     <Trash2 className="w-4 h-4" />
@@ -512,9 +512,9 @@ export default function ShortlinkClient({ initialLinks = [] }) {
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="p-16 flex flex-col items-center justify-center bg-white/50 dark:bg-white/5 border border-dashed border-slate-300 dark:border-white/10 rounded-3xl text-center"
+          className="p-12 sm:p-16 flex flex-col items-center justify-center bg-white/50 dark:bg-white/5 border border-dashed border-slate-300 dark:border-white/10 rounded-xl text-center"
         >
-          <div className="p-4 rounded-2xl bg-emerald-500/10 text-emerald-500 mb-4 border border-emerald-500/20">
+          <div className="p-3.5 rounded-lg bg-emerald-500/10 text-emerald-500 mb-4 border border-emerald-500/20">
             <LinkIcon className="w-8 h-8" />
           </div>
           <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">
@@ -530,7 +530,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
           <button
             type="button"
             onClick={() => handleOpenForm()}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-black font-bold text-xs hover:bg-emerald-400 transition-all shadow-md shadow-emerald-500/20 cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-lg bg-emerald-500 text-black font-bold text-xs hover:bg-emerald-400 transition-all shadow-md shadow-emerald-500/20 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>{t('shortlinks.create_new') || "Buat Tautan Baru"}</span>
@@ -558,16 +558,16 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 15 }}
                 transition={{ duration: 0.2 }}
-                className="relative z-10 w-full max-w-xl my-auto bg-white dark:bg-[#091712] border border-slate-200 dark:border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl overflow-hidden max-h-[85vh] overflow-y-auto"
+                className="relative z-10 w-full max-w-xl my-auto bg-white dark:bg-[#091712] border border-slate-200 dark:border-white/10 rounded-xl p-5 sm:p-6 md:p-8 shadow-2xl overflow-hidden max-h-[85vh] overflow-y-auto"
               >
                 {/* Header */}
                 <div className="flex justify-between items-start mb-6 pb-4 border-b border-slate-100 dark:border-white/5">
                   <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                      <Sparkles className="w-6 h-6" />
+                    <div className="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                      <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
-                      <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">
+                      <h2 className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 dark:text-white">
                         {editingId ? (t('shortlinks.edit_title') || "Edit Tautan Singkat") : (t('shortlinks.create_title') || "Buat Tautan Singkat Baru")}
                       </h2>
                       <p className="text-xs text-slate-400 dark:text-white/40 mt-0.5">
@@ -578,20 +578,20 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                   <button 
                     type="button"
                     onClick={handleCloseForm}
-                    className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                    className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition-colors cursor-pointer"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
                 
                 {error && (
-                  <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-start gap-3">
+                  <div className="mb-6 p-3.5 rounded-lg bg-red-500/10 border border-red-500/20 flex items-start gap-3">
                     <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
                     <p className="text-xs md:text-sm text-red-600 dark:text-red-400 font-semibold">{error}</p>
                   </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
                   {/* Original URL */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-white/70">
@@ -603,7 +603,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                       placeholder={t('shortlinks.url_ph') || "https://drive.google.com/... atau https://..."}
                       value={formData.originalUrl}
                       onChange={(e) => setFormData({...formData, originalUrl: e.target.value})}
-                      className="w-full bg-slate-50 dark:bg-[#060e0a] border border-slate-200 dark:border-white/10 rounded-2xl px-4 py-3 text-xs md:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500 transition-all font-medium"
+                      className="w-full bg-slate-50 dark:bg-[#060e0a] border border-slate-200 dark:border-white/10 rounded-lg px-4 py-2.5 sm:py-3 text-xs md:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500 transition-all font-medium"
                     />
                   </div>
 
@@ -612,8 +612,8 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                     <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-white/70">
                       {t('shortlinks.custom_slug_label') || "Nama Slug Kustom *"}
                     </label>
-                    <div className="flex relative rounded-2xl overflow-hidden border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#060e0a]">
-                      <span className="inline-flex items-center px-3.5 bg-slate-100 dark:bg-white/5 border-r border-slate-200 dark:border-white/10 text-slate-500 dark:text-white/40 font-mono text-xs whitespace-nowrap">
+                    <div className="flex relative rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#060e0a]">
+                      <span className="inline-flex items-center px-3 bg-slate-100 dark:bg-white/5 border-r border-slate-200 dark:border-white/10 text-slate-500 dark:text-white/40 font-mono text-xs whitespace-nowrap">
                         {currentHost}/s/
                       </span>
                       <input
@@ -622,7 +622,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                         placeholder="contoh: panduan-laporan"
                         value={formData.slug}
                         onChange={(e) => setFormData({...formData, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, '')})}
-                        className="w-full bg-transparent px-4 py-3 text-xs md:text-sm font-mono text-slate-900 dark:text-white focus:outline-none pr-10"
+                        className="w-full bg-transparent px-3 sm:px-4 py-2.5 sm:py-3 text-xs md:text-sm font-mono text-slate-900 dark:text-white focus:outline-none pr-10"
                       />
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
                         {isCheckingSlug ? (
@@ -656,7 +656,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                       placeholder={t('shortlinks.desc_ph') || "Contoh: Dokumen SOP Administrasi Periode 2026"}
                       value={formData.description}
                       onChange={(e) => setFormData({...formData, description: e.target.value})}
-                      className="w-full bg-slate-50 dark:bg-[#060e0a] border border-slate-200 dark:border-white/10 rounded-2xl px-4 py-3 text-xs md:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500 transition-all font-medium"
+                      className="w-full bg-slate-50 dark:bg-[#060e0a] border border-slate-200 dark:border-white/10 rounded-lg px-4 py-2.5 sm:py-3 text-xs md:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500 transition-all font-medium"
                     />
                   </div>
 
@@ -665,14 +665,14 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                     <button
                       type="button"
                       onClick={handleCloseForm}
-                      className="px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-white/60 hover:bg-slate-100 dark:hover:bg-white/5 transition-all cursor-pointer"
+                      className="px-4 sm:px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-white/60 hover:bg-slate-100 dark:hover:bg-white/5 transition-all cursor-pointer"
                     >
                       {t('shortlinks.cancel') || "Batal"}
                     </button>
                     <button
                       type="submit"
                       disabled={loading}
-                      className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all disabled:opacity-50 cursor-pointer"
+                      className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-5 sm:px-6 py-2.5 rounded-lg font-black text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all disabled:opacity-50 cursor-pointer"
                     >
                       {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                       <span>{editingId ? (t('shortlinks.save_changes') || "Simpan Perubahan") : (t('shortlinks.create_link') || "Buat Tautan")}</span>
@@ -702,17 +702,17 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                 initial={{ opacity: 0, scale: 0.95, y: 15 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 15 }}
-                className="relative z-10 w-full max-w-sm my-auto bg-white dark:bg-[#091510] border border-slate-200 dark:border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl text-center"
+                className="relative z-10 w-full max-w-sm my-auto bg-white dark:bg-[#091510] border border-slate-200 dark:border-white/10 rounded-xl p-5 sm:p-6 md:p-8 shadow-2xl text-center"
               >
                 <button
                   type="button"
                   onClick={() => setQrModal({ isOpen: false, link: null })}
-                  className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+                  className="absolute top-4 right-4 p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
 
-                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 mx-auto flex items-center justify-center mb-4">
+                <div className="w-12 h-12 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 mx-auto flex items-center justify-center mb-4">
                   <QrCode className="w-6 h-6" />
                 </div>
 
@@ -723,11 +723,11 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                   /s/{qrModal.link.slug}
                 </p>
 
-                <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-inner inline-block mb-6">
+                <div className="p-4 bg-white rounded-lg border border-slate-200 shadow-inner inline-block mb-6">
                   <img
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(`${typeof window !== "undefined" ? window.location.origin : "https://www.sreupnjatim.com"}/s/${qrModal.link.slug}`)}&color=064e3b&bgcolor=ffffff`}
                     alt={`QR Code ${qrModal.link.slug}`}
-                    className="w-48 h-48 mx-auto"
+                    className="w-44 h-44 mx-auto"
                   />
                 </div>
 
@@ -735,7 +735,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                   <button
                     type="button"
                     onClick={() => handleCopy(qrModal.link.slug, qrModal.link.id)}
-                    className="flex-1 py-2.5 px-4 rounded-xl bg-emerald-500 text-black font-bold text-xs hover:bg-emerald-400 transition-all flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/20 cursor-pointer"
+                    className="flex-1 py-2.5 px-4 rounded-lg bg-emerald-500 text-black font-bold text-xs hover:bg-emerald-400 transition-all flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/20 cursor-pointer"
                   >
                     <Copy className="w-4 h-4" />
                     <span>{t('shortlinks.copy_url_btn') || "Salin URL"}</span>
@@ -745,7 +745,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                     download={`QR_SRE_${qrModal.link.slug}.png`}
                     target="_blank"
                     rel="noreferrer"
-                    className="py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white font-bold text-xs hover:bg-slate-200 dark:hover:bg-white/20 transition-all"
+                    className="py-2.5 px-4 rounded-lg bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white font-bold text-xs hover:bg-slate-200 dark:hover:bg-white/20 transition-all"
                   >
                     {t('shortlinks.download_qr_btn') || "Unduh QR"}
                   </a>
@@ -773,12 +773,12 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                 initial={{ scale: 0.9, opacity: 0, y: 15 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 15 }}
-                className="relative z-10 w-full max-w-sm my-auto bg-white dark:bg-[#0a1610] border border-slate-200 dark:border-white/10 rounded-[32px] p-8 shadow-2xl overflow-hidden text-center"
+                className="relative z-10 w-full max-w-sm my-auto bg-white dark:bg-[#0a1610] border border-slate-200 dark:border-white/10 rounded-xl p-6 sm:p-8 shadow-2xl overflow-hidden text-center"
               >
-                <div className="w-16 h-16 rounded-2xl bg-red-500/10 text-red-500 border border-red-500/20 flex items-center justify-center mx-auto mb-5">
-                  <Trash2 className="w-8 h-8" />
+                <div className="w-14 h-14 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 flex items-center justify-center mx-auto mb-5">
+                  <Trash2 className="w-7 h-7" />
                 </div>
-                <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">{t('shortlinks.delete_modal_title') || "Hapus Tautan?"}</h3>
+                <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mb-2">{t('shortlinks.delete_modal_title') || "Hapus Tautan?"}</h3>
                 <p className="text-slate-500 dark:text-white/60 font-medium mb-6 text-xs leading-relaxed">
                   {t('shortlinks.delete_modal_desc') || "Tindakan ini permanen. Tautan dan seluruh data analitik kliknya akan dihapus dari sistem."}
                 </p>
@@ -787,14 +787,14 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                   <button 
                     onClick={() => setDeleteId(null)}
                     disabled={isDeleting}
-                    className="flex-1 py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/5 transition-all cursor-pointer"
+                    className="flex-1 py-2.5 px-4 rounded-lg font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/5 transition-all cursor-pointer"
                   >
                     {t('shortlinks.cancel') || "Batal"}
                   </button>
                   <button 
                     onClick={() => confirmDelete(deleteId)}
                     disabled={isDeleting}
-                    className="flex-1 flex justify-center items-center py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/25 transition-all disabled:opacity-50 cursor-pointer"
+                    className="flex-1 flex justify-center items-center py-2.5 px-4 rounded-lg font-bold text-xs uppercase tracking-wider bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/25 transition-all disabled:opacity-50 cursor-pointer"
                   >
                     {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : (t('shortlinks.delete') || "Hapus")}
                   </button>

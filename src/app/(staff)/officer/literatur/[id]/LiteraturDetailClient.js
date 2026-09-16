@@ -188,16 +188,16 @@ export default function LiteraturDetailClient({ item }) {
         whileHover={{ scale: 1.05, x: -5 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => router.push("/officer/literatur")}
-        className="relative z-20 group flex items-center gap-3 mb-8 text-slate-500 dark:text-white/50 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors font-bold text-sm tracking-wide"
+        className="relative z-20 group flex items-center gap-3 mb-6 sm:mb-8 text-slate-500 dark:text-white/50 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors font-bold text-xs sm:text-sm tracking-wide cursor-pointer"
       >
-        <div className="w-10 h-10 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 flex items-center justify-center group-hover:bg-emerald-500 group-hover:border-emerald-500 group-hover:text-white transition-all shadow-sm">
-          <ArrowLeft className="w-5 h-5" />
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 flex items-center justify-center group-hover:bg-emerald-500 group-hover:border-emerald-500 group-hover:text-white transition-all shadow-sm">
+          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
         {t('literatur.back')}
       </motion.button>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 relative z-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 xl:gap-10 relative z-10">
         
         {/* Left Side (Desktop) / Second (Mobile): PDF Document Viewer with Zoom Controls */}
         <div className="order-2 lg:order-1 lg:col-span-7 xl:col-span-8">
@@ -210,7 +210,7 @@ export default function LiteraturDetailClient({ item }) {
             className={`group w-full ${
               isFullscreen 
                 ? 'fixed inset-0 z-[999] h-screen w-screen rounded-none bg-slate-950 border-none' 
-                : 'h-[600px] sm:h-[750px] lg:h-[820px] bg-white/40 dark:bg-[#090d14]/40 backdrop-blur-2xl rounded-[2rem] border border-slate-200/50 dark:border-white/10 shadow-[0_20px_50px_-12px_rgba(16,185,129,0.2)]'
+                : 'h-[550px] sm:h-[700px] lg:h-[800px] bg-white/40 dark:bg-[#090d14]/40 backdrop-blur-2xl rounded-xl border border-slate-200/50 dark:border-white/10 shadow-[0_20px_50px_-12px_rgba(16,185,129,0.2)]'
             } overflow-hidden relative flex flex-col`}
           >
             {/* Inner Glow */}
@@ -218,7 +218,7 @@ export default function LiteraturDetailClient({ item }) {
 
             {/* PDF Viewer Header Toolbar */}
             {item.type === 'PDF' && (
-              <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 bg-slate-50/95 dark:bg-[#07100c]/95 backdrop-blur-md border-b border-slate-200/50 dark:border-white/10 z-30 shrink-0">
+              <div className="flex items-center justify-between px-3 sm:px-4 py-2 bg-slate-50/95 dark:bg-[#07100c]/95 backdrop-blur-md border-b border-slate-200/50 dark:border-white/10 z-30 shrink-0">
                 {/* Page Count */}
                 <div className="flex items-center gap-1.5 text-slate-500 dark:text-white/50 text-[11px] font-bold">
                   <FileText className="w-3.5 h-3.5 text-emerald-500" />
@@ -226,13 +226,13 @@ export default function LiteraturDetailClient({ item }) {
                 </div>
 
                 {/* Zoom Controls & Fullscreen */}
-                <div className="flex items-center gap-1 bg-white/80 dark:bg-white/5 p-1 rounded-xl border border-slate-200/50 dark:border-white/10 shadow-sm backdrop-blur-sm">
+                <div className="flex items-center gap-1 bg-white/80 dark:bg-white/5 p-1 rounded-lg border border-slate-200/50 dark:border-white/10 shadow-sm backdrop-blur-sm">
                   <button
                     type="button"
                     onClick={handleZoomOut}
                     disabled={zoomScale <= 0.5}
                     title="Perkecil (Zoom Out)"
-                    className="p-1.5 rounded-lg text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/10 disabled:opacity-30 transition-all"
+                    className="p-1.5 rounded-md text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/10 disabled:opacity-30 transition-all cursor-pointer"
                   >
                     <ZoomOut className="w-3.5 h-3.5" />
                   </button>
@@ -241,7 +241,7 @@ export default function LiteraturDetailClient({ item }) {
                     type="button"
                     onClick={handleResetZoom}
                     title="Reset Zoom (100% Lebar Layar)"
-                    className="px-2 py-0.5 rounded-lg text-[11px] font-black text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-all font-mono min-w-[46px] text-center"
+                    className="px-2 py-0.5 rounded-md text-[11px] font-black text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-all font-mono min-w-[46px] text-center cursor-pointer"
                   >
                     {Math.round(zoomScale * 100)}%
                   </button>
@@ -251,7 +251,7 @@ export default function LiteraturDetailClient({ item }) {
                     onClick={handleZoomIn}
                     disabled={zoomScale >= 2.5}
                     title="Perbesar (Zoom In)"
-                    className="p-1.5 rounded-lg text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/10 disabled:opacity-30 transition-all"
+                    className="p-1.5 rounded-md text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/10 disabled:opacity-30 transition-all cursor-pointer"
                   >
                     <ZoomIn className="w-3.5 h-3.5" />
                   </button>
@@ -260,7 +260,7 @@ export default function LiteraturDetailClient({ item }) {
                     type="button"
                     onClick={handleResetZoom}
                     title="Sesuaikan Lebar Layar (Fit Width)"
-                    className={`p-1.5 rounded-lg transition-all ${
+                    className={`p-1.5 rounded-md transition-all cursor-pointer ${
                       zoomScale === 1.0 
                         ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" 
                         : "text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/10"
@@ -275,7 +275,7 @@ export default function LiteraturDetailClient({ item }) {
                     type="button"
                     onClick={toggleFullscreen}
                     title={isFullscreen ? "Keluar Layar Penuh (Exit Fullscreen)" : "Layar Penuh (Fullscreen)"}
-                    className={`p-1.5 rounded-lg transition-all ${
+                    className={`p-1.5 rounded-md transition-all cursor-pointer ${
                       isFullscreen 
                         ? "bg-emerald-500 text-white shadow-sm" 
                         : "text-slate-600 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/10"
@@ -291,7 +291,7 @@ export default function LiteraturDetailClient({ item }) {
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50/80 dark:bg-[#08120e]/80 backdrop-blur-sm z-10">
                 <div className="relative mb-6">
                   <div className="absolute inset-0 bg-emerald-500 rounded-full blur-xl animate-pulse opacity-50" />
-                  <FileText className="w-16 h-16 text-emerald-500 relative z-10 animate-bounce" />
+                  <FileText className="w-14 h-14 sm:w-16 sm:h-16 text-emerald-500 relative z-10 animate-bounce" />
                 </div>
                 <span className="text-xs font-black text-slate-500 dark:text-emerald-400 tracking-[0.3em] uppercase animate-pulse">Memuat Dokumen</span>
               </div>
@@ -327,7 +327,7 @@ export default function LiteraturDetailClient({ item }) {
                     renderPageWrapper={(Page, index) => (
                       <div
                         key={`page_${index + 1}`}
-                        className="my-3 shadow-2xl rounded-xl overflow-hidden border border-slate-200/60 dark:border-white/10 transition-all bg-white shrink-0"
+                        className="my-3 shadow-2xl rounded-lg overflow-hidden border border-slate-200/60 dark:border-white/10 transition-all bg-white shrink-0"
                         style={{ width: calculatedPageWidth }}
                       >
                         <Page 
@@ -359,7 +359,7 @@ export default function LiteraturDetailClient({ item }) {
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="bg-white/60 dark:bg-[#08120e]/60 backdrop-blur-2xl rounded-[2rem] border border-slate-200 dark:border-white/10 p-6 md:p-8 shadow-2xl relative overflow-hidden group max-h-[calc(100vh-6rem)] overflow-y-auto custom-scrollbar flex flex-col"
+              className="bg-white/60 dark:bg-[#08120e]/60 backdrop-blur-2xl rounded-xl border border-slate-200 dark:border-white/10 p-5 sm:p-6 md:p-8 shadow-2xl relative overflow-hidden group max-h-[calc(100vh-6rem)] overflow-y-auto custom-scrollbar flex flex-col"
             >
               {/* Card Ambient Glow */}
               <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl group-hover:bg-teal-500/20 transition-colors duration-700 pointer-events-none" />
@@ -367,19 +367,19 @@ export default function LiteraturDetailClient({ item }) {
               <div className="relative z-10">
                 {/* Badges & Meta Top */}
                 <div className="flex flex-wrap items-center gap-2 mb-4">
-                  <span className={`px-3 py-1 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-sm border ${
+                  <span className={`px-2.5 py-1 rounded-md text-[11px] font-black uppercase tracking-widest flex items-center gap-2 shadow-sm border ${
                     TYPE_COLORS[item.type] || TYPE_COLORS.OTHER
                   }`}>
                     <Zap className="w-3.5 h-3.5" />
                     {item.type || "OTHER"}
                   </span>
                   {item.category && (
-                    <span className="px-3 py-1 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-white/60 shadow-sm">
+                    <span className="px-2.5 py-1 rounded-md text-[11px] font-black uppercase tracking-widest border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-white/60 shadow-sm">
                       {item.category.name}
                     </span>
                   )}
                   {item.year && (
-                    <span className="px-3 py-1 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-white/60 shadow-sm flex items-center gap-1.5">
+                    <span className="px-2.5 py-1 rounded-md text-[11px] font-black uppercase tracking-widest border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-white/60 shadow-sm flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5 text-teal-500" />
                       {item.year}
                     </span>
@@ -387,16 +387,16 @@ export default function LiteraturDetailClient({ item }) {
                 </div>
 
                 {/* Title */}
-                <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-white leading-tight mb-6 tracking-tight drop-shadow-sm">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 dark:text-white leading-tight mb-5 sm:mb-6 tracking-tight drop-shadow-sm">
                   {item.title}
                 </h1>
 
                 {/* Metadata Grid (Author, Year, Category, Type) */}
-                <div className="grid grid-cols-2 gap-3 mb-6 pb-6 border-b border-slate-200/50 dark:border-white/10">
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-3 mb-5 sm:mb-6 pb-5 sm:pb-6 border-b border-slate-200/50 dark:border-white/10">
                   {/* Author */}
-                  <div className="p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 flex items-center justify-center shrink-0">
-                      <User className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <div className="p-2.5 sm:p-3 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center gap-2.5">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-md bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 flex items-center justify-center shrink-0">
+                      <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 dark:text-emerald-400" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-[10px] uppercase font-black text-slate-400 dark:text-white/40 tracking-wider">Penulis</p>
@@ -407,9 +407,9 @@ export default function LiteraturDetailClient({ item }) {
                   </div>
 
                   {/* Year */}
-                  <div className="p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-teal-50 dark:bg-teal-500/10 border border-teal-100 dark:border-teal-500/20 flex items-center justify-center shrink-0">
-                      <Calendar className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                  <div className="p-2.5 sm:p-3 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center gap-2.5">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-md bg-teal-50 dark:bg-teal-500/10 border border-teal-100 dark:border-teal-500/20 flex items-center justify-center shrink-0">
+                      <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-teal-600 dark:text-teal-400" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-[10px] uppercase font-black text-slate-400 dark:text-white/40 tracking-wider">Tahun Terbit</p>
@@ -420,9 +420,9 @@ export default function LiteraturDetailClient({ item }) {
                   </div>
 
                   {/* Category */}
-                  <div className="p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 flex items-center justify-center shrink-0">
-                      <FolderOpen className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <div className="p-2.5 sm:p-3 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center gap-2.5">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-md bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 flex items-center justify-center shrink-0">
+                      <FolderOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-[10px] uppercase font-black text-slate-400 dark:text-white/40 tracking-wider">Kategori</p>
@@ -433,9 +433,9 @@ export default function LiteraturDetailClient({ item }) {
                   </div>
 
                   {/* Type */}
-                  <div className="p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-500/10 border border-purple-100 dark:border-purple-500/20 flex items-center justify-center shrink-0">
-                      <Zap className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  <div className="p-2.5 sm:p-3 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center gap-2.5">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-md bg-purple-50 dark:bg-purple-500/10 border border-purple-100 dark:border-purple-500/20 flex items-center justify-center shrink-0">
+                      <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-600 dark:text-purple-400" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-[10px] uppercase font-black text-slate-400 dark:text-white/40 tracking-wider">Tipe Dokumen</p>
@@ -447,7 +447,7 @@ export default function LiteraturDetailClient({ item }) {
                 </div>
 
                 {/* Abstract Section (Bilingual) */}
-                <div className="mb-6 pb-6 border-b border-slate-200/50 dark:border-white/10">
+                <div className="mb-5 sm:mb-6 pb-5 sm:pb-6 border-b border-slate-200/50 dark:border-white/10">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <FileText className="w-4 h-4 text-emerald-500" />
@@ -458,11 +458,11 @@ export default function LiteraturDetailClient({ item }) {
 
                     {/* Language Switcher */}
                     {hasBilingualAbstract || hasBilingualKeywords ? (
-                      <div className="flex bg-slate-100 dark:bg-white/5 p-0.5 rounded-lg border border-slate-200 dark:border-white/10 shadow-sm">
+                      <div className="flex bg-slate-100 dark:bg-white/5 p-0.5 rounded-md border border-slate-200 dark:border-white/10 shadow-sm">
                         <button
                           type="button"
                           onClick={() => setSelectedLang("en")}
-                          className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase transition-all ${
+                          className={`px-2 py-0.5 rounded text-[10px] font-black uppercase transition-all cursor-pointer ${
                             selectedLang === "en"
                               ? "bg-emerald-500 text-white shadow-sm"
                               : "text-slate-500 dark:text-white/40 hover:text-slate-900 dark:hover:text-white"
@@ -473,7 +473,7 @@ export default function LiteraturDetailClient({ item }) {
                         <button
                           type="button"
                           onClick={() => setSelectedLang("id")}
-                          className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase transition-all ${
+                          className={`px-2 py-0.5 rounded text-[10px] font-black uppercase transition-all cursor-pointer ${
                             selectedLang === "id"
                               ? "bg-emerald-500 text-white shadow-sm"
                               : "text-slate-500 dark:text-white/40 hover:text-slate-900 dark:hover:text-white"
@@ -483,14 +483,14 @@ export default function LiteraturDetailClient({ item }) {
                         </button>
                       </div>
                     ) : hasAbstract ? (
-                      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
                         {item.abstract ? "EN" : "ID"}
                       </span>
                     ) : null}
                   </div>
 
                   {hasAbstract ? (
-                    <div className="relative group/abs bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/70 dark:border-white/5 rounded-2xl p-4 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+                    <div className="relative group/abs bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/70 dark:border-white/5 rounded-lg p-3.5 sm:p-4 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
                       <p className="whitespace-pre-line select-text font-normal leading-relaxed text-justify">
                         {currentAbstract}
                       </p>
@@ -498,7 +498,7 @@ export default function LiteraturDetailClient({ item }) {
                       <button
                         type="button"
                         onClick={handleCopyAbstract}
-                        className="mt-3.5 flex items-center gap-1.5 text-[11px] font-bold text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                        className="mt-3 flex items-center gap-1.5 text-[11px] font-bold text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer"
                       >
                         {copied ? (
                           <>
@@ -514,7 +514,7 @@ export default function LiteraturDetailClient({ item }) {
                       </button>
                     </div>
                   ) : (
-                    <div className="p-4 rounded-2xl bg-slate-50/50 dark:bg-white/[0.02] border border-dashed border-slate-200 dark:border-white/10 text-center">
+                    <div className="p-4 rounded-lg bg-slate-50/50 dark:bg-white/[0.02] border border-dashed border-slate-200 dark:border-white/10 text-center">
                       <p className="text-xs text-slate-400 dark:text-white/40 font-medium">
                         Abstrak belum ditambahkan untuk dokumen ini.
                       </p>
@@ -523,7 +523,7 @@ export default function LiteraturDetailClient({ item }) {
                 </div>
 
                 {/* Keywords (Kata Kunci) */}
-                <div className="mb-6 pb-6 border-b border-slate-200/50 dark:border-white/10">
+                <div className="mb-5 sm:mb-6 pb-5 sm:pb-6 border-b border-slate-200/50 dark:border-white/10">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <Tag className="w-4 h-4 text-emerald-500" />
@@ -532,11 +532,11 @@ export default function LiteraturDetailClient({ item }) {
                       </h3>
                     </div>
                     {!hasAbstract && hasBilingualKeywords ? (
-                      <div className="flex bg-slate-100 dark:bg-white/5 p-0.5 rounded-lg border border-slate-200 dark:border-white/10">
+                      <div className="flex bg-slate-100 dark:bg-white/5 p-0.5 rounded-md border border-slate-200 dark:border-white/10">
                         <button
                           type="button"
                           onClick={() => setSelectedLang("en")}
-                          className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase transition-all ${
+                          className={`px-2 py-0.5 rounded text-[10px] font-black uppercase transition-all cursor-pointer ${
                             selectedLang === "en"
                               ? "bg-emerald-500 text-white shadow-sm"
                               : "text-slate-500 dark:text-white/40 hover:text-slate-900 dark:hover:text-white"
@@ -547,7 +547,7 @@ export default function LiteraturDetailClient({ item }) {
                         <button
                           type="button"
                           onClick={() => setSelectedLang("id")}
-                          className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase transition-all ${
+                          className={`px-2 py-0.5 rounded text-[10px] font-black uppercase transition-all cursor-pointer ${
                             selectedLang === "id"
                               ? "bg-emerald-500 text-white shadow-sm"
                               : "text-slate-500 dark:text-white/40 hover:text-slate-900 dark:hover:text-white"
@@ -557,7 +557,7 @@ export default function LiteraturDetailClient({ item }) {
                         </button>
                       </div>
                     ) : !hasAbstract && hasKeywords ? (
-                      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
                         {item.keywords ? "EN" : "ID"}
                       </span>
                     ) : null}
@@ -571,7 +571,7 @@ export default function LiteraturDetailClient({ item }) {
                         return (
                           <span
                             key={i}
-                            className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-500/20 shadow-sm"
+                            className="px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-500/20 shadow-sm"
                           >
                             {cleanKw}
                           </span>
@@ -593,7 +593,7 @@ export default function LiteraturDetailClient({ item }) {
                     href={item.driveUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-full py-4 rounded-2xl bg-emerald-500 text-white font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all shadow-[0_6px_0_0_#047857] hover:shadow-[0_2px_0_0_#047857] hover:translate-y-[4px] active:shadow-none active:translate-y-[6px] group"
+                    className="w-full py-3 sm:py-3.5 rounded-lg bg-emerald-500 text-white font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2.5 transition-all shadow-[0_4px_0_0_#047857] hover:shadow-[0_2px_0_0_#047857] hover:translate-y-[2px] active:shadow-none active:translate-y-[4px] group cursor-pointer"
                   >
                     Buka Original File
                     <ExternalLink className="w-4 h-4 group-hover:rotate-12 transition-transform" />

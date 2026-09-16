@@ -373,7 +373,7 @@ export default function Home() {
         {/* Hero Section */}
         <section
           id="home"
-          className={`relative min-h-[100dvh] sm:min-h-screen flex flex-col justify-center items-start py-16 sm:py-24 px-6 sm:px-12 md:px-20 lg:px-24 overflow-hidden ${
+          className={`relative min-h-[100dvh] sm:min-h-screen flex flex-col justify-center items-start py-16 sm:py-24 px-6 sm:px-10 md:px-12 lg:px-20 overflow-hidden ${
             isLight ? "bg-white" : "bg-[#0a1c15]"
           }`}
         >
@@ -400,16 +400,16 @@ export default function Home() {
             </>
           )}
 
-          <div className="w-full max-w-7xl mx-auto z-10 flex flex-col justify-center items-start h-full mt-6 sm:mt-12 md:mt-20">
+          <div className="w-full max-w-7xl mx-auto z-10 flex flex-col justify-center items-start h-full mt-2 sm:mt-6 md:mt-10">
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="text-[48px] xs:text-[54px] sm:text-[76px] md:text-[105px] lg:text-[130px] xl:text-[145px] font-display font-black tracking-[-0.04em] leading-[0.85] uppercase flex flex-col items-start w-full drop-shadow-md"
+              className="text-[48px] xs:text-[54px] sm:text-[68px] md:text-[84px] lg:text-[116px] xl:text-[142px] font-display font-black tracking-[-0.04em] leading-[0.88] uppercase flex flex-col items-start w-full drop-shadow-md"
             >
-              <div className="flex items-center gap-2 sm:gap-3 md:gap-5">
+              <div className="flex items-center gap-2 sm:gap-3 md:gap-4 lg:gap-5">
                 <span className={isLight ? "text-white" : "text-white drop-shadow-md"}>SOCIETY</span>
-                <span className={`text-[28px] xs:text-[32px] sm:text-[44px] md:text-[62px] lg:text-[76px] xl:text-[84px] font-serif italic font-normal normal-case tracking-normal transform -translate-y-1 sm:-translate-y-2 md:-translate-y-4 ${
+                <span className={`text-[28px] xs:text-[32px] sm:text-[40px] md:text-[50px] lg:text-[68px] xl:text-[84px] font-serif italic font-normal normal-case tracking-normal transform -translate-y-0.5 sm:-translate-y-1.5 md:-translate-y-3 ${
                   isLight ? "text-white" : "text-[#e8ecc4]"
                 }`}>of</span>
               </div>
@@ -419,7 +419,7 @@ export default function Home() {
           </div>
 
           {/* Slide Indicators — Custom indicators mirroring user attachment */}
-          <div className="absolute bottom-6 sm:bottom-10 left-6 sm:left-12 md:left-20 lg:left-24 z-10 flex gap-2 items-center">
+          <div className="absolute bottom-10 sm:bottom-12 left-6 sm:left-10 md:left-12 lg:left-20 z-10 flex gap-2 items-center">
             {HERO_IMAGES.map((_, idx) => (
               <div
                 key={idx}
@@ -432,7 +432,7 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="absolute bottom-6 sm:bottom-10 right-6 sm:right-12 md:right-16 lg:right-24 z-10 flex flex-col items-end">
+          <div className="absolute bottom-10 sm:bottom-12 right-6 sm:right-10 md:right-12 lg:right-20 z-10 flex flex-col items-end max-w-[200px] sm:max-w-none pr-16 sm:pr-18">
             <span className={`text-[12px] sm:text-[13px] md:text-[14px] font-medium tracking-wide text-right ${
               isLight ? "text-white" : "text-white/90 drop-shadow-md"
             }`}>

@@ -86,7 +86,7 @@ export default function LiteraturMemberClient({ initialItems, categories }) {
             placeholder={t('literatur.search_placeholder')}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-50 dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-2xl pl-10 pr-4 py-3 text-sm text-slate-700 dark:text-white focus:outline-none focus:border-emerald-500/50 shadow-inner placeholder:text-slate-400 dark:placeholder:text-white/40"
+            className="w-full bg-slate-50 dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-xl pl-10 pr-4 py-3 text-sm text-slate-700 dark:text-white focus:outline-none focus:border-emerald-500/50 shadow-inner placeholder:text-slate-400 dark:placeholder:text-white/40"
           />
         </div>
       </div>
@@ -99,7 +99,7 @@ export default function LiteraturMemberClient({ initialItems, categories }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
             onClick={() => setSelectedCategoryId("all")}
-            className="cursor-pointer group relative overflow-hidden rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#090d14] shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:shadow-none hover:shadow-[0_12px_30px_rgba(16,185,129,0.15)] hover:border-emerald-500/50 hover:-translate-y-1.5 transition-all duration-500"
+            className="cursor-pointer group relative overflow-hidden rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#090d14] shadow-sm dark:shadow-none hover:border-emerald-500/50 hover:-translate-y-1 transition-all duration-300"
           >
             <div className="aspect-[4/3] w-full overflow-hidden relative">
                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-100 dark:from-emerald-900/20 to-slate-50 dark:to-[#090d14]">
@@ -123,7 +123,7 @@ export default function LiteraturMemberClient({ initialItems, categories }) {
               transition={{ duration: 0.4, delay: (index + 1) * 0.05 }}
               key={cat.id}
               onClick={() => setSelectedCategoryId(cat.id.toString())}
-              className="cursor-pointer group relative overflow-hidden rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#090d14] shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:shadow-none hover:shadow-[0_12px_30px_rgba(16,185,129,0.15)] hover:border-emerald-500/50 hover:-translate-y-1.5 transition-all duration-500"
+              className="cursor-pointer group relative overflow-hidden rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#090d14] shadow-sm dark:shadow-none hover:border-emerald-500/50 hover:-translate-y-1 transition-all duration-300"
             >
               <div className="aspect-[4/3] w-full overflow-hidden relative bg-slate-900">
                  {cat.imageUrl ? (
@@ -200,7 +200,7 @@ export default function LiteraturMemberClient({ initialItems, categories }) {
                   initial={{ opacity: 0, scale: 0.95, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                  className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md bg-white dark:bg-[#090d14] border border-slate-200 dark:border-white/10 rounded-3xl p-6 md:p-8 z-50 shadow-2xl"
+                  className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md bg-white dark:bg-[#090d14] border border-slate-200 dark:border-white/10 rounded-xl p-6 md:p-8 z-50 shadow-2xl"
                 >
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
@@ -234,7 +234,7 @@ export default function LiteraturMemberClient({ initialItems, categories }) {
                             key={tObj.value}
                             onClick={() => setFilterType(tObj.value)}
                             className={`px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
-                              filterType === t.value 
+                              filterType === tObj.value 
                                 ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 shadow-sm" 
                                 : "bg-slate-50 dark:bg-black/20 text-slate-500 dark:text-white/50 border-slate-200 dark:border-white/5 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 hover:border-slate-300 dark:hover:border-white/10"
                             }`}
@@ -322,7 +322,7 @@ export default function LiteraturMemberClient({ initialItems, categories }) {
 
           {/* Grid List for Items */}
           {filteredItems.length === 0 ? (
-            <div className="py-24 flex flex-col items-center justify-center text-center bg-white dark:bg-[#08120e] border border-dashed border-slate-200 dark:border-white/5 rounded-3xl">
+            <div className="py-24 flex flex-col items-center justify-center text-center bg-white dark:bg-[#08120e] border border-dashed border-slate-200 dark:border-white/5 rounded-xl">
               <FolderOpen className="w-12 h-12 text-slate-300 dark:text-white/10 mb-4 animate-pulse" />
               <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1">{t('literatur.not_found')}</h3>
               <p className="text-slate-500 dark:text-white/40 text-xs max-w-xs leading-relaxed mt-1">{t('literatur.not_found_desc')}</p>
@@ -336,7 +336,7 @@ export default function LiteraturMemberClient({ initialItems, categories }) {
                   transition={{ duration: 0.4, delay: (index % 4) * 0.05 }}
                   key={item.id}
                   href={`/member/literatur/${item.id}`}
-                  className="relative bg-white dark:bg-[#090d14] border border-slate-200 dark:border-white/10 rounded-3xl overflow-hidden cursor-pointer group hover:border-emerald-500/50 transition-all duration-500 transform-gpu hover:-translate-y-1.5 flex flex-col h-full shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:shadow-none hover:shadow-[0_12px_30px_rgba(16,185,129,0.15)]"
+                  className="relative bg-white dark:bg-[#090d14] border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden cursor-pointer group hover:border-emerald-500/50 transition-all duration-300 transform-gpu hover:-translate-y-1 flex flex-col h-full shadow-sm dark:shadow-none"
                 >
                   {/* Document Cover (Header / Kop from PDF) */}
                   <div className="relative aspect-[16/10] w-full overflow-hidden shrink-0 bg-white dark:bg-[#07110c] border-b border-slate-100 dark:border-white/5">

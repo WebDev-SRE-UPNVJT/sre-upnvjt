@@ -349,7 +349,7 @@ export default function MateriDetailClient({ initialData, r2Url }) {
             {/* 2. Presentation Card (order-2 on mobile) */}
             <div 
               ref={presentationRef}
-              className={`order-2 lg:order-none bg-white dark:bg-[#07130e] border-slate-200/80 dark:border-white/10 overflow-hidden flex flex-col relative w-full ${isFullscreen ? 'border-0 rounded-none h-screen' : 'border rounded-2xl shadow-lg dark:shadow-[0_10px_35px_rgba(0,0,0,0.35)]'}`}
+              className={`order-2 lg:order-none bg-white dark:bg-[#07130e] border-slate-200/80 dark:border-white/10 overflow-hidden flex flex-col relative w-full ${isFullscreen ? 'border-0 rounded-none h-screen' : 'border rounded-xl shadow-lg dark:shadow-[0_10px_35px_rgba(0,0,0,0.35)]'}`}
             >
               {/* Media Area (strictly 16:9 unless fullscreen) */}
               <div className={`relative bg-slate-100 dark:bg-black/50 w-full flex flex-col items-center justify-center overflow-hidden ${isFullscreen ? 'flex-1' : 'aspect-video'}`}>
@@ -477,7 +477,7 @@ export default function MateriDetailClient({ initialData, r2Url }) {
 
             {/* 3. Notes Section (order-3 on mobile) */}
             {moduleData?.notes && (
-              <div className="order-3 lg:order-none bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-2xl p-6 sm:p-8 shadow-lg dark:shadow-[0_10px_35px_rgba(0,0,0,0.35)] w-full">
+              <div className="order-3 lg:order-none bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-xl p-6 sm:p-8 shadow-lg dark:shadow-[0_10px_35px_rgba(0,0,0,0.35)] w-full">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pb-4 border-b border-slate-100 dark:border-white/10 gap-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 border border-blue-500/20">
@@ -522,7 +522,7 @@ export default function MateriDetailClient({ initialData, r2Url }) {
           <div className="contents lg:block lg:col-span-1 lg:space-y-6 lg:sticky lg:top-28">
             
               {/* 1. Module Progress (order-1 on mobile) */}
-            <div className="order-1 lg:order-none bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-lg dark:shadow-[0_10px_35px_rgba(0,0,0,0.35)] w-full">
+            <div className="order-1 lg:order-none bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-xl p-6 shadow-lg dark:shadow-[0_10px_35px_rgba(0,0,0,0.35)] w-full">
               <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4">{t('materi.module_progress') || 'Progres Modul'}</h3>
               <div className="flex justify-between text-xs font-bold mb-2">
                 <span className="text-slate-500 dark:text-white/60">{t('materi.completion') || 'Penyelesaian'}</span>
@@ -626,7 +626,7 @@ export default function MateriDetailClient({ initialData, r2Url }) {
                   animate={{ scale: 1, y: 0, opacity: 1 }}
                   exit={{ scale: 0.8, y: 30, opacity: 0 }}
                   transition={{ type: "spring", damping: 14, stiffness: 220 }}
-                  className="bg-white dark:bg-[#07130e] border border-emerald-500/40 rounded-[2.5rem] p-8 max-w-sm w-full shadow-[0_25px_60px_rgba(0,0,0,0.6)] flex flex-col items-center text-center relative overflow-hidden my-auto"
+                  className="bg-white dark:bg-[#07130e] border border-emerald-500/40 rounded-xl p-8 max-w-sm w-full shadow-[0_25px_60px_rgba(0,0,0,0.6)] flex flex-col items-center text-center relative overflow-hidden my-auto"
                 >
                   {/* Confetti Particles */}
                   <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -681,7 +681,7 @@ export default function MateriDetailClient({ initialData, r2Url }) {
                   
                   <motion.div 
                     initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", delay: 0.6 }}
-                    className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-2xl py-3 px-8 mb-8 z-10 shadow-inner relative overflow-hidden group"
+                    className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-xl py-3 px-8 mb-8 z-10 shadow-inner relative overflow-hidden group"
                   >
                     <div className="absolute inset-0 bg-emerald-400/20 w-0 group-hover:w-full transition-all duration-500 ease-out" />
                     <span className="relative text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300 drop-shadow-sm">

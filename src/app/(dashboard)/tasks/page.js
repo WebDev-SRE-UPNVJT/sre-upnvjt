@@ -44,7 +44,9 @@ export default async function TasksAdminPage() {
   const tasks = rawTasks.map(t => ({
     id: t.id,
     title: t.title,
-    description: t.description,
+    introduction: t.introduction || "",
+    instructions: t.instructions || "",
+    submissionGuidelines: t.submissionGuidelines || "",
     rewardXp: t.rewardXp,
     category: t.category || "MAIN",
     isRequired: t.isRequired ?? true,

@@ -28,7 +28,9 @@ export async function GET() {
     const tasks = rawTasks.map(t => ({
       id: t.id,
       title: t.title,
-      description: t.description,
+      introduction: t.introduction || "",
+      instructions: t.instructions || "",
+      submissionGuidelines: t.submissionGuidelines || "",
       rewardXp: t.rewardXp,
       category: t.category || "MAIN",
       isRequired: t.isRequired ?? true,
@@ -67,7 +69,9 @@ export async function POST(req) {
     const body = await req.json();
     const {
       title,
-      description,
+      introduction,
+      instructions,
+      submissionGuidelines,
       rewardXp,
       category,
       isRequired,
@@ -85,8 +89,8 @@ export async function POST(req) {
       createSpreadsheet,
     } = body;
 
-    if (!title || !description || !deadline) {
-      return NextResponse.json({ error: "Judul, deskripsi, dan tenggat waktu wajib diisi" }, { status: 400 });
+    if (!title || !deadline || (!instructions && !introduction && !submissionGuidelines)) {
+      return NextResponse.json({ error: "Judul, rincian instruksi/tugas, dan tenggat waktu wajib diisi" }, { status: 400 });
     }
 
     let spreadsheetId = body.spreadsheetId || null;
@@ -124,7 +128,9 @@ export async function POST(req) {
 
     const [result] = await db.insert(task).values({
       title,
-      description,
+      introduction: introduction || null,
+      instructions: instructions || null,
+      submissionGuidelines: submissionGuidelines || null,
       rewardXp: rewardXp ? parseInt(rewardXp) : 0,
       category: category ? String(category).toUpperCase() : "MAIN",
       isRequired: isRequired !== undefined ? Boolean(isRequired) : true,

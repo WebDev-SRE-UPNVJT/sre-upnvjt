@@ -202,7 +202,7 @@ export default function LiteraturDetailClient({ item }) {
             className={`w-full ${
               isFullscreen 
                 ? 'fixed inset-0 z-[999] h-screen w-screen rounded-none bg-slate-900 border-none' 
-                : 'h-[600px] sm:h-[750px] lg:h-[820px] bg-white dark:bg-[#090d14] rounded-3xl border border-slate-200 dark:border-white/10 shadow-xl'
+                : 'h-[600px] sm:h-[750px] lg:h-[820px] bg-white dark:bg-[#090d14] rounded-xl border border-slate-200 dark:border-white/10 shadow-sm'
             } overflow-hidden relative flex flex-col`}
           >
             {/* PDF Viewer Header Toolbar */}
@@ -344,7 +344,7 @@ export default function LiteraturDetailClient({ item }) {
             <motion.div 
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="bg-white dark:bg-[#090d14] rounded-3xl border border-slate-200 dark:border-white/10 p-6 md:p-8 shadow-xl max-h-[calc(100vh-6rem)] overflow-y-auto custom-scrollbar flex flex-col"
+              className="bg-white dark:bg-[#090d14] rounded-xl border border-slate-200 dark:border-white/10 p-6 md:p-8 shadow-sm max-h-[calc(100vh-6rem)] overflow-y-auto custom-scrollbar flex flex-col"
             >
               {/* Badges & Meta Top */}
               <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -374,8 +374,8 @@ export default function LiteraturDetailClient({ item }) {
               {/* Metadata Grid (Author, Year, Category, Type) */}
               <div className="grid grid-cols-2 gap-3 mb-6 pb-6 border-b border-slate-100 dark:border-white/10">
                 {/* Author */}
-                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 flex items-center justify-center shrink-0">
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 flex items-center justify-center shrink-0">
                     <User className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div className="min-w-0">
@@ -387,8 +387,8 @@ export default function LiteraturDetailClient({ item }) {
                 </div>
 
                 {/* Year */}
-                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-teal-50 dark:bg-teal-500/10 border border-teal-100 dark:border-teal-500/20 flex items-center justify-center shrink-0">
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-teal-50 dark:bg-teal-500/10 border border-teal-100 dark:border-teal-500/20 flex items-center justify-center shrink-0">
                     <Calendar className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                   </div>
                   <div className="min-w-0">
@@ -400,8 +400,8 @@ export default function LiteraturDetailClient({ item }) {
                 </div>
 
                 {/* Category */}
-                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 flex items-center justify-center shrink-0">
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 flex items-center justify-center shrink-0">
                     <FolderOpen className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div className="min-w-0">
@@ -413,8 +413,8 @@ export default function LiteraturDetailClient({ item }) {
                 </div>
 
                 {/* Type */}
-                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-500/10 border border-purple-100 dark:border-purple-500/20 flex items-center justify-center shrink-0">
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/5 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-500/10 border border-purple-100 dark:border-purple-500/20 flex items-center justify-center shrink-0">
                     <Zap className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div className="min-w-0">
@@ -470,7 +470,7 @@ export default function LiteraturDetailClient({ item }) {
                 </div>
 
                 {hasAbstract ? (
-                  <div className="relative group/abs bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/70 dark:border-white/5 rounded-2xl p-4 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+                  <div className="relative group/abs bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/70 dark:border-white/5 rounded-xl p-4 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
                     <p className="whitespace-pre-line select-text font-normal leading-relaxed text-justify">
                       {currentAbstract}
                     </p>
@@ -494,7 +494,7 @@ export default function LiteraturDetailClient({ item }) {
                     </button>
                   </div>
                 ) : (
-                  <div className="p-4 rounded-2xl bg-slate-50/50 dark:bg-white/[0.02] border border-dashed border-slate-200 dark:border-white/10 text-center">
+                  <div className="p-4 rounded-xl bg-slate-50/50 dark:bg-white/[0.02] border border-dashed border-slate-200 dark:border-white/10 text-center">
                     <p className="text-xs text-slate-400 dark:text-white/40 font-medium">
                       Abstrak belum ditambahkan untuk dokumen ini.
                     </p>
@@ -571,7 +571,7 @@ export default function LiteraturDetailClient({ item }) {
                   href={item.driveUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all shadow-lg shadow-emerald-500/25 group"
+                  className="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all shadow-lg shadow-emerald-500/25 group"
                 >
                   {t('literatur.open')} Original File
                   <ExternalLink className="w-4 h-4 group-hover:scale-110 transition-transform" />

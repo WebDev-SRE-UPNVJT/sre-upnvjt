@@ -128,27 +128,27 @@ export default function MemberDashboardClient({
         {/* ── Welcome + XP Progress (2/3 width) ────────────────────── */}
         <motion.div
           {...fadeUp(0)}
-          className="lg:col-span-2 relative bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-3xl p-7 md:p-9 flex flex-col justify-between overflow-hidden shadow-xl dark:shadow-2xl"
+          className="lg:col-span-2 relative bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/10 rounded-xl p-6 sm:p-8 flex flex-col justify-between overflow-hidden shadow-sm dark:shadow-none"
         >
-          {/* Decorative glow */}
-          <div className="absolute -right-20 -top-20 w-56 h-56 rounded-full bg-primary/15 dark:bg-primary/8 blur-[60px] pointer-events-none" />
+          {/* Subtle light accent */}
+          <div className="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-primary/10 dark:bg-primary/5 blur-3xl pointer-events-none" />
 
           <div className="relative z-10">
-            <LevelBadge xp={xp} size="sm" className="mb-5" />
-            <h1 className="text-4xl md:text-5xl font-display font-black tracking-tighter text-slate-900 dark:text-white leading-none">
+            <LevelBadge xp={xp} size="sm" className="mb-4" />
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-black tracking-tight text-slate-900 dark:text-white leading-tight">
               {timeGreeting},{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400 dark:to-emerald-300">
                 <span className="inline md:hidden">{firstName}!</span>
                 <span className="hidden md:inline">{fullName}!</span>
               </span>
             </h1>
-            <p className="text-slate-500 dark:text-white/50 text-sm font-medium mt-3 max-w-lg leading-relaxed">
+            <p className="text-slate-500 dark:text-white/50 text-sm font-medium mt-2.5 max-w-lg leading-relaxed">
               {t("member_dashboard.welcome_msg")}
             </p>
           </div>
 
           {/* XP Progress Panel */}
-          <div className="relative z-10 mt-7 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/5 rounded-2xl p-5">
+          <div className="relative z-10 mt-6 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/5 rounded-lg p-4 sm:p-5">
             <XPProgressBar xp={xp} showStats size="md" />
           </div>
         </motion.div>
@@ -156,43 +156,39 @@ export default function MemberDashboardClient({
         {/* ── Profile Summary Card (1/3 width, desktop only) ────────── */}
         <motion.div
           {...fadeUp(0.1)}
-          className="hidden lg:flex bg-gradient-to-b from-emerald-50 dark:from-[#0a1f15] to-white dark:to-[#07130e] border border-slate-200 dark:border-primary/20 rounded-3xl p-7 flex-col justify-between items-center text-center relative overflow-hidden shadow-xl group"
+          className="hidden lg:flex bg-gradient-to-b from-emerald-50/50 dark:from-[#0a1f15] to-white dark:to-[#07130e] border border-slate-200 dark:border-white/10 rounded-xl p-6 sm:p-7 flex-col justify-between items-center text-center relative overflow-hidden shadow-sm dark:shadow-none group"
         >
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.08)_0%,transparent_70%)] group-hover:opacity-150 transition-opacity pointer-events-none" />
-
           {/* Avatar */}
           <div className="relative">
-            <div className="absolute -inset-2 rounded-full border border-dashed border-primary/40 animate-[spin_12s_linear_infinite]" />
-            <div className="absolute -inset-4 rounded-full border border-dashed border-emerald-500/20 animate-[spin_18s_linear_infinite_reverse]" />
             {user?.profilePictureUrl ? (
               <img
                 src={user.profilePictureUrl}
                 alt={user.name}
-                className="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-[#07130e] shadow-[0_0_40px_rgba(16,185,129,0.2)] relative z-10"
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-primary/40 shadow-md relative z-10"
               />
             ) : (
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-emerald-500/10 border-4 border-white dark:border-[#07130e] flex items-center justify-center font-black text-3xl text-primary shadow-[0_0_40px_rgba(16,185,129,0.15)] relative z-10">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-primary/20 to-emerald-500/10 border-2 border-primary/40 flex items-center justify-center font-black text-2xl sm:text-3xl text-primary shadow-md relative z-10">
                 {user?.name?.charAt(0).toUpperCase()}
               </div>
             )}
-            <div className="absolute -bottom-1 -right-1 bg-amber-500 rounded-full p-1.5 border-2 border-white dark:border-[#07130e] z-20 shadow-lg">
+            <div className="absolute -bottom-1 -right-1 bg-amber-500 rounded-full p-1.5 border-2 border-white dark:border-[#07130e] z-20 shadow-md">
               <Award className="w-3.5 h-3.5 text-white" />
             </div>
           </div>
 
           {/* Name + Dept */}
-          <div className="mt-5 w-full">
-            <h3 className="text-xl font-black text-slate-900 dark:text-white truncate">
+          <div className="mt-4 w-full">
+            <h3 className="text-lg font-black text-slate-900 dark:text-white truncate">
               {user?.name}
             </h3>
-            <p className="text-xs font-bold tracking-widest uppercase text-emerald-600 dark:text-primary/70 mt-1 truncate">
+            <p className="text-xs font-bold tracking-wider uppercase text-emerald-600 dark:text-primary/80 mt-0.5 truncate">
               {user?.department?.name ?? "Member"}
             </p>
-            <LevelBadge xp={xp} size="sm" className="mt-3 mx-auto" />
+            <LevelBadge xp={xp} size="sm" className="mt-2.5 mx-auto" />
           </div>
 
           {/* Mini stats */}
-          <div className="flex w-full mt-5 px-2 py-3 bg-slate-50 dark:bg-black/20 rounded-2xl border border-slate-200 dark:border-white/5 divide-x divide-slate-200 dark:divide-white/10">
+          <div className="flex w-full mt-4 px-2 py-2.5 bg-slate-50 dark:bg-black/20 rounded-xl border border-slate-200 dark:border-white/5 divide-x divide-slate-200 dark:divide-white/10">
             {[
               {
                 label: t("member_dashboard.profile.rank") || "Rank",
@@ -226,7 +222,7 @@ export default function MemberDashboardClient({
 
           <Link
             href="/member/profil"
-            className="w-full mt-5 py-3 rounded-2xl bg-gradient-to-r from-primary to-emerald-400 hover:from-primary-focus hover:to-emerald-500 text-xs font-black text-[#050e0a] tracking-widest uppercase transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.25)] hover:shadow-[0_0_30px_rgba(16,185,129,0.45)] hover:scale-[1.02]"
+            className="w-full mt-4 py-2.5 rounded-xl bg-primary hover:bg-primary-focus text-xs font-black text-[#050e0a] tracking-wider uppercase transition-all flex items-center justify-center gap-2 shadow-sm hover:scale-[1.01]"
           >
             {t("member_dashboard.profile.view_full")}
             <ArrowRight className="w-4 h-4" />
@@ -274,96 +270,87 @@ export default function MemberDashboardClient({
         />
       </div>
 
-      {/* Active Quest Banner */}
+      {/* Active Material Banner */}
       {latestPpt && (
         <motion.div
           {...fadeUp(0.35)}
-          className="relative rounded-[2rem] p-[1.5px] overflow-hidden group shadow-[0_20px_60px_rgba(16,185,129,0.18)]"
+          className="relative rounded-xl overflow-hidden group border border-emerald-500/30 bg-gradient-to-br from-[#06241b] via-[#083024] to-[#041a13] dark:from-[#051c15] dark:via-[#07261d] dark:to-[#03140e] p-6 sm:p-8 flex flex-col md:flex-row justify-between items-center gap-6 sm:gap-8 shadow-lg"
         >
-          {/* Animated gradient border */}
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 bg-[length:200%_auto] animate-[bgSlide_4s_linear_infinite] opacity-80" />
+          <div className="flex-1 relative z-10">
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <span className="px-3 py-1 rounded-lg bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
+                <Activity className="w-3.5 h-3.5 text-emerald-400" /> {t("member_dashboard.latest_material") || "Materi Terbaru"}
+              </span>
+            </div>
 
-          <div className="relative bg-gradient-to-br from-[#06241b] via-[#083024] to-[#041a13] dark:from-[#051c15] dark:via-[#07261d] dark:to-[#03140e] backdrop-blur-2xl rounded-[2rem] p-7 md:p-9 flex flex-col md:flex-row justify-between items-center gap-8 border border-emerald-500/30">
-            {/* Ambient glows */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-400/15 rounded-full blur-[110px] pointer-events-none group-hover:scale-125 transition-transform duration-1000" />
-            <div className="absolute bottom-0 left-0 w-72 h-72 bg-teal-400/15 rounded-full blur-[110px] pointer-events-none group-hover:scale-125 transition-transform duration-1000" />
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-black text-white tracking-tight leading-snug line-clamp-2">
+              {latestPpt.title}
+            </h2>
+            <p className="text-white/70 text-xs sm:text-sm font-medium mt-2 max-w-xl leading-relaxed line-clamp-2">
+              {latestPpt.description ??
+                "Modul pembelajaran resmi SRE UPN Veteran Jawa Timur."}
+            </p>
 
-            <div className="flex-1 relative z-10">
-              <div className="flex flex-wrap items-center gap-2.5 mb-4">
-                <span className="px-3.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-[0_0_15px_rgba(16,185,129,0.25)] backdrop-blur-md">
-                  <Activity className="w-3.5 h-3.5 text-emerald-400" /> {t("member_dashboard.latest_material") || "Materi Terbaru"}
+            {/* Progress bar materi */}
+            <div className="mt-5 max-w-md">
+              <div className="flex justify-between items-center mb-1.5">
+                <span className="text-[10px] font-bold text-emerald-300/80 uppercase tracking-widest flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  {t("member_dashboard.material_progress") || "Progress Materi"}
+                </span>
+                <span className="text-xs font-black text-emerald-300 font-mono">
+                  {pptProgress}%
                 </span>
               </div>
-
-              <h2 className="text-2xl md:text-4xl font-display font-black text-white tracking-tight leading-snug drop-shadow-md line-clamp-2">
-                {latestPpt.title}
-              </h2>
-              <p className="text-white/70 text-xs sm:text-sm font-medium mt-3 max-w-xl leading-relaxed line-clamp-2">
-                {latestPpt.description ??
-                  "Modul pembelajaran resmi SRE UPN Veteran Jawa Timur."}
-              </p>
-
-              {/* Progress bar materi */}
-              <div className="mt-6 max-w-md">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-[10px] font-bold text-emerald-300/80 uppercase tracking-widest flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    {t("member_dashboard.material_progress") || "Progress Materi"}
-                  </span>
-                  <span className="text-xs font-black text-emerald-300 font-mono">
-                    {pptProgress}%
-                  </span>
-                </div>
-                <div className="w-full h-2.5 bg-black/40 rounded-full overflow-hidden p-0.5 border border-white/10 relative">
-                  <motion.div
-                    className="h-full bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 rounded-full shadow-[0_0_12px_rgba(52,211,153,0.6)]"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${pptProgress}%` }}
-                    transition={{
-                      duration: 1.2,
-                      ease: [0.34, 1.56, 0.64, 1],
-                      delay: 0.5,
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div className="mt-7">
-                <Link
-                  href="/member/materi"
-                  className="relative inline-flex items-center gap-3 bg-gradient-to-r from-emerald-400 to-teal-300 hover:from-emerald-300 hover:to-teal-200 text-[#041a13] font-black px-8 py-3.5 rounded-2xl text-xs tracking-widest uppercase overflow-hidden transition-all duration-300 active:scale-95 shadow-[0_0_25px_rgba(16,185,129,0.5)] hover:shadow-[0_0_40px_rgba(16,185,129,0.75)] hover:scale-[1.02] group/btn"
-                >
-                  <Play className="w-4 h-4 fill-current relative z-10" />
-                  <span className="relative z-10">
-                    {pptProgress > 0 ? (t("member_dashboard.continue_learning") || "Lanjutkan Belajar") : (t("member_dashboard.start_learning") || "Mulai Belajar")}
-                  </span>
-                </Link>
+              <div className="w-full h-2 bg-black/40 rounded-full overflow-hidden p-0.5 border border-white/10 relative">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-emerald-400 to-teal-300 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${pptProgress}%` }}
+                  transition={{
+                    duration: 1,
+                    ease: [0.34, 1.56, 0.64, 1],
+                    delay: 0.5,
+                  }}
+                />
               </div>
             </div>
 
-            {/* Thumbnail */}
-            <div className="w-full md:w-72 aspect-[16/10] sm:aspect-[4/3] rounded-2xl bg-black/60 border-2 border-emerald-400/30 group-hover:border-emerald-400/60 overflow-hidden relative shadow-[0_0_30px_rgba(16,185,129,0.2)] transition-all duration-500 z-10 flex-shrink-0">
-              {latestPpt.coverImageUrl ? (
-                <img
-                  src={resolveImageUrl(latestPpt.coverImageUrl)}
-                  alt=""
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90 group-hover:opacity-100"
-                />
-              ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center text-emerald-400/50 bg-gradient-to-br from-emerald-950 to-slate-950">
-                  <BookOpen className="w-10 h-10 mb-2 animate-pulse" />
-                  <span className="text-xs font-black tracking-widest uppercase">
-                    {t("member_dashboard.slides_count") || "Materi"}
-                  </span>
-                </div>
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#041a13] via-transparent to-transparent opacity-80" />
-              <div className="absolute bottom-3 left-3">
-                <span className="px-3 py-1 bg-emerald-950/80 border border-emerald-400/30 rounded-lg text-[10px] font-black text-emerald-300 uppercase tracking-widest backdrop-blur-md shadow-md flex items-center gap-1.5">
-                  <BookOpen className="w-3 h-3 text-emerald-400" />
-                  {latestPpt.slides?.length ?? "?"} {t("member_dashboard.slides_count") || "Slide"}
+            <div className="mt-6">
+              <Link
+                href="/member/materi"
+                className="inline-flex items-center gap-2.5 bg-emerald-400 hover:bg-emerald-300 text-[#041a13] font-black px-6 py-3 rounded-lg text-xs tracking-wider uppercase transition-all duration-200 active:scale-95 shadow-md"
+              >
+                <Play className="w-4 h-4 fill-current" />
+                <span>
+                  {pptProgress > 0 ? (t("member_dashboard.continue_learning") || "Lanjutkan Belajar") : (t("member_dashboard.start_learning") || "Mulai Belajar")}
+                </span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Thumbnail */}
+          <div className="w-full md:w-64 aspect-[16/10] sm:aspect-[4/3] rounded-lg bg-black/60 border border-emerald-400/30 overflow-hidden relative shadow-md flex-shrink-0">
+            {latestPpt.coverImageUrl ? (
+              <img
+                src={resolveImageUrl(latestPpt.coverImageUrl)}
+                alt=""
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100"
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center text-emerald-400/50 bg-gradient-to-br from-emerald-950 to-slate-950">
+                <BookOpen className="w-9 h-9 mb-1.5" />
+                <span className="text-[11px] font-black tracking-widest uppercase">
+                  {t("member_dashboard.slides_count") || "Materi"}
                 </span>
               </div>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#041a13] via-transparent to-transparent opacity-80" />
+            <div className="absolute bottom-2.5 left-2.5">
+              <span className="px-2.5 py-1 bg-emerald-950/80 border border-emerald-400/30 rounded-md text-[10px] font-black text-emerald-300 uppercase tracking-wider backdrop-blur-md flex items-center gap-1.5">
+                <BookOpen className="w-3 h-3 text-emerald-400" />
+                {latestPpt.slides?.length ?? "?"} {t("member_dashboard.slides_count") || "Slide"}
+              </span>
             </div>
           </div>
         </motion.div>
@@ -380,7 +367,7 @@ export default function MemberDashboardClient({
             actionHref="/member/tugas"
           />
 
-          <div className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-3xl p-5 space-y-2.5 shadow-xl dark:shadow-2xl">
+          <div className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/10 rounded-xl p-4 sm:p-5 space-y-2.5 shadow-sm dark:shadow-none">
             {tasks?.length > 0 ? (
               [...tasks]
                 .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
@@ -406,11 +393,11 @@ export default function MemberDashboardClient({
                         ? "Lewat deadline (Hari ini)"
                         : `Lewat ${overdueDays} hari`;
                     deadlineBadgeStyle =
-                      "bg-red-500/15 text-red-500 border-red-500/30 font-black shadow-[0_0_10px_rgba(239,68,68,0.2)]";
+                      "bg-red-500/15 text-red-500 border-red-500/30 font-black";
                   } else if (diffDays === 0) {
                     deadlineBadgeText = `Tenggat ${diffHours} jam lagi`;
                     deadlineBadgeStyle =
-                      "bg-red-500/10 text-red-400 border-red-500/25 font-bold animate-pulse";
+                      "bg-red-500/10 text-red-400 border-red-500/25 font-bold";
                   } else if (diffDays <= 3) {
                     deadlineBadgeText = `Tenggat ${diffDays} hari lagi`;
                     deadlineBadgeStyle =
@@ -435,17 +422,17 @@ export default function MemberDashboardClient({
                     >
                       <Link
                         href="/member/tugas"
-                        className="group relative flex items-center justify-between gap-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 hover:border-primary/30 rounded-2xl p-3.5 transition-all duration-300 hover:shadow-[0_0_25px_rgba(16,185,129,0.12)] hover:scale-[1.01] overflow-hidden"
+                        className="group relative flex items-center justify-between gap-4 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 hover:border-primary/30 rounded-lg p-3.5 transition-all duration-200 hover:shadow-sm overflow-hidden"
                       >
                         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                         {/* Icon + Info */}
                         <div className="flex items-center gap-3 flex-1 min-w-0 relative z-10">
-                          <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-white/5 border border-slate-300 dark:border-white/10 group-hover:bg-primary/10 group-hover:border-primary/30 flex items-center justify-center flex-shrink-0 transition-colors">
+                          <div className="w-10 h-10 rounded-lg bg-slate-200 dark:bg-white/5 border border-slate-300 dark:border-white/10 group-hover:bg-primary/10 group-hover:border-primary/30 flex items-center justify-center flex-shrink-0 transition-colors">
                             <FolderKanban className="w-4.5 h-4.5 text-slate-400 dark:text-white/40 group-hover:text-primary transition-colors" />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-sm font-black text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors">
+                            <p className="text-sm font-bold text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors">
                               {tk.title}
                             </p>
                             <div className="flex items-center gap-1.5 mt-1">
@@ -466,7 +453,7 @@ export default function MemberDashboardClient({
                           >
                             {status.label}
                           </span>
-                          <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[10px] font-black text-amber-400 font-mono">
+                          <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-amber-500/10 border border-amber-500/20 text-[10px] font-black text-amber-500 font-mono">
                             <Zap className="w-3 h-3" />+{tk.rewardXp}
                           </span>
                         </div>
@@ -493,7 +480,7 @@ export default function MemberDashboardClient({
             actionHref="/member/achievement"
           />
 
-          <div className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/5 rounded-3xl p-5 space-y-1 shadow-xl dark:shadow-2xl">
+          <div className="bg-white dark:bg-[#08120e] border border-slate-200 dark:border-white/10 rounded-xl p-4 sm:p-5 space-y-1 shadow-sm dark:shadow-none">
             {xpLogs?.length > 0 ? (
               [...xpLogs]
                 .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -514,14 +501,14 @@ export default function MemberDashboardClient({
                       initial={{ opacity: 0, x: 10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.5 + i * 0.06 }}
-                      className="group flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-all duration-200"
+                      className="group flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-all duration-200"
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary flex-shrink-0 group-hover:scale-110 transition-transform">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary flex-shrink-0 group-hover:scale-105 transition-transform">
                           {XP_ICONS[log.sourceType] ?? XP_ICONS.manual}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-xs font-black text-slate-900 dark:text-white truncate">
+                          <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
                             {log.reason}
                           </p>
                           <p className="text-[9px] text-slate-400 dark:text-white/30 mt-0.5">
@@ -529,7 +516,7 @@ export default function MemberDashboardClient({
                           </p>
                         </div>
                       </div>
-                      <span className="flex-shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black text-emerald-400 font-mono">
+                      <span className="flex-shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black text-emerald-500 font-mono">
                         <Zap className="w-2.5 h-2.5" />+{log.amount}
                       </span>
                     </motion.div>
@@ -558,7 +545,7 @@ export default function MemberDashboardClient({
               color: "text-amber-500 dark:text-amber-400",
               bg: "bg-amber-500/10 dark:bg-amber-500/15",
               border: "border-amber-500/25",
-              hoverGlow: "group-hover:shadow-[0_0_20px_rgba(245,158,11,0.2)]",
+              hoverGlow: "",
             },
             {
               href: "/member/tugas",
@@ -567,7 +554,7 @@ export default function MemberDashboardClient({
               color: "text-blue-500 dark:text-blue-400",
               bg: "bg-blue-500/10 dark:bg-blue-500/15",
               border: "border-blue-500/25",
-              hoverGlow: "group-hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]",
+              hoverGlow: "",
             },
             {
               href: "/member/absensi",
@@ -576,7 +563,7 @@ export default function MemberDashboardClient({
               color: "text-emerald-500 dark:text-emerald-400",
               bg: "bg-emerald-500/10 dark:bg-emerald-500/15",
               border: "border-emerald-500/25",
-              hoverGlow: "group-hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]",
+              hoverGlow: "",
             },
             {
               href: "/member/materi",
@@ -585,7 +572,7 @@ export default function MemberDashboardClient({
               color: "text-teal-500 dark:text-teal-400",
               bg: "bg-teal-500/10 dark:bg-teal-500/15",
               border: "border-teal-500/25",
-              hoverGlow: "group-hover:shadow-[0_0_20px_rgba(20,184,166,0.2)]",
+              hoverGlow: "",
             },
             {
               href: "/member/dokumen",
@@ -594,7 +581,7 @@ export default function MemberDashboardClient({
               color: "text-purple-500 dark:text-purple-400",
               bg: "bg-purple-500/10 dark:bg-purple-500/15",
               border: "border-purple-500/25",
-              hoverGlow: "group-hover:shadow-[0_0_20px_rgba(168,85,247,0.2)]",
+              hoverGlow: "",
             },
             {
               href: "/member/achievement",
@@ -603,7 +590,7 @@ export default function MemberDashboardClient({
               color: "text-pink-500 dark:text-pink-400",
               bg: "bg-pink-500/10 dark:bg-pink-500/15",
               border: "border-pink-500/25",
-              hoverGlow: "group-hover:shadow-[0_0_20px_rgba(236,72,153,0.2)]",
+              hoverGlow: "",
             },
           ].map((item, i) => (
             <motion.div
@@ -614,14 +601,14 @@ export default function MemberDashboardClient({
             >
               <Link
                 href={item.href}
-                className={`group flex flex-col items-center justify-center gap-2 p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white/90 dark:bg-[#07130e] border ${item.border} hover:border-emerald-500/40 dark:border-white/10 dark:hover:border-emerald-400/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${item.hoverGlow}`}
+                className={`group flex flex-col items-center justify-center gap-2 p-3 sm:p-4 rounded-xl bg-white dark:bg-[#07130e] border ${item.border} hover:border-emerald-500/40 dark:border-white/10 dark:hover:border-emerald-400/30 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5`}
               >
                 <div
-                  className={`p-2.5 sm:p-3 rounded-xl sm:rounded-2xl ${item.bg} ${item.border} border ${item.color} group-hover:scale-110 transition-transform duration-300`}
+                  className={`p-2.5 rounded-lg ${item.bg} ${item.border} border ${item.color} group-hover:scale-105 transition-transform duration-200`}
                 >
                   <item.icon className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <span className="text-[11px] sm:text-xs font-black text-slate-800 dark:text-white text-center leading-tight truncate w-full">
+                <span className="text-[11px] sm:text-xs font-bold text-slate-800 dark:text-white text-center leading-tight truncate w-full">
                   {item.label}
                 </span>
               </Link>
