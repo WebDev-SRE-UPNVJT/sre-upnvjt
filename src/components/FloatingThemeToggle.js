@@ -35,7 +35,7 @@ export default function FloatingThemeToggle() {
       initial={{ opacity: 0, scale: 0.8, y: 50 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="fixed bottom-10 right-6 sm:bottom-12 sm:right-8 z-[60]"
+      className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-[60]"
     >
       <motion.button
         whileHover={{ scale: 1.1, rotate: isDark ? 15 : -15 }}

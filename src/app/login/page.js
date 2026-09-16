@@ -243,9 +243,6 @@ export default function LoginPage() {
       </div>
 
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-20 relative z-10 bg-[#0bb37e] dark:bg-[#0a1c15] transition-colors duration-500">
-        {/* Subtle Ambient Glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-yellow-300/10 dark:bg-emerald-500/10 blur-[130px] rounded-full pointer-events-none" />
-
         <div className="absolute top-8 left-8 lg:hidden">
           <Link href="/">
             <div className="inline-flex items-center cursor-pointer">

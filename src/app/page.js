@@ -419,7 +419,7 @@ export default function Home() {
           </div>
 
           {/* Slide Indicators — Custom indicators mirroring user attachment */}
-          <div className="absolute bottom-10 sm:bottom-12 left-6 sm:left-10 md:left-12 lg:left-20 z-10 flex gap-2 items-center">
+          <div className="absolute bottom-6 sm:bottom-10 md:bottom-12 left-6 sm:left-10 md:left-12 lg:left-20 z-10 flex gap-2 items-center">
             {HERO_IMAGES.map((_, idx) => (
               <div
                 key={idx}
@@ -432,7 +432,8 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="absolute bottom-10 sm:bottom-12 right-6 sm:right-10 md:right-12 lg:right-20 z-10 flex flex-col items-end max-w-[200px] sm:max-w-none pr-16 sm:pr-18">
+          {/* Subtitle at bottom right */}
+          <div className="absolute bottom-20 sm:bottom-10 md:bottom-12 right-6 sm:right-10 md:right-12 lg:right-20 z-10 flex flex-col items-end max-w-[260px] xs:max-w-[320px] sm:max-w-none">
             <span className={`text-[12px] sm:text-[13px] md:text-[14px] font-medium tracking-wide text-right ${
               isLight ? "text-white" : "text-white/90 drop-shadow-md"
             }`}>

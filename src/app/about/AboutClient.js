@@ -3,16 +3,11 @@
 import React from "react";
 import { motion } from "framer-motion";
 import {
-  ArrowUpRight,
   BookOpen,
   Cpu,
   Leaf,
   Users,
   Mail,
-  MapPin,
-  Copy,
-  Check,
-  Navigation,
 } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageProvider";
 import { useTheme } from "next-themes";
@@ -520,56 +515,6 @@ export default function AboutClient({ departmentsData = [] }) {
           {/* Secretariat & Campus Location Card */}
           <motion.div {...fadeUp(0.15)} className="w-full max-w-4xl text-left">
             <div className="bg-white/10 dark:bg-[#06140e] border border-white/20 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-md">
-              {/* Card Header Toolbar */}
-              <div className="p-5 sm:p-6 border-b border-white/15 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/5">
-                <div className="flex items-start sm:items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-yellow-300 dark:bg-emerald-500/20 text-slate-900 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 font-black">
-                    <MapPin className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-base sm:text-lg font-black text-white leading-tight">
-                        Sekretariat SRE UPN &quot;Veteran&quot; Jawa Timur
-                      </h3>
-                    </div>
-                    <p className="text-xs text-white/80 dark:text-white/60 mt-0.5 font-medium">
-                      Jl. Rungkut Madya No.1, Gunung Anyar, Surabaya, Jawa Timur 60294
-                    </p>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-2 sm:self-center">
-                  <button
-                    onClick={handleCopyAddress}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/15 dark:bg-white/10 hover:bg-white/25 text-white text-xs font-bold transition-all"
-                  >
-                    {copied ? (
-                      <>
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>Tersalin!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>Salin Alamat</span>
-                      </>
-                    )}
-                  </button>
-
-                  <a
-                    href="https://maps.app.goo.gl/t8684b8ntLqntkLh7"
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-yellow-300 hover:bg-yellow-200 text-slate-950 dark:bg-emerald-400 dark:hover:bg-emerald-300 dark:text-[#050e0a] text-xs font-black transition-all"
-                  >
-                    <Navigation className="w-3.5 h-3.5" />
-                    <span>Petunjuk Arah</span>
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-              </div>
-
               {/* Map Embed Frame */}
               <div className="relative w-full h-[280px] sm:h-[340px] bg-slate-900">
                 <iframe
