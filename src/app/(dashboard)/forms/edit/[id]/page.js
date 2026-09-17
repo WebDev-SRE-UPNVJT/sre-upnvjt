@@ -21,9 +21,12 @@ import {
   Sparkles,
   UploadCloud,
   Folder,
+  Download,
+  UserCheck,
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import FormExcelImportModal, { downloadFormQuestionTemplate } from '@/components/forms/FormExcelImportModal';
 
 const CustomSelect = ({ options, value, onChange, placeholder }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -100,6 +103,7 @@ export default function EditForm() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isPublished, setIsPublished] = useState(true);
+  const [collectUserData, setCollectUserData] = useState(true);
   const [uuid, setUuid] = useState('');
   const [spreadsheetId, setSpreadsheetId] = useState(null);
   const [spreadsheetUrl, setSpreadsheetUrl] = useState(null);
@@ -116,6 +120,31 @@ export default function EditForm() {
   const [previewPage, setPreviewPage] = useState(0);
   const [copiedLink, setCopiedLink] = useState(false);
   const [generatingSheet, setGeneratingSheet] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [downloadingTemplate, setDownloadingTemplate] = useState(false);
+
+  const handleImportQuestions = (newQuestions, mode) => {
+    if (mode === 'replace') {
+      setQuestions(newQuestions);
+    } else {
+      if (questions.length === 1 && !questions[0].question.trim() && questions[0].type === 'text') {
+        setQuestions(newQuestions);
+      } else {
+        setQuestions([...questions, ...newQuestions]);
+      }
+    }
+  };
+
+  const handleDownloadTemplate = async () => {
+    setDownloadingTemplate(true);
+    try {
+      await downloadFormQuestionTemplate();
+    } catch (e) {
+      alert('Gagal mendownload template Excel: ' + (e.message || 'Terjadi kesalahan'));
+    } finally {
+      setDownloadingTemplate(false);
+    }
+  };
 
   useEffect(() => {
     if (id) {
@@ -132,6 +161,7 @@ export default function EditForm() {
         setTitle(data.title || '');
         setDescription(data.description || '');
         setIsPublished(data.isPublished !== undefined ? data.isPublished : true);
+        setCollectUserData(data.collectUserData !== undefined ? data.collectUserData : true);
         setSpreadsheetId(data.spreadsheetId || null);
         setSpreadsheetUrl(data.spreadsheetUrl || null);
         setDriveFolderId(data.driveFolderId || null);
@@ -246,6 +276,7 @@ export default function EditForm() {
           description,
           questions,
           isPublished,
+          collectUserData,
           spreadsheetId,
           spreadsheetUrl,
           driveFolderId,
@@ -350,6 +381,30 @@ export default function EditForm() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          {!showPreview && (
+            <>
+              <button
+                type="button"
+                onClick={handleDownloadTemplate}
+                disabled={downloadingTemplate}
+                title="Download file template Excel (.xlsx) dengan seluruh contoh tipe pertanyaan"
+                className="flex items-center gap-2 bg-white dark:bg-white/5 border border-emerald-200 dark:border-emerald-500/20 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 px-4 py-2.5 rounded-xl font-bold transition-all shadow-sm text-sm disabled:opacity-50"
+              >
+                <Download size={16} />
+                <span className="hidden sm:inline">Template Excel</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowImportModal(true)}
+                title="Import pertanyaan dari file spreadsheet (.xlsx / .xls / .csv)"
+                className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl font-bold transition-all shadow-sm text-sm"
+              >
+                <FileSpreadsheet size={16} />
+                <span>Import Excel (.xlsx)</span>
+              </button>
+            </>
+          )}
+
           <button
             type="button"
             onClick={handleCopyLink}
@@ -527,16 +582,16 @@ export default function EditForm() {
             </div>
 
             {/* Integrations & Settings Row */}
-            <div className="pt-4 border-t border-gray-100 dark:border-white/5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="pt-4 border-t border-gray-100 dark:border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-3.5">
               {/* Google Sheets & Drive Status */}
-              <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-500/10 border border-emerald-200/80 dark:border-emerald-500/20 space-y-3">
+              <div className="p-3.5 rounded-2xl bg-emerald-50/60 dark:bg-emerald-500/10 border border-emerald-200/80 dark:border-emerald-500/20 space-y-2.5">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
-                    <FileSpreadsheet className="w-4 h-4" />
-                    Google Spreadsheet
+                    <FileSpreadsheet className="w-3.5 h-3.5 shrink-0" />
+                    Google Sheets
                   </span>
                   {(spreadsheetUrl || spreadsheetId) && (
-                    <span className="text-[10px] uppercase font-bold px-2 py-0.5 bg-emerald-600 text-white rounded-full">
+                    <span className="text-[9px] uppercase font-bold px-1.5 py-0.5 bg-emerald-600 text-white rounded-full">
                       Terhubung
                     </span>
                   )}
@@ -544,10 +599,10 @@ export default function EditForm() {
 
                 {spreadsheetUrl || spreadsheetId ? (
                   <div className="space-y-2">
-                    <p className="text-xs text-gray-600 dark:text-white/60">
-                      Tanggapan baru otomatis masuk ke spreadsheet ini secara realtime.
+                    <p className="text-[11px] text-gray-600 dark:text-white/60 leading-relaxed">
+                      Respon otomatis tercatat realtime.
                     </p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-col gap-1.5">
                       <a
                         href={
                           spreadsheetUrl ||
@@ -555,10 +610,12 @@ export default function EditForm() {
                         }
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs font-bold bg-white dark:bg-white/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-white/15 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-500/30 transition-all shadow-sm"
+                        className="inline-flex items-center justify-between text-[11px] font-bold bg-white dark:bg-white/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-white/15 px-2.5 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-500/30 transition-all shadow-sm"
                       >
-                        <FileSpreadsheet size={12} />
-                        <span>Buka Spreadsheet</span>
+                        <span className="flex items-center gap-1">
+                          <FileSpreadsheet size={12} />
+                          <span>Spreadsheet</span>
+                        </span>
                         <ExternalLink size={11} />
                       </a>
                       {(driveFolderUrl || driveFolderId) && (
@@ -569,10 +626,12 @@ export default function EditForm() {
                           }
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 text-xs font-bold bg-white dark:bg-white/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-white/15 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-500/30 transition-all shadow-sm"
+                          className="inline-flex items-center justify-between text-[11px] font-bold bg-white dark:bg-white/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-white/15 px-2.5 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-500/30 transition-all shadow-sm"
                         >
-                          <Folder size={12} />
-                          <span>Folder Berkas Drive</span>
+                          <span className="flex items-center gap-1">
+                            <Folder size={12} />
+                            <span>Folder Berkas</span>
+                          </span>
                           <ExternalLink size={11} />
                         </a>
                       )}
@@ -580,24 +639,43 @@ export default function EditForm() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <p className="text-xs text-gray-500 dark:text-white/50">
-                      Belum terhubung ke Google Sheets. Klik tombol di bawah untuk membuat sheet baru di Drive.
+                    <p className="text-[11px] text-gray-500 dark:text-white/50 leading-relaxed">
+                      Belum terhubung ke spreadsheet Google Drive.
                     </p>
                     <button
                       type="button"
                       disabled={generatingSheet}
                       onClick={handleConnectSheet}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 px-3.5 py-1.5 rounded-xl transition-all shadow-sm disabled:opacity-50"
+                      className="w-full inline-flex items-center justify-center gap-1.5 text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 px-3 py-1.5 rounded-xl transition-all shadow-sm disabled:opacity-50"
                     >
-                      <FileSpreadsheet size={14} />
-                      <span>{generatingSheet ? 'Membuat Spreadsheet...' : 'Buat & Hubungkan Sheets'}</span>
+                      <FileSpreadsheet size={13} />
+                      <span>{generatingSheet ? 'Membuat...' : 'Buat Sheet'}</span>
                     </button>
                   </div>
                 )}
               </div>
 
+              {/* Record Account Data Toggle */}
+              <label className="flex items-start gap-3 p-3.5 rounded-2xl bg-teal-50/60 dark:bg-teal-500/10 border border-teal-200/80 dark:border-teal-500/20 cursor-pointer hover:border-teal-400 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={collectUserData}
+                  onChange={(e) => setCollectUserData(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 text-teal-600 accent-teal-500 rounded focus:ring-teal-500"
+                />
+                <div className="text-xs">
+                  <span className="font-bold text-teal-700 dark:text-teal-400 flex items-center gap-1.5">
+                    <UserCheck className="w-3.5 h-3.5 shrink-0 text-teal-500" />
+                    Rekam Akun Responden
+                  </span>
+                  <p className="text-gray-500 dark:text-white/50 mt-1 leading-relaxed">
+                    Otomatis simpan User ID, Nama Akun, & Email yang login saat submit.
+                  </p>
+                </div>
+              </label>
+
               {/* Publish Toggle */}
-              <label className="flex items-start gap-3 p-4 rounded-2xl bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 cursor-pointer">
+              <label className="flex items-start gap-3 p-3.5 rounded-2xl bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 cursor-pointer hover:border-primary transition-colors">
                 <input
                   type="checkbox"
                   checked={isPublished}
@@ -606,11 +684,11 @@ export default function EditForm() {
                 />
                 <div className="text-xs">
                   <span className="font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
-                    <Globe className="w-3.5 h-3.5 text-primary" />
+                    <Globe className="w-3.5 h-3.5 shrink-0 text-primary" />
                     Publikasikan Formulir
                   </span>
-                  <p className="text-gray-500 dark:text-white/50 mt-1">
-                    Aktifkan agar formulir dapat diakses dan diisi secara publik. Jika dinonaktifkan, formulir akan berstatus Draf/Tutup.
+                  <p className="text-gray-500 dark:text-white/50 mt-1 leading-relaxed">
+                    Formulir dapat diakses dan diisi langsung melalui tautan publik.
                   </p>
                 </div>
               </label>
@@ -886,7 +964,7 @@ export default function EditForm() {
 
           {/* Action Buttons */}
           <div className="flex flex-wrap items-center justify-between gap-4 pt-4">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <button 
                 onClick={addQuestion}
                 className="flex items-center gap-2 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-800 dark:text-white px-5 py-3 rounded-2xl font-bold transition-all text-sm shadow-sm"
@@ -906,6 +984,14 @@ export default function EditForm() {
                 <SplitSquareVertical size={16} />
                 <span>Tambah Pembatas Halaman</span>
               </button>
+              <button
+                type="button"
+                onClick={() => setShowImportModal(true)}
+                className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 px-5 py-3 rounded-2xl font-bold transition-all text-sm shadow-sm"
+              >
+                <FileSpreadsheet size={16} />
+                <span>Import Excel (.xlsx)</span>
+              </button>
             </div>
 
             <button 
@@ -919,6 +1005,14 @@ export default function EditForm() {
           </div>
         </div>
       )}
+
+      {/* Excel Import Modal */}
+      <FormExcelImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImportQuestions={handleImportQuestions}
+        currentQuestionsCount={questions.length}
+      />
     </div>
   );
 }

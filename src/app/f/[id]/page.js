@@ -55,11 +55,25 @@ export default async function PublicFormPage({ params }) {
   let sessionUser = null;
   try {
     const session = await getServerSession(authOptions);
-    if (session?.user) {
+    if (session?.user?.id) {
+      const uId = parseInt(session.user.id, 10);
+      let dbUser = null;
+      try {
+        const { user } = await import('@/db/schema');
+        dbUser = await db.query.user.findFirst({
+          where: eq(user.id, uId),
+          columns: { id: true, name: true, email: true, npm: true, profilePictureUrl: true },
+        });
+      } catch (e) {
+        // Fallback to session user
+      }
+
       sessionUser = {
-        id: session.user.id,
-        name: session.user.name,
-        email: session.user.email,
+        id: dbUser?.id || session.user.id,
+        name: dbUser?.name || session.user.name,
+        email: dbUser?.email || session.user.email,
+        npm: dbUser?.npm || session.user.npm || null,
+        image: dbUser?.profilePictureUrl || session.user.image || null,
       };
     }
   } catch (e) {

@@ -20,9 +20,12 @@ import {
   Sparkles,
   UploadCloud,
   Folder,
+  Download,
+  UserCheck,
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import FormExcelImportModal, { downloadFormQuestionTemplate } from '@/components/forms/FormExcelImportModal';
 
 const CustomSelect = ({ options, value, onChange, placeholder }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -96,6 +99,7 @@ export default function CreateForm() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isPublished, setIsPublished] = useState(true);
+  const [collectUserData, setCollectUserData] = useState(true);
   const [createSpreadsheet, setCreateSpreadsheet] = useState(true);
   const [successMessage, setSuccessMessage] = useState('Tanggapan Anda telah berhasil direkam.');
   const [questions, setQuestions] = useState([
@@ -104,6 +108,31 @@ export default function CreateForm() {
   const [saving, setSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [previewPage, setPreviewPage] = useState(0);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [downloadingTemplate, setDownloadingTemplate] = useState(false);
+
+  const handleImportQuestions = (newQuestions, mode) => {
+    if (mode === 'replace') {
+      setQuestions(newQuestions);
+    } else {
+      if (questions.length === 1 && !questions[0].question.trim() && questions[0].type === 'text') {
+        setQuestions(newQuestions);
+      } else {
+        setQuestions([...questions, ...newQuestions]);
+      }
+    }
+  };
+
+  const handleDownloadTemplate = async () => {
+    setDownloadingTemplate(true);
+    try {
+      await downloadFormQuestionTemplate();
+    } catch (e) {
+      alert('Gagal mendownload template Excel: ' + (e.message || 'Terjadi kesalahan'));
+    } finally {
+      setDownloadingTemplate(false);
+    }
+  };
 
   // Drag and Drop state
   const [draggedIndex, setDraggedIndex] = useState(null);
@@ -180,6 +209,7 @@ export default function CreateForm() {
           description,
           questions,
           isPublished,
+          collectUserData,
           createSpreadsheet,
           successMessage,
         }),
@@ -258,7 +288,30 @@ export default function CreateForm() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {!showPreview && (
+            <>
+              <button
+                type="button"
+                onClick={handleDownloadTemplate}
+                disabled={downloadingTemplate}
+                title="Download file template Excel (.xlsx) dengan seluruh contoh tipe pertanyaan"
+                className="flex items-center gap-2 bg-white dark:bg-white/5 border border-emerald-200 dark:border-emerald-500/20 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 px-4 py-2.5 rounded-xl font-bold transition-all shadow-sm text-sm disabled:opacity-50"
+              >
+                <Download size={16} />
+                <span className="hidden sm:inline">Template Excel</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowImportModal(true)}
+                title="Import pertanyaan dari file spreadsheet (.xlsx / .xls / .csv)"
+                className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl font-bold transition-all shadow-sm text-sm"
+              >
+                <FileSpreadsheet size={16} />
+                <span>Import Excel (.xlsx)</span>
+              </button>
+            </>
+          )}
           <button 
             onClick={() => {
               setShowPreview(!showPreview);
@@ -405,9 +458,9 @@ export default function CreateForm() {
             </div>
 
             {/* Integrations & Settings Row */}
-            <div className="pt-4 border-t border-gray-100 dark:border-white/5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="pt-4 border-t border-gray-100 dark:border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-3.5">
               {/* Google Sheets Sync Toggle */}
-              <label className="flex items-start gap-3 p-3.5 rounded-2xl bg-emerald-50/60 dark:bg-emerald-500/10 border border-emerald-200/80 dark:border-emerald-500/20 cursor-pointer">
+              <label className="flex items-start gap-3 p-3.5 rounded-2xl bg-emerald-50/60 dark:bg-emerald-500/10 border border-emerald-200/80 dark:border-emerald-500/20 cursor-pointer hover:border-emerald-400 transition-colors">
                 <input
                   type="checkbox"
                   checked={createSpreadsheet}
@@ -416,17 +469,36 @@ export default function CreateForm() {
                 />
                 <div className="text-xs">
                   <span className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
-                    <FileSpreadsheet className="w-3.5 h-3.5" />
-                    Otomatis Buat Google Spreadsheet
+                    <FileSpreadsheet className="w-3.5 h-3.5 shrink-0" />
+                    Auto Google Sheets
                   </span>
-                  <p className="text-gray-500 dark:text-white/50 mt-0.5">
-                    Setiap jawaban akan langsung tercatat secara realtime di Google Sheets Anda.
+                  <p className="text-gray-500 dark:text-white/50 mt-0.5 leading-relaxed">
+                    Jawaban otomatis tercatat secara realtime di spreadsheet.
+                  </p>
+                </div>
+              </label>
+
+              {/* Record Account Data (User ID & Profile) Toggle */}
+              <label className="flex items-start gap-3 p-3.5 rounded-2xl bg-teal-50/60 dark:bg-teal-500/10 border border-teal-200/80 dark:border-teal-500/20 cursor-pointer hover:border-teal-400 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={collectUserData}
+                  onChange={(e) => setCollectUserData(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 text-teal-600 accent-teal-500 rounded focus:ring-teal-500"
+                />
+                <div className="text-xs">
+                  <span className="font-bold text-teal-700 dark:text-teal-400 flex items-center gap-1.5">
+                    <UserCheck className="w-3.5 h-3.5 shrink-0 text-teal-500" />
+                    Rekam Akun Responden
+                  </span>
+                  <p className="text-gray-500 dark:text-white/50 mt-0.5 leading-relaxed">
+                    Otomatis simpan User ID, Nama Akun, & Email yang login saat submit.
                   </p>
                 </div>
               </label>
 
               {/* Publish Toggle */}
-              <label className="flex items-start gap-3 p-3.5 rounded-2xl bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 cursor-pointer">
+              <label className="flex items-start gap-3 p-3.5 rounded-2xl bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 cursor-pointer hover:border-primary transition-colors">
                 <input
                   type="checkbox"
                   checked={isPublished}
@@ -435,11 +507,11 @@ export default function CreateForm() {
                 />
                 <div className="text-xs">
                   <span className="font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
-                    <Globe className="w-3.5 h-3.5 text-primary" />
+                    <Globe className="w-3.5 h-3.5 shrink-0 text-primary" />
                     Publikasikan Formulir
                   </span>
-                  <p className="text-gray-500 dark:text-white/50 mt-0.5">
-                    Formulir dapat diakses dan diisi langsung melalui tautan publik.
+                  <p className="text-gray-500 dark:text-white/50 mt-0.5 leading-relaxed">
+                    Formulir dapat diakses dan diisi melalui tautan publik.
                   </p>
                 </div>
               </label>
@@ -715,7 +787,7 @@ export default function CreateForm() {
 
           {/* Action Buttons */}
           <div className="flex flex-wrap items-center justify-between gap-4 pt-4">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <button 
                 onClick={addQuestion}
                 className="flex items-center gap-2 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-800 dark:text-white px-5 py-3 rounded-2xl font-bold transition-all text-sm shadow-sm"
@@ -735,6 +807,14 @@ export default function CreateForm() {
                 <SplitSquareVertical size={16} />
                 <span>Tambah Pembatas Halaman</span>
               </button>
+              <button
+                type="button"
+                onClick={() => setShowImportModal(true)}
+                className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 px-5 py-3 rounded-2xl font-bold transition-all text-sm shadow-sm"
+              >
+                <FileSpreadsheet size={16} />
+                <span>Import Excel (.xlsx)</span>
+              </button>
             </div>
 
             <button 
@@ -748,6 +828,14 @@ export default function CreateForm() {
           </div>
         </div>
       )}
+
+      {/* Excel Import Modal */}
+      <FormExcelImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImportQuestions={handleImportQuestions}
+        currentQuestionsCount={questions.length}
+      />
     </div>
   );
 }

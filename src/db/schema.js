@@ -107,6 +107,7 @@ export const formTemplate = pgTable('formTemplate', {
   description: text('description'),
   questions: jsonb('questions').notNull().default([]),
   isPublished: boolean('isPublished').default(true).notNull(),
+  collectUserData: boolean('collectUserData').default(false).notNull(),
   spreadsheetId: varchar('spreadsheetId', { length: 255 }),
   spreadsheetUrl: varchar('spreadsheetUrl', { length: 500 }),
   driveFolderId: varchar('driveFolderId', { length: 255 }),

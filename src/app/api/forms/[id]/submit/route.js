@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { formTemplate, formSubmission, task, taskSubmission } from '@/db/schema';
+import { formTemplate, formSubmission, task, taskSubmission, user } from '@/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
@@ -38,6 +38,7 @@ export async function POST(req, { params }) {
     let memberId = null;
     let autoName = '';
     let autoEmail = '';
+    let autoNpm = '';
     const hasSessionCookie = req.cookies.get('next-auth.session-token') || req.cookies.get('__Secure-next-auth.session-token');
     if (hasSessionCookie) {
       try {
@@ -46,6 +47,17 @@ export async function POST(req, { params }) {
           memberId = parseInt(session.user.id, 10);
           autoName = session.user.name || '';
           autoEmail = session.user.email || '';
+          
+          // Ambil npm jika tersedia
+          if (session.user.npm) {
+            autoNpm = session.user.npm;
+          } else {
+            const u = await db.query.user.findFirst({
+              where: eq(user.id, memberId),
+              columns: { npm: true },
+            });
+            if (u?.npm) autoNpm = u.npm;
+          }
         }
       } catch (e) {
         // Abaikan jika token kedaluwarsa / invalid
@@ -56,8 +68,17 @@ export async function POST(req, { params }) {
     const {
       responderName = autoName || '',
       responderEmail = autoEmail || '',
+      userId = memberId || null,
+      userName = autoName || '',
+      userEmail = autoEmail || '',
+      userNpm = autoNpm || '',
       answers = [],
     } = body;
+
+    const finalMemberId = memberId || (userId ? parseInt(userId, 10) : null);
+    const finalName = (responderName || userName || autoName || '').trim();
+    const finalEmail = (responderEmail || userEmail || autoEmail || '').trim();
+    const finalNpm = (userNpm || autoNpm || '').trim();
 
     // Validasi pertanyaan wajib (Server-Side Validation)
     if (Array.isArray(form.questions)) {
@@ -89,9 +110,9 @@ export async function POST(req, { params }) {
     // 1. Simpan ke database PostgreSQL (Form Response)
     const [inserted] = await db.insert(formSubmission).values({
       formTemplateId: formId,
-      memberId: memberId || null,
-      responderName: responderName ? String(responderName).trim() : null,
-      responderEmail: responderEmail ? String(responderEmail).trim() : null,
+      memberId: finalMemberId || null,
+      responderName: finalName || null,
+      responderEmail: finalEmail || null,
       answers: answers || [],
       submittedAt: new Date(),
     }).returning();
@@ -103,6 +124,12 @@ export async function POST(req, { params }) {
         {
           timestamp: new Date(),
           answers,
+          userId: finalMemberId,
+          userName: finalName,
+          userEmail: finalEmail,
+          userNpm: finalNpm,
+          responderName: finalName,
+          responderEmail: finalEmail,
         },
         form.questions
       ).catch((sheetErr) => {

@@ -14,8 +14,10 @@ import {
   Users,
   Sparkles,
   Folder,
+  Download,
 } from 'lucide-react';
 import Link from 'next/link';
+import { downloadFormQuestionTemplate } from '@/components/forms/FormExcelImportModal';
 
 export default function FormsList() {
   const [forms, setForms] = useState([]);
@@ -144,7 +146,16 @@ export default function FormsList() {
             Buat form kustom seperti Google Form, bagikan link publik, dan pantau respon secara real-time di Google Spreadsheet.
           </p>
         </div>
-        <div className="flex items-center gap-4 w-full md:w-auto">
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <button
+            type="button"
+            onClick={downloadFormQuestionTemplate}
+            title="Download file template Excel (.xlsx) pertanyaan formulir"
+            className="flex items-center justify-center gap-2 bg-white dark:bg-white/5 border border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 px-5 py-3 rounded-xl font-bold tracking-wide hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-all shrink-0 shadow-sm w-full md:w-auto text-sm"
+          >
+            <Download className="w-4 h-4" />
+            <span>Download Template Excel</span>
+          </button>
           <Link 
             href="/forms/create"
             className="flex items-center justify-center gap-2 bg-primary text-[#050e0a] px-6 py-3 rounded-xl font-bold tracking-wide hover:bg-emerald-400 hover:scale-105 transition-all shrink-0 shadow-[0_0_20px_rgba(16,185,129,0.25)] w-full md:w-auto text-sm"

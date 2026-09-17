@@ -25,7 +25,9 @@ export async function POST(req, { params }) {
     }
 
     // Buat Google Spreadsheet baru
-    const sheetRes = await createFormSpreadsheet(form.title, form.questions);
+    const sheetRes = await createFormSpreadsheet(form.title, form.questions, {
+      collectUserData: Boolean(form.collectUserData),
+    });
 
     const [updatedForm] = await db.update(formTemplate)
       .set({

@@ -59,6 +59,7 @@ export async function POST(req) {
       description,
       questions = [],
       isPublished = true,
+      collectUserData = false,
       createSpreadsheet = false,
       successMessage = 'Tanggapan Anda telah berhasil direkam.',
     } = body;
@@ -77,7 +78,9 @@ export async function POST(req) {
     // Otomatis buat Google Spreadsheet jika opsi diaktifkan
     if (createSpreadsheet && !spreadsheetId) {
       try {
-        const sheetRes = await createFormSpreadsheet(title, questions);
+        const sheetRes = await createFormSpreadsheet(title, questions, {
+          collectUserData: Boolean(collectUserData),
+        });
         spreadsheetId = sheetRes.spreadsheetId;
         spreadsheetUrl = sheetRes.spreadsheetUrl;
       } catch (sheetErr) {
@@ -102,6 +105,7 @@ export async function POST(req) {
       description: description?.trim() || null,
       questions: questions || [],
       isPublished: Boolean(isPublished),
+      collectUserData: Boolean(collectUserData),
       spreadsheetId,
       spreadsheetUrl,
       driveFolderId,

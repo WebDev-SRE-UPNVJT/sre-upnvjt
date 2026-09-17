@@ -75,6 +75,7 @@ export async function PUT(req, { params }) {
       description,
       questions,
       isPublished,
+      collectUserData,
       createSpreadsheet,
       successMessage,
     } = body;
@@ -89,7 +90,9 @@ export async function PUT(req, { params }) {
     // Jika diminta buat Google Spreadsheet dan belum ada
     if (createSpreadsheet && !spreadsheetId) {
       try {
-        const sheetRes = await createFormSpreadsheet(title, questions);
+        const sheetRes = await createFormSpreadsheet(title, questions, {
+          collectUserData: Boolean(collectUserData),
+        });
         spreadsheetId = sheetRes.spreadsheetId;
         spreadsheetUrl = sheetRes.spreadsheetUrl;
       } catch (sheetErr) {
@@ -116,6 +119,7 @@ export async function PUT(req, { params }) {
     if (description !== undefined) updateData.description = description?.trim() || null;
     if (questions !== undefined) updateData.questions = questions;
     if (isPublished !== undefined) updateData.isPublished = Boolean(isPublished);
+    if (collectUserData !== undefined) updateData.collectUserData = Boolean(collectUserData);
     if (spreadsheetId !== undefined) updateData.spreadsheetId = spreadsheetId;
     if (spreadsheetUrl !== undefined) updateData.spreadsheetUrl = spreadsheetUrl;
     if (driveFolderId !== undefined) updateData.driveFolderId = driveFolderId;

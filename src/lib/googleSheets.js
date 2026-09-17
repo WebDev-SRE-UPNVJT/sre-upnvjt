@@ -26,7 +26,7 @@ export function getGoogleOAuth2Client() {
 /**
  * Otomatis membuat Google Spreadsheet baru untuk form, menyusun header, dan memindahkannya ke Drive Folder
  */
-export async function createFormSpreadsheet(formTitle, questions = []) {
+export async function createFormSpreadsheet(formTitle, questions = [], options = {}) {
   try {
     const auth = getGoogleOAuth2Client();
     const sheets = google.sheets({ version: "v4", auth });
@@ -37,8 +37,13 @@ export async function createFormSpreadsheet(formTitle, questions = []) {
       (q) => q && q.type !== "page_break"
     );
 
+    const userHeaders = options.collectUserData
+      ? ["User ID", "Nama Akun", "Email Akun"]
+      : [];
+
     const headers = [
       "Timestamp",
+      ...userHeaders,
       ...validQuestions.map((q, idx) => q.question || `Pertanyaan ${idx + 1}`),
     ];
 
@@ -222,7 +227,16 @@ export async function appendFormResponseToSheet(spreadsheetId, payload, question
     const auth = getGoogleOAuth2Client();
     const sheets = google.sheets({ version: "v4", auth });
 
-    const { timestamp, answers = [] } = payload;
+    const {
+      timestamp,
+      answers = [],
+      userId = '',
+      userName = '',
+      userEmail = '',
+      userNpm = '',
+      responderName = '',
+      responderEmail = '',
+    } = payload;
 
     // Filter soal yang nyata (bukan page break)
     const validQuestions = (questions || []).filter(
@@ -348,6 +362,44 @@ export async function appendFormResponseToSheet(spreadsheetId, payload, question
       // Kolom Timestamp / Waktu
       if (headerLower === "timestamp" || headerLower === "waktu" || headerLower === "waktu pengiriman") {
         return formattedTimestamp;
+      }
+
+      // Kolom User ID / Akun ID
+      if (
+        headerLower === "user id" ||
+        headerLower === "id user" ||
+        headerLower === "user_id" ||
+        headerLower === "id member" ||
+        headerLower === "member id" ||
+        headerLower === "id akun"
+      ) {
+        return userId ? String(userId) : "";
+      }
+
+      // Kolom Nama Akun / Nama Responden
+      if (
+        headerLower === "nama akun" ||
+        headerLower === "nama responden" ||
+        headerLower === "nama member" ||
+        headerLower === "user name" ||
+        headerLower === "nama lengkap akun"
+      ) {
+        return userName || responderName || "";
+      }
+
+      // Kolom Email Akun / Email Responden
+      if (
+        headerLower === "email akun" ||
+        headerLower === "email responden" ||
+        headerLower === "email member" ||
+        headerLower === "user email"
+      ) {
+        return userEmail || responderEmail || "";
+      }
+
+      // Kolom NPM
+      if (headerLower === "npm" || headerLower === "npm akun" || headerLower === "nim") {
+        return userNpm ? String(userNpm) : "";
       }
 
       // Cari jawaban berdasarkan nama pertanyaan yang cocok dengan header
