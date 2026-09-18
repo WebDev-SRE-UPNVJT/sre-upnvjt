@@ -775,19 +775,30 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
                         {language === "en" ? "Custom Form Mission" : "Misi Pengisian Formulir"}
                       </h4>
                       <p className="text-xs text-slate-500 dark:text-white/50 mt-0.5">
-                        {language === "en"
-                          ? "Fill and submit the designated response form to finish this quest."
-                          : "Isi dan kirimkan formulir tanggapan untuk menyelesaikan quest ini."}
+                        {submission
+                          ? (language === "en"
+                            ? `Form submitted! (+${submission.xpEarned ?? task.rewardXp} XP earned)`
+                            : `Formulir telah berhasil dikirim (+${submission.xpEarned ?? task.rewardXp} XP diperoleh).`)
+                          : (language === "en"
+                            ? "Fill and submit the designated response form to finish this quest."
+                            : "Isi dan kirimkan formulir tanggapan untuk menyelesaikan quest ini.")}
                       </p>
                     </div>
                   </div>
-                  <Link
-                    href={`/f/${task.formTemplate?.uuid || task.formTemplateId || ""}`}
-                    className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-teal-600/20 transition-all shrink-0"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    <span>{language === "en" ? "Open Form" : "Buka Formulir"}</span>
-                  </Link>
+                  {submission ? (
+                    <div className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center justify-center gap-2 shrink-0">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>{language === "en" ? "Form Submitted" : "Sudah Dikirim"}</span>
+                    </div>
+                  ) : (
+                    <Link
+                      href={`/f/${task.formTemplate?.uuid || task.formTemplateId || ""}`}
+                      className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-teal-600/20 transition-all shrink-0"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>{language === "en" ? "Open Form" : "Buka Formulir"}</span>
+                    </Link>
+                  )}
                 </div>
               )}
 
@@ -812,7 +823,11 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
                       <div className="flex items-center gap-2">
                         <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                         <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-                          Hasil Pengerjaan TTS
+                          {task.submissionType === "TTS" || task.ttsCrosswordId
+                            ? (language === "en" ? "Crossword Result" : "Hasil Pengerjaan TTS")
+                            : task.submissionType === "FORM" || task.formTemplateId
+                            ? (language === "en" ? "Form / Quiz Result" : "Hasil Pengerjaan Formulir")
+                            : (language === "en" ? "Submission Result" : "Hasil Pengerjaan")}
                         </span>
                       </div>
                       <span className="text-xs font-black text-amber-500 flex items-center gap-1">
@@ -823,15 +838,15 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
 
                     <div className="grid grid-cols-3 gap-2 text-center pt-1">
                       <div className="p-2.5 rounded-lg bg-black/5 dark:bg-white/5 border border-current/10">
-                        <span className="text-[10px] opacity-60 font-bold block">Skor</span>
+                        <span className="text-[10px] opacity-60 font-bold block">{language === "en" ? "Score" : "Skor"}</span>
                         <span className="text-sm font-black text-emerald-500">{submission.score}%</span>
                       </div>
                       <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block">Benar</span>
+                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block">{language === "en" ? "Correct" : "Benar"}</span>
                         <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">{submission.correctCount ?? 0}</span>
                       </div>
                       <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20">
-                        <span className="text-[10px] text-rose-500 font-bold block">Salah</span>
+                        <span className="text-[10px] text-rose-500 font-bold block">{language === "en" ? "Wrong" : "Salah"}</span>
                         <span className="text-sm font-black text-rose-500">{submission.wrongCount ?? 0}</span>
                       </div>
                     </div>
