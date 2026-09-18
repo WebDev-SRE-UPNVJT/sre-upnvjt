@@ -60,6 +60,8 @@ export async function POST(req) {
       questions = [],
       isPublished = true,
       collectUserData = false,
+      isQuiz = false,
+      limitOneResponse = false,
       createSpreadsheet = false,
       successMessage = 'Tanggapan Anda telah berhasil direkam.',
     } = body;
@@ -80,6 +82,7 @@ export async function POST(req) {
       try {
         const sheetRes = await createFormSpreadsheet(title, questions, {
           collectUserData: Boolean(collectUserData),
+          isQuiz: Boolean(isQuiz),
         });
         spreadsheetId = sheetRes.spreadsheetId;
         spreadsheetUrl = sheetRes.spreadsheetUrl;
@@ -106,6 +109,8 @@ export async function POST(req) {
       questions: questions || [],
       isPublished: Boolean(isPublished),
       collectUserData: Boolean(collectUserData),
+      isQuiz: Boolean(isQuiz),
+      limitOneResponse: Boolean(limitOneResponse),
       spreadsheetId,
       spreadsheetUrl,
       driveFolderId,

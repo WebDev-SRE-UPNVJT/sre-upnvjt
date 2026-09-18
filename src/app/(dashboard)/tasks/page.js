@@ -33,7 +33,7 @@ export default async function TasksAdminPage() {
         columns: { id: true, title: true, slug: true, timeLimitMinutes: true, rewardXp: true }
       },
       formTemplate: {
-        columns: { id: true, title: true }
+        columns: { id: true, uuid: true, title: true }
       },
       prerequisiteTask: {
         columns: { id: true, title: true }

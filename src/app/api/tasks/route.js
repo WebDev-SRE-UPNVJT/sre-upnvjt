@@ -17,7 +17,7 @@ export async function GET() {
           columns: { id: true, title: true, slug: true, timeLimitMinutes: true, rewardXp: true }
         },
         formTemplate: {
-          columns: { id: true, title: true }
+          columns: { id: true, uuid: true, title: true }
         },
         prerequisiteTask: {
           columns: { id: true, title: true }
@@ -44,6 +44,7 @@ export async function GET() {
       formTemplateId: t.formTemplateId,
       ttsCrosswordId: t.ttsCrosswordId,
       ttsScoringMode: t.ttsScoringMode || "COMPLETION",
+      formScoringMode: t.formScoringMode || "COMPLETION",
       ttsCrossword: t.ttsCrossword,
       formTemplate: t.formTemplate,
       prerequisiteTaskId: t.prerequisiteTaskId,
@@ -81,6 +82,7 @@ export async function POST(req) {
       formTemplateId,
       ttsCrosswordId,
       ttsScoringMode,
+      formScoringMode,
       prerequisiteTaskId,
       maxUploadSizeMb,
       allowMultipleFiles,
@@ -137,6 +139,7 @@ export async function POST(req) {
       formTemplateId: formTemplateId ? parseInt(formTemplateId) : null,
       ttsCrosswordId: ttsCrosswordId ? parseInt(ttsCrosswordId) : null,
       ttsScoringMode: ttsScoringMode ? String(ttsScoringMode).toUpperCase() : "COMPLETION",
+      formScoringMode: formScoringMode ? String(formScoringMode).toUpperCase() : "COMPLETION",
       prerequisiteTaskId: (category === "SIDE" && prerequisiteTaskId) ? parseInt(prerequisiteTaskId) : null,
       deadline: new Date(deadline),
       enableSpeedBonus: enableSpeedBonus !== undefined ? Boolean(enableSpeedBonus) : true,

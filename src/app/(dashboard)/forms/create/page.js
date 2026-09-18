@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Plus,
@@ -22,6 +22,10 @@ import {
   Folder,
   Download,
   UserCheck,
+  Trophy,
+  Award,
+  CheckCheck,
+  Lock,
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -100,16 +104,22 @@ export default function CreateForm() {
   const [description, setDescription] = useState('');
   const [isPublished, setIsPublished] = useState(true);
   const [collectUserData, setCollectUserData] = useState(true);
+  const [isQuiz, setIsQuiz] = useState(false);
+  const [limitOneResponse, setLimitOneResponse] = useState(false);
   const [createSpreadsheet, setCreateSpreadsheet] = useState(true);
   const [successMessage, setSuccessMessage] = useState('Tanggapan Anda telah berhasil direkam.');
   const [questions, setQuestions] = useState([
-    { id: Date.now().toString(), type: 'text', question: '', options: [''], required: false, points: 0 }
+    { id: Date.now().toString(), type: 'text', question: '', options: [''], required: false, points: 0, correctAnswer: '' }
   ]);
   const [saving, setSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [previewPage, setPreviewPage] = useState(0);
   const [showImportModal, setShowImportModal] = useState(false);
   const [downloadingTemplate, setDownloadingTemplate] = useState(false);
+
+  const totalQuizPoints = useMemo(() => {
+    return questions.reduce((acc, q) => acc + (parseInt(q.points, 10) || 0), 0);
+  }, [questions]);
 
   const handleImportQuestions = (newQuestions, mode) => {
     if (mode === 'replace') {
@@ -153,7 +163,7 @@ export default function CreateForm() {
   const addQuestion = () => {
     setQuestions([
       ...questions,
-      { id: Date.now().toString(), type: 'text', question: '', options: [''], required: false, points: 0 }
+      { id: Date.now().toString(), type: 'text', question: '', options: [''], required: false, points: isQuiz ? 10 : 0, correctAnswer: '' }
     ]);
   };
 
@@ -210,6 +220,8 @@ export default function CreateForm() {
           questions,
           isPublished,
           collectUserData,
+          isQuiz,
+          limitOneResponse,
           createSpreadsheet,
           successMessage,
         }),
@@ -458,7 +470,7 @@ export default function CreateForm() {
             </div>
 
             {/* Integrations & Settings Row */}
-            <div className="pt-4 border-t border-gray-100 dark:border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+            <div className="pt-4 border-t border-gray-100 dark:border-white/5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
               {/* Google Sheets Sync Toggle */}
               <label className="flex items-start gap-3 p-3.5 rounded-2xl bg-emerald-50/60 dark:bg-emerald-500/10 border border-emerald-200/80 dark:border-emerald-500/20 cursor-pointer hover:border-emerald-400 transition-colors">
                 <input
@@ -470,15 +482,15 @@ export default function CreateForm() {
                 <div className="text-xs">
                   <span className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
                     <FileSpreadsheet className="w-3.5 h-3.5 shrink-0" />
-                    Auto Google Sheets
+                    Auto Sheets
                   </span>
                   <p className="text-gray-500 dark:text-white/50 mt-0.5 leading-relaxed">
-                    Jawaban otomatis tercatat secara realtime di spreadsheet.
+                    Jawaban otomatis tercatat di Google Sheets.
                   </p>
                 </div>
               </label>
 
-              {/* Record Account Data (User ID & Profile) Toggle */}
+              {/* Record Account Data Toggle */}
               <label className="flex items-start gap-3 p-3.5 rounded-2xl bg-teal-50/60 dark:bg-teal-500/10 border border-teal-200/80 dark:border-teal-500/20 cursor-pointer hover:border-teal-400 transition-colors">
                 <input
                   type="checkbox"
@@ -489,10 +501,61 @@ export default function CreateForm() {
                 <div className="text-xs">
                   <span className="font-bold text-teal-700 dark:text-teal-400 flex items-center gap-1.5">
                     <UserCheck className="w-3.5 h-3.5 shrink-0 text-teal-500" />
-                    Rekam Akun Responden
+                    Rekam Akun
                   </span>
                   <p className="text-gray-500 dark:text-white/50 mt-0.5 leading-relaxed">
-                    Otomatis simpan User ID, Nama Akun, & Email yang login saat submit.
+                    Catat User ID, Nama & Email yang login.
+                  </p>
+                </div>
+              </label>
+
+              {/* Quiz Mode Toggle */}
+              <label className={`flex items-start gap-3 p-3.5 rounded-2xl border cursor-pointer transition-colors ${
+                isQuiz 
+                  ? 'bg-amber-50 dark:bg-amber-500/15 border-amber-300 dark:border-amber-500/30' 
+                  : 'bg-gray-50 dark:bg-white/[0.02] border-gray-200 dark:border-white/10 hover:border-amber-400'
+              }`}>
+                <input
+                  type="checkbox"
+                  checked={isQuiz}
+                  onChange={(e) => setIsQuiz(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 text-amber-500 accent-amber-500 rounded focus:ring-amber-500"
+                />
+                <div className="text-xs">
+                  <span className="font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+                    <Trophy className="w-3.5 h-3.5 shrink-0 text-amber-500" />
+                    Mode Kuis
+                    {isQuiz && (
+                      <span className="font-mono text-[9px] px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300">
+                        {totalQuizPoints} pt
+                      </span>
+                    )}
+                  </span>
+                  <p className="text-gray-500 dark:text-white/50 mt-0.5 leading-relaxed">
+                    Set poin & kunci jawaban benar otomatis.
+                  </p>
+                </div>
+              </label>
+
+              {/* Limit 1 Response Toggle */}
+              <label className={`flex items-start gap-3 p-3.5 rounded-2xl border cursor-pointer transition-colors ${
+                limitOneResponse 
+                  ? 'bg-purple-50 dark:bg-purple-500/15 border-purple-300 dark:border-purple-500/30' 
+                  : 'bg-gray-50 dark:bg-white/[0.02] border-gray-200 dark:border-white/10 hover:border-purple-400'
+              }`}>
+                <input
+                  type="checkbox"
+                  checked={limitOneResponse}
+                  onChange={(e) => setLimitOneResponse(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 text-purple-600 accent-purple-500 rounded focus:ring-purple-500"
+                />
+                <div className="text-xs">
+                  <span className="font-bold text-purple-800 dark:text-purple-300 flex items-center gap-1.5">
+                    <Lock className="w-3.5 h-3.5 shrink-0 text-purple-500" />
+                    1 Akun 1x Isi
+                  </span>
+                  <p className="text-gray-500 dark:text-white/50 mt-0.5 leading-relaxed">
+                    {limitOneResponse ? 'Hanya 1 respon per akun.' : 'Responden bisa isi berkali-kali.'}
                   </p>
                 </div>
               </label>
@@ -508,10 +571,10 @@ export default function CreateForm() {
                 <div className="text-xs">
                   <span className="font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
                     <Globe className="w-3.5 h-3.5 shrink-0 text-primary" />
-                    Publikasikan Formulir
+                    Publikasikan
                   </span>
                   <p className="text-gray-500 dark:text-white/50 mt-0.5 leading-relaxed">
-                    Formulir dapat diakses dan diisi melalui tautan publik.
+                    Formulir dapat diakses via tautan publik.
                   </p>
                 </div>
               </label>
@@ -586,8 +649,8 @@ export default function CreateForm() {
                     isDraggedOver ? 'border-primary ring-2 ring-primary/20' : 'border-gray-200 dark:border-white/10'
                   } rounded-3xl p-6 sm:p-7 relative group transition-all shadow-sm`}
                 >
-                  {/* Drag Handle & Delete */}
-                  <div className="flex items-center justify-between gap-4 mb-4">
+                  {/* Drag Handle, Question Number, Quiz Points & Delete */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                     <div className="flex items-center gap-2">
                       <div className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-white rounded-lg cursor-grab active:cursor-grabbing hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
                         <GripVertical size={18} />
@@ -595,9 +658,25 @@ export default function CreateForm() {
                       <span className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-white/40">
                         Pertanyaan #{index + 1}
                       </span>
+
+                      {/* Quiz Points Input (If isQuiz enabled) */}
+                      {isQuiz && (
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-800 dark:text-amber-300 ml-2">
+                          <Award className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                          <span className="text-[11px] font-bold">Poin:</span>
+                          <input
+                            type="number"
+                            min="0"
+                            placeholder="0"
+                            value={q.points || ''}
+                            onChange={(e) => updateQuestion(q.id, 'points', parseInt(e.target.value, 10) || 0)}
+                            className="w-12 bg-white/80 dark:bg-black/40 border border-amber-500/30 text-center font-mono font-bold text-xs py-0.5 rounded focus:outline-none focus:border-amber-500 text-amber-900 dark:text-amber-200"
+                          />
+                        </div>
+                      )}
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5">
                       <CustomSelect 
                         options={typeOptions}
                         value={q.type}
@@ -606,7 +685,7 @@ export default function CreateForm() {
                       />
                       <button 
                         onClick={() => removeQuestion(q.id)}
-                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors"
+                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer"
                         title="Hapus Pertanyaan"
                       >
                         <Trash2 size={18} />
@@ -628,32 +707,92 @@ export default function CreateForm() {
                   {/* Dynamic Options for Radio, Checkbox, Dropdown */}
                   {(q.type === 'radio' || q.type === 'checkbox' || q.type === 'dropdown') && (
                     <div className="space-y-2.5 pl-2 mb-4">
-                      {q.options?.map((opt, optIndex) => (
-                        <div key={optIndex} className="flex items-center gap-3">
-                          <div className="w-3.5 h-3.5 rounded-full border-2 border-gray-300 dark:border-white/30 shrink-0" />
-                          <input 
-                            type="text" 
-                            placeholder={`Pilihan ${optIndex + 1}`}
-                            value={opt}
-                            onChange={(e) => updateOption(q.id, optIndex, e.target.value)}
-                            className="flex-1 bg-transparent border-b border-gray-200 dark:border-white/10 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 py-1.5 focus:outline-none focus:border-primary transition-colors"
-                          />
-                          {q.options.length > 1 && (
-                            <button 
-                              onClick={() => removeOption(q.id, optIndex)}
-                              className="text-gray-400 hover:text-red-500 p-1 transition-colors"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          )}
+                      {isQuiz && (
+                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 mb-2">
+                          <CheckCheck size={14} />
+                          <span>Klik tombol kunci pada pilihan untuk menandai jawaban yang benar:</span>
                         </div>
-                      ))}
+                      )}
+                      {q.options?.map((opt, optIndex) => {
+                        const isKey = q.type === 'checkbox'
+                          ? (Array.isArray(q.correctAnswer) ? q.correctAnswer.includes(opt) : q.correctAnswer === opt)
+                          : (q.correctAnswer === opt && opt.trim() !== '');
+
+                        return (
+                          <div key={optIndex} className="flex items-center gap-3">
+                            <div className="w-3.5 h-3.5 rounded-full border-2 border-gray-300 dark:border-white/30 shrink-0" />
+                            <input 
+                              type="text" 
+                              placeholder={`Pilihan ${optIndex + 1}`}
+                              value={opt}
+                              onChange={(e) => updateOption(q.id, optIndex, e.target.value)}
+                              className="flex-1 bg-transparent border-b border-gray-200 dark:border-white/10 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 py-1.5 focus:outline-none focus:border-primary transition-colors"
+                            />
+
+                            {/* Quiz Answer Key Selector Button */}
+                            {isQuiz && opt.trim() !== '' && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (q.type === 'checkbox') {
+                                    const currentKeys = Array.isArray(q.correctAnswer) ? [...q.correctAnswer] : (q.correctAnswer ? [q.correctAnswer] : []);
+                                    let newKeys;
+                                    if (currentKeys.includes(opt)) {
+                                      newKeys = currentKeys.filter((k) => k !== opt);
+                                    } else {
+                                      newKeys = [...currentKeys, opt];
+                                    }
+                                    updateQuestion(q.id, 'correctAnswer', newKeys);
+                                  } else {
+                                    updateQuestion(q.id, 'correctAnswer', isKey ? '' : opt);
+                                  }
+                                }}
+                                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer shrink-0 ${
+                                  isKey
+                                    ? 'bg-emerald-600 text-white shadow-sm ring-1 ring-emerald-400'
+                                    : 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-white/50 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 border border-gray-200 dark:border-white/10'
+                                }`}
+                                title="Tandai pilihan ini sebagai kunci jawaban benar"
+                              >
+                                <CheckCheck size={12} />
+                                <span>{isKey ? 'Kunci Benar' : 'Jadikan Kunci'}</span>
+                              </button>
+                            )}
+
+                            {q.options.length > 1 && (
+                              <button 
+                                onClick={() => removeOption(q.id, optIndex)}
+                                className="text-gray-400 hover:text-red-500 p-1 transition-colors cursor-pointer"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
                       <button 
                         onClick={() => addOption(q.id)}
-                        className="text-xs font-bold text-primary hover:text-emerald-400 flex items-center gap-1.5 mt-2 py-1 px-2 rounded-lg hover:bg-primary/10 transition-colors"
+                        className="text-xs font-bold text-primary hover:text-emerald-400 flex items-center gap-1.5 mt-2 py-1 px-2 rounded-lg hover:bg-primary/10 transition-colors cursor-pointer"
                       >
                         <Plus size={14} /> Tambah Pilihan
                       </button>
+                    </div>
+                  )}
+
+                  {/* Answer Key Input for Text & Number Questions (If isQuiz enabled) */}
+                  {isQuiz && (q.type === 'text' || q.type === 'number') && (
+                    <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-500/10 border border-emerald-200/80 dark:border-emerald-500/20 mb-4 space-y-1.5">
+                      <label className="text-xs font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                        <CheckCheck size={14} className="text-emerald-600 dark:text-emerald-400" />
+                        Kunci Jawaban Benar (Pencocokan Tepat):
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Contoh: Energi Surya (tidak sensitif huruf besar/kecil)"
+                        value={q.correctAnswer || ''}
+                        onChange={(e) => updateQuestion(q.id, 'correctAnswer', e.target.value)}
+                        className="w-full bg-white dark:bg-[#071913] border border-emerald-200 dark:border-emerald-500/30 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/30 focus:outline-none focus:border-emerald-500 transition-all shadow-inner"
+                      />
                     </div>
                   )}
 

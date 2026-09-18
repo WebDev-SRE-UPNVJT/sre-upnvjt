@@ -33,6 +33,7 @@ const EMPTY_TASK = {
   formTemplateId: "",
   ttsCrosswordId: "",
   ttsScoringMode: "COMPLETION", // "COMPLETION" | "PROPORTIONAL" | "PERFECT"
+  formScoringMode: "COMPLETION", // "COMPLETION" | "PROPORTIONAL" | "PERFECT"
   prerequisiteTaskId: "",
   maxUploadSizeMb: "10",
   allowMultipleFiles: false,
@@ -193,6 +194,7 @@ export default function TasksClient({ initialTasks, initialSubmissions, availabl
         formTemplateId: tk.formTemplateId ? String(tk.formTemplateId) : "",
         ttsCrosswordId: tk.ttsCrosswordId ? String(tk.ttsCrosswordId) : "",
         ttsScoringMode: tk.ttsScoringMode || "COMPLETION",
+        formScoringMode: tk.formScoringMode || "COMPLETION",
         prerequisiteTaskId: tk.prerequisiteTaskId ? String(tk.prerequisiteTaskId) : "",
         maxUploadSizeMb: tk.maxUploadSizeMb?.toString() || "10",
         allowMultipleFiles: tk.allowMultipleFiles ?? false,
@@ -238,6 +240,7 @@ export default function TasksClient({ initialTasks, initialSubmissions, availabl
           formTemplateId: taskForm.submissionType === "FORM" && taskForm.formTemplateId ? parseInt(taskForm.formTemplateId) : null,
           ttsCrosswordId: taskForm.submissionType === "TTS" && taskForm.ttsCrosswordId ? parseInt(taskForm.ttsCrosswordId) : null,
           ttsScoringMode: taskForm.submissionType === "TTS" ? taskForm.ttsScoringMode || "COMPLETION" : "COMPLETION",
+          formScoringMode: taskForm.submissionType === "FORM" ? taskForm.formScoringMode || "COMPLETION" : "COMPLETION",
           prerequisiteTaskId: taskForm.category === "SIDE" && taskForm.prerequisiteTaskId ? parseInt(taskForm.prerequisiteTaskId) : null,
           maxUploadSizeMb: parseInt(taskForm.maxUploadSizeMb) || 10,
           allowMultipleFiles: Boolean(taskForm.allowMultipleFiles),
@@ -1725,24 +1728,75 @@ export default function TasksClient({ initialTasks, initialSubmissions, availabl
 
                   {/* Form Template Relation Selector */}
                   {taskForm.submissionType === "FORM" && (
-                    <div className="p-4 bg-teal-500/5 border border-teal-500/20 rounded-2xl space-y-3">
+                    <div className="p-4 bg-teal-500/5 border border-teal-500/20 rounded-2xl space-y-4">
                       <InputField label="Hubungkan ke Template Formulir *">
                         <select
                           required
                           value={taskForm.formTemplateId}
-                          onChange={e => setTaskForm(p => ({ ...p, formTemplateId: e.target.value }))}
+                          onChange={e => {
+                            const formId = e.target.value;
+                            const found = availableForms.find(f => String(f.id) === String(formId));
+                            setTaskForm(p => ({
+                              ...p,
+                              formTemplateId: formId,
+                              title: (!p.title && found?.title) ? found.title : p.title,
+                            }));
+                          }}
                           className={inputCls}
                         >
                           <option value="">-- Pilih Template Formulir --</option>
                           {availableForms.map(f => (
                             <option key={f.id} value={f.id}>
-                              {f.title}
+                              {f.title} {f.isQuiz ? "• Mode Kuis" : ""}
                             </option>
                           ))}
                         </select>
                       </InputField>
+
+                      <InputField label="Mode Penilaian & Perolehan XP Formulir *">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          {[
+                            {
+                              value: "COMPLETION",
+                              label: "Flat (Penuh / 100% XP)",
+                              desc: "Dapat seluruh XP tugas saat form berhasil disubmit, terlepas dari skor kuis",
+                            },
+                            {
+                              value: "PROPORTIONAL",
+                              label: "Sesuai Skor Kuis",
+                              desc: "XP dihitung proporsional: (% Skor Kuis × Total Reward XP). Pembulatan ke atas",
+                            },
+                            {
+                              value: "PERFECT",
+                              label: "100% Sempurna",
+                              desc: "Hanya mendapat XP jika mendapatkan nilai sempurna (100% benar pada kuis)",
+                            },
+                          ].map(mode => {
+                            const isSelected = (taskForm.formScoringMode || "COMPLETION") === mode.value;
+                            return (
+                              <button
+                                key={mode.value}
+                                type="button"
+                                onClick={() => setTaskForm(p => ({ ...p, formScoringMode: mode.value }))}
+                                className={`p-3 rounded-xl border text-left transition-all ${
+                                  isSelected
+                                    ? "bg-teal-500/20 border-teal-500 text-teal-800 dark:text-teal-200 shadow-sm"
+                                    : "bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-700 dark:text-white/70 hover:bg-gray-50 dark:hover:bg-white/10"
+                                }`}
+                              >
+                                <div className="text-xs font-bold flex items-center justify-between">
+                                  <span>{mode.label}</span>
+                                  {isSelected && <Check className="w-3.5 h-3.5 text-teal-500" />}
+                                </div>
+                                <div className="text-[10px] mt-1 opacity-75 leading-tight">{mode.desc}</div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </InputField>
+
                       <p className="text-[11px] text-teal-700 dark:text-teal-300 font-medium">
-                        Anggota akan mengisi formulir kustom dinamis untuk menyelesaikan tugas ini.
+                        Anggota yang mengerjakan quest ini akan mengisi formulir dan mendapatkan XP sesuai skema penilaian yang Anda pilih.
                       </p>
                     </div>
                   )}

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { formTemplate, formSubmission, task, taskSubmission, user } from '@/db/schema';
+import { formTemplate, formSubmission, task, taskSubmission, user, memberProfile, xpTransaction } from '@/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
@@ -80,12 +80,51 @@ export async function POST(req, { params }) {
     const finalEmail = (responderEmail || userEmail || autoEmail || '').trim();
     const finalNpm = (userNpm || autoNpm || '').trim();
 
-    // Validasi pertanyaan wajib (Server-Side Validation)
+    // Cek pembatasan 1 tanggapan per akun jika opsi limitOneResponse aktif
+    if (form.limitOneResponse) {
+      let existingSub = null;
+      if (finalMemberId) {
+        existingSub = await db.query.formSubmission.findFirst({
+          where: and(
+            eq(formSubmission.formTemplateId, formId),
+            eq(formSubmission.memberId, finalMemberId)
+          ),
+        });
+      }
+      if (!existingSub && finalEmail) {
+        existingSub = await db.query.formSubmission.findFirst({
+          where: and(
+            eq(formSubmission.formTemplateId, formId),
+            eq(formSubmission.responderEmail, finalEmail)
+          ),
+        });
+      }
+
+      if (existingSub) {
+        return NextResponse.json({
+          error: 'Anda sudah pernah mengirimkan tanggapan untuk formulir ini. Formulir ini dibatasi hanya 1 kali pengisian per akun.',
+          alreadySubmitted: true,
+          submissionId: existingSub.id,
+          submittedAt: existingSub.submittedAt,
+        }, { status: 400 });
+      }
+    }
+
+    // Validasi pertanyaan wajib (Server-Side Validation) & Perhitungan Skor Kuis
+    let earnedScore = 0;
+    let maxScore = 0;
+    let correctCount = 0;
+    let totalScoredQuestions = 0;
+
     if (Array.isArray(form.questions)) {
       for (const q of form.questions) {
-        if (q && q.type !== 'page_break' && Boolean(q.required)) {
-          const submittedAnswer = (answers || []).find((a) => String(a.questionId) === String(q.id));
-          const val = submittedAnswer?.value;
+        if (!q || q.type === 'page_break') continue;
+
+        const submittedAnswer = (answers || []).find((a) => String(a.questionId) === String(q.id));
+        const val = submittedAnswer?.value;
+
+        // Validasi wajib
+        if (Boolean(q.required)) {
           const isEmpty =
             val === undefined ||
             val === null ||
@@ -104,8 +143,44 @@ export async function POST(req, { params }) {
             );
           }
         }
+
+        // Kalkulasi Skor jika mode Kuis aktif atau soal memiliki poin
+        const qPoints = parseInt(q.points, 10) || 0;
+        if (form.isQuiz || qPoints > 0) {
+          if (qPoints > 0) {
+            maxScore += qPoints;
+            totalScoredQuestions += 1;
+          }
+
+          const hasKey = q.correctAnswer !== undefined && q.correctAnswer !== null && (Array.isArray(q.correctAnswer) ? q.correctAnswer.length > 0 : String(q.correctAnswer).trim() !== '');
+          if (hasKey && val !== undefined && val !== null) {
+            let isCorrect = false;
+
+            if (q.type === 'radio' || q.type === 'dropdown') {
+              isCorrect = String(val).trim().toLowerCase() === String(q.correctAnswer).trim().toLowerCase();
+            } else if (q.type === 'checkbox') {
+              const userVals = (Array.isArray(val) ? val : [val]).map((s) => String(s).trim().toLowerCase()).sort();
+              const keyVals = (Array.isArray(q.correctAnswer)
+                ? q.correctAnswer
+                : String(q.correctAnswer).split(/[,;\n|]+/)
+              ).map((s) => String(s).trim().toLowerCase()).sort();
+
+              isCorrect = userVals.length === keyVals.length && userVals.every((v, i) => v === keyVals[i]);
+            } else if (q.type === 'text' || q.type === 'number') {
+              isCorrect = String(val).trim().toLowerCase() === String(q.correctAnswer).trim().toLowerCase();
+            }
+
+            if (isCorrect) {
+              earnedScore += qPoints;
+              correctCount += 1;
+            }
+          }
+        }
       }
     }
+
+    const percentage = maxScore > 0 ? Math.round((earnedScore / maxScore) * 100) : 0;
+    const isQuizForm = Boolean(form.isQuiz) || maxScore > 0;
 
     // 1. Simpan ke database PostgreSQL (Form Response)
     const [inserted] = await db.insert(formSubmission).values({
@@ -114,6 +189,7 @@ export async function POST(req, { params }) {
       responderName: finalName || null,
       responderEmail: finalEmail || null,
       answers: answers || [],
+      score: isQuizForm ? earnedScore : null,
       submittedAt: new Date(),
     }).returning();
 
@@ -130,6 +206,12 @@ export async function POST(req, { params }) {
           userNpm: finalNpm,
           responderName: finalName,
           responderEmail: finalEmail,
+          score: isQuizForm ? earnedScore : null,
+          maxScore: isQuizForm ? maxScore : null,
+          scoreStr: isQuizForm ? `${earnedScore} / ${maxScore}` : '',
+          scorePercentage: isQuizForm ? `${percentage}%` : '',
+          correctCount: isQuizForm ? correctCount : null,
+          correctSummary: isQuizForm ? `${correctCount} Benar / ${totalScoredQuestions || (form.questions || []).filter(q => q && q.type !== 'page_break').length} Soal` : '',
         },
         form.questions
       ).catch((sheetErr) => {
@@ -138,6 +220,7 @@ export async function POST(req, { params }) {
     }
 
     // 3. Jika responden adalah Member login & Formulir terhubung dengan Task / Quest
+    let earnedTaskXp = 0;
     if (memberId) {
       try {
         const linkedTasks = await db.query.task.findMany({
@@ -153,17 +236,54 @@ export async function POST(req, { params }) {
             ),
           });
 
+          // Hitung perolehan XP berdasarkan lTask.formScoringMode
+          const scoringMode = lTask.formScoringMode || "COMPLETION";
+          const maxRewardXp = lTask.rewardXp || 0;
+          let taskXpEarned = 0;
+
+          if (scoringMode === "COMPLETION") {
+            // Flat (Penuh): Seluruh reward XP diberikan saat berhasil mengirim formulir
+            taskXpEarned = maxRewardXp;
+          } else if (scoringMode === "PROPORTIONAL") {
+            // Sesuai Persentase Skor / Jawaban Benar
+            if (isQuizForm && maxScore > 0) {
+              taskXpEarned = Math.ceil((earnedScore / maxScore) * maxRewardXp);
+            } else {
+              taskXpEarned = maxRewardXp;
+            }
+          } else if (scoringMode === "PERFECT") {
+            // 100% Sempurna (Perfect Score)
+            if (isQuizForm && maxScore > 0) {
+              taskXpEarned = (earnedScore === maxScore) ? maxRewardXp : 0;
+            } else {
+              taskXpEarned = maxRewardXp;
+            }
+          }
+
+          earnedTaskXp = Math.max(earnedTaskXp, taskXpEarned);
           let taskSubRecord = existingTaskSub;
           const formResponseUrl = `/f/${form.uuid || form.id}`;
+          const subStatus = "APPROVED"; // Otomatis disetujui karena formulir terverifikasi sistem
+          const feedbackMsg = isQuizForm
+            ? `Skor Kuis: ${earnedScore}/${maxScore} (${percentage}%) | XP Diperoleh: +${taskXpEarned} XP`
+            : `Formulir berhasil diselesaikan | XP Diperoleh: +${taskXpEarned} XP`;
+
+          // Cek apakah sebelumnya sudah pernah APPROVED (agar tidak double award XP)
+          const wasAlreadyApproved = existingTaskSub?.status === "APPROVED";
+          const previousXpEarned = existingTaskSub?.xpEarned || 0;
 
           if (!existingTaskSub) {
             const [createdSub] = await db.insert(taskSubmission).values({
               taskId: lTask.id,
               memberId: memberId,
               fileUrl: formResponseUrl,
-              status: "PENDING",
-              score: null,
-              xpEarned: null,
+              status: subStatus,
+              score: isQuizForm ? percentage : 100,
+              correctCount: isQuizForm ? correctCount : null,
+              wrongCount: isQuizForm ? Math.max(0, (totalScoredQuestions || 0) - correctCount) : null,
+              totalQuestions: isQuizForm ? (totalScoredQuestions || 0) : null,
+              xpEarned: taskXpEarned,
+              feedback: feedbackMsg,
               submittedAt: new Date(),
             }).returning();
             taskSubRecord = createdSub;
@@ -171,12 +291,48 @@ export async function POST(req, { params }) {
             const [updatedSub] = await db.update(taskSubmission)
               .set({
                 fileUrl: formResponseUrl,
-                status: "PENDING",
+                status: subStatus,
+                score: isQuizForm ? percentage : 100,
+                correctCount: isQuizForm ? correctCount : null,
+                wrongCount: isQuizForm ? Math.max(0, (totalScoredQuestions || 0) - correctCount) : null,
+                totalQuestions: isQuizForm ? (totalScoredQuestions || 0) : null,
+                xpEarned: taskXpEarned,
+                feedback: feedbackMsg,
                 submittedAt: new Date(),
               })
               .where(eq(taskSubmission.id, existingTaskSub.id))
               .returning();
             taskSubRecord = updatedSub;
+          }
+
+          // Tambahkan XP ke Member Profile & Catat Transaksi XP
+          const xpDiff = wasAlreadyApproved ? Math.max(0, taskXpEarned - previousXpEarned) : taskXpEarned;
+          if (xpDiff > 0) {
+            const profile = await db.query.memberProfile.findFirst({
+              where: eq(memberProfile.userId, memberId),
+            });
+
+            if (!profile) {
+              await db.insert(memberProfile).values({
+                userId: memberId,
+                xp: xpDiff,
+                level: Math.floor(xpDiff / 100) + 1,
+              });
+            } else {
+              const nextXp = profile.xp + xpDiff;
+              const nextLevel = Math.floor(nextXp / 100) + 1;
+              await db.update(memberProfile)
+                .set({ xp: nextXp, level: nextLevel })
+                .where(eq(memberProfile.userId, memberId));
+            }
+
+            await db.insert(xpTransaction).values({
+              userId: memberId,
+              amount: xpDiff,
+              reason: `Penyelesaian Quest (${lTask.title}): +${xpDiff} XP (${scoringMode === "PROPORTIONAL" ? `Skor: ${percentage}%` : "Selesai"})`,
+              sourceType: "task",
+              sourceId: taskSubRecord.id,
+            });
           }
 
           // Sinkronkan ke Tab 1 ("Submisi Tugas") Google Spreadsheet jika Task memiliki spreadsheet
@@ -187,9 +343,9 @@ export async function POST(req, { params }) {
               memberId: memberId,
               memberName: responderName || autoName,
               memberEmail: responderEmail || autoEmail,
-              status: "PENDING",
+              status: subStatus,
               fileUrl: formResponseUrl,
-              feedback: taskSubRecord.feedback || "",
+              feedback: feedbackMsg,
               submittedAt: taskSubRecord.submittedAt || new Date(),
               taskDeadline: lTask.deadline,
             }).catch((taskSheetErr) => {
@@ -206,6 +362,13 @@ export async function POST(req, { params }) {
       success: true,
       submissionId: inserted.id,
       message: form.successMessage || 'Tanggapan Anda telah berhasil direkam.',
+      score: isQuizForm ? earnedScore : null,
+      maxScore: isQuizForm ? maxScore : null,
+      percentage: isQuizForm ? percentage : null,
+      correctCount: isQuizForm ? correctCount : null,
+      totalQuestions: isQuizForm ? totalScoredQuestions : null,
+      isQuiz: isQuizForm,
+      xpEarned: earnedTaskXp > 0 ? earnedTaskXp : null,
     }, { status: 201 });
   } catch (error) {
     console.error('Error submitting form:', error);

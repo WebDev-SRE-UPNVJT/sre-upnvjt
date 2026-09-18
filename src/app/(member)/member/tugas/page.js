@@ -25,6 +25,12 @@ export default async function MemberTugasPage() {
   const tasks = await db.query.task.findMany({
     orderBy: [asc(task.deadline)],
     with: {
+      formTemplate: {
+        columns: { id: true, uuid: true, title: true }
+      },
+      ttsCrossword: {
+        columns: { id: true, title: true, slug: true, timeLimitMinutes: true, rewardXp: true }
+      },
       prerequisiteTask: {
         columns: { id: true, title: true, rewardXp: true }
       }

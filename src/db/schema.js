@@ -108,6 +108,8 @@ export const formTemplate = pgTable('formTemplate', {
   questions: jsonb('questions').notNull().default([]),
   isPublished: boolean('isPublished').default(true).notNull(),
   collectUserData: boolean('collectUserData').default(false).notNull(),
+  isQuiz: boolean('isQuiz').default(false).notNull(),
+  limitOneResponse: boolean('limitOneResponse').default(false).notNull(),
   spreadsheetId: varchar('spreadsheetId', { length: 255 }),
   spreadsheetUrl: varchar('spreadsheetUrl', { length: 500 }),
   driveFolderId: varchar('driveFolderId', { length: 255 }),
@@ -141,6 +143,7 @@ export const task = pgTable('task', {
   formTemplateId: integer('formTemplateId').references(() => formTemplate.id, { onDelete: 'set null' }),
   ttsCrosswordId: integer('ttsCrosswordId').references(() => ttsCrossword.id, { onDelete: 'set null' }),
   ttsScoringMode: varchar('ttsScoringMode', { length: 50 }).default('COMPLETION').notNull(), // 'COMPLETION' | 'PROPORTIONAL' | 'PERFECT'
+  formScoringMode: varchar('formScoringMode', { length: 50 }).default('COMPLETION').notNull(), // 'COMPLETION' | 'PROPORTIONAL' | 'PERFECT'
   folderId: varchar('folderId', { length: 255 }),
   spreadsheetId: varchar('spreadsheetId', { length: 255 }),
   spreadsheetUrl: varchar('spreadsheetUrl', { length: 500 }),

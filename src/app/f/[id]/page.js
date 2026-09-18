@@ -53,6 +53,8 @@ export default async function PublicFormPage({ params }) {
   }
 
   let sessionUser = null;
+  let existingSubmission = null;
+
   try {
     const session = await getServerSession(authOptions);
     if (session?.user?.id) {
@@ -75,10 +77,43 @@ export default async function PublicFormPage({ params }) {
         npm: dbUser?.npm || session.user.npm || null,
         image: dbUser?.profilePictureUrl || session.user.image || null,
       };
+
+      // Cek apakah user sudah pernah mengisi formulir ini jika limitOneResponse aktif
+      if (form.limitOneResponse) {
+        const { formSubmission } = await import('@/db/schema');
+        const { and } = await import('drizzle-orm');
+
+        let sub = await db.query.formSubmission.findFirst({
+          where: and(
+            eq(formSubmission.formTemplateId, form.id),
+            eq(formSubmission.memberId, sessionUser.id)
+          ),
+          orderBy: (sub, { desc }) => [desc(sub.submittedAt)],
+        });
+
+        if (!sub && sessionUser.email) {
+          sub = await db.query.formSubmission.findFirst({
+            where: and(
+              eq(formSubmission.formTemplateId, form.id),
+              eq(formSubmission.responderEmail, sessionUser.email)
+            ),
+            orderBy: (sub, { desc }) => [desc(sub.submittedAt)],
+          });
+        }
+
+        if (sub) {
+          existingSubmission = {
+            id: sub.id,
+            submittedAt: sub.submittedAt,
+            score: sub.score,
+            answers: sub.answers,
+          };
+        }
+      }
     }
   } catch (e) {
     // Abaikan
   }
 
-  return <PublicFormClient form={form} user={sessionUser} />;
+  return <PublicFormClient form={form} user={sessionUser} existingSubmission={existingSubmission} />;
 }

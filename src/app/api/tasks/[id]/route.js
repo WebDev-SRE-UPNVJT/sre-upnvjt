@@ -85,6 +85,7 @@ export async function PUT(req, { params }) {
       formTemplateId: formTemplateId ? parseInt(formTemplateId) : null,
       ttsCrosswordId: ttsCrosswordId ? parseInt(ttsCrosswordId) : null,
       ttsScoringMode: ttsScoringMode ? String(ttsScoringMode).toUpperCase() : "COMPLETION",
+      formScoringMode: formScoringMode ? String(formScoringMode).toUpperCase() : "COMPLETION",
       prerequisiteTaskId: (category === "SIDE" && prerequisiteTaskId) ? parseInt(prerequisiteTaskId) : null,
       deadline: new Date(deadline),
       enableSpeedBonus: enableSpeedBonus !== undefined ? Boolean(enableSpeedBonus) : true,

@@ -32,19 +32,19 @@ export default function FloatingThemeToggle() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.8, y: 50 }}
+      initial={{ opacity: 0, scale: 0.8, y: 30 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-[60]"
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-[60]"
     >
       <motion.button
-        whileHover={{ scale: 1.1, rotate: isDark ? 15 : -15 }}
-        whileTap={{ scale: 0.9, rotate: isDark ? -25 : 25 }}
+        whileHover={{ scale: 1.08, rotate: isDark ? 12 : -12 }}
+        whileTap={{ scale: 0.92, rotate: isDark ? -20 : 20 }}
         onClick={() => setTheme(isDark ? "light" : "dark")}
-        className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center relative overflow-hidden backdrop-blur-xl border-2 shadow-2xl transition-colors duration-500 focus:outline-none cursor-pointer group ${
+        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center relative overflow-hidden backdrop-blur-xl border-[1.5px] shadow-lg transition-colors duration-300 focus:outline-none cursor-pointer group ${
           isDark
-            ? "bg-[#07130e]/90 border-emerald-400 text-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)] hover:shadow-[0_0_25px_rgba(52,211,153,0.5)]"
-            : "bg-[#0cc48a]/90 border-yellow-300 text-yellow-300 shadow-[0_0_20px_rgba(253,224,71,0.35)] hover:shadow-[0_0_25px_rgba(253,224,71,0.55)]"
+            ? "bg-[#07130e]/90 border-emerald-400 text-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.25)] hover:shadow-[0_0_20px_rgba(52,211,153,0.4)]"
+            : "bg-[#0cc48a]/90 border-yellow-300 text-yellow-300 shadow-[0_0_15px_rgba(253,224,71,0.3)] hover:shadow-[0_0_20px_rgba(253,224,71,0.45)]"
         }`}
         aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       >
@@ -61,7 +61,7 @@ export default function FloatingThemeToggle() {
               transition={{ type: "spring", stiffness: 350, damping: 20 }}
               className="text-emerald-400 font-bold"
             >
-              <Sun className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.2]" />
+              <Sun className="w-4.5 h-4.5 sm:w-5 sm:h-5 stroke-[2.2]" />
             </motion.div>
           ) : (
             <motion.div
@@ -72,7 +72,7 @@ export default function FloatingThemeToggle() {
               transition={{ type: "spring", stiffness: 350, damping: 20 }}
               className="text-yellow-300 font-bold"
             >
-              <Moon className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.2]" />
+              <Moon className="w-4.5 h-4.5 sm:w-5 sm:h-5 stroke-[2.2]" />
             </motion.div>
           )}
         </AnimatePresence>

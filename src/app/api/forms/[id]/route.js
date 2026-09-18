@@ -4,7 +4,7 @@ import { formTemplate, formSubmission } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
-import { createFormSpreadsheet, createFormDriveFolder } from '@/lib/googleSheets';
+import { createFormSpreadsheet, createFormDriveFolder, syncFormSpreadsheetHeaders } from '@/lib/googleSheets';
 
 export const dynamic = 'force-dynamic';
 
@@ -76,6 +76,8 @@ export async function PUT(req, { params }) {
       questions,
       isPublished,
       collectUserData,
+      isQuiz,
+      limitOneResponse,
       createSpreadsheet,
       successMessage,
     } = body;
@@ -92,6 +94,7 @@ export async function PUT(req, { params }) {
       try {
         const sheetRes = await createFormSpreadsheet(title, questions, {
           collectUserData: Boolean(collectUserData),
+          isQuiz: Boolean(isQuiz),
         });
         spreadsheetId = sheetRes.spreadsheetId;
         spreadsheetUrl = sheetRes.spreadsheetUrl;
@@ -120,6 +123,8 @@ export async function PUT(req, { params }) {
     if (questions !== undefined) updateData.questions = questions;
     if (isPublished !== undefined) updateData.isPublished = Boolean(isPublished);
     if (collectUserData !== undefined) updateData.collectUserData = Boolean(collectUserData);
+    if (isQuiz !== undefined) updateData.isQuiz = Boolean(isQuiz);
+    if (limitOneResponse !== undefined) updateData.limitOneResponse = Boolean(limitOneResponse);
     if (spreadsheetId !== undefined) updateData.spreadsheetId = spreadsheetId;
     if (spreadsheetUrl !== undefined) updateData.spreadsheetUrl = spreadsheetUrl;
     if (driveFolderId !== undefined) updateData.driveFolderId = driveFolderId;
@@ -133,6 +138,21 @@ export async function PUT(req, { params }) {
 
     if (!updatedForm) {
       return NextResponse.json({ error: 'Form tidak ditemukan' }, { status: 404 });
+    }
+
+    // Sinkronkan susunan header Google Spreadsheet jika form terhubung dengan Spreadsheet
+    if (updatedForm.spreadsheetId) {
+      syncFormSpreadsheetHeaders(
+        updatedForm.spreadsheetId,
+        updatedForm.title,
+        updatedForm.questions || [],
+        {
+          collectUserData: Boolean(updatedForm.collectUserData),
+          isQuiz: Boolean(updatedForm.isQuiz),
+        }
+      ).catch((sheetSyncErr) => {
+        console.error('[Forms] Failed to sync spreadsheet headers on form update:', sheetSyncErr);
+      });
     }
 
     return NextResponse.json(updatedForm);

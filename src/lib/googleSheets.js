@@ -41,9 +41,14 @@ export async function createFormSpreadsheet(formTitle, questions = [], options =
       ? ["User ID", "Nama Akun", "Email Akun"]
       : [];
 
+    const quizHeaders = options.isQuiz
+      ? ["Skor / Nilai", "Persentase Skor", "Benar / Salah (Total)"]
+      : [];
+
     const headers = [
       "Timestamp",
       ...userHeaders,
+      ...quizHeaders,
       ...validQuestions.map((q, idx) => q.question || `Pertanyaan ${idx + 1}`),
     ];
 
@@ -217,6 +222,128 @@ export async function createFormSpreadsheet(formTitle, questions = [], options =
 }
 
 /**
+ * Sinkronkan dan perbarui susunan header Google Spreadsheet saat formulir diedit
+ * (Menambah kolom Skor & Benar/Salah jika kuis diaktifkan, atau menghapusnya jika kuis dimatikan)
+ */
+export async function syncFormSpreadsheetHeaders(spreadsheetId, formTitle = "", questions = [], options = {}) {
+  if (!spreadsheetId) return null;
+
+  try {
+    const auth = getGoogleOAuth2Client();
+    const sheets = google.sheets({ version: "v4", auth });
+
+    const validQuestions = (questions || []).filter(
+      (q) => q && q.type !== "page_break"
+    );
+
+    const userHeaders = options.collectUserData
+      ? ["User ID", "Nama Akun", "Email Akun"]
+      : [];
+
+    const quizHeaders = options.isQuiz
+      ? ["Skor / Nilai", "Persentase Skor", "Benar / Salah (Total)"]
+      : [];
+
+    const newHeaders = [
+      "Timestamp",
+      ...userHeaders,
+      ...quizHeaders,
+      ...validQuestions.map((q, idx) => q.question || `Pertanyaan ${idx + 1}`),
+    ];
+
+    // 1. Dapatkan nama tab target
+    let targetTabName = "Form Responses 1";
+    let targetSheetId = 0;
+    try {
+      const sheetMeta = await sheets.spreadsheets.get({ spreadsheetId });
+      const sheetsList = sheetMeta.data.sheets || [];
+      const foundTab =
+        sheetsList.find((s) => s.properties?.title === "Respon Form Detail") ||
+        sheetsList.find((s) => s.properties?.title === "Form Responses 1");
+
+      if (foundTab) {
+        targetTabName = foundTab.properties.title;
+        targetSheetId = foundTab.properties.sheetId;
+      } else if (sheetsList.length > 0) {
+        targetTabName = sheetsList[0].properties.title;
+        targetSheetId = sheetsList[0].properties.sheetId;
+      }
+    } catch (metaErr) {
+      console.warn("[GoogleSheets] Metadata lookup error during header sync:", metaErr.message);
+    }
+
+    // 2. Bersihkan seluruh baris 1 terlebih dahulu (menghapus kolom kuis yang dipangkas jika dinonaktifkan)
+    try {
+      await sheets.spreadsheets.values.clear({
+        spreadsheetId,
+        range: `'${targetTabName}'!1:1`,
+      });
+    } catch (clearErr) {
+      console.warn("[GoogleSheets] Clear row 1 warning:", clearErr.message);
+    }
+
+    // 3. Tulis header baru ke baris 1
+    await sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: `'${targetTabName}'!A1`,
+      valueInputOption: "USER_ENTERED",
+      requestBody: {
+        values: [newHeaders],
+      },
+    });
+
+    // 4. Format header row
+    try {
+      await sheets.spreadsheets.batchUpdate({
+        spreadsheetId,
+        requestBody: {
+          requests: [
+            {
+              repeatCell: {
+                range: {
+                  sheetId: targetSheetId,
+                  startRowIndex: 0,
+                  endRowIndex: 1,
+                  startColumnIndex: 0,
+                  endColumnIndex: newHeaders.length,
+                },
+                cell: {
+                  userEnteredFormat: {
+                    backgroundColor: {
+                      red: 0.06,
+                      green: 0.73,
+                      blue: 0.51,
+                    },
+                    textFormat: {
+                      bold: true,
+                      foregroundColor: {
+                        red: 1,
+                        green: 1,
+                        blue: 1,
+                      },
+                      fontSize: 10,
+                    },
+                    horizontalAlignment: "CENTER",
+                  },
+                },
+                fields: "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment)",
+              },
+            },
+          ],
+        },
+      });
+    } catch (fmtErr) {
+      console.warn("[GoogleSheets] Format batchUpdate error:", fmtErr.message);
+    }
+
+    return { success: true, headers: newHeaders };
+  } catch (err) {
+    console.error("[GoogleSheets] Error syncing spreadsheet headers:", err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
  * Menambahkan baris data respon form ke Google Spreadsheet secara realtime
  * Memetakan setiap jawaban secara presisi ke kolom header yang sesuai
  */
@@ -236,6 +363,12 @@ export async function appendFormResponseToSheet(spreadsheetId, payload, question
       userNpm = '',
       responderName = '',
       responderEmail = '',
+      scoreStr = '',
+      scorePercentage = '',
+      correctSummary = '',
+      correctCount = null,
+      score = null,
+      maxScore = null,
     } = payload;
 
     // Filter soal yang nyata (bukan page break)
@@ -400,6 +533,43 @@ export async function appendFormResponseToSheet(spreadsheetId, payload, question
       // Kolom NPM
       if (headerLower === "npm" || headerLower === "npm akun" || headerLower === "nim") {
         return userNpm ? String(userNpm) : "";
+      }
+
+      // Kolom Skor / Nilai Kuis
+      if (
+        headerLower === "skor / nilai" ||
+        headerLower === "skor" ||
+        headerLower === "nilai" ||
+        headerLower === "score" ||
+        headerLower === "total skor" ||
+        headerLower === "nilai kuis"
+      ) {
+        if (scoreStr) return scoreStr;
+        if (score !== null && score !== undefined) {
+          return maxScore ? `${score} / ${maxScore}` : String(score);
+        }
+        return "";
+      }
+
+      // Kolom Persentase Skor
+      if (
+        headerLower === "persentase skor" ||
+        headerLower === "persentase" ||
+        headerLower === "percentage" ||
+        headerLower === "% nilai"
+      ) {
+        return scorePercentage || "";
+      }
+
+      // Kolom Benar / Salah (Total)
+      if (
+        headerLower === "benar / salah (total)" ||
+        headerLower === "benar / salah" ||
+        headerLower === "jumlah benar" ||
+        headerLower === "status benar / salah" ||
+        headerLower === "hasil kuis"
+      ) {
+        return correctSummary || (correctCount !== null ? `${correctCount} Benar` : "");
       }
 
       // Cari jawaban berdasarkan nama pertanyaan yang cocok dengan header

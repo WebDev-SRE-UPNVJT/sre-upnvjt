@@ -1,17 +1,19 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, ArrowLeft, Eye, EyeOff, Loader2, ShieldCheck, Zap, Sparkles, Lock, Mail, X, CheckCircle2, Send } from "lucide-react";
 import { signIn, getSession, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLanguage } from "@/i18n/LanguageProvider";
 import { useTheme } from "next-themes";
 
 export const dynamic = "force-dynamic";
 
-export default function LoginPage() {
+function LoginFormContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
   const { language, t } = useLanguage();
   const { theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -106,9 +108,13 @@ export default function LoginPage() {
 
   const isLight = mounted && (theme === "light" || resolvedTheme === "light");
 
-  // If already authenticated on initial page load, redirect to appropriate role dashboard
+  // If already authenticated on initial page load, redirect to callbackUrl or appropriate role dashboard
   React.useEffect(() => {
     if (status === "authenticated" && !isLoading) {
+      if (callbackUrl && callbackUrl.startsWith("/") && !callbackUrl.startsWith("//")) {
+        window.location.href = callbackUrl;
+        return;
+      }
       const role = session?.user?.roleName;
       if (role === "MEMBER") {
         window.location.href = "/member";
@@ -118,7 +124,7 @@ export default function LoginPage() {
         window.location.href = "/dashboard";
       }
     }
-  }, [status, session, isLoading]);
+  }, [status, session, isLoading, callbackUrl]);
 
   React.useEffect(() => {
     fetch("/api/settings/system")
@@ -159,7 +165,9 @@ export default function LoginPage() {
       const role = sessionData?.user?.roleName;
 
       let destination = "/dashboard";
-      if (role === "MEMBER") {
+      if (callbackUrl && callbackUrl.startsWith("/") && !callbackUrl.startsWith("//")) {
+        destination = callbackUrl;
+      } else if (role === "MEMBER") {
         destination = "/member";
       } else if (role === "STAFF") {
         destination = "/officer";
@@ -678,5 +686,17 @@ export default function LoginPage() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#0bb37e] dark:bg-[#0a1c15]" />
+      }
+    >
+      <LoginFormContent />
+    </Suspense>
   );
 }

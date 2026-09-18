@@ -65,7 +65,9 @@ export async function downloadFormQuestionTemplate() {
       { header: 'No', key: 'no', width: 8 },
       { header: 'Tipe Pertanyaan', key: 'type', width: 22 },
       { header: 'Pertanyaan / Judul', key: 'question', width: 45 },
-      { header: 'Wajib Diisi (YA/TIDAK)', key: 'required', width: 24 },
+      { header: 'Wajib Diisi (YA/TIDAK)', key: 'required', width: 22 },
+      { header: 'Poin Soal (Khusus Kuis: Angka)', key: 'points', width: 24 },
+      { header: 'Kunci Jawaban (Khusus Kuis: A/B/C/D atau Teks)', key: 'correctAnswer', width: 38 },
       { header: 'Pilihan Jawaban (Pisahkan tanda titik koma ; atau koma)', key: 'options', width: 45 },
       { header: 'Format File (Khusus File: all/pdf/image/document/archive/audio_video)', key: 'allowedTypes', width: 42 },
       { header: 'Batas Ukuran MB (1/5/10/25/50/100)', key: 'maxSizeMb', width: 28 },
@@ -91,13 +93,15 @@ export async function downloadFormQuestionTemplate() {
       };
     });
 
-    // Example Rows Covering ALL 9 Question Types
+    // Example Rows Covering Question & Quiz Types
     const exampleRows = [
       {
         no: 1,
         type: 'text',
         question: 'Nama Lengkap (Sesuai KTM/KTP)',
         required: 'YA',
+        points: '',
+        correctAnswer: '',
         options: '',
         allowedTypes: '',
         maxSizeMb: '',
@@ -105,40 +109,48 @@ export async function downloadFormQuestionTemplate() {
       },
       {
         no: 2,
-        type: 'paragraph',
-        question: 'Motivasi Anda mendaftar program ini?',
+        type: 'radio',
+        question: 'Sumber energi terbarukan yang berasal dari panas bumi disebut?',
         required: 'YA',
-        options: '',
+        points: 25,
+        correctAnswer: 'A',
+        options: 'Geothermal; Biomassa; Hidrotermal; Pembangkit Nuklir',
         allowedTypes: '',
         maxSizeMb: '',
         maxFiles: '',
       },
       {
         no: 3,
-        type: 'radio',
-        question: 'Pilihan Divisi Minat',
+        type: 'checkbox',
+        question: 'Manakah yang termasuk energi bersih ramah lingkungan? (Pilih semua yang benar)',
         required: 'YA',
-        options: 'Human Capital; Renewable Energy R&D; Public Relations; Event Organizer; Creative & Media',
+        points: 25,
+        correctAnswer: 'A; B; D',
+        options: 'Tenaga Surya (Solar); Tenaga Angin (Wind); Batubara (Coal); Mikrohidro',
         allowedTypes: '',
         maxSizeMb: '',
         maxFiles: '',
       },
       {
         no: 4,
-        type: 'checkbox',
-        question: 'Keahlian yang Anda miliki (Bisa pilih lebih dari satu)',
-        required: 'TIDAK',
-        options: 'Desain Grafis (Canva/Figma/Photoshop); Public Speaking / MC; Web Development; Penulisan Artikel; Pengolahan Data (Excel/Python)',
+        type: 'dropdown',
+        question: 'Satuan standar daya listrik internasional adalah?',
+        required: 'YA',
+        points: 25,
+        correctAnswer: 'Watt',
+        options: 'Joule; Newton; Watt; Volt',
         allowedTypes: '',
         maxSizeMb: '',
         maxFiles: '',
       },
       {
         no: 5,
-        type: 'dropdown',
-        question: 'Fakultas / Program Studi',
+        type: 'paragraph',
+        question: 'Jelaskan peran generasi muda dalam transisi energi terbarukan di Indonesia?',
         required: 'YA',
-        options: 'Teknik Kimia; Teknik Lingkungan; Teknik Industri; Sistem Informasi; Informatika; Agroteknologi; Manajemen; Ilmu Komunikasi',
+        points: 25,
+        correctAnswer: '',
+        options: '',
         allowedTypes: '',
         maxSizeMb: '',
         maxFiles: '',
@@ -428,6 +440,14 @@ export function parseExcelQuestions(rawMatrix) {
     (h.includes('pilihan') || h.includes('option') || h.includes('opsi') || h.includes('jawaban')) && 
     !h.includes('tipe') && !h.includes('type') && !h.includes('wajib')
   );
+  let colPoints = headerRow.findIndex((h) => 
+    (h.includes('poin') || h.includes('point') || h.includes('skor') || h.includes('score') || h.includes('bobot')) && 
+    !h.includes('tipe') && !h.includes('pilihan')
+  );
+  let colCorrectAnswer = headerRow.findIndex((h) => 
+    (h.includes('kunci') || h.includes('jawaban benar') || h.includes('correct') || h.includes('key')) && 
+    !h.includes('tipe') && !h.includes('pilihan')
+  );
   let colAllowedTypes = headerRow.findIndex((h) => h.includes('format') || h.includes('allowed') || h.includes('jenis berkas') || h.includes('ekstensi'));
   let colMaxSize = headerRow.findIndex((h) => h.includes('ukuran') || h.includes('size') || h.includes('mb') || h.includes('max size'));
   let colMaxFiles = headerRow.findIndex((h) => h.includes('jumlah') || h.includes('max files') || h.includes('count') || h.includes('banyak file'));
@@ -450,6 +470,8 @@ export function parseExcelQuestions(rawMatrix) {
     const typeRaw = colType !== -1 && colType < row.length ? row[colType] : (row.length > 1 ? row[1] : row[0]);
     const questionRaw = colQuestion !== -1 && colQuestion < row.length ? row[colQuestion] : (row.length > 2 ? row[2] : (colType === 0 ? row[1] : row[0]));
     const requiredRaw = colRequired !== -1 && colRequired < row.length ? row[colRequired] : '';
+    const pointsRaw = colPoints !== -1 && colPoints < row.length ? row[colPoints] : 0;
+    const correctAnswerRaw = colCorrectAnswer !== -1 && colCorrectAnswer < row.length ? row[colCorrectAnswer] : '';
     const optionsRaw = colOptions !== -1 && colOptions < row.length ? row[colOptions] : '';
     const allowedTypesRaw = colAllowedTypes !== -1 && colAllowedTypes < row.length ? row[colAllowedTypes] : '';
     const maxSizeRaw = colMaxSize !== -1 && colMaxSize < row.length ? row[colMaxSize] : '';
@@ -462,18 +484,53 @@ export function parseExcelQuestions(rawMatrix) {
       continue; // Skip rows without question text unless it's a page break
     }
 
+    const parsedPoints = parseInt(String(pointsRaw || '0'), 10);
+
     const qItem = {
       id: `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
       type,
       question: questionText || (type === 'page_break' ? 'Pembatas Halaman' : ''),
       required: parseBoolean(requiredRaw),
-      points: 0,
+      points: isNaN(parsedPoints) ? 0 : parsedPoints,
     };
 
     if (['radio', 'checkbox', 'dropdown'].includes(type)) {
       qItem.options = parseOptions(optionsRaw);
     } else {
       qItem.options = [''];
+    }
+
+    // Resolve Correct Answer for Quiz Mode
+    if (correctAnswerRaw !== undefined && correctAnswerRaw !== null && String(correctAnswerRaw).trim() !== '') {
+      const rawKey = String(correctAnswerRaw).trim();
+      if (['radio', 'dropdown'].includes(type)) {
+        const matchLetter = rawKey.match(/^[A-Ea-e]$/);
+        if (matchLetter) {
+          const optIdx = matchLetter[0].toUpperCase().charCodeAt(0) - 65;
+          if (qItem.options && qItem.options[optIdx]) {
+            qItem.correctAnswer = qItem.options[optIdx];
+          } else {
+            qItem.correctAnswer = rawKey;
+          }
+        } else {
+          qItem.correctAnswer = rawKey;
+        }
+      } else if (type === 'checkbox') {
+        const rawKeys = rawKey.split(/[,;\n|]+/).map((s) => s.trim()).filter(Boolean);
+        const resolvedKeys = rawKeys.map((k) => {
+          const matchLetter = k.match(/^[A-Ea-e]$/);
+          if (matchLetter) {
+            const optIdx = matchLetter[0].toUpperCase().charCodeAt(0) - 65;
+            if (qItem.options && qItem.options[optIdx]) {
+              return qItem.options[optIdx];
+            }
+          }
+          return k;
+        });
+        qItem.correctAnswer = resolvedKeys;
+      } else {
+        qItem.correctAnswer = rawKey;
+      }
     }
 
     if (type === 'file') {
@@ -769,14 +826,17 @@ export default function FormExcelImportModal({
                   <thead className="bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-white/60 font-bold sticky top-0 z-10">
                     <tr>
                       <th className="py-2.5 px-3 w-10 text-center">#</th>
-                      <th className="py-2.5 px-3 w-32">Tipe</th>
+                      <th className="py-2.5 px-3 w-28">Tipe</th>
                       <th className="py-2.5 px-3">Pertanyaan & Opsi</th>
-                      <th className="py-2.5 px-3 w-20 text-center">Wajib</th>
+                      <th className="py-2.5 px-3 w-16 text-center">Poin</th>
+                      <th className="py-2.5 px-3 w-28">Kunci</th>
+                      <th className="py-2.5 px-3 w-16 text-center">Wajib</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-white/5 text-gray-800 dark:text-white/90">
                     {parsedList.map((q, idx) => {
                       const Icon = QUESTION_TYPE_ICONS[q.type] || FileText;
+                      const hasKey = q.correctAnswer !== undefined && q.correctAnswer !== null && (Array.isArray(q.correctAnswer) ? q.correctAnswer.length > 0 : String(q.correctAnswer).trim() !== '');
                       return (
                         <tr key={q.id || idx} className="hover:bg-gray-50/50 dark:hover:bg-white/[0.02]">
                           <td className="py-2.5 px-3 text-center font-mono font-bold text-gray-400 dark:text-white/40">
@@ -801,6 +861,24 @@ export default function FormExcelImportModal({
                               <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium mt-0.5">
                                 Format: {q.allowedTypes?.join(', ')?.toUpperCase()} • Maks: {q.maxSizeMb}MB • {q.maxFiles} File
                               </div>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-3 text-center">
+                            {q.points > 0 ? (
+                              <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 font-mono font-bold text-[10px]">
+                                {q.points} pt
+                              </span>
+                            ) : (
+                              <span className="text-gray-400 dark:text-white/30 text-[10px]">-</span>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-3">
+                            {hasKey ? (
+                              <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-500/20 block truncate max-w-[120px]" title={Array.isArray(q.correctAnswer) ? q.correctAnswer.join(', ') : String(q.correctAnswer)}>
+                                {Array.isArray(q.correctAnswer) ? q.correctAnswer.join(', ') : String(q.correctAnswer)}
+                              </span>
+                            ) : (
+                              <span className="text-gray-400 dark:text-white/30 text-[10px]">-</span>
                             )}
                           </td>
                           <td className="py-2.5 px-3 text-center">

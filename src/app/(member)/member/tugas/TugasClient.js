@@ -782,7 +782,7 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
                     </div>
                   </div>
                   <Link
-                    href={`/f/${task.formTemplateId || ""}`}
+                    href={`/f/${task.formTemplate?.uuid || task.formTemplateId || ""}`}
                     className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-teal-600/20 transition-all shrink-0"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
