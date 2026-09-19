@@ -754,3 +754,52 @@ export const ttsQuestionRelations = relations(ttsQuestion, ({ one }) => ({
   }),
 }));
 
+// 21. Kelompok & Mentoring (Mentor Groups)
+export const mentorGroup = pgTable('mentorGroup', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  code: varchar('code', { length: 100 }),
+  description: text('description'),
+  mentorId: integer('mentorId').references(() => user.id, { onDelete: 'set null' }),
+  coMentorId: integer('coMentorId').references(() => user.id, { onDelete: 'set null' }),
+  batch: varchar('batch', { length: 100 }).default('Batch 2025/2026'),
+  whatsappGroupUrl: varchar('whatsappGroupUrl', { length: 500 }),
+  isActive: boolean('isActive').default(true).notNull(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
+});
+
+export const mentorGroupMember = pgTable('mentorGroupMember', {
+  id: serial('id').primaryKey(),
+  groupId: integer('groupId').references(() => mentorGroup.id, { onDelete: 'cascade' }).notNull(),
+  userId: integer('userId').references(() => user.id, { onDelete: 'cascade' }).notNull(),
+  role: varchar('role', { length: 50 }).default('MEMBER').notNull(), // 'MEMBER' | 'LEADER'
+  joinedAt: timestamp('joinedAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
+});
+
+export const mentorGroupRelations = relations(mentorGroup, ({ one, many }) => ({
+  mentor: one(user, {
+    fields: [mentorGroup.mentorId],
+    references: [user.id],
+    relationName: 'mentorGroup_mentor',
+  }),
+  coMentor: one(user, {
+    fields: [mentorGroup.coMentorId],
+    references: [user.id],
+    relationName: 'mentorGroup_coMentor',
+  }),
+  members: many(mentorGroupMember),
+}));
+
+export const mentorGroupMemberRelations = relations(mentorGroupMember, ({ one }) => ({
+  group: one(mentorGroup, {
+    fields: [mentorGroupMember.groupId],
+    references: [mentorGroup.id],
+  }),
+  user: one(user, {
+    fields: [mentorGroupMember.userId],
+    references: [user.id],
+  }),
+}));
+
+

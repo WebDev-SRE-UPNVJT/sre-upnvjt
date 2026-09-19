@@ -190,25 +190,29 @@ function SubmissionItem({ sub, index }) {
                       className={`flex items-start gap-2.5 p-3 rounded-xl border ${
                         sub.status === "REJECTED"
                           ? "bg-rose-500/5 border-rose-500/20"
-                          : "bg-emerald-500/5 border-emerald-500/20"
+                          : "bg-emerald-500/10 border-emerald-500/25"
                       }`}
                     >
-                      <AlertTriangle
-                        className={`w-4 h-4 shrink-0 mt-0.5 ${
-                          sub.status === "REJECTED" ? "text-rose-500" : "text-emerald-500"
-                        }`}
-                      />
+                      {sub.status === "REJECTED" ? (
+                        <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                      ) : (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                      )}
                       <div className="min-w-0 flex-1">
-                        <p
-                          className={`text-[10px] font-black uppercase tracking-wider mb-1 ${
-                            sub.status === "REJECTED"
-                              ? "text-rose-600 dark:text-rose-400"
-                              : "text-emerald-600 dark:text-emerald-400"
-                          }`}
-                        >
-                          {t("member_task_history.card.reviewer_notes") || "Catatan Reviewer:"}
-                        </p>
-                        <p className="text-xs text-slate-600 dark:text-white/70 whitespace-pre-line">
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <p
+                            className={`text-[10px] font-black uppercase tracking-wider ${
+                              sub.status === "REJECTED"
+                                ? "text-rose-600 dark:text-rose-400"
+                                : "text-emerald-700 dark:text-emerald-300"
+                            }`}
+                          >
+                            {sub.status === "REJECTED"
+                              ? (t("member_task_history.card.reviewer_notes_revision") || "Catatan Revisi Reviewer:")
+                              : (t("member_task_history.card.reviewer_notes") || "Catatan & Evaluasi Reviewer:")}
+                          </p>
+                        </div>
+                        <p className="text-xs text-slate-700 dark:text-white/80 whitespace-pre-line leading-relaxed font-medium">
                           {sub.feedback}
                         </p>
                       </div>

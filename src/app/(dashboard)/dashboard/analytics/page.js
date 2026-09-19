@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
+import { hasAccess } from "@/lib/permissions";
 import {
   getVisitorStats,
   getDailyTraffic,
@@ -18,11 +19,10 @@ export const metadata = {
 
 export default async function AnalyticsPage() {
   const session = await getServerSession(authOptions);
-  if (!session) redirect("/login");
+  if (!session?.user) redirect("/login");
 
-  const role = session.user?.roleName;
-  if (role !== "SUPER_ADMIN" && role !== "ADMIN") {
-    redirect("/dashboard");
+  if (!hasAccess(session.user, "analytics", "read")) {
+    redirect("/dashboard?error=unauthorized");
   }
 
   const [statsRes, dailyRes, hourlyRes, deviceRes, topPagesRes] =

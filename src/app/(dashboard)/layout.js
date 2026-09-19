@@ -7,7 +7,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   LayoutDashboard, Users, FileText, CheckSquare, Shield,
-  Settings, LogOut, Menu, X, CreditCard, Box, ChevronLeft, ChevronRight, FolderKanban, ClipboardCheck, FolderOpen, Newspaper, Presentation, ShoppingBag, Handshake, Activity, Trophy, Star, Target, ShieldCheck, Link2, BarChart2, Rocket, Grid3X3
+  Settings, LogOut, Menu, X, CreditCard, Box, ChevronLeft, ChevronRight, FolderKanban, ClipboardCheck, FolderOpen, Newspaper, Presentation, ShoppingBag, Handshake, Activity, Trophy, Star, Target, ShieldCheck, Link2, BarChart2, Rocket, Grid3X3, UsersRound, BookOpen
 } from "lucide-react";
 
 import { hasAccess } from "@/lib/permissions";
@@ -78,15 +78,16 @@ export default function DashboardLayout({ children }) {
     // Organization & Team
     { name: t("sidebar.departments"), icon: FileText, href: "/departments", module: "departments" },
     { name: t("sidebar.users"), icon: Users, href: "/users", module: "users" },
+    { name: "Kelompok Mentoring", icon: UsersRound, href: "/groups", module: "groups" },
     { name: t("sidebar.roles"), icon: Shield, href: "/roles", module: "roles" },
     { name: "Form Builder", icon: ClipboardCheck, href: "/forms", module: "forms" },
-    { name: "TTS Builder", icon: Grid3X3, href: "/tts", module: "quiz" },
+    { name: "TTS Builder", icon: Grid3X3, href: "/tts", module: "tts" },
     
     // Public & Media
     { name: t("sidebar.articles") || "Content / Berita", icon: Newspaper, href: "/content", module: "content" },
     { name: t("sidebar.shortlinks") || "SRE Links (Shortlinks)", icon: Link2, href: "/shortlinks", module: "shortlinks" },
     { name: t("sidebar.analytics") || "Analytics", icon: BarChart2, href: "/dashboard/analytics", module: "analytics" },
-    { name: "Testimonials", icon: Star, href: "/testimonials", module: "content" },
+    { name: "Testimonials", icon: Star, href: "/testimonials", module: "testimonials" },
     { name: t("sidebar.merch"), icon: ShoppingBag, href: "/merch", module: "merchandise" },
     { name: t("sidebar.partners"), icon: Handshake, href: "/partners", module: "partners" },
     { name: "Featured Events", icon: Rocket, href: "/featured-projects", module: "featured-projects" },
@@ -95,23 +96,21 @@ export default function DashboardLayout({ children }) {
     { name: "Literature Bank", icon: FolderOpen, href: "/literature", module: "literature" },
     { name: "Dokumen Internal", icon: FileText, href: "/documents", module: "documents" },
     { name: "PPT Modules", icon: Presentation, href: "/ppt", module: "ppt" },
+    { name: "Progres Modul", icon: BookOpen, href: "/module-progress", module: "module_progress" },
     { name: "Quiz", icon: Target, href: "/quiz", module: "quiz" },
     { name: "Tasks", icon: FolderKanban, href: "/tasks", module: "tasks" },
+    { name: "Penilaian Submisi", icon: CheckSquare, href: "/submissions", module: "submissions" },
     { name: "Activities", icon: Activity, href: "/activities", module: "activities" },
     { name: "Leaderboard", icon: Trophy, href: "/leaderboard", module: "leaderboard" },
     { name: "Attendance", icon: ShieldCheck, href: "/attendance", module: "attendance" },
     { name: "Events (Admin)", icon: Activity, href: "/events-admin", module: "events" },
-    { name: "Applications", icon: ShieldCheck, href: "/applications", module: "users" },
+    { name: "Applications", icon: ShieldCheck, href: "/applications", module: "applications" },
     
     // System
     { name: t("sidebar.settings"), icon: Settings, href: "/settings", module: "settings" },
   ];
 
   const allowedNavItems = navItems.filter(item => {
-    if (item.module === "overview" || item.module === "settings") return true;
-    if (item.module === "partners") return role === "SUPER_ADMIN";
-    if (item.module === "featured-projects") return role === "SUPER_ADMIN" || role === "ADMIN";
-    if (item.module === "documents") return hasAccess(session?.user, "documents", "read") || role === "SUPER_ADMIN" || role === "ADMIN";
     return hasAccess(session?.user, item.module, "read");
   }).sort((a, b) => {
     if (a.href === "/dashboard") return -1;

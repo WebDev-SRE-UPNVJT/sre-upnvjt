@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
+import { hasAccess } from "@/lib/permissions";
 import { getTTSList } from "@/app/actions/ttsActions";
 import TTSBuilderClient from "./TTSBuilderClient";
 
@@ -16,6 +17,10 @@ export default async function TTSDashboardPage() {
 
   if (!session?.user) {
     redirect("/login");
+  }
+
+  if (!hasAccess(session.user, "tts", "read")) {
+    redirect("/dashboard?error=unauthorized");
   }
 
   const listRes = await getTTSList();

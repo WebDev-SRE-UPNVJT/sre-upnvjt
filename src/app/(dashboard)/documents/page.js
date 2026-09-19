@@ -2,6 +2,7 @@ import React from "react";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
+import { hasAccess } from "@/lib/permissions";
 import { db } from "@/lib/db";
 import { documentCategory, documentItem } from "@/db/schema";
 import { desc } from "drizzle-orm";
@@ -17,8 +18,12 @@ export const metadata = {
 export default async function DocumentsPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session) {
+  if (!session?.user) {
     redirect("/login");
+  }
+
+  if (!hasAccess(session.user, "documents", "read")) {
+    redirect("/dashboard?error=unauthorized");
   }
 
   // Fetch categories

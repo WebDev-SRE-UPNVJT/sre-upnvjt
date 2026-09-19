@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
+import { hasAccess } from "@/lib/permissions";
 import { getFeaturedProjects } from "@/app/actions/featuredProjectActions";
 import FeaturedProjectsClient from "./FeaturedProjectsClient";
 
@@ -14,9 +15,9 @@ export const metadata = {
 export default async function FeaturedProjectsPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session) redirect("/login");
+  if (!session?.user) redirect("/login");
 
-  if (session.user.roleName !== "SUPER_ADMIN" && session.user.roleName !== "ADMIN") {
+  if (!hasAccess(session.user, "featured-projects", "read")) {
     redirect("/dashboard?error=unauthorized");
   }
 

@@ -870,15 +870,37 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
                 </div>
               )}
 
+              {/* Reviewer Feedback (Approved) */}
+              {status === "APPROVED" && submission?.feedback && (
+                <div className="flex items-start gap-3 p-4 bg-emerald-500/10 border border-emerald-500/25 rounded-2xl shadow-sm">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                    <CheckCircle2 className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
+                      <p className="text-xs font-black text-emerald-700 dark:text-emerald-300 uppercase tracking-wider">
+                        {language === "en" ? "Reviewer & Mentor Evaluation:" : "Catatan & Evaluasi Mentor / Reviewer:"}
+                      </p>
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-mono">
+                        +{submission.xpEarned ?? task.rewardXp} XP
+                      </span>
+                    </div>
+                    <p className="text-xs sm:text-sm text-slate-700 dark:text-white/85 leading-relaxed whitespace-pre-line font-medium">
+                      {submission.feedback}
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Rejected feedback */}
               {status === "REJECTED" && submission?.feedback && (
-                <div className="flex items-start gap-3 p-4 bg-rose-500/8 border border-rose-500/20 rounded-xl">
+                <div className="flex items-start gap-3 p-4 bg-rose-500/8 border border-rose-500/20 rounded-2xl shadow-sm">
                   <AlertTriangle className="w-4 h-4 text-rose-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-xs font-black text-rose-600 dark:text-rose-400 mb-1">
-                      {t("member_tasks.modal.feedback_reviewer") || "Catatan Reviewer:"}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-black text-rose-600 dark:text-rose-400 mb-1 uppercase tracking-wider">
+                      {t("member_tasks.modal.feedback_reviewer") || "Catatan Revisi Reviewer:"}
                     </p>
-                    <p className="text-sm text-slate-600 dark:text-white/60">{submission.feedback}</p>
+                    <p className="text-xs sm:text-sm text-slate-700 dark:text-white/80 leading-relaxed whitespace-pre-line">{submission.feedback}</p>
                   </div>
                 </div>
               )}
@@ -918,12 +940,6 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
                         <span className="text-sm font-black text-rose-500">{submission.wrongCount ?? 0}</span>
                       </div>
                     </div>
-
-                    {submission.feedback && (
-                      <p className="text-xs text-slate-500 dark:text-white/50 pt-1 border-t border-emerald-500/15">
-                        {submission.feedback}
-                      </p>
-                    )}
                   </div>
                 ) : submission?.fileUrl ? (
                   <div className="flex items-center gap-3 p-4 bg-emerald-500/8 border border-emerald-500/20 rounded-xl">

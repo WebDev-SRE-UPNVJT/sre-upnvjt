@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import {
   Plus,
   Trash2,
@@ -18,16 +19,20 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { downloadFormQuestionTemplate } from '@/components/forms/FormExcelImportModal';
+import { hasAccess } from '@/lib/permissions';
 
 export default function FormsList() {
+  const { data: session, status } = useSession();
   const [forms, setForms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState(null);
   const [creatingSheetId, setCreatingSheetId] = useState(null);
 
   useEffect(() => {
-    fetchForms();
-  }, []);
+    if (status !== 'loading' && hasAccess(session?.user, 'forms', 'read')) {
+      fetchForms();
+    }
+  }, [status, session]);
 
   const fetchForms = async () => {
     try {
@@ -125,10 +130,25 @@ export default function FormsList() {
     }
   };
 
-  if (loading) {
+  if (status === 'loading' || loading) {
+    if (status !== 'loading' && !hasAccess(session?.user, 'forms', 'read')) {
+      return (
+        <div className="p-10 text-center text-red-500 font-bold">
+          Akses Ditolak: Anda tidak memiliki izin untuk mengakses Form Builder.
+        </div>
+      );
+    }
     return (
       <div className="p-6 flex items-center justify-center min-h-[50vh]">
         <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!hasAccess(session?.user, 'forms', 'read')) {
+    return (
+      <div className="p-10 text-center text-red-500 font-bold">
+        Akses Ditolak: Anda tidak memiliki izin untuk mengakses Form Builder.
       </div>
     );
   }

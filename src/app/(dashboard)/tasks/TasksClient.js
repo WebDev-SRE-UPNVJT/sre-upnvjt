@@ -10,6 +10,7 @@ import {
   UploadCloud, Link2 as LinkIcon, Lock, Zap, BookOpen, Presentation,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { hasAccess } from "@/lib/permissions";
 import * as XLSX from "xlsx";
 import { calculateSpeedBonusXp } from "@/lib/xpUtils";
@@ -805,27 +806,37 @@ export default function TasksClient({ initialTasks, initialSubmissions, availabl
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-8 bg-gray-100 dark:bg-white/[0.03] p-1 rounded-2xl w-fit border border-gray-200 dark:border-white/10">
-        {[
-          { key: "tasks", label: "Daftar Tugas", icon: FolderKanban },
-          { key: "submissions", label: "Submisi Anggota", icon: ShieldCheck },
-        ].map(tab => {
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.key}
-              onClick={() => { setActiveTab(tab.key); setSearchQuery(""); }}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                activeTab === tab.key
-                  ? "bg-white dark:bg-white/10 text-gray-900 dark:text-white shadow-sm"
-                  : "text-gray-500 dark:text-white/40 hover:text-gray-900 dark:hover:text-white"
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              {tab.label}
-            </button>
-          );
-        })}
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+        <div className="flex gap-1 bg-gray-100 dark:bg-white/[0.03] p-1 rounded-2xl w-fit border border-gray-200 dark:border-white/10">
+          {[
+            { key: "tasks", label: "Daftar Tugas", icon: FolderKanban },
+            { key: "submissions", label: "Submisi Anggota", icon: ShieldCheck },
+          ].map(tab => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => { setActiveTab(tab.key); setSearchQuery(""); }}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                  activeTab === tab.key
+                    ? "bg-white dark:bg-white/10 text-gray-900 dark:text-white shadow-sm"
+                    : "text-gray-500 dark:text-white/40 hover:text-gray-900 dark:hover:text-white"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+
+        <Link
+          href="/submissions"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/15 hover:bg-primary/25 border border-primary/30 text-primary dark:text-primary-light text-xs font-bold transition-all shadow-sm"
+        >
+          <CheckSquare className="w-4 h-4" />
+          <span>Buka Halaman Penilaian Khusus Mentor & Admin &rarr;</span>
+        </Link>
       </div>
 
       {/* Tab: Tasks */}

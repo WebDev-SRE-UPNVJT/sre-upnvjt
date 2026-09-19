@@ -19,8 +19,8 @@ export default async function ApplicationsAdminPage() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) redirect("/login");
-  if (!hasAccess(session.user, "users", "read")) {
-    redirect("/dashboard");
+  if (!hasAccess(session.user, "applications", "read") && !hasAccess(session.user, "users", "read")) {
+    redirect("/dashboard?error=unauthorized");
   }
 
   const data = await db.query.memberApplication.findMany({

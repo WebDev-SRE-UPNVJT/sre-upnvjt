@@ -9,8 +9,8 @@ export default async function middleware(req, event) {
   const isAuthPage = req.nextUrl.pathname.startsWith("/login");
   const isMemberRole = token?.roleName === "MEMBER";
   const isStaffRole = token?.roleName === "STAFF";
+  const isMentorRole = token?.roleName === "MENTOR" || (token?.roleName || "").toUpperCase().includes("MENTOR");
   const isAdminRole = token?.roleName === "SUPER_ADMIN" || token?.roleName === "ADMIN";
-  
 
   if (isAuthPage) {
     if (isAuth) {
@@ -18,6 +18,8 @@ export default async function middleware(req, event) {
         return NextResponse.redirect(new URL("/member", req.url));
       } else if (isStaffRole) {
         return NextResponse.redirect(new URL("/officer", req.url));
+      } else if (isMentorRole) {
+        return NextResponse.redirect(new URL("/submissions", req.url));
       }
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
@@ -58,17 +60,23 @@ export const config = {
     "/roles/:path*",
     "/users/:path*",
     "/departments/:path*",
+    "/groups/:path*",
+    "/groups",
     "/merch/:path*",
     "/settings/:path*",
-    // Previously unprotected — now fixed
+    // Operational modules
     "/content/:path*",
     "/forms/:path*",
     "/partners/:path*",
-    // New operational modules
     "/literature/:path*",
     "/ppt/:path*",
+    "/module-progress/:path*",
+    "/module-progress",
     "/quiz/:path*",
     "/tasks/:path*",
+    "/tasks",
+    "/submissions/:path*",
+    "/submissions",
     "/leaderboard/:path*",
     "/attendance/:path*",
     "/events-admin/:path*",
