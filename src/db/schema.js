@@ -142,6 +142,7 @@ export const task = pgTable('task', {
   isRequired: boolean('isRequired').default(true).notNull(), // true = Wajib, false = Opsional
   formTemplateId: integer('formTemplateId').references(() => formTemplate.id, { onDelete: 'set null' }),
   ttsCrosswordId: integer('ttsCrosswordId').references(() => ttsCrossword.id, { onDelete: 'set null' }),
+  pptModuleId: integer('pptModuleId').references(() => pptModule.id, { onDelete: 'set null' }),
   ttsScoringMode: varchar('ttsScoringMode', { length: 50 }).default('COMPLETION').notNull(), // 'COMPLETION' | 'PROPORTIONAL' | 'PERFECT'
   formScoringMode: varchar('formScoringMode', { length: 50 }).default('COMPLETION').notNull(), // 'COMPLETION' | 'PROPORTIONAL' | 'PERFECT'
   folderId: varchar('folderId', { length: 255 }),
@@ -312,6 +313,7 @@ export const taskRelations = relations(task, ({ one, many }) => ({
   formTemplate: one(formTemplate, { fields: [task.formTemplateId], references: [formTemplate.id] }),
   ttsCrossword: one(ttsCrossword, { fields: [task.ttsCrosswordId], references: [ttsCrossword.id] }),
   prerequisiteTask: one(task, { fields: [task.prerequisiteTaskId], references: [task.id] }),
+  pptModule: one(pptModule, { fields: [task.pptModuleId], references: [pptModule.id] }),
   submissions: many(taskSubmission),
 }));
 
@@ -407,9 +409,18 @@ export const literatureItem = pgTable('literatureItem', {
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()),
 });
 
-// 13. PPT Modules
+// 13. PPT Phases & Modules
+export const pptPhase = pgTable('pptPhase', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description'),
+  order: integer('order').default(0).notNull(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()),
+});
+
 export const pptModule = pgTable('pptModule', {
   id: serial('id').primaryKey(),
+  phaseId: integer('phaseId').references(() => pptPhase.id, { onDelete: 'set null' }),
   title: varchar('title', { length: 255 }).notNull(),
   description: text('description'),
   notes: text('notes'),
@@ -427,6 +438,19 @@ export const pptSlide = pgTable('pptSlide', {
   title: varchar('title', { length: 255 }),
   fileUrl: varchar('fileUrl', { length: 1000 }).notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()),
+});
+
+export const pptModuleProgress = pgTable('pptModuleProgress', {
+  id: serial('id').primaryKey(),
+  userId: integer('userId').references(() => user.id, { onDelete: 'cascade' }).notNull(),
+  moduleId: integer('moduleId').references(() => pptModule.id, { onDelete: 'cascade' }).notNull(),
+  currentSlideIdx: integer('currentSlideIdx').default(0).notNull(),
+  maxSlideIdx: integer('maxSlideIdx').default(0).notNull(),
+  isCompleted: boolean('isCompleted').default(false).notNull(),
+  completedAt: timestamp('completedAt', { mode: 'date' }),
+  lastAccessedAt: timestamp('lastAccessedAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
 
 // 14. Quiz System
@@ -526,17 +550,38 @@ export const literatureItemRelations = relations(literatureItem, ({ one }) => ({
   }),
 }));
 
+export const pptPhaseRelations = relations(pptPhase, ({ many }) => ({
+  modules: many(pptModule),
+}));
+
 export const pptModuleRelations = relations(pptModule, ({ one, many }) => ({
   createdBy: one(user, {
     fields: [pptModule.createdById],
     references: [user.id],
   }),
+  phase: one(pptPhase, {
+    fields: [pptModule.phaseId],
+    references: [pptPhase.id],
+  }),
   slides: many(pptSlide),
+  tasks: many(task),
+  progress: many(pptModuleProgress),
 }));
 
 export const pptSlideRelations = relations(pptSlide, ({ one }) => ({
   module: one(pptModule, {
     fields: [pptSlide.moduleId],
+    references: [pptModule.id],
+  }),
+}));
+
+export const pptModuleProgressRelations = relations(pptModuleProgress, ({ one }) => ({
+  user: one(user, {
+    fields: [pptModuleProgress.userId],
+    references: [user.id],
+  }),
+  module: one(pptModule, {
+    fields: [pptModuleProgress.moduleId],
     references: [pptModule.id],
   }),
 }));

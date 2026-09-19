@@ -7,7 +7,7 @@ import {
   AlertTriangle, FolderKanban, FileText, Calendar, Award,
   Clock, Check, Eye, ExternalLink, ShieldCheck, ChevronDown, ChevronUp, Filter,
   Download, FileSpreadsheet, Upload, RefreshCw, Crown, Swords, Gamepad2, Puzzle,
-  UploadCloud, Link2 as LinkIcon, Lock, Zap,
+  UploadCloud, Link2 as LinkIcon, Lock, Zap, BookOpen, Presentation,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { hasAccess } from "@/lib/permissions";
@@ -32,6 +32,7 @@ const EMPTY_TASK = {
   submissionType: "FILE", // "FILE" | "LINK" | "TTS" | "FORM"
   formTemplateId: "",
   ttsCrosswordId: "",
+  pptModuleId: "",
   ttsScoringMode: "COMPLETION", // "COMPLETION" | "PROPORTIONAL" | "PERFECT"
   formScoringMode: "COMPLETION", // "COMPLETION" | "PROPORTIONAL" | "PERFECT"
   prerequisiteTaskId: "",
@@ -94,7 +95,7 @@ function CustomSelect({ value, onChange, options, icon: Icon, placeholder = "Pil
   );
 }
 
-export default function TasksClient({ initialTasks, initialSubmissions, availablePuzzles = [], availableForms = [], currentUser }) {
+export default function TasksClient({ initialTasks, initialSubmissions, availablePuzzles = [], availableForms = [], availablePptModules = [], currentUser }) {
   const { data: session } = useSession();
   const user = session?.user ?? currentUser;
 
@@ -171,6 +172,18 @@ export default function TasksClient({ initialTasks, initialSubmissions, availabl
     }
   };
 
+  const parseBool = (val, defaultVal = true) => {
+    if (val === undefined || val === null) return defaultVal;
+    if (typeof val === "boolean") return val;
+    if (typeof val === "string") {
+      const s = val.trim().toLowerCase();
+      if (s === "false" || s === "0" || s === "off" || s === "no") return false;
+      if (s === "true" || s === "1" || s === "on" || s === "yes") return true;
+    }
+    if (typeof val === "number") return val !== 0;
+    return Boolean(val);
+  };
+
   const handleOpenTaskModal = (tk = null) => {
     if (tk) {
       const date = new Date(tk.deadline);
@@ -193,13 +206,14 @@ export default function TasksClient({ initialTasks, initialSubmissions, availabl
         submissionType: tk.submissionType || (tk.ttsCrosswordId ? "TTS" : tk.formTemplateId ? "FORM" : "FILE"),
         formTemplateId: tk.formTemplateId ? String(tk.formTemplateId) : "",
         ttsCrosswordId: tk.ttsCrosswordId ? String(tk.ttsCrosswordId) : "",
+        pptModuleId: tk.pptModuleId ? String(tk.pptModuleId) : "",
         ttsScoringMode: tk.ttsScoringMode || "COMPLETION",
         formScoringMode: tk.formScoringMode || "COMPLETION",
         prerequisiteTaskId: tk.prerequisiteTaskId ? String(tk.prerequisiteTaskId) : "",
         maxUploadSizeMb: tk.maxUploadSizeMb?.toString() || "10",
         allowMultipleFiles: tk.allowMultipleFiles ?? false,
-        enableSpeedBonus: tk.enableSpeedBonus !== undefined ? Boolean(tk.enableSpeedBonus) : true,
-        allowLateSubmission: tk.allowLateSubmission !== undefined ? Boolean(tk.allowLateSubmission) : true,
+        enableSpeedBonus: parseBool(tk.enableSpeedBonus, true),
+        allowLateSubmission: parseBool(tk.allowLateSubmission, true),
       });
     } else {
       setTaskForm({ ...EMPTY_TASK });
@@ -239,20 +253,21 @@ export default function TasksClient({ initialTasks, initialSubmissions, availabl
           submissionType: taskForm.submissionType,
           formTemplateId: taskForm.submissionType === "FORM" && taskForm.formTemplateId ? parseInt(taskForm.formTemplateId) : null,
           ttsCrosswordId: taskForm.submissionType === "TTS" && taskForm.ttsCrosswordId ? parseInt(taskForm.ttsCrosswordId) : null,
+          pptModuleId: taskForm.pptModuleId ? parseInt(taskForm.pptModuleId) : null,
           ttsScoringMode: taskForm.submissionType === "TTS" ? taskForm.ttsScoringMode || "COMPLETION" : "COMPLETION",
           formScoringMode: taskForm.submissionType === "FORM" ? taskForm.formScoringMode || "COMPLETION" : "COMPLETION",
           prerequisiteTaskId: taskForm.category === "SIDE" && taskForm.prerequisiteTaskId ? parseInt(taskForm.prerequisiteTaskId) : null,
           maxUploadSizeMb: parseInt(taskForm.maxUploadSizeMb) || 10,
           allowMultipleFiles: Boolean(taskForm.allowMultipleFiles),
-          enableSpeedBonus: Boolean(taskForm.enableSpeedBonus),
-          allowLateSubmission: Boolean(taskForm.allowLateSubmission),
+          enableSpeedBonus: parseBool(taskForm.enableSpeedBonus, true),
+          allowLateSubmission: parseBool(taskForm.allowLateSubmission, true),
         }),
       });
 
       const data = await res.json();
       if (res.ok) {
         if (isEditing) {
-          setTasks(tasks.map(t => t.id === targetTask.id ? { ...data.task, submissionCount: t.submissionCount } : t));
+          setTasks(tasks.map(t => t.id === targetTask.id ? { ...t, ...data.task, submissionCount: t.submissionCount } : t));
         } else {
           setTasks([data.task, ...tasks]);
         }
@@ -874,6 +889,12 @@ export default function TasksClient({ initialTasks, initialSubmissions, availabl
                             </span>
                           )}
 
+                          {tk.pptModule && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-bold max-w-[200px] truncate" title={`Modul Materi: ${tk.pptModule.title}`}>
+                              <Presentation className="w-3 h-3 shrink-0" /> <span className="truncate">{tk.pptModule.title}</span>
+                            </span>
+                          )}
+
                           {tk.allowLateSubmission === false && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[10px] font-bold" title="Submisi otomatis ditutup saat tenggat waktu berakhir">
                               <Clock className="w-3 h-3" /> Strict DL
@@ -921,7 +942,7 @@ export default function TasksClient({ initialTasks, initialSubmissions, availabl
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 text-xs font-bold">
                             <Award className="w-3.5 h-3.5" /> +{tk.rewardXp} XP
                           </span>
-                          {tk.enableSpeedBonus !== false && (
+                          {parseBool(tk.enableSpeedBonus, true) && (
                             <span
                               title="Bonus Kecepatan Aktif (+1 s/d +10 XP jika submit sebelum deadline)"
                               className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 text-[10px] font-bold"
@@ -1621,6 +1642,27 @@ export default function TasksClient({ initialTasks, initialSubmissions, availabl
                     </div>
                   )}
 
+                  {/* Related Learning Material / Modul Materi Selector */}
+                  <div className="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl space-y-2">
+                    <InputField label="Modul Materi Terkait (Opsional)">
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-1.5 leading-relaxed">
+                        Pilih modul materi pembelajaran yang berkaitan dengan tugas/quest ini. Member akan melihat tombol pintasan ke modul materi di halaman quest.
+                      </p>
+                      <select
+                        value={taskForm.pptModuleId}
+                        onChange={e => setTaskForm(p => ({ ...p, pptModuleId: e.target.value }))}
+                        className={inputCls}
+                      >
+                        <option value="">-- Tidak Terhubung ke Modul Materi --</option>
+                        {availablePptModules.map(mod => (
+                          <option key={mod.id} value={mod.id}>
+                            📖 {mod.title} {mod.isPublished ? "• Published" : "• Draft"}
+                          </option>
+                        ))}
+                      </select>
+                    </InputField>
+                  </div>
+
                   <InputField label="Tipe Pengumpulan / Jenis Task *">
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                       {[
@@ -1948,7 +1990,7 @@ export default function TasksClient({ initialTasks, initialSubmissions, availabl
                 {(() => {
                   const targetTaskObj = tasks.find(t => t.id === targetSubmission.taskId);
                   const baseRewardXp = targetTaskObj?.rewardXp || 0;
-                  const isSpeedBonusEnabled = targetTaskObj?.enableSpeedBonus !== false;
+                  const isSpeedBonusEnabled = parseBool(targetTaskObj?.enableSpeedBonus, true);
                   const speedBonusXp = isSpeedBonusEnabled
                     ? calculateSpeedBonusXp(
                         targetTaskObj?.createdAt,

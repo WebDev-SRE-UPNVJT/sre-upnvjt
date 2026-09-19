@@ -97,36 +97,46 @@ export async function PUT(req, { params }) {
       }
     }
 
-    const [updated] = await db.update(taskSubmission)
-      .set({
-        status,
-        feedback: feedback || null,
-        reviewedById: session.user.id,
-      })
-      .where(eq(taskSubmission.id, parseInt(submissionId)))
-      .returning();
-
-    // Realtime Sync to Google Spreadsheet if connected
-    if (submission.task?.spreadsheetId) {
-      const { appendOrUpdateTaskSubmissionToSheet } = await import("@/lib/googleSheets");
-      appendOrUpdateTaskSubmissionToSheet(submission.task.spreadsheetId, {
-        id: updated.id,
-        memberId: submission.memberId,
-        memberName: submission.member?.name || `User ${submission.memberId}`,
-        memberEmail: submission.member?.email || "",
-        departmentName: submission.member?.department?.name || "-",
-        divisionName: submission.member?.division?.name || "-",
-        status: updated.status,
-        fileUrl: updated.fileUrl,
-        feedback: updated.feedback,
-        submittedAt: submission.submittedAt,
-        taskDeadline: submission.task?.deadline,
-      }).catch(sheetErr => {
-        console.warn("[Task Review] Background Sheet sync error:", sheetErr.message);
+    // Handle XP revocation if previously APPROVED and now changed to REJECTED or PENDING
+    if (wasApproved && !nowApproved) {
+      const prevTransactions = await db.query.xpTransaction.findMany({
+        where: (tx, { eq, and }) => and(
+          eq(tx.userId, submission.memberId),
+          eq(tx.sourceId, submission.id)
+        ),
       });
+
+      const netAwardedXp = prevTransactions
+        .filter(tx => tx.sourceType === "task" || tx.sourceType === "task_import" || tx.sourceType === "task_revocation")
+        .reduce((sum, tx) => sum + tx.amount, 0);
+
+      const revokeAmount = netAwardedXp > 0 ? netAwardedXp : (submission.xpEarned || 0);
+
+      if (revokeAmount > 0) {
+        const profile = await db.query.memberProfile.findFirst({
+          where: eq(memberProfile.userId, submission.memberId),
+        });
+
+        if (profile) {
+          const nextXp = Math.max(0, profile.xp - revokeAmount);
+          const nextLevel = Math.max(1, Math.floor(nextXp / 100) + 1);
+          await db.update(memberProfile)
+            .set({ xp: nextXp, level: nextLevel })
+            .where(eq(memberProfile.userId, submission.memberId));
+        }
+
+        await db.insert(xpTransaction).values({
+          userId: submission.memberId,
+          amount: -revokeAmount,
+          reason: `Pembatalan Persetujuan Tugas: ${submission.task?.title || "Tugas"} (-${revokeAmount} XP)`,
+          sourceType: "task_revocation",
+          sourceId: submission.id,
+          grantedById: session.user.id,
+        });
+      }
     }
 
-    // Reward XP if transitioned to APPROVED or if bonusXp > 0
+    // Reward XP if transitioned to APPROVED or if additional bonusXp > 0 while remaining APPROVED
     const parsedBonusXp = parseInt(bonusXp) || 0;
     let totalGainedXp = 0;
     let reasons = [];
@@ -151,11 +161,14 @@ export async function PUT(req, { params }) {
         totalGainedXp += speedBonusXp;
         reasons.push(`Bonus Kecepatan: +${speedBonusXp} XP`);
       }
-    }
 
-    if (parsedBonusXp > 0) {
+      if (parsedBonusXp > 0) {
+        totalGainedXp += parsedBonusXp;
+        reasons.push(`Bonus Admin: +${parsedBonusXp} XP`);
+      }
+    } else if (wasApproved && nowApproved && parsedBonusXp > 0) {
       totalGainedXp += parsedBonusXp;
-      reasons.push(`Bonus Admin: +${parsedBonusXp} XP`);
+      reasons.push(`Bonus Tambahan Admin: +${parsedBonusXp} XP`);
     }
 
     if (totalGainedXp > 0) {
@@ -183,6 +196,46 @@ export async function PUT(req, { params }) {
         reason: reasons.join(" | "),
         sourceType: "task",
         sourceId: submission.id,
+        grantedById: session.user.id,
+      });
+    }
+
+    const updatePayload = {
+      status,
+      feedback: feedback || null,
+      reviewedById: session.user.id,
+    };
+
+    if (nowApproved && !wasApproved) {
+      updatePayload.xpEarned = totalGainedXp;
+    } else if (wasApproved && !nowApproved) {
+      updatePayload.xpEarned = 0;
+    } else if (wasApproved && nowApproved && parsedBonusXp > 0) {
+      updatePayload.xpEarned = (submission.xpEarned || 0) + parsedBonusXp;
+    }
+
+    const [updated] = await db.update(taskSubmission)
+      .set(updatePayload)
+      .where(eq(taskSubmission.id, parseInt(submissionId)))
+      .returning();
+
+    // Realtime Sync to Google Spreadsheet if connected
+    if (submission.task?.spreadsheetId) {
+      const { appendOrUpdateTaskSubmissionToSheet } = await import("@/lib/googleSheets");
+      appendOrUpdateTaskSubmissionToSheet(submission.task.spreadsheetId, {
+        id: updated.id,
+        memberId: submission.memberId,
+        memberName: submission.member?.name || `User ${submission.memberId}`,
+        memberEmail: submission.member?.email || "",
+        departmentName: submission.member?.department?.name || "-",
+        divisionName: submission.member?.division?.name || "-",
+        status: updated.status,
+        fileUrl: updated.fileUrl,
+        feedback: updated.feedback,
+        submittedAt: submission.submittedAt,
+        taskDeadline: submission.task?.deadline,
+      }).catch(sheetErr => {
+        console.warn("[Task Review] Background Sheet sync error:", sheetErr.message);
       });
     }
 

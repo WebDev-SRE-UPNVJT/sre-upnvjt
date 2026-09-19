@@ -14,10 +14,12 @@ import { SectionHeader } from "../components/ui/CommonUI";
 
 // ─── XP source icons ─────────────────────────────────────────────────────────
 const SOURCE_ICON = {
-  task:       { icon: Trophy,        color: "text-amber-500",   bg: "bg-amber-500/10 border-amber-500/20" },
-  quiz:       { icon: BookOpen,      color: "text-blue-500",    bg: "bg-blue-500/10 border-blue-500/20" },
-  attendance: { icon: ClipboardCheck, color: "text-emerald-500", bg: "bg-emerald-500/10 border-emerald-500/20" },
-  manual:     { icon: Zap,           color: "text-purple-500",  bg: "bg-purple-500/10 border-purple-500/20" },
+  task:            { icon: Trophy,         color: "text-amber-500",   bg: "bg-amber-500/10 border-amber-500/20" },
+  task_import:     { icon: Trophy,         color: "text-amber-500",   bg: "bg-amber-500/10 border-amber-500/20" },
+  task_revocation: { icon: Trophy,         color: "text-rose-500",    bg: "bg-rose-500/10 border-rose-500/20" },
+  quiz:            { icon: BookOpen,       color: "text-blue-500",    bg: "bg-blue-500/10 border-blue-500/20" },
+  attendance:      { icon: ClipboardCheck, color: "text-emerald-500", bg: "bg-emerald-500/10 border-emerald-500/20" },
+  manual:          { icon: Zap,            color: "text-purple-500",  bg: "bg-purple-500/10 border-purple-500/20" },
 };
 
 // ─── Badge definitions — business rules untuk unlock ─────────────────────────
@@ -84,7 +86,10 @@ function BadgeCard({ badge, unlocked, index }) {
 
 // ─── XP Log Item ─────────────────────────────────────────────────────────────
 function XpLogItem({ log, index }) {
-  const src = SOURCE_ICON[log.sourceType] ?? SOURCE_ICON.manual;
+  const isNegative = log.amount < 0;
+  const src = SOURCE_ICON[log.sourceType] ?? (isNegative
+    ? { icon: Zap, color: "text-rose-500", bg: "bg-rose-500/10 border-rose-500/20" }
+    : SOURCE_ICON.manual);
   const Icon = src.icon;
   const date = new Date(log.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short" });
   const time = new Date(log.createdAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
@@ -103,8 +108,13 @@ function XpLogItem({ log, index }) {
         <p className="text-xs font-black text-slate-900 dark:text-white truncate">{log.reason}</p>
         <p className="text-[9px] text-slate-400 dark:text-white/30 mt-0.5">{date} · {time}</p>
       </div>
-      <span className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black text-emerald-500 dark:text-emerald-400 font-mono">
-        <Zap className="w-2.5 h-2.5" />+{log.amount}
+      <span className={`flex-shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-lg border text-[10px] font-black font-mono ${
+        isNegative
+          ? "bg-rose-500/10 border-rose-500/20 text-rose-500 dark:text-rose-400"
+          : "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 dark:text-emerald-400"
+      }`}>
+        <Zap className="w-2.5 h-2.5" />
+        {isNegative ? log.amount : `+${log.amount}`}
       </span>
     </motion.div>
   );

@@ -972,6 +972,12 @@
       "status_reviewing": "REVIEW",
       "deadline": "Deadline"
     },
+    "phase_tree": {
+      "title": "Roadmap Pembelajaran",
+      "progress": "Total Progres",
+      "done": "Tuntas",
+      "no_phase": "Belum ada roadmap fase yang tersedia."
+    },
     "xp_logs": {
       "title": "Aktivitas XP Baru",
       "no_xp": "Belum ada perolehan XP",

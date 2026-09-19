@@ -14,6 +14,18 @@ export const metadata = {
   description: "Kelola penugasan dan hasil pengerjaan anggota SRE UPNVJT.",
 };
 
+function parseBool(val, defaultVal = true) {
+  if (val === undefined || val === null) return defaultVal;
+  if (typeof val === "boolean") return val;
+  if (typeof val === "string") {
+    const s = val.trim().toLowerCase();
+    if (s === "false" || s === "0" || s === "off" || s === "no") return false;
+    if (s === "true" || s === "1" || s === "on" || s === "yes") return true;
+  }
+  if (typeof val === "number") return val !== 0;
+  return Boolean(val);
+}
+
 export default async function TasksAdminPage() {
   const session = await getServerSession(authOptions);
 
@@ -37,6 +49,9 @@ export default async function TasksAdminPage() {
       },
       prerequisiteTask: {
         columns: { id: true, title: true }
+      },
+      pptModule: {
+        columns: { id: true, title: true, coverImageUrl: true }
       }
     }
   });
@@ -49,26 +64,32 @@ export default async function TasksAdminPage() {
     submissionGuidelines: t.submissionGuidelines || "",
     rewardXp: t.rewardXp,
     category: t.category || "MAIN",
-    isRequired: t.isRequired ?? true,
+    isRequired: parseBool(t.isRequired, true),
     deadline: t.deadline,
     folderId: t.folderId,
     spreadsheetId: t.spreadsheetId,
     spreadsheetUrl: t.spreadsheetUrl,
     maxUploadSizeMb: t.maxUploadSizeMb,
-    allowMultipleFiles: t.allowMultipleFiles,
+    allowMultipleFiles: parseBool(t.allowMultipleFiles, false),
     submissionType: t.submissionType,
     formTemplateId: t.formTemplateId,
     ttsCrosswordId: t.ttsCrosswordId,
+    pptModuleId: t.pptModuleId,
+    ttsScoringMode: t.ttsScoringMode || "COMPLETION",
+    formScoringMode: t.formScoringMode || "COMPLETION",
+    enableSpeedBonus: parseBool(t.enableSpeedBonus, true),
+    allowLateSubmission: parseBool(t.allowLateSubmission, true),
     ttsCrossword: t.ttsCrossword,
     formTemplate: t.formTemplate,
     prerequisiteTaskId: t.prerequisiteTaskId,
     prerequisiteTask: t.prerequisiteTask,
+    pptModule: t.pptModule,
     createdById: t.createdById,
     createdAt: t.createdAt,
     submissionCount: t.submissions?.length || 0,
   }));
 
-  // Fetch available TTS Puzzles and Form Templates for task relation selection
+  // Fetch available TTS Puzzles, Form Templates, and PPT Modules for task relation selection
   const availablePuzzles = await db.query.ttsCrossword.findMany({
     orderBy: (c, { desc }) => [desc(c.createdAt)],
     columns: { id: true, title: true, slug: true, rewardXp: true, isPublished: true },
@@ -77,6 +98,11 @@ export default async function TasksAdminPage() {
   const availableForms = await db.query.formTemplate.findMany({
     orderBy: (f, { desc }) => [desc(f.createdAt)],
     columns: { id: true, title: true, uuid: true, isPublished: true },
+  });
+
+  const availablePptModules = await db.query.pptModule.findMany({
+    orderBy: (m, { desc }) => [desc(m.createdAt)],
+    columns: { id: true, title: true, isPublished: true },
   });
 
   // Fetch all submissions
@@ -125,6 +151,7 @@ export default async function TasksAdminPage() {
       initialSubmissions={submissions}
       availablePuzzles={availablePuzzles || []}
       availableForms={availableForms || []}
+      availablePptModules={availablePptModules || []}
       currentUser={session.user}
     />
   );

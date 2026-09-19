@@ -563,6 +563,8 @@ export default function PublicFormClient({ form, user, existingSubmission }) {
     form?.successMessage || "Tanggapan Anda telah berhasil direkam.",
   );
   const [earnedXp, setEarnedXp] = useState(null);
+  const [baseXp, setBaseXp] = useState(null);
+  const [speedBonusXp, setSpeedBonusXp] = useState(null);
   const [uploadingFiles, setUploadingFiles] = useState({});
   const [uploadErrors, setUploadErrors] = useState({});
   const [copiedReceipt, setCopiedReceipt] = useState(false);
@@ -840,6 +842,12 @@ export default function PublicFormClient({ form, user, existingSubmission }) {
       if (data.xpEarned) {
         setEarnedXp(data.xpEarned);
       }
+      if (data.baseXp) {
+        setBaseXp(data.baseXp);
+      }
+      if (data.speedBonusXp) {
+        setSpeedBonusXp(data.speedBonusXp);
+      }
       if (data.isQuiz || (data.score !== undefined && data.score !== null)) {
         setQuizResult({
           score: data.score,
@@ -920,7 +928,7 @@ Society of Renewable Energy • UPN Veteran Jawa Timur`;
             hubungi pengurus SRE UPNVJT.
           </p>
           <Link
-            href="/"
+            href="/member/tugas"
             className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 px-7 py-3.5 rounded-2xl font-black text-sm hover:scale-105 transition-all shadow-lg shadow-emerald-500/20"
           >
             Kembali ke Beranda
@@ -1035,6 +1043,13 @@ Society of Renewable Energy • UPN Veteran Jawa Timur`;
                   <span>+{earnedXp} XP Quest Diperoleh!</span>
                 </div>
               )}
+
+              {speedBonusXp > 0 && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-500/15 border border-blue-300 dark:border-blue-500/30 text-blue-800 dark:text-blue-300 text-xs font-black uppercase tracking-wider shadow-sm">
+                  <Clock className="w-3.5 h-3.5 text-blue-500" />
+                  <span>+{speedBonusXp} XP Bonus Kecepatan!</span>
+                </div>
+              )}
             </div>
 
             <h2 className="text-2xl sm:text-3xl font-display font-black text-slate-900 dark:text-white mb-2.5 tracking-tight">
@@ -1132,6 +1147,25 @@ Society of Renewable Energy • UPN Veteran Jawa Timur`;
               </div>
             )}
 
+            {/* XP Reward & Speed Bonus Row */}
+            {earnedXp > 0 && (
+              <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/5">
+                <span className="text-slate-500 dark:text-white/50 font-medium">
+                  Perolehan XP
+                </span>
+                <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                  <span className="font-mono font-black text-amber-700 dark:text-amber-400 text-xs px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/25">
+                    +{earnedXp} XP Total
+                  </span>
+                  {speedBonusXp > 0 && (
+                    <span className="font-mono font-bold text-blue-700 dark:text-blue-400 text-[11px] px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20">
+                      (+{speedBonusXp} Speed)
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
             {submissionId && (
               <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/5">
                 <span className="text-slate-500 dark:text-white/50 font-medium">
@@ -1193,11 +1227,11 @@ Society of Renewable Energy • UPN Veteran Jawa Timur`;
 
               {form.limitOneResponse || isExistingRecord ? (
                 <Link
-                  href="/"
+                  href="/member/tugas"
                   className="w-full sm:w-1/2 py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-sm"
                 >
                   <Home size={16} />
-                  <span>Ke Beranda SRE</span>
+                  <span>Ke Quest</span>
                 </Link>
               ) : (
                 <button

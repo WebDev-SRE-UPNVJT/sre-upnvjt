@@ -1,44 +1,34 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Presentation, Layers, ChevronRight, ChevronLeft, ArrowLeft, 
-  ExternalLink, FileText, AlertCircle, HelpCircle, Star, BookOpen
+  ExternalLink, FileText, AlertCircle, HelpCircle, Star, BookOpen, Search
 } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageProvider";
 import { useRouter } from "next/navigation";
 import { resolveImageUrl } from "@/lib/imageUrl";
 
-export default function MateriClient({ initialModules }) {
+export default function MateriClient({ initialModules = [], initialPhases = [], initialProgressMap = {} }) {
   const { t } = useLanguage();
   const [modules] = useState(initialModules || []);
-  const [activeModule, setActiveModule] = useState(null); // module details with slides
-  const [slides, setSlides] = useState([]);
+  const [phases] = useState(initialPhases || []);
+  const [selectedPhase, setSelectedPhase] = useState("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
 
   const handleOpenModule = (mod) => {
     router.push(`/member/materi/${mod.id}`);
   };
 
-  const [progressMap, setProgressMap] = useState({});
+  const [progressMap, setProgressMap] = useState(initialProgressMap || {});
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const map = {};
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith('sre_materi_progress_')) {
-          try {
-            const moduleId = key.replace('sre_materi_progress_', '');
-            const data = JSON.parse(localStorage.getItem(key));
-            map[moduleId] = data;
-          } catch (e) {}
-        }
-      }
-      setProgressMap(map);
+    if (initialProgressMap) {
+      setProgressMap(initialProgressMap);
     }
-  }, []);
+  }, [initialProgressMap]);
 
   const formatTimeAgo = (timestamp) => {
     if (!timestamp) return null;
@@ -52,6 +42,21 @@ export default function MateriClient({ initialModules }) {
     return `${diffDays} hari lalu`;
   };
 
+  // Filter modules by search and phase
+  const filteredModules = useMemo(() => {
+    return modules.filter((mod) => {
+      const matchesSearch =
+        (mod.title || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (mod.description || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (mod.phaseName || "").toLowerCase().includes(searchQuery.toLowerCase());
+      if (!matchesSearch) return false;
+
+      if (selectedPhase === "ALL") return true;
+      if (selectedPhase === "NONE") return !mod.phaseId;
+      return String(mod.phaseId) === String(selectedPhase);
+    });
+  }, [modules, searchQuery, selectedPhase]);
+
   return (
     <div className="w-full relative select-none">
       
@@ -59,28 +64,103 @@ export default function MateriClient({ initialModules }) {
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[80px] pointer-events-none" />
 
       {/* Header */}
-      <div className="mb-10">
-        <span className="px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary tracking-wide uppercase">
-          Re-mind
-        </span>
-        <h1 className="text-4xl md:text-5xl font-display font-black tracking-tighter text-slate-900 dark:text-white mt-4 flex items-center gap-3">
-          <Presentation className="w-9 h-9 text-primary animate-pulse" />
-          {t('materi.title')}
-        </h1>
-        <p className="text-slate-600 dark:text-white/50 max-w-xl font-medium text-sm mt-2 leading-relaxed">
-          {t('materi.subtitle')}
-        </p>
+      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <span className="px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary tracking-wide uppercase">
+            Re-mind
+          </span>
+          <h1 className="text-4xl md:text-5xl font-display font-black tracking-tighter text-slate-900 dark:text-white mt-4 flex items-center gap-3">
+            <Presentation className="w-9 h-9 text-primary animate-pulse" />
+            {t('materi.title')}
+          </h1>
+          <p className="text-slate-600 dark:text-white/50 max-w-xl font-medium text-sm mt-2 leading-relaxed">
+            {t('materi.subtitle')}
+          </p>
+        </div>
+
+        {/* Search bar */}
+        <div className="relative w-full md:w-72">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-white/30" />
+          <input
+            type="text"
+            placeholder="Cari materi pembelajaran..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/30 focus:outline-none focus:border-primary/50 shadow-sm transition-all"
+          />
+        </div>
       </div>
 
-      {modules.length === 0 ? (
+      {/* Phase Filter Tabs */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-8 scrollbar-none">
+        <button
+          onClick={() => setSelectedPhase("ALL")}
+          className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 shadow-sm ${
+            selectedPhase === "ALL"
+              ? "bg-emerald-500 text-slate-950 font-black shadow-emerald-500/20"
+              : "bg-white dark:bg-[#07130e] text-slate-600 dark:text-white/60 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-white/10"
+          }`}
+        >
+          <span>Semua Fase</span>
+          <span className={`px-1.5 py-0.5 rounded-md text-[10px] ${selectedPhase === "ALL" ? "bg-black/15 text-black" : "bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-white/50"}`}>
+            {modules.length}
+          </span>
+        </button>
+
+        {phases.map((p) => {
+          const countInPhase = modules.filter(m => String(m.phaseId) === String(p.id)).length;
+          const isSelected = String(selectedPhase) === String(p.id);
+
+          return (
+            <button
+              key={p.id}
+              onClick={() => setSelectedPhase(String(p.id))}
+              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 shadow-sm ${
+                isSelected
+                  ? "bg-emerald-500 text-slate-950 font-black shadow-emerald-500/20"
+                  : "bg-white dark:bg-[#07130e] text-slate-600 dark:text-white/60 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-white/10"
+              }`}
+            >
+              <span>{p.name}</span>
+              <span className={`px-1.5 py-0.5 rounded-md text-[10px] ${isSelected ? "bg-black/15 text-black" : "bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-white/50"}`}>
+                {countInPhase}
+              </span>
+            </button>
+          );
+        })}
+
+        {modules.some(m => !m.phaseId) && (
+          <button
+            onClick={() => setSelectedPhase("NONE")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 shadow-sm ${
+              selectedPhase === "NONE"
+                ? "bg-emerald-500 text-slate-950 font-black shadow-emerald-500/20"
+                : "bg-white dark:bg-[#07130e] text-slate-600 dark:text-white/60 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-white/10"
+            }`}
+          >
+            <span>Tanpa Fase</span>
+            <span className={`px-1.5 py-0.5 rounded-md text-[10px] ${selectedPhase === "NONE" ? "bg-black/15 text-black" : "bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-white/50"}`}>
+              {modules.filter(m => !m.phaseId).length}
+            </span>
+          </button>
+        )}
+      </div>
+
+      {filteredModules.length === 0 ? (
         <div className="py-24 flex flex-col items-center justify-center text-center bg-slate-50 dark:bg-[#08120e] border border-dashed border-slate-200 dark:border-white/5 rounded-xl">
           <BookOpen className="w-12 h-12 text-slate-300 dark:text-white/10 mb-4 animate-pulse" />
-          <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1">{t('materi.empty_title')}</h3>
-          <p className="text-slate-500 dark:text-white/40 text-xs max-w-xs leading-relaxed mt-1">{t('materi.empty_desc')}</p>
+          <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1">
+            {searchQuery || selectedPhase !== "ALL" ? "Materi Tidak Ditemukan" : t('materi.empty_title')}
+          </h3>
+          <p className="text-slate-500 dark:text-white/40 text-xs max-w-xs leading-relaxed mt-1">
+            {searchQuery || selectedPhase !== "ALL"
+              ? "Tidak ada materi yang sesuai dengan kata kunci atau fase yang dipilih."
+              : t('materi.empty_desc')}
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {modules.map((mod, index) => {
+          {filteredModules.map((mod, index) => {
             const userProg = progressMap[mod.id];
             const hasProgress = !!userProg;
             const slideCount = mod.slideCount || 1;
@@ -102,40 +182,46 @@ export default function MateriClient({ initialModules }) {
                 onClick={() => handleOpenModule(mod)}
                 className="relative bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden cursor-pointer group hover:border-emerald-500/50 transition-all duration-300 transform-gpu hover:-translate-y-1 flex flex-col h-full shadow-sm hover:shadow-md"
               >
-                {/* Cover Banner */}
-                <div className="relative aspect-[16/10] w-full overflow-hidden shrink-0 bg-slate-900/60">
+                  {/* Cover Banner */}
+                <div className="relative aspect-[16/10] w-full overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-900 border-b border-slate-100 dark:border-white/5">
                   {mod.coverImageUrl ? (
                     <img
                       src={resolveImageUrl(mod.coverImageUrl)}
                       alt={mod.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out opacity-90 group-hover:opacity-100"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                     />
                   ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center text-emerald-400/40 bg-gradient-to-br from-emerald-950 via-teal-950 to-slate-950">
-                      <Presentation className="w-14 h-14 animate-pulse" />
+                    <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 dark:text-white/20 bg-slate-100 dark:bg-slate-900">
+                      <Presentation className="w-12 h-12 opacity-60" />
                     </div>
                   )}
-                  
-                  {/* Sleek Gradient Overlay for Text Readability */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-white via-white/20 to-transparent dark:from-[#07130e] dark:via-[#07130e]/60 dark:to-transparent" />
+
+                  {/* Phase Badge */}
+                  {mod.phaseName && (
+                    <div className="absolute top-3.5 left-3.5 z-10">
+                      <span className="px-2.5 py-1 rounded-md bg-slate-900/80 border border-white/10 text-[9px] font-black uppercase tracking-wider flex items-center gap-1 text-slate-200 backdrop-blur-md truncate max-w-[130px]" title={mod.phaseName}>
+                        {mod.phaseName}
+                      </span>
+                    </div>
+                  )}
 
                   {/* Slide Count Badge */}
                   <div className="absolute top-3.5 right-3.5 z-10">
-                    <span className="px-2.5 py-1 rounded-md bg-emerald-950/80 border border-emerald-400/30 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 text-emerald-300 backdrop-blur-md">
-                      <Layers className="w-3.5 h-3.5" />
+                    <span className="px-2.5 py-1 rounded-md bg-slate-900/80 border border-white/10 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 text-slate-200 backdrop-blur-md">
+                      <Layers className="w-3.5 h-3.5 text-emerald-400" />
                       {mod.slideCount || 0} HALAMAN
                     </span>
                   </div>
                 </div>
 
                 {/* Title & Desc */}
-                <div className="p-6 flex-1 flex flex-col justify-between z-10 bg-white/95 dark:bg-[#07130e]/95 -mt-2">
+                <div className="p-5 flex-1 flex flex-col justify-between z-10 bg-white dark:bg-[#07130e]">
                   <div>
-                    <h3 className="font-black text-slate-900 dark:text-white text-lg md:text-xl line-clamp-2 mb-2 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors duration-300 leading-snug tracking-tight">
+                    <h3 className="font-black text-slate-900 dark:text-white text-base md:text-lg line-clamp-2 mb-2 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors duration-200 leading-snug">
                       {mod.title}
                     </h3>
                     {mod.description ? (
-                      <p className="text-xs sm:text-sm text-slate-500 dark:text-white/60 line-clamp-2 leading-relaxed font-medium">
+                      <p className="text-xs text-slate-500 dark:text-white/60 line-clamp-2 leading-relaxed font-medium">
                         {mod.description}
                       </p>
                     ) : (
@@ -144,14 +230,14 @@ export default function MateriClient({ initialModules }) {
                   </div>
                   
                   {/* Progress & Footer */}
-                  <div className="mt-7 flex flex-col gap-4">
+                  <div className="mt-5 flex flex-col gap-3.5">
                     {/* Always Visible Progress Bar */}
                     <div className="w-full">
                       <div className="flex justify-between items-center text-[10px] sm:text-[11px] font-bold mb-1.5 uppercase tracking-wider">
                         <span className="flex items-center gap-1.5 text-slate-500 dark:text-white/45">
                           {hasProgress ? (
                             <>
-                              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                              <span className="w-2 h-2 rounded-full bg-emerald-500" />
                               <span>{timeAgoText || "Pernah dibuka"}</span>
                             </>
                           ) : (
@@ -161,35 +247,25 @@ export default function MateriClient({ initialModules }) {
                             </>
                           )}
                         </span>
-                        <span className={`font-black font-mono ${pct === 100 ? "text-emerald-500 dark:text-emerald-400" : pct > 0 ? "text-amber-500 dark:text-amber-400" : "text-slate-400 dark:text-white/30"}`}>
+                        <span className={`font-black font-mono ${pct === 100 ? "text-emerald-500 dark:text-emerald-400" : pct > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-white/30"}`}>
                           {pct}%
                         </span>
                       </div>
-                      <div className="w-full h-2 bg-slate-100 dark:bg-white/8 rounded-full overflow-hidden p-0.5 border border-slate-200/50 dark:border-white/5 relative">
+                      <div className="w-full h-1.5 bg-slate-100 dark:bg-white/10 rounded-full overflow-hidden">
                         <motion.div 
                           initial={{ width: 0 }}
                           animate={{ width: `${pct}%` }}
-                          transition={{ duration: 1, ease: "easeOut" }}
-                          className={`h-full rounded-full ${
-                            pct === 100
-                              ? "bg-gradient-to-r from-emerald-400 to-teal-400 shadow-[0_0_12px_rgba(52,211,153,0.5)]"
-                              : pct > 0
-                              ? "bg-gradient-to-r from-amber-400 to-emerald-400"
-                              : "bg-transparent"
-                          }`}
+                          transition={{ duration: 0.6, ease: "easeOut" }}
+                          className={`h-full rounded-full ${pct > 0 ? "bg-emerald-500" : "bg-transparent"}`}
                         />
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-white/8">
-                      <div className="flex items-center gap-2 text-slate-400 dark:text-white/40">
-                        <Presentation className="w-4 h-4 text-emerald-500" />
-                        <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-white/50">{t('materi.open_module')}</span>
-                      </div>
-                      
-                      <div className="px-4 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 group-hover:bg-emerald-500 dark:group-hover:bg-emerald-400 group-hover:text-slate-950 font-black text-[11px] uppercase tracking-wider flex items-center gap-1.5 transition-all duration-300 shadow-md group-hover:shadow-[0_4px_20px_rgba(16,185,129,0.4)] group-hover:scale-[1.03]">
-                        <span>{pct > 0 ? "Lanjutkan" : t('materi.view_slides')}</span>
-                        <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                    {/* Single Action Button */}
+                    <div className="pt-3 border-t border-slate-100 dark:border-white/8">
+                      <div className="w-full py-2.5 px-4 rounded-xl bg-emerald-500 group-hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all duration-200 shadow-sm">
+                        <span>{pct > 0 ? "Lanjutkan" : (t('materi.view_slides') || "Buka Materi")}</span>
+                        <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                       </div>
                     </div>
                   </div>

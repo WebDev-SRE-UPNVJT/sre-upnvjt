@@ -3,12 +3,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ChevronLeft, ChevronRight, Download, Play, Lightbulb, ArrowLeft, Layers, Presentation, Maximize, Minimize, Loader2, Timer, CheckCircle2, Award
+  ChevronLeft, ChevronRight, Download, Play, Lightbulb, ArrowLeft, Layers, Presentation, Maximize, Minimize, Loader2, Timer, CheckCircle2, Award,
+  Crown, Swords, Zap, Lock, ExternalLink, Target,
 } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageProvider";
 import { resolveImageUrl } from "@/lib/imageUrl";
+import { savePptModuleProgress } from "@/app/actions/pptActions";
 
 // Helper component to render HTML notes nicely
 const HtmlNotes = ({ html, fontSizeClass }) => {
@@ -39,14 +42,27 @@ const HtmlNotes = ({ html, fontSizeClass }) => {
   );
 };
 
-export default function MateriDetailClient({ initialData, r2Url }) {
+export default function MateriDetailClient({ initialData, r2Url, linkedTasks = [], submissions = [], initialProgress = null }) {
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   
   const [moduleData] = useState(initialData);
   const [slides] = useState(initialData?.slides || []);
-  const [currentSlideIdx, setCurrentSlideIdx] = useState(0);
-  const [maxSlideIdx, setMaxSlideIdx] = useState(0);
+  
+  const [currentSlideIdx, setCurrentSlideIdx] = useState(() => {
+    if (initialProgress?.currentSlideIdx !== undefined && initialProgress.currentSlideIdx >= 0 && initialProgress.currentSlideIdx < (initialData?.slides?.length || 1)) {
+      return initialProgress.currentSlideIdx;
+    }
+    return 0;
+  });
+  
+  const [maxSlideIdx, setMaxSlideIdx] = useState(() => {
+    if (initialProgress?.maxSlideIdx !== undefined && initialProgress.maxSlideIdx >= 0 && initialProgress.maxSlideIdx < (initialData?.slides?.length || 1)) {
+      return initialProgress.maxSlideIdx;
+    }
+    return 0;
+  });
+
   const [notesFontSize, setNotesFontSize] = useState('md');
   const [direction, setDirection] = useState(0); // 1 for next, -1 for prev
   const [timeLeft, setTimeLeft] = useState(5);
@@ -54,41 +70,9 @@ export default function MateriDetailClient({ initialData, r2Url }) {
   const [isCompleting, setIsCompleting] = useState(false);
   const [xpGained, setXpGained] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [hasCompleted, setHasCompleted] = useState(false);
+  const [hasCompleted, setHasCompleted] = useState(() => !!initialProgress?.isCompleted);
   const [isMounted, setIsMounted] = useState(false);
 
-  useEffect(() => {
-    setIsMounted(true);
-    if (initialData?.id) {
-      try {
-        const savedProgress = localStorage.getItem(`sre_materi_progress_${initialData.id}`);
-        if (savedProgress) {
-          const parsed = JSON.parse(savedProgress);
-          let cIdx = 0;
-          let mIdx = 0;
-          
-          if (parsed.currentSlideIdx !== undefined && parsed.currentSlideIdx >= 0 && parsed.currentSlideIdx < (initialData.slides?.length || 0)) {
-            cIdx = parsed.currentSlideIdx;
-          }
-          if (parsed.maxSlideIdx !== undefined) {
-            mIdx = parsed.maxSlideIdx;
-          } else {
-            mIdx = cIdx || 0;
-          }
-          
-          setCurrentSlideIdx(cIdx);
-          setMaxSlideIdx(mIdx);
-          
-          if (cIdx < mIdx) {
-            setTimeLeft(0);
-          }
-        }
-      } catch (e) {}
-    }
-  }, [initialData]);
-
-
-  
   // Custom font sizes based on user preference
   const fontSizeStyles = {
     sm: 'text-xs md:text-sm',
@@ -104,14 +88,36 @@ export default function MateriDetailClient({ initialData, r2Url }) {
   // Cached Images Object URLs
   const [cachedImages, setCachedImages] = useState({});
 
-
-  // Save progress to localStorage when it changes
   useEffect(() => {
-    if (typeof window !== 'undefined' && moduleData?.id) {
-      const progressData = { currentSlideIdx, maxSlideIdx, lastAccessed: Date.now() };
-      localStorage.setItem(`sre_materi_progress_${moduleData.id}`, JSON.stringify(progressData));
+    setIsMounted(true);
+    if (initialProgress) {
+      if (initialProgress.currentSlideIdx !== undefined && initialProgress.currentSlideIdx < (slides?.length || 1)) {
+        setCurrentSlideIdx(initialProgress.currentSlideIdx);
+      }
+      if (initialProgress.maxSlideIdx !== undefined && initialProgress.maxSlideIdx < (slides?.length || 1)) {
+        setMaxSlideIdx(initialProgress.maxSlideIdx);
+      }
+      if (initialProgress.isCompleted) {
+        setHasCompleted(true);
+      }
+      if ((initialProgress.currentSlideIdx || 0) < (initialProgress.maxSlideIdx || 0)) {
+        setTimeLeft(0);
+      }
     }
-  }, [currentSlideIdx, maxSlideIdx, moduleData?.id]);
+  }, [initialProgress, slides?.length]);
+
+  // Sync progress to Database
+  useEffect(() => {
+    if (isMounted && moduleData?.id) {
+      const isDone = slides.length > 0 && maxSlideIdx >= slides.length - 1;
+      savePptModuleProgress({
+        moduleId: moduleData.id,
+        currentSlideIdx,
+        maxSlideIdx,
+        isCompleted: hasCompleted || isDone,
+      });
+    }
+  }, [currentSlideIdx, maxSlideIdx, hasCompleted, moduleData?.id, isMounted, slides.length]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -332,9 +338,16 @@ export default function MateriDetailClient({ initialData, r2Url }) {
 
         {/* Header Section */}
         <div className="mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-4">
-            <Layers className="w-3.5 h-3.5" />
-            {t('materi.learning_material') || 'Materi Pembelajaran'}
+          <div className="flex items-center gap-2 flex-wrap mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 text-xs font-bold text-emerald-700 dark:text-emerald-400">
+              <Layers className="w-3.5 h-3.5" />
+              {t('materi.learning_material') || 'Materi Pembelajaran'}
+            </div>
+            {moduleData.phase?.name && (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 dark:bg-indigo-500/20 border border-indigo-500/20 dark:border-indigo-500/30 text-xs font-bold text-indigo-600 dark:text-indigo-300">
+                <span>{moduleData.phase.name}</span>
+              </div>
+            )}
           </div>
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
             {moduleData.title}
@@ -522,87 +535,303 @@ export default function MateriDetailClient({ initialData, r2Url }) {
           <div className="contents lg:block lg:col-span-1 lg:space-y-6 lg:sticky lg:top-28">
             
               {/* 1. Module Progress (order-1 on mobile) */}
-            <div className="order-1 lg:order-none bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-xl p-6 shadow-lg dark:shadow-[0_10px_35px_rgba(0,0,0,0.35)] w-full">
-              <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4">{t('materi.module_progress') || 'Progres Modul'}</h3>
+            <div className="order-1 lg:order-none bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-xl p-5 sm:p-6 shadow-lg dark:shadow-[0_10px_35px_rgba(0,0,0,0.35)] w-full">
+              <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white mb-3">
+                {language === 'en' ? 'Module Progress' : 'Progres Modul'}
+              </h3>
+              
               <div className="flex justify-between text-xs font-bold mb-2">
-                <span className="text-slate-500 dark:text-white/60">{t('materi.completion') || 'Penyelesaian'}</span>
+                <span className="text-slate-500 dark:text-white/60">
+                  {language === 'en' ? 'Completion' : 'Penyelesaian'}
+                </span>
                 <span className="text-emerald-600 dark:text-emerald-400 font-mono font-black">
                   {slides?.length > 1 ? Math.round((maxSlideIdx / (slides.length - 1)) * 100) : (maxSlideIdx >= 0 ? 100 : 0)}%
                 </span>
               </div>
+              
               <div className="w-full h-2.5 bg-slate-100 dark:bg-white/10 rounded-full overflow-hidden mb-4 border border-slate-200/50 dark:border-white/5 p-0.5 relative">
                 <div 
-                  className="h-full bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full transition-all duration-300 shadow-[0_0_12px_rgba(52,211,153,0.5)]"
+                  className="h-full bg-emerald-500 rounded-full transition-all duration-300"
                   style={{ width: `${slides?.length > 1 ? (maxSlideIdx / (slides.length - 1)) * 100 : (maxSlideIdx >= 0 ? 100 : 0)}%` }}
                 />
               </div>
 
-              {/* XP Claim / Timer section */}
+              {/* XP Claim / Completion section */}
               {xpGained ? (
                 <motion.div 
-                  initial={{ opacity: 0, scale: 0.9, y: 10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className="relative overflow-hidden flex items-center justify-between p-4 bg-gradient-to-r from-emerald-600 to-teal-500 rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] border border-emerald-400/50"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30 rounded-xl space-y-3"
                 >
-                  {/* Animated Background Rays/Glow */}
-                  <motion.div 
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
-                    className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] bg-[conic-gradient(from_0deg,transparent_0_340deg,rgba(255,255,255,0.2)_360deg)] pointer-events-none"
-                  />
-                  
-                  <div className="flex items-center gap-3 relative z-10">
-                    <motion.div 
-                      initial={{ rotate: -180, scale: 0 }}
-                      animate={{ rotate: 0, scale: 1 }}
-                      transition={{ type: "spring", delay: 0.2 }}
-                      className="flex items-center justify-center w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full shadow-inner border border-white/30"
-                    >
-                      <Award className="w-5 h-5 text-yellow-300 drop-shadow-[0_0_5px_rgba(253,224,71,0.8)]" />
-                    </motion.div>
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-bold text-emerald-100 uppercase tracking-widest drop-shadow-sm">Pencapaian</span>
-                      <span className="text-base font-black text-white drop-shadow-md">Modul Selesai!</span>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center w-9 h-9 bg-emerald-500 text-slate-950 rounded-xl font-bold shrink-0 shadow-sm">
+                      <Award className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">
+                        Pencapaian Modul
+                      </span>
+                      <span className="text-sm font-black text-slate-900 dark:text-white block truncate">
+                        Selesai Dibaca
+                      </span>
                     </div>
                   </div>
-                  
-                  <motion.div 
-                    initial={{ x: 20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.4, type: "spring" }}
-                    className="relative z-10 flex flex-col items-center justify-center bg-black/30 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/20"
-                  >
-                    <span className="text-xl font-black text-yellow-300 drop-shadow-[0_0_8px_rgba(253,224,71,0.8)]">
-                      +{xpGained}
+
+                  <div className="flex items-center justify-between pt-2.5 border-t border-emerald-500/20 text-xs font-bold">
+                    <span className="text-slate-500 dark:text-white/60 text-xs">Hadiah:</span>
+                    <span className="px-2.5 py-1 rounded-md bg-emerald-500 text-slate-950 font-black font-mono">
+                      +{xpGained} XP
                     </span>
-                    <span className="text-[9px] font-bold text-white/80 uppercase tracking-widest -mt-1">XP Points</span>
-                  </motion.div>
+                  </div>
                 </motion.div>
               ) : hasCompleted ? (
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="relative overflow-hidden flex items-center justify-between p-4 bg-slate-900 dark:bg-black/40 border border-emerald-500/30 rounded-xl group shadow-[0_0_15px_rgba(16,185,129,0.15)]"
+                  className="p-4 bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-500/20 rounded-xl space-y-3"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-transparent opacity-50" />
-                  
-                  <div className="flex items-center gap-3 relative z-10">
-                    <div className="flex items-center justify-center w-10 h-10 bg-emerald-500/20 rounded-full shadow-inner border border-emerald-500/30">
-                      <Award className="w-5 h-5 text-emerald-400 drop-shadow-[0_0_5px_rgba(52,211,153,0.8)]" />
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center w-9 h-9 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 rounded-xl shrink-0 border border-emerald-500/30">
+                      <CheckCircle2 className="w-5 h-5" />
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-bold text-emerald-400/80 uppercase tracking-widest">Status</span>
-                      <span className="text-base font-black text-emerald-400 drop-shadow-md">Tuntas!</span>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-[10px] font-bold text-slate-400 dark:text-white/40 uppercase tracking-wider block">
+                        Status Pembelajaran
+                      </span>
+                      <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 block truncate">
+                        Modul Selesai
+                      </span>
                     </div>
                   </div>
-                  
-                  <div className="relative z-10 flex items-center justify-center bg-emerald-500/20 backdrop-blur-md px-3 py-1.5 rounded-lg border border-emerald-500/30">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400 drop-shadow-[0_0_5px_rgba(52,211,153,0.8)]" />
+
+                  <div className="flex items-center justify-between pt-2.5 border-t border-emerald-500/15 text-xs">
+                    <span className="text-slate-500 dark:text-white/50 text-[11px] font-medium">Status Modul</span>
+                    <span className="px-2.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-black text-[11px] uppercase tracking-wider">
+                      Tuntas (100%)
+                    </span>
                   </div>
                 </motion.div>
               ) : null}
             </div>
+
+            {/* 2. Linked Quests (Main Quest & Side Quest) Card */}
+            {linkedTasks && linkedTasks.length > 0 ? (
+              <div className="order-4 lg:order-none bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-xl p-5 sm:p-6 shadow-lg dark:shadow-[0_10px_35px_rgba(0,0,0,0.35)] w-full space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
+                      <Target className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-slate-900 dark:text-white leading-none">
+                        {language === "en" ? "Module Quests" : "Quest & Misi Modul"}
+                      </h3>
+                      <p className="text-[10px] text-slate-400 dark:text-white/40 mt-1">
+                        {linkedTasks.length} {language === "en" ? "quest(s) available" : "quest terkait modul ini"}
+                      </p>
+                    </div>
+                  </div>
+                  <Link
+                    href="/member/tugas"
+                    className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+                  >
+                    <span>{language === "en" ? "All Quests" : "Semua Quest"}</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </Link>
+                </div>
+
+                {/* Quests Container */}
+                <div className="space-y-4">
+                  {/* Main Quests Section */}
+                  {linkedTasks.filter(t => t.category === "MAIN" || (!t.category && (t.rewardXp || 0) >= 50)).length > 0 && (
+                    <div className="space-y-2.5">
+                      <div className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                        <Crown className="w-3.5 h-3.5 fill-current" />
+                        <span>{language === "en" ? "Main Quest" : "Main Quest (Utama)"}</span>
+                      </div>
+                      
+                      <div className="space-y-2.5">
+                        {linkedTasks
+                          .filter(t => t.category === "MAIN" || (!t.category && (t.rewardXp || 0) >= 50))
+                          .map((t) => {
+                            const sub = submissions?.find((s) => s.taskId === t.id);
+                            const isApproved = sub?.status === "APPROVED";
+                            const isPending = sub?.status === "PENDING";
+                            const isRejected = sub?.status === "REJECTED";
+
+                            let isLocked = false;
+                            if (t.prerequisiteTaskId) {
+                              const prereqSub = submissions?.find((s) => s.taskId === t.prerequisiteTaskId);
+                              isLocked = !prereqSub || prereqSub.status !== "APPROVED";
+                            }
+
+                            return (
+                              <div
+                                key={t.id}
+                                className={`p-3.5 rounded-xl border transition-all duration-200 group ${
+                                  isApproved
+                                    ? "bg-emerald-500/5 border-emerald-500/20 dark:bg-emerald-500/10"
+                                    : isLocked
+                                    ? "bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 opacity-80"
+                                    : "bg-amber-500/[0.03] dark:bg-amber-500/[0.04] border-amber-500/20 dark:border-amber-500/15 hover:border-amber-500/40 shadow-sm"
+                                }`}
+                              >
+                                <div className="flex items-start justify-between gap-2 mb-1.5">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span className="inline-flex items-center gap-1 text-[9px] font-black px-2 py-0.5 rounded-md border uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-300 border-amber-500/25">
+                                      <Crown className="w-2.5 h-2.5 fill-current" />
+                                      Main Quest
+                                    </span>
+                                    <span className="flex items-center gap-0.5 text-[10px] font-bold text-amber-500 font-mono">
+                                      <Zap className="w-3 h-3 fill-amber-400" />+{t.rewardXp} XP
+                                    </span>
+                                  </div>
+
+                                  {/* Status */}
+                                  {isApproved ? (
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[9px] font-bold">
+                                      <CheckCircle2 className="w-3 h-3" /> Selesai
+                                    </span>
+                                  ) : isPending ? (
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 text-[9px] font-bold">
+                                      Review
+                                    </span>
+                                  ) : isRejected ? (
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-600 dark:text-rose-400 text-[9px] font-bold">
+                                      Revisi
+                                    </span>
+                                  ) : isLocked ? (
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-200 dark:bg-white/10 text-slate-500 text-[9px] font-bold">
+                                      <Lock className="w-2.5 h-2.5" /> Terkunci
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/50 text-[9px] font-bold">
+                                      Tersedia
+                                    </span>
+                                  )}
+                                </div>
+
+                                <h4 className="text-xs font-bold text-slate-900 dark:text-white leading-snug line-clamp-2 mb-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                                  {t.title}
+                                </h4>
+
+                                {isLocked && t.prerequisiteTask && (
+                                  <p className="text-[10px] text-amber-600 dark:text-amber-400 mb-2 flex items-center gap-1">
+                                    <Lock className="w-2.5 h-2.5 shrink-0" />
+                                    <span className="truncate">Perlu: {t.prerequisiteTask.title}</span>
+                                  </p>
+                                )}
+
+                                <Link
+                                  href={`/member/tugas?taskId=${t.id}`}
+                                  className="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]"
+                                >
+                                  <span>{isApproved ? "Lihat Detail Quest" : isLocked ? "Buka Info Prasyarat" : "Buka & Kerjakan Quest"}</span>
+                                  <ExternalLink className="w-3.5 h-3.5" />
+                                </Link>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Side Quests Section */}
+                  {linkedTasks.filter(t => t.category === "SIDE" || (t.category !== "MAIN" && (t.rewardXp || 0) < 50)).length > 0 && (
+                    <div className="space-y-2.5 pt-2">
+                      <div className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                        <Swords className="w-3.5 h-3.5" />
+                        <span>{language === "en" ? "Side Quest" : "Side Quest (Misi Sampingan)"}</span>
+                      </div>
+                      
+                      <div className="space-y-2.5">
+                        {linkedTasks
+                          .filter(t => t.category === "SIDE" || (t.category !== "MAIN" && (t.rewardXp || 0) < 50))
+                          .map((t) => {
+                            const sub = submissions?.find((s) => s.taskId === t.id);
+                            const isApproved = sub?.status === "APPROVED";
+                            const isPending = sub?.status === "PENDING";
+                            const isRejected = sub?.status === "REJECTED";
+
+                            let isLocked = false;
+                            if (t.prerequisiteTaskId) {
+                              const prereqSub = submissions?.find((s) => s.taskId === t.prerequisiteTaskId);
+                              isLocked = !prereqSub || prereqSub.status !== "APPROVED";
+                            }
+
+                            return (
+                              <div
+                                key={t.id}
+                                className={`p-3.5 rounded-xl border transition-all duration-200 group ${
+                                  isApproved
+                                    ? "bg-emerald-500/5 border-emerald-500/20 dark:bg-emerald-500/10"
+                                    : isLocked
+                                    ? "bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 opacity-80"
+                                    : "bg-emerald-500/[0.03] dark:bg-emerald-500/[0.04] border-emerald-500/20 dark:border-emerald-500/15 hover:border-emerald-500/40 shadow-sm"
+                                }`}
+                              >
+                                <div className="flex items-start justify-between gap-2 mb-1.5">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span className="inline-flex items-center gap-1 text-[9px] font-black px-2 py-0.5 rounded-md border uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border-emerald-500/20">
+                                      <Swords className="w-2.5 h-2.5" />
+                                      Side Quest
+                                    </span>
+                                    <span className="flex items-center gap-0.5 text-[10px] font-bold text-amber-500 font-mono">
+                                      <Zap className="w-3 h-3 fill-amber-400" />+{t.rewardXp} XP
+                                    </span>
+                                  </div>
+
+                                  {/* Status */}
+                                  {isApproved ? (
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[9px] font-bold">
+                                      <CheckCircle2 className="w-3 h-3" /> Selesai
+                                    </span>
+                                  ) : isPending ? (
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 text-[9px] font-bold">
+                                      Review
+                                    </span>
+                                  ) : isRejected ? (
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-600 dark:text-rose-400 text-[9px] font-bold">
+                                      Revisi
+                                    </span>
+                                  ) : isLocked ? (
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-200 dark:bg-white/10 text-slate-500 text-[9px] font-bold">
+                                      <Lock className="w-2.5 h-2.5" /> Terkunci
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/50 text-[9px] font-bold">
+                                      Tersedia
+                                    </span>
+                                  )}
+                                </div>
+
+                                <h4 className="text-xs font-bold text-slate-900 dark:text-white leading-snug line-clamp-2 mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                  {t.title}
+                                </h4>
+
+                                {isLocked && t.prerequisiteTask && (
+                                  <p className="text-[10px] text-amber-600 dark:text-amber-400 mb-2 flex items-center gap-1">
+                                    <Lock className="w-2.5 h-2.5 shrink-0" />
+                                    <span className="truncate">Perlu: {t.prerequisiteTask.title}</span>
+                                  </p>
+                                )}
+
+                                <Link
+                                  href={`/member/tugas?taskId=${t.id}`}
+                                  className="w-full py-2 px-3 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]"
+                                >
+                                  <span>{isApproved ? "Lihat Detail Quest" : isLocked ? "Buka Info Prasyarat" : "Buka & Kerjakan Quest"}</span>
+                                  <ExternalLink className="w-3.5 h-3.5" />
+                                </Link>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : null}
 
           </div>
 
@@ -647,52 +876,41 @@ export default function MateriDetailClient({ initialData, r2Url }) {
                     ))}
                   </div>
 
-                  {/* Background Glow */}
-                  <div className="absolute -top-20 -left-20 w-48 h-48 bg-emerald-500/30 blur-[60px] rounded-full pointer-events-none" />
-                  <div className="absolute -bottom-20 -right-20 w-48 h-48 bg-teal-500/30 blur-[60px] rounded-full pointer-events-none" />
-
                   <motion.div 
-                    initial={{ scale: 0, rotate: -180 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ type: "spring", delay: 0.2, damping: 10 }}
-                    className="relative z-10 w-24 h-24 bg-gradient-to-br from-yellow-300 via-amber-400 to-amber-600 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(253,224,71,0.6)] mb-6 border-4 border-white dark:border-[#07130e] overflow-hidden"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", delay: 0.2, damping: 12 }}
+                    className="relative z-10 w-20 h-20 bg-emerald-500 rounded-2xl flex items-center justify-center mb-6 shadow-md"
                   >
-                    {/* Shine effect across the medal */}
-                    <motion.div 
-                      animate={{ x: ['-150%', '250%'] }}
-                      transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut", delay: 1 }}
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent skew-x-12 w-full"
-                    />
-                    <Award className="w-12 h-12 text-white drop-shadow-md relative z-10" />
+                    <Award className="w-10 h-10 text-slate-950" />
                   </motion.div>
                   
                   <motion.h3 
-                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-                    className="text-2xl font-black text-slate-800 dark:text-white mb-2 z-10 tracking-tight"
+                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+                    className="text-2xl font-black text-slate-900 dark:text-white mb-2 z-10 tracking-tight"
                   >
                     Pencapaian Baru!
                   </motion.h3>
                   <motion.p 
-                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-                    className="text-slate-500 dark:text-slate-400 text-sm mb-6 z-10 leading-relaxed"
+                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+                    className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mb-6 z-10 leading-relaxed"
                   >
                     Hebat! Kamu telah menyelesaikan modul pembelajaran ini dan mendapatkan hadiah.
                   </motion.p>
                   
                   <motion.div 
-                    initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", delay: 0.6 }}
-                    className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-xl py-3 px-8 mb-8 z-10 shadow-inner relative overflow-hidden group"
+                    initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", delay: 0.5 }}
+                    className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-500/30 rounded-xl py-3 px-8 mb-6 z-10"
                   >
-                    <div className="absolute inset-0 bg-emerald-400/20 w-0 group-hover:w-full transition-all duration-500 ease-out" />
-                    <span className="relative text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300 drop-shadow-sm">
+                    <span className="text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
                       +{xpGained} XP
                     </span>
                   </motion.div>
                   
                   <motion.button 
-                    initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.7 }}
+                    initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.6 }}
                     onClick={() => setShowModal(false)}
-                    className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-black uppercase tracking-wider text-sm rounded-xl transition-all z-10 shadow-[0_10px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_15px_30px_rgba(16,185,129,0.4)] active:scale-95"
+                    className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black uppercase tracking-wider text-xs rounded-xl transition-all shadow-sm active:scale-98"
                   >
                     Lanjutkan Misi
                   </motion.button>

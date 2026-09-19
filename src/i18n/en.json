@@ -972,6 +972,12 @@
       "status_reviewing": "REVIEWING",
       "deadline": "Deadline"
     },
+    "phase_tree": {
+      "title": "Phase Learning Tree",
+      "progress": "Curriculum Progress",
+      "done": "Done",
+      "no_phase": "No curriculum roadmap available yet."
+    },
     "xp_logs": {
       "title": "Recent XP Activities",
       "no_xp": "No XP earned yet",

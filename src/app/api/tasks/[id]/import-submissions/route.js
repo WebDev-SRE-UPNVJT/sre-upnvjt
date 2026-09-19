@@ -55,20 +55,43 @@ export async function POST(req, { params }) {
       const wasApproved = sub.status === "APPROVED";
       const nowApproved = status === "APPROVED";
 
-      // Update submission record
-      const [updated] = await db.update(taskSubmission)
-        .set({
-          status,
-          feedback: feedback || null,
-          reviewedById: session.user.id,
-        })
-        .where(eq(taskSubmission.id, sub.id))
-        .returning();
-
       // Fetch member profile
       const profile = await db.query.memberProfile.findFirst({
         where: eq(memberProfile.userId, sub.memberId),
       });
+
+      // Revoke XP if previously APPROVED and now changed to REJECTED or PENDING
+      if (wasApproved && !nowApproved) {
+        const prevTransactions = await db.query.xpTransaction.findMany({
+          where: (tx, { eq, and }) => and(
+            eq(tx.userId, sub.memberId),
+            eq(tx.sourceId, sub.id)
+          ),
+        });
+
+        const netAwardedXp = prevTransactions
+          .filter(tx => tx.sourceType === "task" || tx.sourceType === "task_import" || tx.sourceType === "task_revocation")
+          .reduce((sum, tx) => sum + tx.amount, 0);
+
+        const revokeAmount = netAwardedXp > 0 ? netAwardedXp : (sub.xpEarned || 0);
+
+        if (revokeAmount > 0 && profile) {
+          const nextXp = Math.max(0, profile.xp - revokeAmount);
+          const nextLevel = Math.max(1, Math.floor(nextXp / 100) + 1);
+          await db.update(memberProfile)
+            .set({ xp: nextXp, level: nextLevel })
+            .where(eq(memberProfile.userId, sub.memberId));
+
+          await db.insert(xpTransaction).values({
+            userId: sub.memberId,
+            amount: -revokeAmount,
+            reason: `Pembatalan Persetujuan Tugas (Import Excel): ${taskData.title || "Tugas"} (-${revokeAmount} XP)`,
+            sourceType: "task_revocation",
+            sourceId: sub.id,
+            grantedById: session.user.id,
+          });
+        }
+      }
 
       // Calculate XP gains (Base XP + Speed Bonus 0-10 XP + Admin Bonus XP)
       let totalGainedXp = 0;
@@ -94,13 +117,20 @@ export async function POST(req, { params }) {
           totalGainedXp += speedBonusXp;
           reasons.push(`Bonus Kecepatan: +${speedBonusXp} XP`);
         }
-      }
 
-      const parsedBonusXp = parseInt(bonusXp) || 0;
-      if (parsedBonusXp > 0) {
-        totalGainedXp += parsedBonusXp;
-        reasons.push(`Bonus Admin: +${parsedBonusXp} XP`);
-        bonusXpMap.set(sub.id, parsedBonusXp);
+        const parsedBonusXp = parseInt(bonusXp) || 0;
+        if (parsedBonusXp > 0) {
+          totalGainedXp += parsedBonusXp;
+          reasons.push(`Bonus Admin: +${parsedBonusXp} XP`);
+          bonusXpMap.set(sub.id, parsedBonusXp);
+        }
+      } else if (wasApproved && nowApproved) {
+        const parsedBonusXp = parseInt(bonusXp) || 0;
+        if (parsedBonusXp > 0) {
+          totalGainedXp += parsedBonusXp;
+          reasons.push(`Bonus Tambahan Admin: +${parsedBonusXp} XP`);
+          bonusXpMap.set(sub.id, parsedBonusXp);
+        }
       }
 
       if (totalGainedXp > 0) {
@@ -124,8 +154,29 @@ export async function POST(req, { params }) {
           reason: reasons.join(" | "),
           sourceType: "task_import",
           sourceId: sub.id,
+          grantedById: session.user.id,
         });
       }
+
+      const updatePayload = {
+        status,
+        feedback: feedback || null,
+        reviewedById: session.user.id,
+      };
+
+      if (nowApproved && !wasApproved) {
+        updatePayload.xpEarned = totalGainedXp;
+      } else if (wasApproved && !nowApproved) {
+        updatePayload.xpEarned = 0;
+      } else if (wasApproved && nowApproved && totalGainedXp > 0) {
+        updatePayload.xpEarned = (sub.xpEarned || 0) + totalGainedXp;
+      }
+
+      // Update submission record
+      const [updated] = await db.update(taskSubmission)
+        .set(updatePayload)
+        .where(eq(taskSubmission.id, sub.id))
+        .returning();
 
       updatedSubmissions.push(updated);
       updatedCount++;

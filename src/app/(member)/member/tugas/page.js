@@ -14,12 +14,15 @@ export const metadata = {
   description: "Daftar Main Quest dan Side Quest untuk pengurus dan anggota SRE UPNVJT.",
 };
 
-export default async function MemberTugasPage() {
+export default async function MemberTugasPage({ searchParams }) {
   const session = await getServerSession(authOptions);
 
   if (!session) {
     redirect("/login");
   }
+
+  const resolvedSearchParams = await searchParams;
+  const initialTaskId = resolvedSearchParams?.taskId || null;
 
   // Fetch all tasks with prerequisite relations
   const tasks = await db.query.task.findMany({
@@ -33,6 +36,9 @@ export default async function MemberTugasPage() {
       },
       prerequisiteTask: {
         columns: { id: true, title: true, rewardXp: true }
+      },
+      pptModule: {
+        columns: { id: true, title: true, coverImageUrl: true, description: true }
       }
     }
   });
@@ -47,6 +53,7 @@ export default async function MemberTugasPage() {
       user={session.user}
       initialTasks={tasks}
       initialSubmissions={submissions}
+      initialTaskId={initialTaskId}
     />
   );
 }

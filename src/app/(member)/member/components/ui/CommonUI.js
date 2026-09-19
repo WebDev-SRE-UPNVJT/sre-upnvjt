@@ -70,18 +70,23 @@ export function SectionHeader({
   title,
   actionLabel,
   actionHref,
+  rightElement,
+  children,
   className = "",
 }) {
   return (
-    <div className={`flex justify-between items-center gap-4 flex-wrap sm:flex-nowrap ${className}`}>
-      <h3 className="font-display font-black text-xl tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
-        {Icon && <Icon className="w-5 h-5 text-primary flex-shrink-0" />}
-        {title}
+    <div className={`flex justify-between items-center gap-2 sm:gap-4 ${className}`}>
+      <h3 className="font-display font-black text-lg sm:text-xl tracking-tight text-slate-900 dark:text-white flex items-center gap-2 sm:gap-2.5 min-w-0">
+        {Icon && <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />}
+        <span className="truncate">{title}</span>
       </h3>
+      {(rightElement || children) && (
+        <div className="shrink-0 ml-auto whitespace-nowrap">{rightElement || children}</div>
+      )}
       {actionLabel && actionHref && (
         <Link
           href={actionHref}
-          className="group flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-[11px] font-black text-primary hover:bg-primary hover:text-white dark:hover:text-[#050e0a] hover:border-primary transition-all duration-300 hover:shadow-[0_0_15px_rgba(16,185,129,0.35)] shrink-0 ml-auto"
+          className="group flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-[11px] font-black text-primary hover:bg-primary hover:text-white dark:hover:text-[#050e0a] hover:border-primary transition-all duration-300 hover:shadow-[0_0_15px_rgba(16,185,129,0.35)] shrink-0 ml-auto whitespace-nowrap"
         >
           {actionLabel}
           <svg

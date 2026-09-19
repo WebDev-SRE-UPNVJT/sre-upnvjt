@@ -5,6 +5,18 @@ import { eq } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 
+function parseBool(val, defaultVal = true) {
+  if (val === undefined || val === null) return defaultVal;
+  if (typeof val === "boolean") return val;
+  if (typeof val === "string") {
+    const s = val.trim().toLowerCase();
+    if (s === "false" || s === "0" || s === "off" || s === "no") return false;
+    if (s === "true" || s === "1" || s === "on" || s === "yes") return true;
+  }
+  if (typeof val === "number") return val !== 0;
+  return Boolean(val);
+}
+
 export async function PUT(req, { params }) {
   try {
     const session = await getServerSession(authOptions);
@@ -28,7 +40,9 @@ export async function PUT(req, { params }) {
       submissionType,
       formTemplateId,
       ttsCrosswordId,
+      pptModuleId,
       ttsScoringMode,
+      formScoringMode,
       prerequisiteTaskId,
       maxUploadSizeMb,
       allowMultipleFiles,
@@ -81,19 +95,20 @@ export async function PUT(req, { params }) {
       submissionGuidelines: submissionGuidelines !== undefined ? submissionGuidelines || null : undefined,
       rewardXp: rewardXp ? parseInt(rewardXp) : 0,
       category: category ? String(category).toUpperCase() : "MAIN",
-      isRequired: isRequired !== undefined ? Boolean(isRequired) : true,
+      isRequired: isRequired !== undefined ? parseBool(isRequired, true) : true,
       formTemplateId: formTemplateId ? parseInt(formTemplateId) : null,
       ttsCrosswordId: ttsCrosswordId ? parseInt(ttsCrosswordId) : null,
+      pptModuleId: pptModuleId ? parseInt(pptModuleId) : null,
       ttsScoringMode: ttsScoringMode ? String(ttsScoringMode).toUpperCase() : "COMPLETION",
       formScoringMode: formScoringMode ? String(formScoringMode).toUpperCase() : "COMPLETION",
       prerequisiteTaskId: (category === "SIDE" && prerequisiteTaskId) ? parseInt(prerequisiteTaskId) : null,
       deadline: new Date(deadline),
-      enableSpeedBonus: enableSpeedBonus !== undefined ? Boolean(enableSpeedBonus) : true,
-      allowLateSubmission: allowLateSubmission !== undefined ? Boolean(allowLateSubmission) : true,
+      enableSpeedBonus: parseBool(enableSpeedBonus, true),
+      allowLateSubmission: parseBool(allowLateSubmission, true),
       folderId: folderId ? String(folderId).trim() : null,
       submissionType: submissionType || "FILE",
       maxUploadSizeMb: maxUploadSizeMb ? parseInt(maxUploadSizeMb) : 10,
-      allowMultipleFiles: Boolean(allowMultipleFiles),
+      allowMultipleFiles: parseBool(allowMultipleFiles, false),
     };
 
     if (spreadsheetId !== undefined) updateData.spreadsheetId = spreadsheetId;

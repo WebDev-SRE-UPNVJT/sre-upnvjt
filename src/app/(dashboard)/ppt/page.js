@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import { hasAccess } from "@/lib/permissions";
-import { getPptModules } from "@/app/actions/pptActions";
+import { getPptModules, getPptPhases } from "@/app/actions/pptActions";
 import PptClient from "./PptClient";
 
 export const dynamic = "force-dynamic";
@@ -20,11 +20,15 @@ export default async function PptPage() {
     redirect("/dashboard");
   }
 
-  const modulesRes = await getPptModules();
+  const [modulesRes, phasesRes] = await Promise.all([
+    getPptModules(),
+    getPptPhases(),
+  ]);
 
   return (
     <PptClient
       initialModules={modulesRes.data || []}
+      initialPhases={phasesRes.data || []}
       currentUser={session.user}
     />
   );

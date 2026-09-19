@@ -5,6 +5,18 @@ import { asc, desc, eq } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 
+function parseBool(val, defaultVal = true) {
+  if (val === undefined || val === null) return defaultVal;
+  if (typeof val === "boolean") return val;
+  if (typeof val === "string") {
+    const s = val.trim().toLowerCase();
+    if (s === "false" || s === "0" || s === "off" || s === "no") return false;
+    if (s === "true" || s === "1" || s === "on" || s === "yes") return true;
+  }
+  if (typeof val === "number") return val !== 0;
+  return Boolean(val);
+}
+
 export async function GET() {
   try {
     const rawTasks = await db.query.task.findMany({
@@ -21,6 +33,9 @@ export async function GET() {
         },
         prerequisiteTask: {
           columns: { id: true, title: true }
+        },
+        pptModule: {
+          columns: { id: true, title: true, coverImageUrl: true }
         }
       }
     });
@@ -33,22 +48,26 @@ export async function GET() {
       submissionGuidelines: t.submissionGuidelines || "",
       rewardXp: t.rewardXp,
       category: t.category || "MAIN",
-      isRequired: t.isRequired ?? true,
+      isRequired: parseBool(t.isRequired, true),
       deadline: t.deadline,
       folderId: t.folderId,
       spreadsheetId: t.spreadsheetId,
       spreadsheetUrl: t.spreadsheetUrl,
       maxUploadSizeMb: t.maxUploadSizeMb,
-      allowMultipleFiles: t.allowMultipleFiles,
+      allowMultipleFiles: parseBool(t.allowMultipleFiles, false),
       submissionType: t.submissionType,
       formTemplateId: t.formTemplateId,
       ttsCrosswordId: t.ttsCrosswordId,
+      pptModuleId: t.pptModuleId,
       ttsScoringMode: t.ttsScoringMode || "COMPLETION",
       formScoringMode: t.formScoringMode || "COMPLETION",
+      enableSpeedBonus: parseBool(t.enableSpeedBonus, true),
+      allowLateSubmission: parseBool(t.allowLateSubmission, true),
       ttsCrossword: t.ttsCrossword,
       formTemplate: t.formTemplate,
       prerequisiteTaskId: t.prerequisiteTaskId,
       prerequisiteTask: t.prerequisiteTask,
+      pptModule: t.pptModule,
       createdById: t.createdById,
       createdAt: t.createdAt,
       submissionCount: t.submissions?.length || 0,
@@ -81,6 +100,7 @@ export async function POST(req) {
       submissionType,
       formTemplateId,
       ttsCrosswordId,
+      pptModuleId,
       ttsScoringMode,
       formScoringMode,
       prerequisiteTaskId,
@@ -135,21 +155,22 @@ export async function POST(req) {
       submissionGuidelines: submissionGuidelines || null,
       rewardXp: rewardXp ? parseInt(rewardXp) : 0,
       category: category ? String(category).toUpperCase() : "MAIN",
-      isRequired: isRequired !== undefined ? Boolean(isRequired) : true,
+      isRequired: isRequired !== undefined ? parseBool(isRequired, true) : true,
       formTemplateId: formTemplateId ? parseInt(formTemplateId) : null,
       ttsCrosswordId: ttsCrosswordId ? parseInt(ttsCrosswordId) : null,
+      pptModuleId: pptModuleId ? parseInt(pptModuleId) : null,
       ttsScoringMode: ttsScoringMode ? String(ttsScoringMode).toUpperCase() : "COMPLETION",
       formScoringMode: formScoringMode ? String(formScoringMode).toUpperCase() : "COMPLETION",
       prerequisiteTaskId: (category === "SIDE" && prerequisiteTaskId) ? parseInt(prerequisiteTaskId) : null,
       deadline: new Date(deadline),
-      enableSpeedBonus: enableSpeedBonus !== undefined ? Boolean(enableSpeedBonus) : true,
-      allowLateSubmission: allowLateSubmission !== undefined ? Boolean(allowLateSubmission) : true,
+      enableSpeedBonus: parseBool(enableSpeedBonus, true),
+      allowLateSubmission: parseBool(allowLateSubmission, true),
       folderId: folderId ? String(folderId).trim() : null,
       spreadsheetId,
       spreadsheetUrl,
       submissionType: submissionType || "FILE",
       maxUploadSizeMb: maxUploadSizeMb ? parseInt(maxUploadSizeMb) : 10,
-      allowMultipleFiles: Boolean(allowMultipleFiles),
+      allowMultipleFiles: parseBool(allowMultipleFiles, false),
       createdById: session.user.id,
     }).returning();
 

@@ -3,8 +3,8 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { pptModule, pptSlide } from "@/db/schema";
-import { eq, count } from "drizzle-orm";
+import { pptModule, pptSlide, pptPhase, pptModuleProgress } from "@/db/schema";
+import { eq, asc, count } from "drizzle-orm";
 import MateriClient from "./MateriClient";
 
 export const dynamic = "force-dynamic";
@@ -21,10 +21,15 @@ export default async function MemberMateriPage() {
     redirect("/login");
   }
 
-  // Fetch only published modules with slide count
+  const userId = Number(session?.user?.id);
+
+  // Fetch only published modules with slide count & phase
   const modules = await db
     .select({
       id: pptModule.id,
+      phaseId: pptModule.phaseId,
+      phaseName: pptPhase.name,
+      phaseOrder: pptPhase.order,
       title: pptModule.title,
       description: pptModule.description,
       coverImageUrl: pptModule.coverImageUrl,
@@ -35,9 +40,38 @@ export default async function MemberMateriPage() {
     })
     .from(pptModule)
     .leftJoin(pptSlide, eq(pptSlide.moduleId, pptModule.id))
+    .leftJoin(pptPhase, eq(pptPhase.id, pptModule.phaseId))
     .where(eq(pptModule.isPublished, true))
-    .groupBy(pptModule.id)
+    .groupBy(pptModule.id, pptPhase.id)
     .orderBy(pptModule.createdAt);
 
-  return <MateriClient initialModules={modules} />;
+  const phases = await db.query.pptPhase.findMany({
+    orderBy: [asc(pptPhase.order), asc(pptPhase.id)],
+  });
+
+  // Fetch user's actual progress from DB
+  let initialProgressMap = {};
+  if (userId) {
+    const userProgressRecords = await db
+      .select()
+      .from(pptModuleProgress)
+      .where(eq(pptModuleProgress.userId, userId));
+
+    for (const p of userProgressRecords) {
+      initialProgressMap[p.moduleId] = {
+        currentSlideIdx: p.currentSlideIdx,
+        maxSlideIdx: p.maxSlideIdx,
+        isCompleted: p.isCompleted,
+        lastAccessed: p.lastAccessedAt ? new Date(p.lastAccessedAt).getTime() : Date.now(),
+      };
+    }
+  }
+
+  return (
+    <MateriClient 
+      initialModules={modules} 
+      initialPhases={phases || []} 
+      initialProgressMap={initialProgressMap} 
+    />
+  );
 }

@@ -4,6 +4,7 @@ import { ttsCrossword, ttsQuestion, task, taskSubmission, memberProfile, xpTrans
 import { eq, and, desc } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { calculateSpeedBonusXp } from "@/lib/xpUtils";
 
 function formatSeconds(sec) {
   if (!sec && sec !== 0) return "00:00";
@@ -109,6 +110,14 @@ export async function POST(req, { params }) {
     let submissionRecord = null;
 
     if (linkedTask) {
+      // 3a. Validasi Tenggat Waktu jika pengumpulan terlambat tidak diizinkan
+      if (linkedTask.allowLateSubmission === false && linkedTask.deadline && new Date() > new Date(linkedTask.deadline)) {
+        return NextResponse.json(
+          { error: "Tenggat waktu pengumpulan tugas ini telah berakhir. Submisi sudah ditutup." },
+          { status: 400 }
+        );
+      }
+
       // 3b. Validasi Prasyarat Main Quest jika linkedTask adalah Side Quest terkunci
       if (linkedTask.prerequisiteTaskId) {
         const prereqSub = await db.query.taskSubmission.findFirst({
@@ -130,19 +139,40 @@ export async function POST(req, { params }) {
       // 4. Calculate XP based on Admin's configured ttsScoringMode
       const scoringMode = linkedTask.ttsScoringMode || "COMPLETION";
       const maxRewardXp = linkedTask.rewardXp || 0;
+      let baseXp = 0;
 
       if (scoringMode === "COMPLETION") {
         // Full XP upon completion regardless of mistakes (Flat XP)
-        xpEarned = maxRewardXp;
+        baseXp = maxRewardXp;
       } else if (scoringMode === "PROPORTIONAL") {
         // Proportional XP based on ratio of correct answers, rounded up (Math.ceil)
-        xpEarned = totalQuestions > 0 ? Math.ceil((correctCount / totalQuestions) * maxRewardXp) : 0;
+        baseXp = totalQuestions > 0 ? Math.ceil((correctCount / totalQuestions) * maxRewardXp) : 0;
       } else if (scoringMode === "PERFECT") {
         // Perfect score only (100% correct, 0 mistakes)
-        xpEarned = (correctCount === totalQuestions && totalWrongAttempts === 0) ? maxRewardXp : 0;
+        baseXp = (correctCount === totalQuestions && totalWrongAttempts === 0) ? maxRewardXp : 0;
       }
 
-      const feedback = `Skor: ${score}% | Terpecahkan: ${correctCount}/${totalQuestions} | Kesalahan Input: ${totalWrongAttempts}x | Waktu: ${formatSeconds(elapsedTime)} | XP Diperoleh: +${xpEarned} XP`;
+      // Hitung Bonus Kecepatan (Speed Bonus) jika diaktifkan di task
+      const isSpeedBonusEnabled = linkedTask.enableSpeedBonus !== false;
+      let speedBonusXp = 0;
+      if (isSpeedBonusEnabled && baseXp > 0) {
+        speedBonusXp = calculateSpeedBonusXp(
+          linkedTask.createdAt,
+          linkedTask.deadline,
+          new Date()
+        );
+      }
+
+      xpEarned = baseXp + speedBonusXp;
+
+      let feedback = `Skor: ${score}% | Terpecahkan: ${correctCount}/${totalQuestions} | Kesalahan Input: ${totalWrongAttempts}x | Waktu: ${formatSeconds(elapsedTime)} | XP Dasar: +${baseXp} XP`;
+      if (speedBonusXp > 0) {
+        feedback += ` | Bonus Kecepatan: +${speedBonusXp} XP`;
+      }
+      if (speedBonusXp > 0) {
+        feedback += ` (Total: +${xpEarned} XP)`;
+      }
+
       const fileUrl = `[TTS Game] Skor: ${score}% (${correctCount}/${totalQuestions} Terpecahkan, ${totalWrongAttempts}x Keliru)`;
 
       // 5. Cek apakah sudah pernah mengerjakan (hanya 1x pengerjaan)
@@ -202,10 +232,17 @@ export async function POST(req, { params }) {
             .where(eq(memberProfile.userId, memberId));
         }
 
+        const reasons = [
+          `Penyelesaian TTS: ${crossword.title} (${correctCount}/${totalQuestions} Terpecahkan, Skor ${score}%) +${baseXp} XP`
+        ];
+        if (speedBonusXp > 0) {
+          reasons.push(`Bonus Kecepatan: +${speedBonusXp} XP`);
+        }
+
         await db.insert(xpTransaction).values({
           userId: memberId,
           amount: xpEarned,
-          reason: `Penyelesaian TTS: ${crossword.title} (${correctCount}/${totalQuestions} Terpecahkan, ${totalWrongAttempts}x Keliru - Skor ${score}%)`,
+          reason: reasons.join(" | "),
           sourceType: "task",
           sourceId: submissionRecord.id,
         });
@@ -286,6 +323,8 @@ export async function POST(req, { params }) {
       wrongCount: totalWrongAttempts,
       totalQuestions,
       xpEarned,
+      baseXp: typeof baseXp !== 'undefined' ? baseXp : xpEarned,
+      speedBonusXp: typeof speedBonusXp !== 'undefined' ? speedBonusXp : 0,
       elapsedTime,
       taskId: linkedTask?.id || null,
       taskTitle: linkedTask?.title || null,

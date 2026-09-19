@@ -6,7 +6,7 @@ import {
   Check, Volume2, VolumeX, Maximize2, Minimize2,
   Sun, Moon, RotateCcw, ArrowLeft, Keyboard as KeyboardIcon,
   Trophy, Award, Zap, Delete, Sparkles, Flame, Lightbulb,
-  Star, Target, Timer, Crown, ShieldAlert, Sparkle
+  Star, Target, Timer, Crown, ShieldAlert, Sparkle, CheckCircle2
 } from "lucide-react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
@@ -1348,6 +1348,11 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
                     <Zap className="w-4 h-4 fill-amber-400" />
                     +{submissionResult ? submissionResult.xpEarned : (puzzleData?.rewardXp || 10)} XP
                   </span>
+                  {submissionResult?.speedBonusXp > 0 && (
+                    <span className="text-[9px] text-blue-400 font-bold block mt-0.5">
+                      (+{submissionResult.speedBonusXp} XP Speed)
+                    </span>
+                  )}
                 </div>
                 <div>
                   <span className="text-[10px] opacity-60 uppercase font-black block">Waktu Selesai</span>
@@ -1394,14 +1399,23 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
                 </div>
               </div>
 
+              {/* REALTIME SAVE & SYNC STATUS BANNER */}
+              <div className="w-full">
+                {isSubmitting ? (
+                  <div className="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/25 flex items-center justify-center gap-2.5 text-blue-500 dark:text-blue-400 text-xs font-bold animate-pulse">
+                    <Sparkles className="w-4 h-4 animate-spin shrink-0" />
+                    <span>Menyimpan data dan sinkronisasi ke sistem...</span>
+                  </div>
+                ) : hasSubmitted ? (
+                  <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center gap-2 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                    <span>Data pengerjaan & sinkronisasi berhasil disimpan ke sistem</span>
+                  </div>
+                ) : null}
+              </div>
+
               {/* BADGES EARNED */}
               <div className="flex items-center justify-center gap-2 flex-wrap">
-                {isSubmitting && (
-                  <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-400 text-[10px] font-black uppercase tracking-wider animate-pulse">
-                    <Sparkle className="w-3 h-3 animate-spin" />
-                    <span>Menyimpan & Menilai Submisi...</span>
-                  </div>
-                )}
                 {(submissionResult?.wrongCount !== undefined ? submissionResult.wrongCount === 0 && submissionResult.correctCount === totalWords : mistakeCount === 0 && correctWordsCount === totalWords) && (
                   <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-wider">
                     <Target className="w-3 h-3" />
@@ -1419,7 +1433,8 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
                 {!taskId && (
                   <button
                     onClick={handleResetPuzzle}
-                    className="w-full py-3.5 rounded-2xl bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 border border-current/10 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95"
+                    disabled={isSubmitting}
+                    className="w-full py-3.5 rounded-2xl bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 border border-current/10 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
                   >
                     <RotateCcw className="w-4 h-4" />
                     <span>Main Lagi</span>
@@ -1428,13 +1443,20 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
 
                 <button
                   type="button"
+                  disabled={isSubmitting}
                   onClick={() => {
                     window.location.href = onBackUrl;
                   }}
-                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-400 to-teal-400 text-slate-950 font-black text-xs flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-500/40 hover:shadow-emerald-500/60 cursor-pointer active:scale-95"
+                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-400 to-teal-400 text-slate-950 font-black text-xs flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-500/40 hover:shadow-emerald-500/60 cursor-pointer active:scale-95 disabled:opacity-50"
                 >
                   <Check className="w-4 h-4 stroke-[3]" />
-                  <span>{onBackUrl.includes("tugas") ? "Kembali ke Quest Tugas" : "Selesai & Keluar"}</span>
+                  <span>
+                    {isSubmitting
+                      ? "Menyimpan Data..."
+                      : onBackUrl.includes("tugas")
+                      ? "Kembali ke Quest Tugas"
+                      : "Selesai & Keluar"}
+                  </span>
                 </button>
               </div>
             </motion.div>

@@ -103,6 +103,19 @@ export default async function TTSAssignmentPlayPage({ params, searchParams }) {
         />
       );
     }
+
+    // 3. Cek apakah batas waktu tugas sudah berakhir dan pengumpulan terlambat tidak diizinkan
+    const isLateSubmissionBlocked = taskRecord?.allowLateSubmission === false && taskRecord?.deadline && new Date() > new Date(taskRecord.deadline);
+    if (isLateSubmissionBlocked) {
+      return (
+        <TTSStatusNotice
+          type="closed"
+          ttsTitle={res.data.title}
+          taskId={taskId}
+          backUrl="/member/tugas"
+        />
+      );
+    }
   }
 
   return (

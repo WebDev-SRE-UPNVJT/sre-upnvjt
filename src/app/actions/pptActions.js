@@ -1,17 +1,86 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { pptModule, pptSlide } from "@/db/schema";
-import { desc, asc, eq, count } from "drizzle-orm";
+import { pptModule, pptSlide, pptPhase, pptModuleProgress } from "@/db/schema";
+import { desc, asc, eq, and, count } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
+// ─── Phase Actions ────────────────────────────────────────────────────────────
+export async function getPptPhases() {
+  try {
+    const phases = await db.query.pptPhase.findMany({
+      orderBy: [asc(pptPhase.order), asc(pptPhase.id)],
+    });
+    return { success: true, data: phases || [] };
+  } catch (error) {
+    console.error("Error fetching PPT phases:", error);
+    return { success: false, error: error.message, data: [] };
+  }
+}
+
+export async function createPptPhase(data) {
+  try {
+    const { name, description, order } = data;
+    const [result] = await db.insert(pptPhase).values({
+      name,
+      description: description || null,
+      order: order !== undefined && order !== "" ? parseInt(order) : 0,
+    }).returning();
+    revalidatePath("/ppt");
+    revalidatePath("/member/materi");
+    return { success: true, phase: result };
+  } catch (error) {
+    console.error("Error creating PPT phase:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function updatePptPhase(id, data) {
+  try {
+    const { name, description, order } = data;
+    const [result] = await db.update(pptPhase)
+      .set({
+        name,
+        description: description !== undefined ? (description || null) : undefined,
+        order: order !== undefined && order !== "" ? parseInt(order) : undefined,
+      })
+      .where(eq(pptPhase.id, id))
+      .returning();
+    revalidatePath("/ppt");
+    revalidatePath("/member/materi");
+    return { success: true, phase: result };
+  } catch (error) {
+    console.error("Error updating PPT phase:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function deletePptPhase(id) {
+  try {
+    await db.delete(pptPhase).where(eq(pptPhase.id, id));
+    revalidatePath("/ppt");
+    revalidatePath("/member/materi");
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting PPT phase:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+// ─── Module Actions ───────────────────────────────────────────────────────────
 export async function getPptModules() {
   try {
     const modules = await db
       .select({
         id: pptModule.id,
+        phaseId: pptModule.phaseId,
+        phaseName: pptPhase.name,
+        phaseOrder: pptPhase.order,
         title: pptModule.title,
         description: pptModule.description,
+        notes: pptModule.notes,
         coverImageUrl: pptModule.coverImageUrl,
         isPublished: pptModule.isPublished,
         createdById: pptModule.createdById,
@@ -21,7 +90,8 @@ export async function getPptModules() {
       })
       .from(pptModule)
       .leftJoin(pptSlide, eq(pptSlide.moduleId, pptModule.id))
-      .groupBy(pptModule.id)
+      .leftJoin(pptPhase, eq(pptPhase.id, pptModule.phaseId))
+      .groupBy(pptModule.id, pptPhase.id)
       .orderBy(desc(pptModule.createdAt));
 
     return { success: true, data: modules };
@@ -36,6 +106,7 @@ export async function getPptModule(id) {
     const mod = await db.query.pptModule.findFirst({
       where: (t, { eq }) => eq(t.id, id),
       with: {
+        phase: true,
         slides: { orderBy: [asc(pptSlide.order)] },
       },
     });
@@ -48,16 +119,19 @@ export async function getPptModule(id) {
 
 export async function createPptModule(data, createdById) {
   try {
-    const { title, description, notes, coverImageUrl, isPublished } = data;
+    const { title, description, notes, coverImageUrl, isPublished, phaseId } = data;
+    const parsedPhaseId = phaseId ? parseInt(phaseId) : null;
     const [result] = await db.insert(pptModule).values({
       title,
       description: description || null,
       notes: notes || null,
       coverImageUrl: coverImageUrl || null,
       isPublished: Boolean(isPublished),
+      phaseId: parsedPhaseId,
       createdById,
     }).returning();
     revalidatePath("/ppt");
+    revalidatePath("/member/materi");
     return { success: true, module: { ...result, slideCount: 0 } };
   } catch (error) {
     console.error("Error creating PPT module:", error);
@@ -67,7 +141,7 @@ export async function createPptModule(data, createdById) {
 
 export async function updatePptModule(id, data) {
   try {
-    const { title, description, notes, coverImageUrl, isPublished } = data;
+    const { title, description, notes, coverImageUrl, isPublished, phaseId } = data;
     const existing = await db.query.pptModule.findFirst({ where: eq(pptModule.id, id) });
     if (coverImageUrl !== undefined && existing?.coverImageUrl && existing.coverImageUrl !== coverImageUrl) {
       try {
@@ -78,6 +152,8 @@ export async function updatePptModule(id, data) {
       }
     }
 
+    const parsedPhaseId = phaseId !== undefined ? (phaseId ? parseInt(phaseId) : null) : undefined;
+
     const [result] = await db.update(pptModule)
       .set({
         title,
@@ -85,11 +161,13 @@ export async function updatePptModule(id, data) {
         notes: notes || null,
         coverImageUrl: coverImageUrl || null,
         isPublished: Boolean(isPublished),
+        ...(parsedPhaseId !== undefined ? { phaseId: parsedPhaseId } : {}),
         updatedAt: new Date(),
       })
       .where(eq(pptModule.id, id))
       .returning();
     revalidatePath("/ppt");
+    revalidatePath("/member/materi");
     return { success: true, module: result };
   } catch (error) {
     console.error("Error updating PPT module:", error);
@@ -226,6 +304,64 @@ export async function reorderSlides(moduleId, orderedSlideIds) {
     return { success: true };
   } catch (error) {
     console.error("Error reordering slides:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+// ─── Member Progress Actions ──────────────────────────────────────────────────
+export async function savePptModuleProgress({ moduleId, currentSlideIdx, maxSlideIdx, isCompleted }) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const userId = Number(session.user.id);
+    const modId = Number(moduleId);
+    if (!modId || isNaN(modId)) {
+      return { success: false, error: "Invalid module ID" };
+    }
+
+    const existing = await db.query.pptModuleProgress.findFirst({
+      where: and(
+        eq(pptModuleProgress.userId, userId),
+        eq(pptModuleProgress.moduleId, modId)
+      ),
+    });
+
+    const now = new Date();
+    if (existing) {
+      const calculatedMax = Math.max(existing.maxSlideIdx || 0, maxSlideIdx || 0, currentSlideIdx || 0);
+      const completed = existing.isCompleted || !!isCompleted;
+
+      await db.update(pptModuleProgress)
+        .set({
+          currentSlideIdx: currentSlideIdx !== undefined ? currentSlideIdx : existing.currentSlideIdx,
+          maxSlideIdx: calculatedMax,
+          isCompleted: completed,
+          completedAt: completed && !existing.completedAt ? now : existing.completedAt,
+          lastAccessedAt: now,
+          updatedAt: now,
+        })
+        .where(eq(pptModuleProgress.id, existing.id));
+    } else {
+      const calculatedMax = Math.max(maxSlideIdx || 0, currentSlideIdx || 0);
+      await db.insert(pptModuleProgress).values({
+        userId,
+        moduleId: modId,
+        currentSlideIdx: currentSlideIdx || 0,
+        maxSlideIdx: calculatedMax,
+        isCompleted: !!isCompleted,
+        completedAt: isCompleted ? now : null,
+        lastAccessedAt: now,
+        createdAt: now,
+        updatedAt: now,
+      });
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error saving PPT module progress:", error);
     return { success: false, error: error.message };
   }
 }

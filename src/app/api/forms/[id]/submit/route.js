@@ -5,6 +5,7 @@ import { and, eq } from 'drizzle-orm';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import { appendFormResponseToSheet, appendOrUpdateTaskSubmissionToSheet } from '@/lib/googleSheets';
+import { calculateSpeedBonusXp } from '@/lib/xpUtils';
 
 export async function POST(req, { params }) {
   try {
@@ -221,6 +222,9 @@ export async function POST(req, { params }) {
 
     // 3. Jika responden adalah Member login & Formulir terhubung dengan Task / Quest
     let earnedTaskXp = 0;
+    let earnedSpeedBonusXp = 0;
+    let earnedBaseXp = 0;
+
     if (memberId) {
       try {
         const linkedTasks = await db.query.task.findMany({
@@ -228,6 +232,11 @@ export async function POST(req, { params }) {
         });
 
         for (const lTask of linkedTasks) {
+          // Lewati pemberian XP dan rekaman submisi tugas jika tugas sudah ditutup (overdue & allowLateSubmission === false)
+          if (lTask.allowLateSubmission === false && lTask.deadline && new Date() > new Date(lTask.deadline)) {
+            continue;
+          }
+
           // Cari apakah sudah pernah submit tugas ini
           const existingTaskSub = await db.query.taskSubmission.findFirst({
             where: and(
@@ -239,34 +248,56 @@ export async function POST(req, { params }) {
           // Hitung perolehan XP berdasarkan lTask.formScoringMode
           const scoringMode = lTask.formScoringMode || "COMPLETION";
           const maxRewardXp = lTask.rewardXp || 0;
-          let taskXpEarned = 0;
+          let baseTaskXp = 0;
 
           if (scoringMode === "COMPLETION") {
             // Flat (Penuh): Seluruh reward XP diberikan saat berhasil mengirim formulir
-            taskXpEarned = maxRewardXp;
+            baseTaskXp = maxRewardXp;
           } else if (scoringMode === "PROPORTIONAL") {
             // Sesuai Persentase Skor / Jawaban Benar
             if (isQuizForm && maxScore > 0) {
-              taskXpEarned = Math.ceil((earnedScore / maxScore) * maxRewardXp);
+              baseTaskXp = Math.ceil((earnedScore / maxScore) * maxRewardXp);
             } else {
-              taskXpEarned = maxRewardXp;
+              baseTaskXp = maxRewardXp;
             }
           } else if (scoringMode === "PERFECT") {
             // 100% Sempurna (Perfect Score)
             if (isQuizForm && maxScore > 0) {
-              taskXpEarned = (earnedScore === maxScore) ? maxRewardXp : 0;
+              baseTaskXp = (earnedScore === maxScore) ? maxRewardXp : 0;
             } else {
-              taskXpEarned = maxRewardXp;
+              baseTaskXp = maxRewardXp;
             }
           }
 
-          earnedTaskXp = Math.max(earnedTaskXp, taskXpEarned);
+          // Hitung Bonus Kecepatan (Speed Bonus) jika diaktifkan di task
+          const isSpeedBonusEnabled = lTask.enableSpeedBonus !== false;
+          let speedBonusXp = 0;
+          if (isSpeedBonusEnabled && (baseTaskXp > 0 || !isQuizForm)) {
+            speedBonusXp = calculateSpeedBonusXp(
+              lTask.createdAt,
+              lTask.deadline,
+              new Date()
+            );
+          }
+
+          const totalTaskXpEarned = baseTaskXp + speedBonusXp;
+          earnedTaskXp = Math.max(earnedTaskXp, totalTaskXpEarned);
+          earnedSpeedBonusXp = Math.max(earnedSpeedBonusXp, speedBonusXp);
+          earnedBaseXp = Math.max(earnedBaseXp, baseTaskXp);
+
           let taskSubRecord = existingTaskSub;
           const formResponseUrl = `/f/${form.uuid || form.id}`;
           const subStatus = "APPROVED"; // Otomatis disetujui karena formulir terverifikasi sistem
-          const feedbackMsg = isQuizForm
-            ? `Skor Kuis: ${earnedScore}/${maxScore} (${percentage}%) | XP Diperoleh: +${taskXpEarned} XP`
-            : `Formulir berhasil diselesaikan | XP Diperoleh: +${taskXpEarned} XP`;
+          let feedbackMsg = isQuizForm
+            ? `Skor Kuis: ${earnedScore}/${maxScore} (${percentage}%) | XP Dasar: +${baseTaskXp} XP`
+            : `Formulir berhasil diselesaikan | XP Dasar: +${baseTaskXp} XP`;
+
+          if (speedBonusXp > 0) {
+            feedbackMsg += ` | Bonus Kecepatan: +${speedBonusXp} XP`;
+          }
+          if (speedBonusXp > 0) {
+            feedbackMsg += ` (Total: +${totalTaskXpEarned} XP)`;
+          }
 
           // Cek apakah sebelumnya sudah pernah APPROVED (agar tidak double award XP)
           const wasAlreadyApproved = existingTaskSub?.status === "APPROVED";
@@ -282,7 +313,7 @@ export async function POST(req, { params }) {
               correctCount: isQuizForm ? correctCount : null,
               wrongCount: isQuizForm ? Math.max(0, (totalScoredQuestions || 0) - correctCount) : null,
               totalQuestions: isQuizForm ? (totalScoredQuestions || 0) : null,
-              xpEarned: taskXpEarned,
+              xpEarned: totalTaskXpEarned,
               feedback: feedbackMsg,
               submittedAt: new Date(),
             }).returning();
@@ -296,7 +327,7 @@ export async function POST(req, { params }) {
                 correctCount: isQuizForm ? correctCount : null,
                 wrongCount: isQuizForm ? Math.max(0, (totalScoredQuestions || 0) - correctCount) : null,
                 totalQuestions: isQuizForm ? (totalScoredQuestions || 0) : null,
-                xpEarned: taskXpEarned,
+                xpEarned: totalTaskXpEarned,
                 feedback: feedbackMsg,
                 submittedAt: new Date(),
               })
@@ -306,7 +337,7 @@ export async function POST(req, { params }) {
           }
 
           // Tambahkan XP ke Member Profile & Catat Transaksi XP
-          const xpDiff = wasAlreadyApproved ? Math.max(0, taskXpEarned - previousXpEarned) : taskXpEarned;
+          const xpDiff = wasAlreadyApproved ? Math.max(0, totalTaskXpEarned - previousXpEarned) : totalTaskXpEarned;
           if (xpDiff > 0) {
             const profile = await db.query.memberProfile.findFirst({
               where: eq(memberProfile.userId, memberId),
@@ -326,10 +357,17 @@ export async function POST(req, { params }) {
                 .where(eq(memberProfile.userId, memberId));
             }
 
+            const reasons = [
+              `Penyelesaian Misi Formulir (${lTask.title}): +${baseTaskXp} XP (${scoringMode === "PROPORTIONAL" ? `Skor: ${percentage}%` : "Selesai"})`
+            ];
+            if (speedBonusXp > 0) {
+              reasons.push(`Bonus Kecepatan: +${speedBonusXp} XP`);
+            }
+
             await db.insert(xpTransaction).values({
               userId: memberId,
               amount: xpDiff,
-              reason: `Penyelesaian Quest (${lTask.title}): +${xpDiff} XP (${scoringMode === "PROPORTIONAL" ? `Skor: ${percentage}%` : "Selesai"})`,
+              reason: reasons.join(" | "),
               sourceType: "task",
               sourceId: taskSubRecord.id,
             });
@@ -369,6 +407,8 @@ export async function POST(req, { params }) {
       totalQuestions: isQuizForm ? totalScoredQuestions : null,
       isQuiz: isQuizForm,
       xpEarned: earnedTaskXp > 0 ? earnedTaskXp : null,
+      baseXp: earnedBaseXp > 0 ? earnedBaseXp : null,
+      speedBonusXp: earnedSpeedBonusXp > 0 ? earnedSpeedBonusXp : null,
     }, { status: 201 });
   } catch (error) {
     console.error('Error submitting form:', error);

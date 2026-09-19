@@ -14,15 +14,18 @@ import {
   createPptModule, updatePptModule, deletePptModule,
   createPptSlide, updatePptSlide, deletePptSlide,
   reorderSlides,
+  createPptPhase, updatePptPhase, deletePptPhase,
 } from "@/app/actions/pptActions";
 import { useSession } from "next-auth/react";
 import { hasAccess } from "@/lib/permissions";
 import { resolveImageUrl } from "@/lib/imageUrl";
 import { compressImageToWebP } from "@/lib/imageCompressor";
+import TinyMCEEditor from "@/components/editor/TinyMCEEditor";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const EMPTY_MODULE = { title: "", description: "", notes: "", coverImageUrl: "", isPublished: false };
+const EMPTY_MODULE = { title: "", description: "", notes: "", coverImageUrl: "", isPublished: false, phaseId: "" };
 const EMPTY_SLIDE  = { title: "", fileUrl: "" };
+const EMPTY_PHASE  = { name: "", description: "", order: 0 };
 
 // ─── Shared UI helpers ─────────────────────────────────────────────────────────
 const InputField = ({ label, children }) => (
@@ -40,7 +43,7 @@ const inputCls =
 const textareaCls =
   "w-full p-4 bg-white dark:bg-white/5 shadow-sm dark:shadow-none border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/20 focus:outline-none focus:border-primary/50 transition-all resize-none";
 
-export default function PptClient({ initialModules, currentUser }) {
+export default function PptClient({ initialModules, initialPhases = [], currentUser }) {
   const { data: session } = useSession();
   const user = session?.user ?? currentUser;
 
@@ -50,13 +53,20 @@ export default function PptClient({ initialModules, currentUser }) {
 
   // ── Data ────────────────────────────────────────────────────────────────────
   const [modules, setModules]     = useState(initialModules || []);
+  const [phases, setPhases]       = useState(initialPhases || []);
   const [slides, setSlides]       = useState([]);        // slides of active module
 
   // ── UI state ────────────────────────────────────────────────────────────────
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedPhaseFilter, setSelectedPhaseFilter] = useState("ALL");
   const [isLoading, setIsLoading]     = useState(false);
   const [notification, setNotification] = useState(null);
   const [pdfProgress, setPdfProgress] = useState(null);
+
+  // Phase modal
+  const [phaseModalOpen, setPhaseModalOpen] = useState(false);
+  const [phaseForm, setPhaseForm]           = useState(EMPTY_PHASE);
+  const [targetPhase, setTargetPhase]       = useState(null);
 
   // Module modal
   const [modModal, setModModal]     = useState(false);
@@ -217,9 +227,54 @@ export default function PptClient({ initialModules, currentUser }) {
     setSearchQuery("");
   };
 
+  // Phase handlers
+  const openPhaseModal = (phase = null) => {
+    setPhaseForm(phase ? { ...phase } : { ...EMPTY_PHASE });
+    setTargetPhase(phase);
+    setPhaseModalOpen(true);
+  };
+
+  const handleSavePhase = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    const isEditing = Boolean(targetPhase?.id);
+    const res = isEditing
+      ? await updatePptPhase(targetPhase.id, phaseForm)
+      : await createPptPhase(phaseForm);
+
+    if (res.success) {
+      if (isEditing) {
+        setPhases(prev => prev.map(p => p.id === targetPhase.id ? res.phase : p).sort((a,b) => (a.order || 0) - (b.order || 0)));
+        setModules(prev => prev.map(m => m.phaseId === targetPhase.id ? { ...m, phaseName: res.phase.name, phaseOrder: res.phase.order } : m));
+      } else {
+        setPhases(prev => [...prev, res.phase].sort((a,b) => (a.order || 0) - (b.order || 0)));
+      }
+      notify("success", isEditing ? "Fase diperbarui!" : "Fase ditambahkan!");
+      setPhaseForm(EMPTY_PHASE);
+      setTargetPhase(null);
+    } else {
+      notify("error", res.error || "Gagal menyimpan fase");
+    }
+    setIsLoading(false);
+  };
+
+  const handleDeletePhase = async (phaseId) => {
+    if (!confirm("Hapus fase ini? Modul dalam fase ini akan dialihkan menjadi tanpa fase.")) return;
+    setIsLoading(true);
+    const res = await deletePptPhase(phaseId);
+    if (res.success) {
+      setPhases(prev => prev.filter(p => p.id !== phaseId));
+      setModules(prev => prev.map(m => m.phaseId === phaseId ? { ...m, phaseId: null, phaseName: null, phaseOrder: null } : m));
+      notify("success", "Fase dihapus");
+    } else {
+      notify("error", res.error || "Gagal menghapus fase");
+    }
+    setIsLoading(false);
+  };
+
   // Module handlers
   const openModModal = (mod = null) => {
-    setModForm(mod ? { ...mod } : { ...EMPTY_MODULE });
+    setModForm(mod ? { ...mod, phaseId: mod.phaseId ? String(mod.phaseId) : "" } : { ...EMPTY_MODULE });
     setTargetMod(mod);
     setModModal(true);
   };
@@ -237,17 +292,24 @@ export default function PptClient({ initialModules, currentUser }) {
       : await createPptModule(modForm, user?.id);
 
     if (res.success) {
+      const selectedPhase = phases.find(p => String(p.id) === String(res.module.phaseId));
+      const enhancedMod = {
+        ...res.module,
+        phaseName: selectedPhase?.name || null,
+        phaseOrder: selectedPhase?.order ?? null,
+      };
+
       if (isEditing) {
         setModules(prev => prev.map(m => m.id === targetMod.id
-          ? { ...res.module, slideCount: m.slideCount }
+          ? { ...enhancedMod, slideCount: m.slideCount }
           : m
         ));
         // Also update activeModule if in slide view
         if (activeModule?.id === targetMod.id) {
-          setActiveModule(p => ({ ...p, ...res.module }));
+          setActiveModule(p => ({ ...p, ...enhancedMod }));
         }
       } else {
-        setModules(prev => [res.module, ...prev]);
+        setModules(prev => [enhancedMod, ...prev]);
       }
       notify("success", isEditing ? "Modul diperbarui!" : "Modul ditambahkan!");
       closeModModal();
@@ -344,9 +406,17 @@ export default function PptClient({ initialModules, currentUser }) {
   }, [slides, activeModule]);
 
   // ── Filtered modules ────────────────────────────────────────────────────────
-  const filteredModules = modules.filter(m =>
-    (m.title || "").toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredModules = modules.filter(m => {
+    const matchesSearch =
+      (m.title || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (m.description || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (m.phaseName || "").toLowerCase().includes(searchQuery.toLowerCase());
+    if (!matchesSearch) return false;
+
+    if (selectedPhaseFilter === "ALL") return true;
+    if (selectedPhaseFilter === "NONE") return !m.phaseId;
+    return String(m.phaseId) === String(selectedPhaseFilter);
+  });
 
   if (view === "slides" && activeModule) {
     return (
@@ -653,6 +723,7 @@ export default function PptClient({ initialModules, currentUser }) {
           open={modModal} onClose={closeModModal} form={modForm} setForm={setModForm}
           onSubmit={handleSaveModule} isEditing={Boolean(targetMod?.id)}
           isLoading={isLoading} onUpload={handleFileUpload}
+          phases={phases} onOpenPhaseManager={() => openPhaseModal()}
         />
       </div>
     );
@@ -667,25 +738,91 @@ export default function PptClient({ initialModules, currentUser }) {
             <Presentation className="w-8 h-8 text-primary" />
             PPT Modules
           </h1>
-          <p className="text-gray-500 dark:text-white/50 max-w-xl">
-            Kelola modul pembelajaran dan slide presentasi SRE UPNVJT.
+          <p className="text-gray-500 dark:text-white/50 max-w-xl text-sm">
+            Kelola modul pembelajaran, fase kurikulum, dan slide presentasi SRE UPNVJT.
           </p>
         </div>
-        <div className="flex items-center gap-4 w-full md:w-auto">
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <div className="relative flex-1 md:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-white/30" />
-            <input type="text" placeholder="Cari modul..." value={searchQuery}
+            <input type="text" placeholder="Cari modul atau fase..." value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full bg-white dark:bg-white/5 shadow-sm dark:shadow-none border border-gray-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 transition-colors" />
+              className="w-full bg-white dark:bg-white/5 shadow-sm dark:shadow-none border border-gray-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 transition-colors" />
           </div>
+
+          {canCreate && (
+            <button
+              onClick={() => openPhaseModal()}
+              className="flex items-center gap-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-white px-4 py-2.5 rounded-xl font-bold text-sm tracking-wide hover:bg-gray-50 dark:hover:bg-white/10 transition-all shrink-0"
+            >
+              <Layers className="w-4 h-4 text-primary" />
+              <span>Kelola Fase ({phases.length})</span>
+            </button>
+          )}
+
           {canCreate && (
             <button onClick={() => openModModal()}
-              className="flex items-center gap-2 bg-primary text-[#050e0a] px-6 py-3 rounded-xl font-bold tracking-wide hover:bg-primary-focus hover:scale-105 transition-all shrink-0 shadow-[0_0_20px_rgba(16,185,129,0.3)]">
-              <Plus className="w-5 h-5" />
-              <span className="hidden sm:inline">Tambah Modul</span>
+              className="flex items-center gap-2 bg-primary text-[#050e0a] px-5 py-2.5 rounded-xl font-bold tracking-wide hover:bg-primary-focus hover:scale-105 transition-all shrink-0 shadow-[0_0_20px_rgba(16,185,129,0.3)] text-sm">
+              <Plus className="w-4 h-4" />
+              <span>Tambah Modul</span>
             </button>
           )}
         </div>
+      </div>
+
+      {/* ── Phase Filter Tabs ── */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 scrollbar-none">
+        <button
+          onClick={() => setSelectedPhaseFilter("ALL")}
+          className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 ${
+            selectedPhaseFilter === "ALL"
+              ? "bg-primary text-[#050e0a] shadow-sm font-black"
+              : "bg-white dark:bg-white/5 text-gray-600 dark:text-white/60 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-white/5"
+          }`}
+        >
+          <span>Semua Fase</span>
+          <span className={`px-1.5 py-0.5 rounded-md text-[10px] ${selectedPhaseFilter === "ALL" ? "bg-black/15 text-black" : "bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-white/50"}`}>
+            {modules.length}
+          </span>
+        </button>
+
+        {phases.map((p) => {
+          const countInPhase = modules.filter(m => String(m.phaseId) === String(p.id)).length;
+          const isSelected = String(selectedPhaseFilter) === String(p.id);
+
+          return (
+            <button
+              key={p.id}
+              onClick={() => setSelectedPhaseFilter(String(p.id))}
+              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 ${
+                isSelected
+                  ? "bg-primary text-[#050e0a] shadow-sm font-black"
+                  : "bg-white dark:bg-white/5 text-gray-600 dark:text-white/60 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-white/5"
+              }`}
+            >
+              <span>{p.name}</span>
+              <span className={`px-1.5 py-0.5 rounded-md text-[10px] ${isSelected ? "bg-black/15 text-black" : "bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-white/50"}`}>
+                {countInPhase}
+              </span>
+            </button>
+          );
+        })}
+
+        {modules.some(m => !m.phaseId) && (
+          <button
+            onClick={() => setSelectedPhaseFilter("NONE")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 ${
+              selectedPhaseFilter === "NONE"
+                ? "bg-primary text-[#050e0a] shadow-sm font-black"
+                : "bg-white dark:bg-white/5 text-gray-600 dark:text-white/60 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-white/5"
+            }`}
+          >
+            <span>Tanpa Fase</span>
+            <span className={`px-1.5 py-0.5 rounded-md text-[10px] ${selectedPhaseFilter === "NONE" ? "bg-black/15 text-black" : "bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-white/50"}`}>
+              {modules.filter(m => !m.phaseId).length}
+            </span>
+          </button>
+        )}
       </div>
 
       {/* ── Module Grid ── */}
@@ -694,8 +831,12 @@ export default function PptClient({ initialModules, currentUser }) {
           {filteredModules.length === 0 ? (
             <div className="col-span-full py-24 flex flex-col items-center justify-center text-center bg-white/40 dark:bg-white/[0.02] border border-dashed border-gray-200/50 dark:border-white/10 rounded-3xl">
               <Presentation className="w-12 h-12 text-gray-400 dark:text-white/20 mb-4" />
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Belum ada modul PPT</h3>
-              <p className="text-gray-500 dark:text-white/40 text-sm">Buat modul pertama untuk mulai menambahkan slide.</p>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Tidak ada modul</h3>
+              <p className="text-gray-500 dark:text-white/40 text-sm">
+                {searchQuery || selectedPhaseFilter !== "ALL"
+                  ? "Tidak ada modul yang cocok dengan filter atau kata kunci pencarian."
+                  : "Buat modul pertama untuk mulai menambahkan slide."}
+              </p>
             </div>
           ) : filteredModules.map(mod => (
             <motion.div
@@ -726,17 +867,28 @@ export default function PptClient({ initialModules, currentUser }) {
                   </span>
                 </div>
                 {/* Badges */}
-                <div className="absolute top-3 left-3 right-3 flex justify-between">
-                  <span className="px-2 py-1 rounded-md text-[10px] font-bold bg-black/40 text-white backdrop-blur-md border border-white/10">
-                    {mod.slideCount ?? 0} slide
-                  </span>
-                  <span className={`px-2 py-1 rounded-md text-[10px] font-bold border backdrop-blur-md ${
-                    mod.isPublished
-                      ? "bg-green-500/25 text-green-300 border-green-500/30"
-                      : "bg-black/40 text-white/60 border-white/10"
-                  }`}>
-                    {mod.isPublished ? "Published" : "Draft"}
-                  </span>
+                <div className="absolute top-3 left-3 right-3 flex justify-between items-center gap-2">
+                  {mod.phaseName ? (
+                    <span className="px-2 py-0.5 rounded-md text-[9px] font-black bg-indigo-950/80 text-indigo-300 backdrop-blur-md border border-indigo-500/30 truncate max-w-[140px]" title={mod.phaseName}>
+                      {mod.phaseName}
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-black/40 text-white/50 backdrop-blur-md border border-white/10">
+                      Umum
+                    </span>
+                  )}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-black/40 text-white backdrop-blur-md border border-white/10">
+                      {mod.slideCount ?? 0} slide
+                    </span>
+                    <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold border backdrop-blur-md ${
+                      mod.isPublished
+                        ? "bg-green-500/25 text-green-300 border-green-500/30"
+                        : "bg-black/40 text-white/60 border-white/10"
+                    }`}>
+                      {mod.isPublished ? "Published" : "Draft"}
+                    </span>
+                  </div>
                 </div>
               </button>
 
@@ -780,6 +932,21 @@ export default function PptClient({ initialModules, currentUser }) {
         open={modModal} onClose={closeModModal} form={modForm} setForm={setModForm}
         onSubmit={handleSaveModule} isEditing={Boolean(targetMod?.id)}
         isLoading={isLoading} onUpload={handleFileUpload}
+        phases={phases} onOpenPhaseManager={() => openPhaseModal()}
+      />
+
+      {/* ── Phase Manager Modal ── */}
+      <PhaseManagerModal
+        open={phaseModalOpen}
+        onClose={() => { setPhaseModalOpen(false); setPhaseForm(EMPTY_PHASE); setTargetPhase(null); }}
+        phases={phases}
+        form={phaseForm}
+        setForm={setPhaseForm}
+        targetPhase={targetPhase}
+        setTargetPhase={setTargetPhase}
+        onSubmit={handleSavePhase}
+        onDelete={handleDeletePhase}
+        isLoading={isLoading}
       />
 
       {/* ── Module Delete Modal ── */}
@@ -795,7 +962,7 @@ export default function PptClient({ initialModules, currentUser }) {
               </div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Hapus Modul</h2>
               <p className="text-gray-500 dark:text-white/50 mb-2 text-sm">
-                Hapus modul <strong className="text-gray-900 dark:text-white">{targetMod?.name}</strong>?
+                Hapus modul <strong className="text-gray-900 dark:text-white">{targetMod?.title}</strong>?
               </p>
               <p className="text-red-400/80 text-xs mb-8">Semua slide di dalam modul ini juga akan terhapus.</p>
               <div className="flex gap-3">
@@ -816,7 +983,7 @@ export default function PptClient({ initialModules, currentUser }) {
 }
 
 // ─── Extracted: Module Save Modal ─────────────────────────────────────────────
-function ModuleModal({ open, onClose, form, setForm, onSubmit, isEditing, isLoading, onUpload }) {
+function ModuleModal({ open, onClose, form, setForm, onSubmit, isEditing, isLoading, onUpload, phases = [], onOpenPhaseManager }) {
   return (
     <AnimatePresence>
       {open && (
@@ -827,7 +994,7 @@ function ModuleModal({ open, onClose, form, setForm, onSubmit, isEditing, isLoad
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-lg bg-white dark:bg-[#0a1612] border border-gray-200 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+            className="relative w-full max-w-4xl bg-white dark:bg-[#0a1612] border border-gray-200 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
           >
             <div className="p-6 border-b border-gray-200 dark:border-white/10 flex items-center justify-between shrink-0 bg-gray-50/50 dark:bg-white/[0.02]">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -840,22 +1007,54 @@ function ModuleModal({ open, onClose, form, setForm, onSubmit, isEditing, isLoad
             </div>
             <div className="p-6 overflow-y-auto flex-1">
               <form id="modForm" onSubmit={onSubmit} className="space-y-5">
-                <InputField label="Judul Modul *">
-                  <input type="text" required value={form.title}
-                    onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
-                    className={inputCls} placeholder="e.g. Mekanika Fluida — Pertemuan 1" />
-                </InputField>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <InputField label="Judul Modul *">
+                    <input type="text" required value={form.title}
+                      onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
+                      className={inputCls} placeholder="e.g. Mekanika Fluida — Pertemuan 1" />
+                  </InputField>
 
-                <InputField label="Deskripsi">
-                  <textarea rows={3} value={form.description || ''}
+                  <InputField label="Fase / Kategori Modul">
+                    <div className="flex gap-2">
+                      <select
+                        value={form.phaseId || ""}
+                        onChange={e => setForm(p => ({ ...p, phaseId: e.target.value }))}
+                        className={`${inputCls} cursor-pointer`}
+                      >
+                        <option value="">Tanpa Fase (Umum)</option>
+                        {phases.map(ph => (
+                          <option key={ph.id} value={ph.id}>
+                            {ph.name} (Urutan: {ph.order || 0})
+                          </option>
+                        ))}
+                      </select>
+                      {onOpenPhaseManager && (
+                        <button
+                          type="button"
+                          onClick={onOpenPhaseManager}
+                          className="px-3 rounded-xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-bold text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-white/10 shrink-0"
+                          title="Kelola Daftar Fase"
+                        >
+                          + Fase
+                        </button>
+                      )}
+                    </div>
+                  </InputField>
+                </div>
+
+                <InputField label="Deskripsi Singkat Modul">
+                  <textarea rows={2} value={form.description || ''}
                     onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
-                    className={`${textareaCls} h-24`} placeholder="Deskripsi singkat modul..." />
+                    className={`${textareaCls} h-20 text-xs sm:text-sm`} placeholder="Deskripsi singkat modul..." />
                 </InputField>
 
-                <InputField label="Catatan / Notes">
-                  <textarea rows={6} value={form.notes || ''}
-                    onChange={e => setForm(p => ({ ...p, notes: e.target.value }))}
-                    className={`${textareaCls} h-32`} placeholder="Catatan materi untuk modul ini..." />
+                <InputField label="Catatan / Notes Materi (TinyMCE Rich HTML Editor)">
+                  <TinyMCEEditor
+                    value={form.notes || ""}
+                    onChange={(val) => setForm((p) => ({ ...p, notes: val }))}
+                    placeholder="Tuliskan catatan dan materi pembelajaran modul di sini..."
+                    height={340}
+                  />
                 </InputField>
 
                 <InputField label="Cover Image (URL atau Upload)">
@@ -898,6 +1097,159 @@ function ModuleModal({ open, onClose, form, setForm, onSubmit, isEditing, isLoad
               <button type="submit" form="modForm" disabled={isLoading}
                 className="px-6 py-2.5 rounded-xl font-bold bg-primary text-[#050e0a] hover:bg-[#a8d3ba] transition-all flex items-center gap-2 disabled:opacity-50">
                 {isLoading ? <div className="w-5 h-5 border-2 border-[#050e0a]/30 border-t-[#050e0a] rounded-full animate-spin" /> : "Simpan Modul"}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// ─── Extracted: Phase Manager Modal ───────────────────────────────────────────
+function PhaseManagerModal({ open, onClose, phases, form, setForm, targetPhase, setTargetPhase, onSubmit, onDelete, isLoading }) {
+  return (
+    <AnimatePresence>
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={onClose} className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="relative w-full max-w-xl bg-white dark:bg-[#0a1612] border border-gray-200 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+          >
+            <div className="p-6 border-b border-gray-200 dark:border-white/10 flex items-center justify-between shrink-0 bg-gray-50/50 dark:bg-white/[0.02]">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <Layers className="w-5 h-5 text-primary" />
+                Kelola Fase Modul
+              </h2>
+              <button onClick={onClose} className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto flex-1 space-y-6">
+              {/* Form Create / Edit Phase */}
+              <div className="p-4 bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 rounded-2xl">
+                <h3 className="text-xs font-black uppercase tracking-wider text-gray-700 dark:text-white mb-3">
+                  {targetPhase ? `Edit Fase: ${targetPhase.name}` : "Tambah Fase Baru"}
+                </h3>
+                <form onSubmit={onSubmit} className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="sm:col-span-2">
+                      <input
+                        type="text"
+                        required
+                        value={form.name || ""}
+                        onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+                        className={`${inputCls} h-10 text-xs`}
+                        placeholder="Nama Fase (e.g. Fase 1: Onboarding)"
+                      />
+                    </div>
+                    <div>
+                      <input
+                        type="number"
+                        value={form.order !== undefined ? form.order : 0}
+                        onChange={e => setForm(p => ({ ...p, order: e.target.value }))}
+                        className={`${inputCls} h-10 text-xs`}
+                        placeholder="Urutan (1, 2, ...)"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <input
+                      type="text"
+                      value={form.description || ""}
+                      onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
+                      className={`${inputCls} h-10 text-xs`}
+                      placeholder="Deskripsi singkat fase (opsional)..."
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-1">
+                    {targetPhase && (
+                      <button
+                        type="button"
+                        onClick={() => { setTargetPhase(null); setForm(EMPTY_PHASE); }}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-700 dark:text-white/60"
+                      >
+                        Batal Edit
+                      </button>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="px-4 py-1.5 rounded-lg text-xs font-bold bg-primary text-[#050e0a] hover:bg-primary-focus transition-all disabled:opacity-50"
+                    >
+                      {targetPhase ? "Perbarui Fase" : "Simpan Fase"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* List of Phases */}
+              <div>
+                <h3 className="text-xs font-black uppercase tracking-wider text-gray-500 dark:text-white/50 mb-3">
+                  Daftar Fase Tersedia ({phases.length})
+                </h3>
+
+                {phases.length === 0 ? (
+                  <div className="py-8 text-center text-xs text-gray-400">Belum ada fase. Buat fase pertama di atas.</div>
+                ) : (
+                  <div className="space-y-2">
+                    {phases.map((ph) => (
+                      <div
+                        key={ph.id}
+                        className="p-3.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl flex items-center justify-between gap-3"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-black font-mono">
+                              #{ph.order || 0}
+                            </span>
+                            <span className="font-bold text-sm text-gray-900 dark:text-white truncate">
+                              {ph.name}
+                            </span>
+                          </div>
+                          {ph.description && (
+                            <p className="text-xs text-gray-500 dark:text-white/50 mt-1 line-clamp-1">{ph.description}</p>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setTargetPhase(ph);
+                              setForm({ name: ph.name, description: ph.description || "", order: ph.order || 0 });
+                            }}
+                            className="p-2 rounded-lg bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white hover:bg-gray-200 transition-colors"
+                            title="Edit Fase"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onDelete(ph.id)}
+                            className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
+                            title="Hapus Fase"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-gray-200 dark:border-white/10 flex justify-end shrink-0 bg-gray-50/50 dark:bg-white/[0.02]">
+              <button onClick={onClose} className="px-5 py-2 rounded-xl text-xs font-bold bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-white hover:bg-gray-300 transition-all">
+                Tutup
               </button>
             </div>
           </motion.div>
