@@ -100,6 +100,8 @@ export default async function TTSAssignmentPlayPage({ params, searchParams }) {
           submission={existingSubmission}
           taskId={taskId}
           backUrl="/member/tugas"
+          puzzleData={res.data}
+          currentUser={session.user}
         />
       );
     }

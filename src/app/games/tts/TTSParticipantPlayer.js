@@ -6,11 +6,13 @@ import {
   Check, Volume2, VolumeX, Maximize2, Minimize2,
   Sun, Moon, RotateCcw, ArrowLeft, Keyboard as KeyboardIcon,
   Trophy, Award, Zap, Delete, Sparkles, Flame, Lightbulb,
-  Star, Target, Timer, Crown, ShieldAlert, Sparkle, CheckCircle2
+  Star, Target, Timer, Crown, ShieldAlert, Sparkle, CheckCircle2,
+  Share2, ListOrdered, HelpCircle, BookOpen, X, ChevronLeft,
+  ChevronRight, ArrowRight, Eye, Palette
 } from "lucide-react";
 import Link from "next/link";
-import { useTheme } from "next-themes";
 import { generateCrosswordLayout } from "@/lib/crosswordGenerator";
+import TTSShareCardModal from "./TTSShareCardModal";
 
 // ==========================================
 // PURE WEB AUDIO SYNTHESIZER (PITCH SHIFT & SFX)
@@ -23,7 +25,6 @@ const playSound = (type, isMuted = false, noteIndex = 0) => {
     const ctx = new AudioContext();
 
     if (type === "type") {
-      // Musical pentatonic scale stepping as you type
       const scale = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5];
       const baseFreq = scale[noteIndex % scale.length] || 620;
       const osc = ctx.createOscillator();
@@ -38,7 +39,6 @@ const playSound = (type, isMuted = false, noteIndex = 0) => {
       osc.start();
       osc.stop(ctx.currentTime + 0.05);
     } else if (type === "correct") {
-      // Grand celebratory ascending arpeggio
       const notes = [523.25, 659.25, 783.99, 1046.5, 1318.51, 1567.98];
       notes.forEach((freq, idx) => {
         const osc = ctx.createOscillator();
@@ -54,7 +54,6 @@ const playSound = (type, isMuted = false, noteIndex = 0) => {
         osc.stop(startTime + 0.55);
       });
     } else if (type === "hint") {
-      // Magic shimmer harp
       const harp = [880, 1174.66, 1396.91, 1760];
       harp.forEach((freq, idx) => {
         const osc = ctx.createOscillator();
@@ -101,20 +100,26 @@ const playSound = (type, isMuted = false, noteIndex = 0) => {
 };
 
 // Particle Explosion Component
-function ParticleExplosion({ count = 28 }) {
-  const particles = useMemo(() => {
-    return Array.from({ length: count }).map((_, i) => ({
-      id: i,
-      x: (Math.random() - 0.5) * 500,
-      y: (Math.random() - 0.5) * 450 - 50,
-      scale: Math.random() * 1.4 + 0.6,
-      rotate: Math.random() * 720 - 360,
-      color: ["#10b981", "#34d399", "#f59e0b", "#fbbf24", "#38bdf8", "#ec4899", "#a855f7"][
-        Math.floor(Math.random() * 7)
-      ],
-      shape: Math.random() > 0.4 ? "circle" : "star"
-    }));
+function ParticleExplosion({ count = 36 }) {
+  const [particles, setParticles] = useState([]);
+
+  useEffect(() => {
+    setParticles(
+      Array.from({ length: count }).map((_, i) => ({
+        id: i,
+        x: (Math.random() - 0.5) * 600,
+        y: (Math.random() - 0.5) * 550 - 50,
+        scale: Math.random() * 1.4 + 0.6,
+        rotate: Math.random() * 720 - 360,
+        color: ["#10b981", "#34d399", "#f59e0b", "#fbbf24", "#38bdf8", "#ec4899", "#a855f7"][
+          Math.floor(Math.random() * 7)
+        ],
+        shape: Math.random() > 0.4 ? "circle" : "star",
+      }))
+    );
   }, [count]);
+
+  if (particles.length === 0) return null;
 
   return (
     <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
@@ -129,7 +134,7 @@ function ParticleExplosion({ count = 28 }) {
             y: p.y,
             rotate: p.rotate
           }}
-          transition={{ duration: 1.1, ease: "easeOut" }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
           style={{ backgroundColor: p.shape === "circle" ? p.color : "transparent" }}
           className={p.shape === "circle" ? "w-3 h-3 rounded-full shadow-lg" : "text-lg"}
         >
@@ -141,25 +146,24 @@ function ParticleExplosion({ count = 28 }) {
 }
 
 export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/tts", currentUser, taskId }) {
-  const { theme: globalTheme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const hiddenInputRef = useRef(null);
+
+  // 2 Selectable Themes: "dark" (Cyber Emerald) vs "light" (Modern Pearl)
+  const [gameTheme, setGameTheme] = useState("dark");
+  const isDark = gameTheme === "dark";
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const activeThemeKey = mounted ? (globalTheme === "system" ? resolvedTheme : globalTheme) : "dark";
-  const isDark = activeThemeKey === "dark";
-
   // Audio State
   const [isMuted, setIsMuted] = useState(false);
 
-  // ==========================================
-  // GAMEPLAY STATE & NOTIFICATION
-  // ==========================================
+  // Gameplay State
   const [mistakeCount, setMistakeCount] = useState(0);
+  const [hintsUsed, setHintsUsed] = useState(0);
   const [floatingXP, setFloatingXP] = useState(null);
   const [showCelebrationParticles, setShowCelebrationParticles] = useState(false);
   const [hoveredCell, setHoveredCell] = useState(null);
@@ -195,7 +199,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
   const [userInputs, setUserInputs] = useState({});
   const [wordStatuses, setWordStatuses] = useState({}); // { "ACROSS-1": "CORRECT" | "WRONG" | "REVEALED" }
 
-  // Game UI Mode: "PICK_WORD" vs "ANSWERING"
+  // Focus Modal Answering State
   const [activeWord, setActiveWord] = useState(null);
   const [typedLetters, setTypedLetters] = useState([]);
   const [activeSlotIdx, setActiveSlotIdx] = useState(0);
@@ -207,8 +211,10 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(true);
 
-  // Completion
+  // Modals
   const [showWinModal, setShowWinModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [showClueDrawer, setShowClueDrawer] = useState(false);
 
   const allClueWords = useMemo(() => {
     return [...crosswordData.clues.across, ...crosswordData.clues.down];
@@ -220,7 +226,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
     return Object.values(wordStatuses).filter((st) => st === "CORRECT").length;
   }, [wordStatuses]);
 
-  // Player Rank Calculation based on user profile
+  // Player Rank Calculation
   const playerRank = useMemo(() => {
     const userLvl = currentUser?.memberProfile?.level || 1;
     if (userLvl >= 5) return { title: "Grandmaster", level: userLvl, icon: Crown, color: "text-amber-400" };
@@ -277,9 +283,9 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
-  // Lock body scroll when activeWord or showWinModal is open
+  // Lock body scroll when modal is open
   useEffect(() => {
-    if (activeWord || showWinModal) {
+    if (activeWord || showWinModal || showShareModal || showClueDrawer) {
       document.body.style.overflow = "hidden";
       document.body.style.touchAction = "none";
     } else {
@@ -290,7 +296,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
       document.body.style.overflow = "";
       document.body.style.touchAction = "";
     };
-  }, [activeWord, showWinModal]);
+  }, [activeWord, showWinModal, showShareModal, showClueDrawer]);
 
   // Timer interval
   useEffect(() => {
@@ -323,7 +329,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
-  // Open answering focus mode when a word or box is clicked
+  // Open answering focus modal when a word or box is clicked
   const handleSelectWord = (word) => {
     if (!word) return;
     playSound("type", isMuted, 0);
@@ -352,7 +358,6 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
   const handleCellClick = (cell, row, col) => {
     if (!cell || !cell.char) return;
 
-    // Find word for this cell
     let chosen = null;
     if (cell.acrossWordId) {
       chosen = crosswordData.placedWords.find((w) => w.id === cell.acrossWordId && w.direction === "ACROSS");
@@ -373,7 +378,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
     }
   };
 
-  // Submit answers to server to score and record in taskSubmission & user profile
+  // Submit answers to server
   const handleSubmitAnswers = useCallback(
     async (finalStatuses = wordStatuses, finalInputs = userInputs, currentMistakes = mistakeCount) => {
       if (hasSubmitted || isSubmitting) return;
@@ -392,11 +397,9 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
 
           if (match) {
             const wordKey = `${match.direction}-${match.number}`;
-            // If participant solved it correctly themselves:
             if (finalStatuses[wordKey] === "CORRECT") {
               answersMap[q.id] = cleanAns;
             } else {
-              // If it was auto-revealed due to wrong answer, do not submit correct answer!
               answersMap[q.id] = "REVEALED_AFTER_WRONG";
             }
           } else {
@@ -430,7 +433,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
     [hasSubmitted, isSubmitting, puzzleData, crosswordData, wordStatuses, userInputs, mistakeCount, elapsedTime, taskId]
   );
 
-  // Direct letter typing & auto validation
+  // Direct letter typing & auto validation in modal
   const triggerValidation = useCallback((letters) => {
     if (!activeWord) return;
     const enteredAnswer = letters.join("").toUpperCase();
@@ -441,20 +444,17 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
     if (isCorrect) {
       setAnswerState("correct");
       playSound("correct", isMuted);
-
-      // Trigger Confetti & Success Notification (Clean feedback without fake XP/Streak)
       setShowCelebrationParticles(true);
       setTimeout(() => setShowCelebrationParticles(false), 1200);
 
       setFloatingXP({
         text: "Jawaban Benar!",
-        sub: `Soal #${activeWord.number} Terpecahkan`,
+        sub: `Soal #${activeWord.number} Terpecahkan ✨`,
         key: Date.now(),
         type: "correct"
       });
       setTimeout(() => setFloatingXP(null), 1400);
 
-      // Update board cells
       const isAcross = activeWord.direction === "ACROSS";
       const newInputs = { ...userInputs };
       for (let i = 0; i < activeWord.length; i++) {
@@ -471,7 +471,6 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
         (st) => st === "CORRECT" || st === "REVEALED"
       ).length;
 
-      // Smooth transition back to overview board
       setTimeout(() => {
         setActiveWord(null);
         setAnswerState("typing");
@@ -481,7 +480,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
           playSound("win", isMuted);
           handleSubmitAnswers(nextStatuses, newInputs, mistakeCount);
         }
-      }, 850);
+      }, 750);
     } else {
       setAnswerState("wrong");
       playSound("wrong", isMuted);
@@ -492,7 +491,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
 
       setFloatingXP({
         text: "Jawaban Kurang Tepat",
-        sub: wrongAnswerBehavior === "RETRY" ? "Coba periksa kembali hurufnya" : "Lanjut ke soal berikutnya",
+        sub: wrongAnswerBehavior === "RETRY" ? "Periksa kembali susunan hurufnya" : "Lanjut ke soal berikutnya",
         key: Date.now(),
         type: "wrong"
       });
@@ -523,14 +522,13 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
             playSound("win", isMuted);
             handleSubmitAnswers(nextStatuses, newInputs, nextMistakes);
           }
-        }, 1200);
+        }, 1100);
       } else {
-        // Retry behavior: clear letters so participant can retry immediately
         setTimeout(() => {
           setTypedLetters(new Array(activeWord.length).fill(""));
           setActiveSlotIdx(0);
           setAnswerState("typing");
-        }, 650);
+        }, 600);
       }
     }
   }, [activeWord, userInputs, wordStatuses, totalWords, wrongAnswerBehavior, isMuted, mistakeCount, handleSubmitAnswers]);
@@ -551,7 +549,6 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
       setActiveSlotIdx(nextSlot);
     }
 
-    // AUTO VALIDATE WHEN FULL
     const isFull = nextLetters.length === activeWord.length && nextLetters.every((l) => Boolean(l));
     if (isFull) {
       triggerValidation(nextLetters);
@@ -573,15 +570,23 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
     playSound("type", isMuted, Math.max(0, activeSlotIdx - 1));
   }, [activeWord, activeSlotIdx, typedLetters, answerState, isMuted]);
 
+  // Close modal safely on mobile and desktop
+  const handleCloseModal = useCallback(() => {
+    setActiveWord(null);
+    setAnswerState("typing");
+    if (typeof document !== "undefined" && document.activeElement) {
+      document.activeElement.blur();
+    }
+  }, []);
+
   // Keyboard events
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (showWinModal) return;
+      if (showWinModal || showShareModal || showClueDrawer) return;
 
       if (e.key === "Escape") {
         if (activeWord) {
-          setActiveWord(null);
-          setAnswerState("typing");
+          handleCloseModal();
         }
         return;
       }
@@ -611,7 +616,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeWord, showWinModal, handleInputLetter, handleBackspace]);
+  }, [activeWord, showWinModal, showShareModal, showClueDrawer, handleInputLetter, handleBackspace]);
 
   // Reset puzzle
   const handleResetPuzzle = () => {
@@ -622,7 +627,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
     setAnswerState("typing");
     setShowWinModal(false);
     setMistakeCount(0);
-    setHintsRemaining(3);
+    setHintsUsed(0);
     setElapsedTime(0);
     if (timeLimitMinutes) {
       setTimeRemaining(timeLimitMinutes * 60);
@@ -630,82 +635,52 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
     setIsTimerRunning(true);
   };
 
-  // Background Theme Styles matching SRE aesthetic
-  const bgGradient = isDark
-    ? "bg-gradient-to-b from-[#06140f] via-[#040e0b] to-[#020705] text-white"
-    : "bg-gradient-to-b from-[#f2f8f5] via-[#eaf4ef] to-[#dfede7] text-slate-900";
+  // 2 Distinct Layout Themes:
+  const bgThemeClass = isDark
+    ? "bg-[#030f09] text-white"
+    : "bg-gradient-to-b from-[#f2faf5] via-[#e6f6ed] to-[#d9f0e3] text-slate-900";
 
   return (
-    <div className={`fixed inset-0 w-screen h-screen overflow-hidden select-none font-sans flex flex-col justify-between transition-colors duration-700 ${bgGradient}`}>
-      {/* ========================================================================= */}
-      {/* CELEBRATION PARTICLE EXPLOSION */}
-      {/* ========================================================================= */}
-      {showCelebrationParticles && <ParticleExplosion count={36} />}
+    <div className={`fixed inset-0 w-screen h-screen overflow-hidden select-none font-sans flex flex-col justify-between transition-colors duration-500 ${bgThemeClass}`}>
+      {/* CELEBRATION EXPLOSION */}
+      {showCelebrationParticles && <ParticleExplosion count={40} />}
 
-      {/* ========================================================================= */}
-      {/* GLOWING CELESTIAL ORBS & SPACE AMBIENCE (MATCHING REFERENCE AESTHETICS) */}
-      {/* ========================================================================= */}
+      {/* AMBIENT BACKGROUND GLOW */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        {/* Glowing Planet 1 - Top Right (Warm Solar Orb) */}
-        <div
-          className={`absolute -top-12 -right-12 w-64 h-64 sm:w-80 sm:h-80 rounded-full blur-[1px] opacity-75 transition-all duration-1000 ${
-            isDark
-              ? "bg-gradient-to-br from-amber-400 via-rose-500 to-purple-800 shadow-[0_0_80px_rgba(251,146,60,0.45)]"
-              : "bg-gradient-to-br from-amber-200 via-emerald-300 to-teal-400 shadow-[0_0_60px_rgba(52,211,153,0.3)] opacity-40"
-          }`}
-        />
-
-        {/* Glowing Planet 2 - Bottom Right (Cosmic Emerald Planet) */}
-        <div
-          className={`absolute bottom-8 right-16 sm:right-24 w-52 h-52 sm:w-72 sm:h-72 rounded-full blur-[1px] opacity-65 transition-all duration-1000 ${
-            isDark
-              ? "bg-gradient-to-tr from-emerald-900 via-teal-600 to-cyan-400 shadow-[0_0_90px_rgba(20,184,166,0.4)]"
-              : "bg-gradient-to-tr from-teal-200 via-emerald-200 to-emerald-400 shadow-[0_0_50px_rgba(16,185,129,0.25)] opacity-35"
-          }`}
-        />
-
-        {/* Glowing Planet 3 - Mid Left (Violet Sphere) */}
-        <div
-          className={`absolute top-1/3 -left-16 w-44 h-44 sm:w-60 sm:h-60 rounded-full blur-[1px] opacity-55 transition-all duration-1000 ${
-            isDark
-              ? "bg-gradient-to-br from-indigo-900 via-purple-700 to-pink-500 shadow-[0_0_70px_rgba(168,85,247,0.35)]"
-              : "bg-gradient-to-br from-indigo-200 via-purple-200 to-emerald-200 shadow-[0_0_40px_rgba(147,51,234,0.15)] opacity-30"
-          }`}
-        />
-
-        {/* Twinkling Star Clusters */}
-        <div className="absolute top-[18%] left-[22%] w-1.5 h-1.5 rounded-full bg-white animate-ping opacity-70" />
-        <div className="absolute top-[65%] left-[14%] w-2 h-2 rounded-full bg-emerald-300 animate-pulse opacity-80" />
-        <div className="absolute top-[28%] right-[32%] w-1.5 h-1.5 rounded-full bg-cyan-300 animate-pulse opacity-75" />
-        <div className="absolute bottom-[22%] left-[45%] w-2 h-2 rounded-full bg-amber-200 animate-ping opacity-60" />
-        <div className="absolute top-[12%] right-[15%] text-amber-300 text-xs animate-spin opacity-70">✦</div>
-        <div className="absolute bottom-[35%] right-[12%] text-cyan-200 text-sm animate-pulse opacity-80">✦</div>
-        <div className="absolute top-[48%] left-[8%] text-emerald-300 text-base animate-pulse opacity-70">★</div>
+        {isDark ? (
+          <>
+            <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-emerald-500/10 blur-3xl opacity-70" />
+            <div className="absolute bottom-10 -right-10 w-96 h-96 rounded-full bg-teal-500/15 blur-3xl opacity-60" />
+            <div className="absolute top-1/3 -left-20 w-72 h-72 rounded-full bg-emerald-950/40 blur-3xl opacity-50" />
+          </>
+        ) : (
+          <>
+            <div className="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-emerald-200/40 blur-3xl" />
+            <div className="absolute bottom-10 -left-10 w-96 h-96 rounded-full bg-teal-200/40 blur-3xl" />
+          </>
+        )}
       </div>
 
-      {/* FLOATING GAMIFICATION XP & NOTIFICATION BANNER */}
+      {/* FLOATING XP BANNER */}
       <AnimatePresence>
         {floatingXP && (
           <motion.div
             key={floatingXP.key}
             initial={{ opacity: 0, y: -25, scale: 0.8 }}
-            animate={{ opacity: 1, y: 0, scale: 1.15 }}
+            animate={{ opacity: 1, y: 0, scale: 1.08 }}
             exit={{ opacity: 0, y: -35, scale: 0.9 }}
-            className={`fixed top-20 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-2xl border-2 flex flex-col items-center justify-center gap-0.5 shadow-2xl pointer-events-none ${
+            className={`fixed top-16 left-1/2 -translate-x-1/2 z-50 px-6 py-2.5 rounded-2xl border-2 flex flex-col items-center justify-center gap-0.5 shadow-2xl pointer-events-none ${
               floatingXP.type === "wrong"
                 ? "bg-rose-600 text-white border-rose-300 shadow-rose-900/60"
-                : floatingXP.type === "hint"
-                ? "bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 border-white shadow-amber-500/80"
-                : "bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-300 text-slate-950 border-white shadow-[0_0_40px_rgba(52,211,153,0.95)]"
+                : "bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-300 text-slate-950 border-white shadow-[0_0_35px_rgba(52,211,153,0.95)]"
             }`}
           >
-            <div className="flex items-center gap-2 font-black text-base sm:text-lg">
-              {floatingXP.type === "correct" && <Sparkles className="w-5 h-5 fill-current animate-spin" />}
-              {floatingXP.type === "hint" && <Lightbulb className="w-5 h-5 fill-current animate-bounce" />}
+            <div className="flex items-center gap-2 font-black text-sm sm:text-base">
+              {floatingXP.type === "correct" && <Sparkles className="w-4 h-4 fill-current animate-spin" />}
               <span>{floatingXP.text}</span>
             </div>
             {floatingXP.sub && (
-              <span className="text-[11px] font-black uppercase tracking-wider opacity-90">
+              <span className="text-[10px] font-bold uppercase tracking-wider opacity-90">
                 {floatingXP.sub}
               </span>
             )}
@@ -714,755 +689,754 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
       </AnimatePresence>
 
       {/* ========================================================================= */}
-      {/* 1. TOP BAR HUD (TIMER, LEVEL/RANK, STREAK, XP, SINGLE THEME TOGGLE) */}
+      {/* 1. TOP HEADER HUD */}
       {/* ========================================================================= */}
-      <header className="relative z-20 w-full px-3 sm:px-6 py-2.5 sm:py-3.5 flex items-center justify-between backdrop-blur-md border-b border-white/5 shrink-0">
-        {/* LEFT: TIMER & LEVEL RANK BADGE */}
-        <div className="flex items-center gap-2 sm:gap-4">
-          {/* DIGITAL TIMER */}
-          <div className="flex items-center gap-1.5 sm:gap-2 font-mono font-black text-sm sm:text-lg tracking-tight">
-            <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_#34d399]" />
-            <span className="drop-shadow-md">
-              {timeLimitMinutes ? formatSeconds(timeRemaining) : formatSeconds(elapsedTime)}
+      <header
+        className={`relative z-20 w-full px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between backdrop-blur-xl border-b transition-colors duration-500 shrink-0 gap-2 ${
+          isDark
+            ? "border-emerald-500/20 bg-[#020b06]/90 text-white"
+            : "border-emerald-600/20 bg-white/90 text-slate-900 shadow-sm"
+        }`}
+      >
+        {/* LEFT: SRE LOGO & TITLE */}
+        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+          <Link
+            href={onBackUrl}
+            className={`p-1.5 sm:p-2 rounded-xl border transition-all cursor-pointer shrink-0 shadow-sm ${
+              isDark ? "bg-white/5 hover:bg-white/15 border-white/10 text-gray-300 hover:text-white" : "bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700"
+            }`}
+            title="Kembali"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </Link>
+
+          <div className="flex items-center gap-2 min-w-0">
+            <div
+              className={`h-6 w-20 sm:h-7 sm:w-28 shrink-0 transition-all duration-300 ${
+                isDark ? "bg-white" : "bg-[#047857]"
+              }`}
+              style={{
+                WebkitMaskImage: "url(/images/logo.webp)",
+                WebkitMaskSize: "contain",
+                WebkitMaskRepeat: "no-repeat",
+                WebkitMaskPosition: "left center",
+                maskImage: "url(/images/logo.webp)",
+                maskSize: "contain",
+                maskRepeat: "no-repeat",
+                maskPosition: "left center",
+              }}
+            />
+            <div className="min-w-0">
+              <h1 className="text-xs sm:text-sm font-black tracking-tight truncate max-w-[85px] xs:max-w-[130px] sm:max-w-xs">
+                {title}
+              </h1>
+              <div className="hidden sm:flex items-center gap-1.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider">
+                <span className={isDark ? "text-emerald-400" : "text-emerald-700 font-extrabold"}>SRE UPNVJT</span>
+                <span>•</span>
+                <span className={isDark ? "text-gray-400" : "text-slate-600"}>Teka-Teki Silang</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* CENTER: PROGRESS BAR */}
+        <div className="hidden md:flex flex-col items-center gap-1 max-w-xs w-full px-4">
+          <div className="flex items-center justify-between w-full text-[10px] font-black uppercase tracking-wider">
+            <span className={`flex items-center gap-1 ${isDark ? "text-emerald-400" : "text-emerald-700"}`}>
+              <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+              <span>Progres Pengerjaan</span>
+            </span>
+            <span className={isDark ? "text-gray-300" : "text-slate-700 font-bold"}>
+              {correctWordsCount} / {totalWords} Soal
             </span>
           </div>
-
-          {/* LEVEL / RANK BADGE */}
-          <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-black/20 dark:bg-white/10 border border-current/10 text-xs font-black">
-            <playerRank.icon className={`w-3.5 h-3.5 ${playerRank.color}`} />
-            <span className="opacity-75">LVL {playerRank.level}</span>
-            <span className="opacity-40">•</span>
-            <span className={playerRank.color}>{playerRank.title}</span>
+          <div className={`w-full h-2 rounded-full overflow-hidden border ${isDark ? "bg-black/60 border-emerald-500/30" : "bg-slate-200 border-slate-300"}`}>
+            <motion.div
+              className="h-full bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${totalWords > 0 ? (correctWordsCount / totalWords) * 100 : 0}%` }}
+              transition={{ duration: 0.4 }}
+            />
           </div>
         </div>
 
-        {/* CENTER: SUBTITLE (PICK A WORD / TYPE THE LETTERS) */}
-        <div className="font-bold text-xs sm:text-base tracking-wider text-center drop-shadow hidden xs:block">
-          <AnimatePresence mode="wait">
-            {activeWord ? (
-              <motion.span
-                key="typing"
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 8 }}
-                className="text-emerald-400 font-extrabold flex items-center justify-center gap-1.5"
-              >
-                <span>Type the letters</span>
-              </motion.span>
-            ) : (
-              <motion.span
-                key="pick"
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 8 }}
-                className="opacity-85 font-medium"
-              >
-                Pick a word
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* RIGHT: REAL REWARD XP & SOLVED COUNTER */}
-        <div className="flex items-center gap-1.5 sm:gap-3">
-          {/* REAL REWARD XP BADGE */}
-          <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-500 dark:text-amber-400 font-mono font-black text-[11px] sm:text-xs shadow-sm">
-            <Zap className="w-3.5 h-3.5 fill-amber-400 shrink-0" />
-            <span>+{puzzleData?.rewardXp || 10} XP<span className="hidden sm:inline"> Reward</span></span>
+        {/* RIGHT: THEME SWITCHER, TIMER, XP, SOUND */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* DIGITAL TIMER */}
+          <div
+            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl border font-mono font-black text-xs sm:text-sm shadow-sm ${
+              isDark
+                ? "bg-black/60 border-emerald-500/40 text-emerald-300"
+                : "bg-white border-emerald-600/30 text-emerald-800"
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
+            <span>{timeLimitMinutes ? formatSeconds(timeRemaining) : formatSeconds(elapsedTime)}</span>
           </div>
 
-          {/* SOLVED CHECK COUNTER (✓ 0 or ✓ 3/10) */}
-          <div className="flex items-center gap-1 sm:gap-1.5 font-black text-xs sm:text-base px-2 sm:px-3 py-1 rounded-xl bg-black/20 dark:bg-white/10 border border-current/10 backdrop-blur-md">
-            <Check className="w-3.5 sm:w-4 h-3.5 sm:h-4 stroke-[3.5] text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.8)] shrink-0" />
-            <span>{correctWordsCount}</span>
-            <span className="opacity-40 text-[10px] sm:text-xs">/{totalWords}</span>
+          {/* XP REWARD */}
+          <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-500 dark:text-amber-400 font-mono font-black text-xs">
+            <Zap className="w-3.5 h-3.5 fill-amber-400" />
+            <span>+{puzzleData?.rewardXp || 10} XP</span>
           </div>
 
-          {/* SINGLE INTEGRATED THEME TOGGLE */}
-          {mounted && (
-            <motion.button
-              whileHover={{ scale: 1.12, rotate: isDark ? 15 : -15 }}
-              whileTap={{ scale: 0.88, rotate: isDark ? -25 : 25 }}
-              onClick={() => setTheme(isDark ? "light" : "dark")}
-              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center border-2 shadow-lg transition-all cursor-pointer shrink-0 ${
-                isDark
-                  ? "bg-[#07130e]/90 border-emerald-400 text-emerald-400 shadow-emerald-950/50 hover:shadow-emerald-500/40"
-                  : "bg-[#0cc48a]/90 border-yellow-300 text-yellow-300 shadow-emerald-900/20 hover:shadow-yellow-300/50"
-              }`}
-              title={isDark ? "Ganti ke Mode Terang" : "Ganti ke Mode Gelap"}
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                {isDark ? (
-                  <motion.div
-                    key="sun"
-                    initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
-                    animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                    exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
-                  >
-                    <Sun className="w-3.5 sm:w-4 h-3.5 sm:h-4 drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="moon"
-                    initial={{ rotate: 90, opacity: 0, scale: 0.5 }}
-                    animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                    exit={{ rotate: -90, opacity: 0, scale: 0.5 }}
-                  >
-                    <Moon className="w-3.5 sm:w-4 h-3.5 sm:h-4 drop-shadow-[0_0_8px_rgba(253,224,71,0.8)] fill-current" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.button>
-          )}
+          {/* 2 THEME SELECTOR BUTTON */}
+          <button
+            type="button"
+            onClick={() => setGameTheme(isDark ? "light" : "dark")}
+            className={`p-1.5 sm:px-3 sm:py-1 rounded-xl border font-black text-[11px] flex items-center gap-1.5 transition-all cursor-pointer shadow-sm ${
+              isDark
+                ? "bg-emerald-950/80 border-emerald-400 text-emerald-300 hover:bg-emerald-900"
+                : "bg-emerald-100 border-emerald-600 text-emerald-900 hover:bg-emerald-200"
+            }`}
+            title="Ganti Tema Visual"
+          >
+            {isDark ? <Moon className="w-3.5 h-3.5 text-emerald-400" /> : <Sun className="w-3.5 h-3.5 text-amber-600" />}
+            <span className="hidden md:inline">{isDark ? "" : ""}</span>
+          </button>
+
+          {/* SOUND TOGGLE */}
+          <button
+            onClick={() => setIsMuted(!isMuted)}
+            className={`p-1.5 sm:p-2 rounded-xl border transition-all cursor-pointer shadow-sm ${
+              isDark ? "bg-white/5 hover:bg-white/15 border-white/10 text-gray-300" : "bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700"
+            }`}
+            title={isMuted ? "Suara Aktif" : "Bisukan Suara"}
+          >
+            {isMuted ? <VolumeX className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-rose-400" /> : <Volume2 className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-emerald-500" />}
+          </button>
         </div>
       </header>
 
       {/* ========================================================================= */}
-      {/* 2. MAIN INTERACTIVE VIEW (CRISP SQUARE GRID vs FULL-SCREEN FOCUS QUESTION) */}
+      {/* 2. MAIN BOARD VIEW */}
       {/* ========================================================================= */}
-      <main className="relative z-10 flex-1 w-full max-w-[1500px] mx-auto flex items-center justify-center p-2 sm:p-6 overflow-auto">
-        {/* ------------------------------------------------------------- */}
-        {/* A. BOARD VIEW ("Pick a word") */}
-        {/* ------------------------------------------------------------- */}
+      <main className="relative z-10 flex-1 w-full max-w-5xl mx-auto flex flex-col items-center justify-center p-3 sm:p-6 overflow-auto">
+        {/* SUBTITLE BANNER */}
         <div
-          className={`relative transition-all duration-500 w-full flex items-center justify-center ${
-            activeWord ? "filter blur-[8px] opacity-20 pointer-events-none scale-95" : "opacity-100 scale-100"
+          className={`mb-2 sm:mb-4 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border text-[10px] sm:text-xs font-black uppercase tracking-wider flex items-center gap-1.5 sm:gap-2 shadow-sm text-center ${
+            isDark
+              ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
+              : "bg-emerald-100 border-emerald-400 text-emerald-900"
           }`}
         >
-          {crosswordData.grid && crosswordData.grid.length > 0 ? (
-            <div className="w-full overflow-auto flex justify-center items-center py-2 px-1 max-h-full">
-              <div
-                className="grid gap-[4px] sm:gap-[7px] select-none p-2 sm:p-5 md:p-6 bg-black/10 dark:bg-white/5 rounded-2xl sm:rounded-3xl border border-current/10 shadow-inner"
-                style={{
-                  gridTemplateColumns: `repeat(${crosswordData.cols}, minmax(0, 1fr))`,
-                  width: `${Math.min(crosswordData.cols * (typeof window !== "undefined" && window.innerWidth < 640 ? 38 : 50), 960)}px`,
-                  maxWidth: "100%",
-                }}
-              >
-                {crosswordData.grid.map((row, rIdx) =>
-                  row.map((cell, cIdx) => {
-                    const cellKey = `${rIdx},${cIdx}`;
-                    const isLetterCell = Boolean(cell && cell.char);
-                    const userLetter = userInputs[cellKey] || "";
-                    const isWordHovered = hoveredWordCells.has(cellKey);
-
-                    if (!isLetterCell) {
-                      return <div key={cellKey} className="aspect-square w-full opacity-0 pointer-events-none" />;
-                    }
-
-                    return (
-                      <motion.div
-                        key={cellKey}
-                        whileHover={{ scale: 1.08, y: -2 }}
-                        whileTap={{ scale: 0.92 }}
-                        onMouseEnter={() => setHoveredCell({ row: rIdx, col: cIdx })}
-                        onMouseLeave={() => setHoveredCell(null)}
-                        onClick={() => handleCellClick(cell, rIdx, cIdx)}
-                        className={`relative aspect-square w-full rounded-lg sm:rounded-2xl flex items-center justify-center font-black text-xs sm:text-2xl transition-all cursor-pointer ${
-                          isDark
-                            ? userLetter
-                              ? "border-2 border-emerald-400 bg-gradient-to-b from-[#123e2d] to-[#0a271c] text-emerald-300 shadow-[0_3px_0_#051811] sm:shadow-[0_4px_0_#051811] shadow-emerald-950/80"
-                              : isWordHovered
-                              ? "border-2 border-emerald-400 bg-[#0f2e21] text-white shadow-[0_3px_0_#061a12] sm:shadow-[0_4px_0_#061a12] shadow-emerald-500/20"
-                              : "border-2 border-white/40 bg-[#091a13]/85 text-white hover:border-emerald-400 hover:bg-[#113324] shadow-[0_3px_0_#040d09] sm:shadow-[0_4px_0_#040d09]"
-                            : userLetter
-                            ? "border-2 border-emerald-600 bg-emerald-100 text-emerald-950 shadow-[0_3px_0_#047857] sm:shadow-[0_4px_0_#047857]"
-                            : isWordHovered
-                            ? "border-2 border-emerald-600 bg-emerald-50 text-slate-900 shadow-[0_3px_0_#94a3b8] sm:shadow-[0_4px_0_#94a3b8]"
-                            : "border-2 border-slate-400/80 bg-white/95 text-slate-900 hover:border-emerald-600 hover:bg-emerald-50 shadow-[0_3px_0_#cbd5e1] sm:shadow-[0_4px_0_#cbd5e1]"
-                        }`}
-                      >
-                        {/* CRISP NUMBER IN TOP-LEFT */}
-                        {cell.number && (
-                          <span
-                            className={`absolute top-0.5 left-0.5 sm:left-1 text-[7px] sm:text-[11px] font-black leading-none drop-shadow ${
-                              isDark ? "text-white" : "text-slate-800"
-                            }`}
-                          >
-                            {cell.number}
-                          </span>
-                        )}
-
-                        {/* USER SOLVED LETTER */}
-                        <span className="mt-0.5 font-mono font-black tracking-wider drop-shadow">
-                          {userLetter}
-                        </span>
-                      </motion.div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-12 opacity-60 text-sm">
-              Papan TTS belum memiliki pertanyaan yang valid.
-            </div>
-          )}
+          <Sparkles className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-emerald-500 shrink-0" />
+          <span>Klik kotak untuk mengisi jawaban</span>
         </div>
 
-        {/* ------------------------------------------------------------- */}
-        {/* B. FOCUS QUESTION VIEW - PERFECTLY CENTERED & NON-SCROLLABLE */}
-        {/* ------------------------------------------------------------- */}
-        <AnimatePresence>
-          {activeWord && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{
-                opacity: 1,
-                scale: 1,
-                x: shakeWord ? [-16, 16, -12, 12, -6, 6, 0] : 0,
-              }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.22, ease: "easeOut" }}
-              onClick={() => {
-                // Clicking anywhere refocuses the native phone keyboard
-                hiddenInputRef.current?.focus();
-              }}
-              className={`fixed inset-0 z-50 flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 overflow-hidden backdrop-blur-3xl select-none ${
-                isDark ? "bg-[#06140e]/95 text-white" : "bg-slate-50/98 text-slate-900"
+        {/* SQUARE CROSSWORD GRID */}
+        {crosswordData.grid && crosswordData.grid.length > 0 ? (
+          <div className="w-full flex items-center justify-center max-h-full overflow-auto py-2">
+            <div
+              className={`grid gap-[4px] sm:gap-[7px] select-none p-3 sm:p-6 rounded-3xl border shadow-2xl transition-colors duration-500 ${
+                isDark
+                  ? "bg-black/75 border-emerald-500/30 shadow-[0_0_60px_rgba(0,0,0,0.8)]"
+                  : "bg-white/95 border-emerald-600/30 shadow-[0_15px_40px_rgba(4,120,87,0.15)]"
               }`}
+              style={{
+                gridTemplateColumns: `repeat(${crosswordData.cols}, minmax(0, 1fr))`,
+                maxWidth: `min(100%, ${Math.min(crosswordData.cols * 52, 720)}px)`,
+                width: "100%",
+              }}
             >
-              {/* REAL HIDDEN INPUT TO TRIGGER NATIVE PHONE KEYBOARD */}
-              <input
-                ref={hiddenInputRef}
-                type="text"
-                inputMode="text"
-                autoFocus
-                autoCapitalize="characters"
-                autoComplete="off"
-                autoCorrect="off"
-                spellCheck="false"
-                value=""
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (val) {
-                    const char = val.slice(-1);
-                    handleInputLetter(char);
+              {crosswordData.grid.map((row, rIdx) =>
+                row.map((cell, cIdx) => {
+                  const cellKey = `${rIdx},${cIdx}`;
+                  const isLetterCell = Boolean(cell && cell.char);
+                  const userLetter = userInputs[cellKey] || "";
+                  const isWordHovered = hoveredWordCells.has(cellKey);
+
+                  if (!isLetterCell) {
+                    return <div key={cellKey} className="aspect-square w-full opacity-0 pointer-events-none" />;
                   }
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Backspace") {
-                    e.preventDefault();
-                    handleBackspace();
-                  }
-                }}
-                className="opacity-0 absolute -top-10 left-0 w-1 h-1 pointer-events-none"
-                aria-label="Ketik jawaban Anda"
-              />
 
-              {/* CENTERED COMPACT CONTENT WRAPPER */}
-              <div className="w-full max-w-lg mx-auto flex flex-col items-center justify-center my-auto space-y-3 sm:space-y-4 px-1">
-                {/* TOP HEADER: BACK BUTTON & CLUE INFO */}
-                <div className="w-full flex items-center justify-between gap-2 shrink-0">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveWord(null);
-                      setAnswerState("typing");
-                    }}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-md ${
-                      isDark
-                        ? "bg-white/10 hover:bg-white/20 border-white/20 text-white"
-                        : "bg-white hover:bg-slate-100 border-slate-300 text-slate-800"
-                    }`}
-                  >
-                    <ArrowLeft className="w-3.5 h-3.5" />
-                    <span>Kembali ke Papan</span>
-                  </button>
-
-                  <div
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border text-xs font-black uppercase tracking-wider shadow-md ${
-                      isDark
-                        ? "bg-emerald-500/25 border-emerald-400/50 text-emerald-300"
-                        : "bg-emerald-100 border-emerald-400 text-emerald-800"
-                    }`}
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
-                    <span>Soal #{activeWord.number}</span>
-                    <span>•</span>
-                    <span>{activeWord.direction === "ACROSS" ? "Mendatar" : "Menurun"}</span>
-                  </div>
-                </div>
-
-                {/* QUESTION CARD */}
-                <div
-                  className={`w-full p-4 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl border shadow-xl backdrop-blur-md text-center shrink-0 ${
-                    isDark
-                      ? "bg-[#081f16] border-emerald-500/30 text-white"
-                      : "bg-white border-emerald-500/30 text-slate-900 shadow-slate-200/80"
-                  }`}
-                >
-                  <span
-                    className={`text-[10px] sm:text-[11px] font-black uppercase tracking-widest block mb-1.5 opacity-90 ${
-                      isDark ? "text-emerald-400" : "text-emerald-600"
-                    }`}
-                  >
-                    Pertanyaan ({activeWord.length} Huruf)
-                  </span>
-                  <h2
-                    className={`text-base sm:text-2xl md:text-3xl font-black leading-snug tracking-tight drop-shadow-sm ${
-                      isDark ? "text-white" : "text-slate-900"
-                    }`}
-                  >
-                    {activeWord.clue}
-                  </h2>
-                </div>
-
-                {/* LETTER BOXES / SLOTS (RESPONSIVE FOR ALL SCREEN SIZES) */}
-                <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 md:gap-3 flex-wrap py-1 max-w-full">
-                  {typedLetters.map((letter, idx) => {
-                    const isActive = activeSlotIdx === idx;
-                    const isFilled = Boolean(letter);
-                    const isLongWord = typedLetters.length > 7;
-
-                    return (
-                      <motion.button
-                        key={idx}
-                        type="button"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveSlotIdx(idx);
-                          hiddenInputRef.current?.focus();
-                        }}
-                        className={`${
-                          isLongWord
-                            ? "w-9 h-11 text-lg sm:w-12 sm:h-14 sm:text-2xl md:w-15 md:h-18 md:text-3xl"
-                            : "w-11 h-13 text-xl sm:w-14 sm:h-16 sm:text-2xl md:w-16 md:h-20 md:text-3xl"
-                        } rounded-xl sm:rounded-2xl flex items-center justify-center font-black font-mono uppercase transition-all relative cursor-pointer select-none ${
-                          answerState === "correct"
-                            ? "bg-emerald-400 border-2 border-emerald-200 text-slate-950 shadow-[0_4px_0_#047857] scale-105"
-                            : answerState === "wrong"
-                            ? "bg-rose-600 border-2 border-rose-300 text-white shadow-[0_4px_0_#9f1239]"
-                            : isFilled
-                            ? isDark
-                              ? "bg-gradient-to-b from-[#144230] to-[#092419] border-2 border-emerald-400 text-emerald-300 shadow-[0_4px_0_#051710]"
-                              : "bg-emerald-100 border-2 border-emerald-600 text-emerald-950 shadow-[0_4px_0_#047857]"
-                            : isActive
-                            ? isDark
-                              ? "bg-[#0b261b] border-2 border-emerald-400 text-white shadow-[0_4px_0_#05150f] ring-2 sm:ring-4 ring-emerald-500/40 scale-105"
-                              : "bg-white border-2 border-emerald-600 text-slate-900 shadow-[0_4px_0_#047857] ring-2 sm:ring-4 ring-emerald-500/30 scale-105"
-                            : isDark
-                            ? "bg-[#081811]/90 border-2 border-white/30 text-white/40 shadow-[0_3px_0_#030b07]"
-                            : "bg-white border-2 border-slate-300 text-slate-400 shadow-[0_3px_0_#cbd5e1]"
-                        }`}
-                      >
-                        {letter ? (
-                          <motion.span
-                            initial={{ scale: 0.5, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ type: "spring", stiffness: 500, damping: 20 }}
-                            className="drop-shadow-md"
-                          >
-                            {letter}
-                          </motion.span>
-                        ) : (
-                          isActive && (
-                            <span className="w-3 sm:w-5 h-1 rounded-full bg-emerald-500 opacity-90 animate-pulse" />
-                          )
-                        )}
-
-                        {/* Slot Index Number */}
+                  return (
+                    <motion.button
+                      key={cellKey}
+                      type="button"
+                      whileHover={{ scale: 1.08, y: -2 }}
+                      whileTap={{ scale: 0.92 }}
+                      onMouseEnter={() => setHoveredCell({ row: rIdx, col: cIdx })}
+                      onMouseLeave={() => setHoveredCell(null)}
+                      onClick={() => handleCellClick(cell, rIdx, cIdx)}
+                      className={`relative aspect-square w-full rounded-xl sm:rounded-2xl flex items-center justify-center font-mono font-black text-xs sm:text-2xl transition-all cursor-pointer shadow-md ${
+                        isDark
+                          ? userLetter
+                            ? "border-2 border-emerald-400 bg-gradient-to-b from-[#123e2d] to-[#0a271c] text-emerald-300 shadow-[0_3px_0_#051811]"
+                            : isWordHovered
+                            ? "border-2 border-emerald-400 bg-[#0f2e21] text-white shadow-[0_3px_0_#061a12]"
+                            : "border-2 border-white/30 bg-[#081c13] text-white hover:border-emerald-400 hover:bg-[#0f2e21] shadow-[0_3px_0_#040d09]"
+                          : userLetter
+                          ? "border-2 border-emerald-600 bg-emerald-100 text-emerald-950 shadow-[0_3px_0_#047857]"
+                          : isWordHovered
+                          ? "border-2 border-emerald-600 bg-emerald-50 text-slate-900 shadow-[0_3px_0_#94a3b8]"
+                          : "border-2 border-slate-300 bg-white text-slate-900 hover:border-emerald-600 hover:bg-emerald-50 shadow-[0_3px_0_#cbd5e1]"
+                      }`}
+                    >
+                      {/* Starting clue number */}
+                      {cell.number && (
                         <span
-                          className={`absolute -bottom-1 text-[7px] sm:text-[8px] font-bold select-none ${
-                            isDark ? "opacity-60 text-white" : "opacity-60 text-slate-600"
+                          className={`absolute top-0.5 left-0.5 sm:left-1 text-[7px] sm:text-[11px] font-black leading-none ${
+                            isDark ? "text-emerald-400" : "text-emerald-700"
                           }`}
                         >
-                          {idx + 1}
+                          {cell.number}
                         </span>
-                      </motion.button>
-                    );
-                  })}
-                </div>
+                      )}
 
-                {/* HELPER QUICK ACTION BUTTONS */}
-                <div className="flex items-center justify-center gap-2.5 pt-1 shrink-0">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleBackspace();
-                      hiddenInputRef.current?.focus();
-                    }}
-                    className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-md ${
-                      isDark
-                        ? "bg-rose-950/70 hover:bg-rose-900 border-rose-500/40 text-rose-300 hover:text-white shadow-[0_3px_0_#4c0519]"
-                        : "bg-rose-100 hover:bg-rose-200 border-rose-300 text-rose-800 shadow-[0_3px_0_#fca5a5]"
-                    }`}
-                  >
-                    <Delete className="w-3.5 h-3.5" />
-                    <span>Hapus (⌫)</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setTypedLetters(new Array(activeWord.length).fill(""));
-                      setActiveSlotIdx(0);
-                      hiddenInputRef.current?.focus();
-                    }}
-                    className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-md ${
-                      isDark
-                        ? "bg-slate-800/80 hover:bg-slate-700 border-white/15 text-slate-300 hover:text-white shadow-[0_3px_0_#0f172a]"
-                        : "bg-slate-200 hover:bg-slate-300 border-slate-300 text-slate-800 shadow-[0_3px_0_#cbd5e1]"
-                    }`}
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Kosongkan</span>
-                  </button>
-                </div>
-
-                <p className={`text-[11px] sm:text-xs tracking-wide font-medium text-center shrink-0 ${isDark ? "opacity-50 text-white" : "opacity-60 text-slate-600"}`}>
-                  Ketik jawaban langsung menggunakan keyboard HP Anda
-                </p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                      {/* Letter */}
+                      <span className="mt-0.5 font-mono font-black tracking-wider drop-shadow">
+                        {userLetter}
+                      </span>
+                    </motion.button>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-12 opacity-60 text-sm">
+            Papan TTS belum memiliki soal.
+          </div>
+        )}
       </main>
 
       {/* ========================================================================= */}
-      {/* 4. BOTTOM ACTION BAR (BACK/PAUSE, SOUND, FULLSCREEN) */}
+      {/* 3. BOTTOM FOOTER BAR */}
       {/* ========================================================================= */}
-      <footer className="relative z-20 w-full px-4 sm:px-6 py-2.5 sm:py-3.5 flex items-center justify-between backdrop-blur-md border-t border-white/5 shrink-0">
-        {/* LEFT: BACK */}
+      <footer
+        className={`relative z-20 w-full px-4 sm:px-6 py-2 sm:py-3 flex items-center justify-center sm:justify-between backdrop-blur-md border-t shrink-0 gap-2 transition-colors duration-500 pb-[max(0.65rem,env(safe-area-inset-bottom))] ${
+          isDark
+            ? "border-white/10 bg-[#020b06]/85 text-white"
+            : "border-slate-300 bg-white/90 text-slate-900 shadow-sm"
+        }`}
+      >
         <Link
           href={onBackUrl}
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full border border-current/15 bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 transition-all cursor-pointer text-xs font-bold opacity-80 hover:opacity-100"
-          title="Kembali ke Daftar TTS"
+          className={`hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-bold transition-all cursor-pointer shrink-0 ${
+            isDark ? "border-white/10 bg-white/5 hover:bg-white/15 text-gray-300 hover:text-white" : "border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-800"
+          }`}
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Kembali</span>
         </Link>
 
-        {/* RIGHT: SOUND & FULLSCREEN */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsMuted(!isMuted)}
-            className="p-2 sm:p-2.5 rounded-full border border-current/15 bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 transition-all cursor-pointer opacity-80 hover:opacity-100"
-            title={isMuted ? "Aktifkan Suara" : "Matikan Suara"}
-          >
-            {isMuted ? <VolumeX className="w-4 h-4 opacity-50" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
-          </button>
+        {/* DAFTAR SOAL BUTTON - CENTERED ON MOBILE */}
+        <button
+          type="button"
+          onClick={() => setShowClueDrawer(true)}
+          className={`inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-2 sm:py-2.5 rounded-full border font-black text-xs transition-all shadow-md active:scale-95 cursor-pointer ${
+            isDark
+              ? "border-emerald-500/40 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300"
+              : "border-emerald-600 bg-emerald-600 hover:bg-emerald-700 text-white"
+          }`}
+        >
+          <BookOpen className="w-4 h-4" />
+          <span>Daftar Soal</span>
+          <span className={`px-2 py-0.5 rounded-full text-[10px] font-black leading-none ${isDark ? "bg-emerald-400/25 text-emerald-300" : "bg-white/25 text-white"}`}>
+            {correctWordsCount}/{totalWords}
+          </span>
+        </button>
 
-          <button
-            onClick={toggleFullscreen}
-            className="p-2 sm:p-2.5 rounded-full border border-current/15 bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 transition-all cursor-pointer opacity-80 hover:opacity-100"
-            title={isFullscreen ? "Keluar Layar Penuh" : "Layar Penuh"}
-          >
-            {isFullscreen ? <Minimize2 className="w-4 h-4 text-emerald-400" /> : <Maximize2 className="w-4 h-4" />}
-          </button>
+        <div className="hidden sm:flex items-center gap-2">
+          <span className="text-[11px] opacity-70 font-bold">
+            Mode: {isDark ? "Cyber Emerald" : "Modern Pearl"}
+          </span>
         </div>
       </footer>
 
       {/* ========================================================================= */}
-      {/* 5. GAMIFIED VICTORY SCORECARD MODAL */}
+      {/* 4. FOCUS ANSWERING MODAL */}
       {/* ========================================================================= */}
       <AnimatePresence>
-        {showWinModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-3xl overflow-hidden select-none">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.85, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.85, y: 20 }}
-              className={`border-2 rounded-3xl sm:rounded-[40px] p-5 sm:p-8 max-w-lg w-full text-center space-y-4 sm:space-y-6 relative overflow-hidden backdrop-blur-3xl shadow-2xl ${
-                isDark ? "bg-[#081812] border-emerald-400/50 text-white" : "bg-white border-emerald-500/40 text-slate-900"
-              }`}
+        {activeWord && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            onClick={handleCloseModal}
+            className="fixed inset-0 z-50 flex flex-col items-center justify-between p-4 sm:p-6 bg-black/60 backdrop-blur-lg overflow-y-auto select-none text-white"
+          >
+            {/* INVISIBLE KEYBOARD INPUT */}
+            <input
+              ref={hiddenInputRef}
+              type="text"
+              inputMode="text"
+              autoFocus
+              autoCapitalize="characters"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck="false"
+              value=""
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val) {
+                  handleInputLetter(val.slice(-1));
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Backspace") {
+                  e.preventDefault();
+                  handleBackspace();
+                }
+              }}
+              className="opacity-0 absolute -top-10 left-0 w-1 h-1 pointer-events-none"
+              aria-label="Ketik jawaban Anda"
+            />
+
+            {/* TOP BAR / CLOSE BUTTONS */}
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-lg mx-auto flex items-center justify-between gap-2 shrink-0 pt-2 sm:pt-0"
             >
-              {/* TROPHY & 3-STAR RATING CELEBRATION */}
-              <div className="relative pt-2">
-                {/* SVG GRADIENT DEFINITIONS FOR 3D GOLD STARS */}
-                <svg className="absolute w-0 h-0 overflow-hidden" aria-hidden="true" focusable="false">
-                  <defs>
-                    <linearGradient id="ttsGoldHeroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#FFFBEB" />
-                      <stop offset="25%" stopColor="#FDE047" />
-                      <stop offset="60%" stopColor="#F59E0B" />
-                      <stop offset="100%" stopColor="#D97706" />
-                    </linearGradient>
-                    <linearGradient id="ttsGoldBevelGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#B45309" />
-                      <stop offset="40%" stopColor="#D97706" />
-                      <stop offset="100%" stopColor="#FBBF24" />
-                    </linearGradient>
-                    <linearGradient id="ttsEmptyStarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="rgba(148, 163, 184, 0.3)" />
-                      <stop offset="100%" stopColor="rgba(71, 85, 105, 0.15)" />
-                    </linearGradient>
-                    <filter id="starGlow" x="-30%" y="-30%" width="160%" height="160%">
-                      <feGaussianBlur stdDeviation="3" result="blur" />
-                      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                    </filter>
-                  </defs>
-                </svg>
+              <button
+                type="button"
+                onClick={handleCloseModal}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/20 bg-black/40 hover:bg-black/60 text-xs font-bold text-white transition-all active:scale-95 cursor-pointer shadow-md backdrop-blur-md"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Kembali ke Papan</span>
+              </button>
 
-                {/* AMBIENT RADIAL GLOW & LIGHT RAYS */}
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-64 h-64 bg-[radial-gradient(circle,_rgba(245,158,11,0.22)_0%,_rgba(16,185,129,0.15)_40%,_transparent_70%)] pointer-events-none blur-xl -z-10 animate-pulse" />
-
-                {/* TROPHY BADGE PEDESTAL */}
-                <div className="relative inline-flex mb-2">
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-emerald-300 text-slate-950 flex items-center justify-center shadow-[0_0_35px_rgba(16,185,129,0.5)] border-2 border-emerald-200/50 animate-bounce">
-                    <Trophy className="w-10 h-10 sm:w-12 sm:h-12 text-slate-950 drop-shadow-md" />
-                  </div>
-                  {/* FLOATING CORNER SPARKLES */}
-                  <motion.div
-                    animate={{ rotate: [0, 15, -15, 0], scale: [1, 1.2, 1] }}
-                    transition={{ repeat: Infinity, duration: 2.5 }}
-                    className="absolute -top-2 -right-2 bg-amber-400 text-slate-950 p-1 rounded-full shadow-lg border border-amber-200"
-                  >
-                    <Sparkles className="w-4 h-4 fill-amber-950 text-amber-950" />
-                  </motion.div>
+              <div className="flex items-center gap-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-400/40 bg-emerald-500/20 text-emerald-300 text-xs font-black uppercase tracking-wider backdrop-blur-md">
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>#{activeWord.number} • {activeWord.direction === "ACROSS" ? "Mendatar" : "Menurun"}</span>
                 </div>
-
-                {/* 3D ARCADE STAR RATING ARC */}
-                <div className="flex items-center justify-center gap-3 sm:gap-4 mt-1 mb-2">
-                  {[1, 2, 3].map((starNum) => {
-                    const isEarned = starNum <= starsEarned;
-                    const isCenter = starNum === 2;
-                    const rotationClass = starNum === 1 ? "-rotate-12 translate-y-2.5" : starNum === 3 ? "rotate-12 translate-y-2.5" : "-translate-y-2";
-                    const sizeClass = isCenter ? "w-14 h-14 sm:w-16 sm:h-16" : "w-10 h-10 sm:w-12 sm:h-12";
-
-                    return (
-                      <motion.div
-                        key={starNum}
-                        initial={{ scale: 0, y: 30, opacity: 0 }}
-                        animate={{ scale: 1, y: 0, opacity: 1 }}
-                        transition={{
-                          delay: 0.15 + starNum * 0.18,
-                          type: "spring",
-                          stiffness: 320,
-                          damping: 14,
-                        }}
-                        className={`relative flex items-center justify-center ${rotationClass} transition-transform`}
-                      >
-                        {/* Glow halo behind earned stars */}
-                        {isEarned && (
-                          <div
-                            className={`absolute inset-0 rounded-full blur-md -z-10 ${
-                              isCenter ? "bg-amber-400/60 scale-125 animate-pulse" : "bg-amber-400/40 scale-110"
-                            }`}
-                          />
-                        )}
-
-                        <svg
-                          viewBox="0 0 24 24"
-                          className={`${sizeClass} ${
-                            isEarned
-                              ? "drop-shadow-[0_4px_12px_rgba(245,158,11,0.65)] hover:scale-110 transition-transform duration-300"
-                              : "opacity-40"
-                          }`}
-                        >
-                          {isEarned ? (
-                            <>
-                              {/* 3D Gold Faceted Star Body */}
-                              <polygon
-                                points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"
-                                fill="url(#ttsGoldHeroGrad)"
-                                stroke="url(#ttsGoldBevelGrad)"
-                                strokeWidth="1.2"
-                                strokeLinejoin="round"
-                              />
-                              {/* Specular 3D Highlight facet */}
-                              <polygon
-                                points="12,2 15.09,8.26 12,17.77"
-                                fill="rgba(255, 255, 255, 0.45)"
-                              />
-                              <polygon
-                                points="12,2 8.91,8.26 12,17.77"
-                                fill="rgba(0, 0, 0, 0.12)"
-                              />
-                            </>
-                          ) : (
-                            /* Unearned Sleek Crystal Star */
-                            <polygon
-                              points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"
-                              fill="url(#ttsEmptyStarGrad)"
-                              stroke="currentColor"
-                              strokeWidth="1.2"
-                              className="text-slate-400/50"
-                              strokeLinejoin="round"
-                            />
-                          )}
-                        </svg>
-
-                        {/* Top sparkle badge on center hero star if earned */}
-                        {isEarned && isCenter && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: [1, 1.25, 1] }}
-                            transition={{ repeat: Infinity, duration: 2 }}
-                            className="absolute -top-1 -right-1 text-amber-300 text-xs select-none pointer-events-none"
-                          >
-                            ✦
-                          </motion.div>
-                        )}
-                      </motion.div>
-                    );
-                  })}
-                </div>
-
-                {/* STAR TIER PERFORMANCE TITLE */}
-                <div className="flex justify-center mt-1">
-                  <span
-                    className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider ${
-                      starsEarned === 3
-                        ? "bg-amber-400/15 text-amber-500 dark:text-amber-400 border border-amber-400/30 shadow-[0_0_15px_rgba(251,191,36,0.2)]"
-                        : starsEarned === 2
-                        ? "bg-teal-400/15 text-teal-600 dark:text-teal-300 border border-teal-400/30"
-                        : "bg-blue-400/15 text-blue-600 dark:text-blue-300 border border-blue-400/30"
-                    }`}
-                  >
-                    {starsEarned === 3 && <Sparkles className="w-3.5 h-3.5" />}
-                    {starsEarned === 3
-                      ? "Bintang Sempurna (Mastery)"
-                      : starsEarned === 2
-                      ? "Pencapaian Hebat (Great Job)"
-                      : "Misi Tuntas (Completed)"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                  <Crown className="w-3.5 h-3.5" />
-                  {submissionResult?.taskTitle ? "MISI QUEST SELESAI" : "PENUGASAN SELESAI"}
-                </div>
-                <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
-                  Kemenangan Gemilang!
-                </h2>
-                <p className="text-xs sm:text-sm opacity-80">
-                  {submissionResult?.taskTitle
-                    ? `Hasil pengerjaan quest "${submissionResult.taskTitle}" berhasil disimpan ke sistem!`
-                    : `Selamat! Anda berhasil menuntaskan teka-teki silang "${title}".`}
-                </p>
-              </div>
-
-              {/* GAMIFIED STATS GRID */}
-              <div className="grid grid-cols-3 gap-2.5 bg-black/15 dark:bg-white/5 border border-current/10 rounded-2xl p-4 text-center">
-                <div>
-                  <span className="text-[10px] opacity-60 uppercase font-black block">XP Diperoleh</span>
-                  <span className="text-lg sm:text-xl font-black text-amber-400 flex items-center justify-center gap-1">
-                    <Zap className="w-4 h-4 fill-amber-400" />
-                    +{submissionResult ? submissionResult.xpEarned : (puzzleData?.rewardXp || 10)} XP
-                  </span>
-                  {submissionResult?.speedBonusXp > 0 && (
-                    <span className="text-[9px] text-blue-400 font-bold block mt-0.5">
-                      (+{submissionResult.speedBonusXp} XP Speed)
-                    </span>
-                  )}
-                </div>
-                <div>
-                  <span className="text-[10px] opacity-60 uppercase font-black block">Waktu Selesai</span>
-                  <span className="text-lg sm:text-xl font-black text-cyan-400 flex items-center justify-center gap-1">
-                    <Timer className="w-4 h-4" />
-                    {formatSeconds(elapsedTime)}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-[10px] opacity-60 uppercase font-black block">Akurasi / Skor</span>
-                  <span className="text-lg sm:text-xl font-black text-emerald-400 flex items-center justify-center gap-1">
-                    <Target className="w-4 h-4" />
-                    {submissionResult
-                      ? `${submissionResult.score}%`
-                      : `${totalWords > 0 ? Math.max(0, Math.round((correctWordsCount / totalWords) * 100)) : 100}%`}
-                  </span>
-                </div>
-              </div>
-
-              {/* BREAKDOWN TERPECAHKAN / PERCOBAAN KELIRU */}
-              <div className="grid grid-cols-2 gap-2.5">
-                <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-black text-xs">
-                      ✓
-                    </div>
-                    <span className="text-xs font-bold text-slate-800 dark:text-emerald-200">Soal Terpecahkan</span>
-                  </div>
-                  <span className="text-sm font-black text-emerald-500">
-                    {submissionResult ? submissionResult.correctCount : correctWordsCount} / {submissionResult ? submissionResult.totalQuestions : totalWords}
-                  </span>
-                </div>
-
-                <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/25 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center font-black text-xs">
-                      ✕
-                    </div>
-                    <span className="text-xs font-bold text-slate-800 dark:text-rose-200">Percobaan Keliru</span>
-                  </div>
-                  <span className="text-sm font-black text-rose-500">
-                    {submissionResult?.wrongCount !== undefined ? submissionResult.wrongCount : mistakeCount}x
-                  </span>
-                </div>
-              </div>
-
-              {/* REALTIME SAVE & SYNC STATUS BANNER */}
-              <div className="w-full">
-                {isSubmitting ? (
-                  <div className="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/25 flex items-center justify-center gap-2.5 text-blue-500 dark:text-blue-400 text-xs font-bold animate-pulse">
-                    <Sparkles className="w-4 h-4 animate-spin shrink-0" />
-                    <span>Menyimpan data dan sinkronisasi ke sistem...</span>
-                  </div>
-                ) : hasSubmitted ? (
-                  <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center gap-2 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>Data pengerjaan & sinkronisasi berhasil disimpan ke sistem</span>
-                  </div>
-                ) : null}
-              </div>
-
-              {/* BADGES EARNED */}
-              <div className="flex items-center justify-center gap-2 flex-wrap">
-                {(submissionResult?.wrongCount !== undefined ? submissionResult.wrongCount === 0 && submissionResult.correctCount === totalWords : mistakeCount === 0 && correctWordsCount === totalWords) && (
-                  <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-wider">
-                    <Target className="w-3 h-3" />
-                    <span>🎯 Perfect Accuracy</span>
-                  </div>
-                )}
-                <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-400 text-[10px] font-black uppercase tracking-wider">
-                  <Award className="w-3 h-3" />
-                  <span>Rank: {playerRank.title}</span>
-                </div>
-              </div>
-
-              {/* BUTTONS */}
-              <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
-                {!taskId && (
-                  <button
-                    onClick={handleResetPuzzle}
-                    disabled={isSubmitting}
-                    className="w-full py-3.5 rounded-2xl bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 border border-current/10 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                    <span>Main Lagi</span>
-                  </button>
-                )}
 
                 <button
                   type="button"
-                  disabled={isSubmitting}
-                  onClick={() => {
-                    window.location.href = onBackUrl;
-                  }}
-                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-400 to-teal-400 text-slate-950 font-black text-xs flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-500/40 hover:shadow-emerald-500/60 cursor-pointer active:scale-95 disabled:opacity-50"
+                  onClick={handleCloseModal}
+                  className="p-1.5 sm:p-2 rounded-full border border-white/20 bg-black/40 hover:bg-black/60 text-white transition-all active:scale-95 cursor-pointer shadow-md backdrop-blur-md"
+                  title="Tutup Modal"
                 >
-                  <Check className="w-4 h-4 stroke-[3]" />
-                  <span>
-                    {isSubmitting
-                      ? "Menyimpan Data..."
-                      : onBackUrl.includes("tugas")
-                      ? "Kembali ke Quest Tugas"
-                      : "Selesai & Keluar"}
-                  </span>
+                  <X className="w-4 h-4" />
                 </button>
+              </div>
+            </div>
+
+            {/* MAIN CONTENT AREA (NO BOX / CARD BACKGROUND) */}
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                hiddenInputRef.current?.focus();
+              }}
+              className="w-full max-w-lg mx-auto flex flex-col items-center justify-center my-auto py-4 space-y-5 text-center"
+            >
+              {/* CLEAN QUESTION TEXT WITHOUT BACKGROUND BOX */}
+              <div className="space-y-1.5 px-2">
+                <span className="text-[11px] font-black uppercase tracking-widest text-emerald-400 block drop-shadow">
+                  Pertanyaan ({activeWord.length} Huruf)
+                </span>
+                <h2 className="text-lg sm:text-2xl md:text-3xl font-black leading-snug tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
+                  {activeWord.clue}
+                </h2>
+              </div>
+
+              {/* LETTER SLOTS */}
+              <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 flex-wrap py-2 max-w-full">
+                {typedLetters.map((letter, idx) => {
+                  const isActive = activeSlotIdx === idx;
+                  const isFilled = Boolean(letter);
+                  const isLongWord = typedLetters.length > 7;
+
+                  return (
+                    <motion.button
+                      key={idx}
+                      type="button"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveSlotIdx(idx);
+                        hiddenInputRef.current?.focus();
+                      }}
+                      className={`${
+                        isLongWord
+                          ? "w-9 h-11 text-lg sm:w-12 sm:h-14 sm:text-2xl md:w-14 md:h-16 md:text-3xl"
+                          : "w-11 h-13 text-xl sm:w-14 sm:h-16 sm:text-2xl md:w-16 md:h-20 md:text-3xl"
+                      } rounded-xl sm:rounded-2xl flex items-center justify-center font-black font-mono uppercase transition-all relative cursor-pointer select-none ${
+                        answerState === "correct"
+                          ? "bg-emerald-400 border-2 border-emerald-200 text-slate-950 shadow-[0_4px_0_#047857] scale-105"
+                          : answerState === "wrong"
+                          ? "bg-rose-600 border-2 border-rose-300 text-white shadow-[0_4px_0_#9f1239]"
+                          : isFilled
+                          ? "bg-gradient-to-b from-[#144230] to-[#092419] border-2 border-emerald-400 text-emerald-300 shadow-[0_4px_0_#051710]"
+                          : isActive
+                          ? "bg-[#0b261b] border-2 border-emerald-400 text-white shadow-[0_4px_0_#05150f] ring-4 ring-emerald-500/40 scale-105"
+                          : "bg-[#081811]/90 border-2 border-white/30 text-white/40 shadow-[0_3px_0_#030b07]"
+                      }`}
+                    >
+                      {letter ? (
+                        <motion.span
+                          initial={{ scale: 0.5, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                          className="drop-shadow-md"
+                        >
+                          {letter}
+                        </motion.span>
+                      ) : (
+                        isActive && (
+                          <span className="w-3 sm:w-5 h-1 rounded-full bg-emerald-500 opacity-90 animate-pulse" />
+                        )
+                      )}
+
+                      <span className="absolute -bottom-1 text-[7px] sm:text-[8px] font-bold opacity-60 text-white select-none">
+                        {idx + 1}
+                      </span>
+                    </motion.button>
+                  );
+                })}
+              </div>
+
+              {/* QUICK ACTION BUTTONS */}
+              <div className="flex items-center justify-center gap-2.5 pt-1 shrink-0 flex-wrap">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleBackspace();
+                    hiddenInputRef.current?.focus();
+                  }}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-rose-500/40 bg-rose-950/80 hover:bg-rose-900 text-xs font-bold text-rose-300 hover:text-white transition-all active:scale-95 cursor-pointer shadow-lg backdrop-blur-md"
+                >
+                  <Delete className="w-3.5 h-3.5" />
+                  <span>Hapus (⌫)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setTypedLetters(new Array(activeWord.length).fill(""));
+                    setActiveSlotIdx(0);
+                    hiddenInputRef.current?.focus();
+                  }}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-white/20 bg-slate-800/80 hover:bg-slate-700 text-xs font-bold text-slate-300 hover:text-white transition-all active:scale-95 cursor-pointer shadow-lg backdrop-blur-md"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Kosongkan</span>
+                </button>
+              </div>
+
+              <p className="text-[11px] sm:text-xs tracking-wide font-medium text-center opacity-70 text-white drop-shadow">
+                Ketik jawaban langsung menggunakan keyboard HP / Laptop Anda
+              </p>
+            </div>
+
+            {/* SPACER */}
+            <div className="w-full h-1 shrink-0" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ========================================================================= */}
+      {/* 5. CLUES EXPLORER DRAWER */}
+      {/* ========================================================================= */}
+      <AnimatePresence>
+        {showClueDrawer && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/50 backdrop-blur-md overflow-hidden select-none">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className={`border-2 rounded-3xl sm:rounded-[36px] p-5 sm:p-7 max-w-2xl w-full max-h-[88vh] flex flex-col relative overflow-hidden backdrop-blur-3xl shadow-2xl ${
+                isDark ? "bg-[#071711] border-emerald-500/40 text-white" : "bg-white border-emerald-600/40 text-slate-900"
+              }`}
+            >
+              <div className="flex items-center justify-between pb-4 border-b border-current/10 shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 flex items-center justify-center font-black">
+                    <BookOpen className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-sm sm:text-base">Daftar Pertanyaan TTS</h3>
+                    <p className="text-[11px] opacity-70">
+                      Klik salah satu pertanyaan untuk langsung mengisi jawabannya.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setShowClueDrawer(false)}
+                  className="p-1.5 rounded-full bg-black/10 dark:bg-white/10 hover:opacity-80 transition-all cursor-pointer"
+                  title="Tutup"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* LIST BODY */}
+              <div className="flex-1 overflow-y-auto py-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* MENDATAR */}
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-black text-xs uppercase tracking-wider">
+                    <span>Mendatar (Across)</span>
+                    <span>{crosswordData.clues.across.length} Soal</span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {crosswordData.clues.across.map((item) => {
+                      const wordKey = `ACROSS-${item.number}`;
+                      const isSolved = wordStatuses[wordKey] === "CORRECT";
+                      const matchWord = crosswordData.placedWords.find(
+                        (w) => w.direction === "ACROSS" && w.number === item.number
+                      );
+
+                      return (
+                        <button
+                          key={wordKey}
+                          type="button"
+                          onClick={() => {
+                            setShowClueDrawer(false);
+                            if (matchWord) handleSelectWord(matchWord);
+                          }}
+                          className={`w-full text-left p-3 rounded-2xl border transition-all flex items-start gap-2.5 cursor-pointer active:scale-98 ${
+                            isSolved
+                              ? "bg-emerald-500/10 border-emerald-500/30 opacity-90"
+                              : isDark
+                              ? "bg-black/30 hover:bg-emerald-950/40 border-white/10 hover:border-emerald-500/40"
+                              : "bg-slate-50 hover:bg-emerald-50 border-slate-200 hover:border-emerald-300"
+                          }`}
+                        >
+                          <div
+                            className={`w-6 h-6 rounded-lg flex items-center justify-center font-black text-xs shrink-0 ${
+                              isSolved
+                                ? "bg-emerald-500 text-slate-950"
+                                : "bg-emerald-500/20 text-emerald-500"
+                            }`}
+                          >
+                            {isSolved ? "✓" : item.number}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-bold leading-snug line-clamp-2">{item.clue}</p>
+                            <span className="text-[10px] opacity-60 font-mono mt-0.5 block">
+                              {item.length} Huruf {isSolved && "• Terjawab"}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* MENURUN */}
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between px-2 py-1 rounded-lg bg-teal-500/10 border border-teal-500/20 text-teal-600 dark:text-teal-400 font-black text-xs uppercase tracking-wider">
+                    <span>Menurun (Down)</span>
+                    <span>{crosswordData.clues.down.length} Soal</span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {crosswordData.clues.down.map((item) => {
+                      const wordKey = `DOWN-${item.number}`;
+                      const isSolved = wordStatuses[wordKey] === "CORRECT";
+                      const matchWord = crosswordData.placedWords.find(
+                        (w) => w.direction === "DOWN" && w.number === item.number
+                      );
+
+                      return (
+                        <button
+                          key={wordKey}
+                          type="button"
+                          onClick={() => {
+                            setShowClueDrawer(false);
+                            if (matchWord) handleSelectWord(matchWord);
+                          }}
+                          className={`w-full text-left p-3 rounded-2xl border transition-all flex items-start gap-2.5 cursor-pointer active:scale-98 ${
+                            isSolved
+                              ? "bg-teal-500/10 border-teal-500/30 opacity-90"
+                              : isDark
+                              ? "bg-black/30 hover:bg-teal-950/40 border-white/10 hover:border-teal-500/40"
+                              : "bg-slate-50 hover:bg-teal-50 border-slate-200 hover:border-teal-300"
+                          }`}
+                        >
+                          <div
+                            className={`w-6 h-6 rounded-lg flex items-center justify-center font-black text-xs shrink-0 ${
+                              isSolved
+                                ? "bg-teal-500 text-slate-950"
+                                : "bg-teal-500/20 text-teal-500"
+                            }`}
+                          >
+                            {isSolved ? "✓" : item.number}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-bold leading-snug line-clamp-2">{item.clue}</p>
+                            <span className="text-[10px] opacity-60 font-mono mt-0.5 block">
+                              {item.length} Huruf {isSolved && "• Terjawab"}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
+
+      {/* ========================================================================= */}
+      {/* 6. GAMIFIED VICTORY SCORECARD MODAL */}
+      {/* ========================================================================= */}
+      <AnimatePresence>
+        {showWinModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/55 backdrop-blur-md overflow-hidden select-none">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.85, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.85, y: 20 }}
+              className="border-2 rounded-3xl sm:rounded-[40px] p-5 sm:p-8 max-w-lg w-full text-center space-y-4 sm:space-y-6 relative overflow-hidden backdrop-blur-3xl shadow-2xl bg-[#071911] border-emerald-400/50 text-white"
+            >
+              {/* SRE Logo */}
+              <div className="flex items-center justify-center gap-2">
+                <div
+                  className="h-7 w-24 shrink-0 bg-white"
+                  style={{
+                    WebkitMaskImage: "url(/images/logo.webp)",
+                    WebkitMaskSize: "contain",
+                    WebkitMaskRepeat: "no-repeat",
+                    WebkitMaskPosition: "center center",
+                    maskImage: "url(/images/logo.webp)",
+                    maskSize: "contain",
+                    maskRepeat: "no-repeat",
+                    maskPosition: "center center",
+                  }}
+                />
+                <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400">SRE UPN Veteran Jawa Timur</span>
+              </div>
+
+              {/* TROPHY & 3-STAR RATING CELEBRATION */}
+              <div className="relative pt-1">
+                <div className="relative inline-flex mb-2">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-emerald-300 text-slate-950 flex items-center justify-center shadow-[0_0_35px_rgba(16,185,129,0.5)] border-2 border-emerald-200/50 animate-bounce">
+                    <Trophy className="w-8 h-8 sm:w-10 sm:h-10 text-slate-950 drop-shadow-md" />
+                  </div>
+                </div>
+
+                {/* 3D GOLD STARS */}
+                <div className="flex items-center justify-center gap-3 mt-1 mb-2">
+                  {[1, 2, 3].map((starNum) => (
+                    <div key={starNum} className="text-amber-400">
+                      <Star className={`w-8 h-8 sm:w-10 sm:h-10 fill-amber-400 text-amber-300 drop-shadow-[0_0_12px_rgba(251,191,36,0.8)] ${starNum === 2 ? "scale-125" : ""}`} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  <Crown className="w-3.5 h-3.5" />
+                  <span>MISI TTS SELESAI</span>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+                  Kemenangan Gemilang!
+                </h2>
+                <p className="text-xs sm:text-sm opacity-80 text-gray-300">
+                  Selamat! Anda berhasil menuntaskan seluruh teka-teki silang &quot;{title}&quot;.
+                </p>
+              </div>
+
+              {/* STATS GRID */}
+              <div className="grid grid-cols-3 gap-2 bg-black/40 border border-white/10 rounded-2xl p-3 text-center">
+                <div>
+                  <span className="text-[9px] opacity-60 uppercase font-black block">XP Reward</span>
+                  <span className="text-base sm:text-lg font-black text-amber-400 flex items-center justify-center gap-1">
+                    <Zap className="w-3.5 h-3.5 fill-amber-400" />
+                    +{submissionResult ? submissionResult.xpEarned : (puzzleData?.rewardXp || 10)} XP
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[9px] opacity-60 uppercase font-black block">Waktu Selesai</span>
+                  <span className="text-base sm:text-lg font-black text-cyan-400 flex items-center justify-center gap-1">
+                    <Timer className="w-3.5 h-3.5" />
+                    {formatSeconds(elapsedTime)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[9px] opacity-60 uppercase font-black block">Skor / Akurasi</span>
+                  <span className="text-base sm:text-lg font-black text-emerald-400 flex items-center justify-center gap-1">
+                    <Target className="w-3.5 h-3.5" />
+                    {submissionResult ? `${submissionResult.score}%` : "100%"}
+                  </span>
+                </div>
+              </div>
+
+              {/* BUTTONS */}
+              <div className="flex flex-col gap-2.5 pt-2">
+                {/* SHARE TO SOCIAL MEDIA BUTTON */}
+                <button
+                  type="button"
+                  onClick={() => setShowShareModal(true)}
+                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 hover:from-emerald-300 hover:to-cyan-300 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/40 hover:shadow-emerald-500/60 transition-all cursor-pointer active:scale-95 border border-emerald-200/50"
+                >
+                  <Share2 className="w-4 h-4 stroke-[2.5]" />
+                  <span>Bagikan ke Media Sosial (Story 9:16)</span>
+                  <Sparkles className="w-4 h-4 fill-current animate-pulse" />
+                </button>
+
+                <div className="flex flex-col sm:flex-row items-center gap-2.5">
+                  {!taskId && (
+                    <button
+                      onClick={handleResetPuzzle}
+                      disabled={isSubmitting}
+                      className="w-full py-3 rounded-2xl bg-black/40 hover:bg-black/60 border border-white/10 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-50 text-white"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      <span>Main Lagi</span>
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={() => {
+                      window.location.href = onBackUrl;
+                    }}
+                    className="w-full py-3 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/20 text-white font-black text-xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                  >
+                    <Check className="w-4 h-4 stroke-[3]" />
+                    <span>
+                      {isSubmitting
+                        ? "Menyimpan Data..."
+                        : onBackUrl.includes("tugas")
+                        ? "Kembali ke Quest Tugas"
+                        : "Selesai & Keluar"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ========================================================================= */}
+      {/* 7. SOCIAL MEDIA PORTRAIT SHARE CARD MODAL */}
+      {/* ========================================================================= */}
+      <TTSShareCardModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        puzzleData={puzzleData}
+        crosswordData={crosswordData}
+        userInputs={userInputs}
+        wordStatuses={wordStatuses}
+        stats={{
+          elapsedTime,
+          mistakeCount: submissionResult?.wrongCount !== undefined ? submissionResult.wrongCount : mistakeCount,
+          xpEarned: submissionResult ? submissionResult.xpEarned : (puzzleData?.rewardXp || 10),
+          score: submissionResult
+            ? submissionResult.score
+            : totalWords > 0
+            ? Math.max(0, Math.round((correctWordsCount / totalWords) * 100))
+            : 100,
+          starsEarned,
+        }}
+        currentUser={currentUser}
+      />
     </div>
   );
 }

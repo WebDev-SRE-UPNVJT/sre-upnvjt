@@ -16,6 +16,18 @@ export function sanitizeAnswer(text) {
     .replace(/[^A-Z0-9]/g, "");
 }
 
+// Deterministic Seeded PRNG (Mulberry32)
+function createSeededRandom(seed = 42) {
+  let s = (typeof seed === "number" ? seed : 42) >>> 0;
+  if (s === 0) s = 42;
+  return function () {
+    s = (s + 0x6d2b79f5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 /**
  * Generate a Crossword Layout from a list of items
  * @param {Array<{id: string|number, clue: string, answer: string}>} items 
@@ -24,6 +36,7 @@ export function sanitizeAnswer(text) {
  */
 export function generateCrosswordLayout(items = [], options = {}) {
   const maxIterations = options.maxIterations || 60;
+  const rng = createSeededRandom(options.seed || 42);
   
   // Filter valid items
   const validItems = items
@@ -57,10 +70,10 @@ export function generateCrosswordLayout(items = [], options = {}) {
   let bestScore = -Infinity;
 
   for (let iteration = 0; iteration < maxIterations; iteration++) {
-    // Sort items: longest words first, with slight stochastic perturbation for different iterations
+    // Sort items: longest words first, with deterministic seeded perturbation for different iterations
     const wordsToPlace = [...validItems].sort((a, b) => {
       if (iteration === 0) return b.length - a.length;
-      return (b.length + (Math.random() * 2 - 1)) - (a.length + (Math.random() * 2 - 1));
+      return (b.length + (rng() * 2 - 1)) - (a.length + (rng() * 2 - 1));
     });
 
     const gridMap = new Map(); // key: `${r},${c}` => { char, acrossWordId, downWordId }

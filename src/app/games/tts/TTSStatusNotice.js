@@ -1,8 +1,11 @@
 "use client";
 
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import { ArrowLeft, AlertCircle, CheckCircle2, Lock, Clock } from "lucide-react";
+import { ArrowLeft, AlertCircle, CheckCircle2, Lock, Clock, Share2, Sparkles } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageProvider";
+import { generateCrosswordLayout } from "@/lib/crosswordGenerator";
+import TTSShareCardModal from "./TTSShareCardModal";
 
 export default function TTSStatusNotice({
   type,
@@ -12,8 +15,54 @@ export default function TTSStatusNotice({
   error = "",
   taskId = null,
   backUrl = "/member/tugas",
+  puzzleData = null,
+  currentUser = null,
 }) {
   const { language } = useLanguage();
+  const [showShareModal, setShowShareModal] = useState(false);
+
+  // Generate crossword layout & filled inputs if puzzleData is passed
+  const items = useMemo(() => {
+    if (puzzleData?.questions && puzzleData.questions.length > 0) {
+      return puzzleData.questions.map((q, idx) => ({
+        id: q.id || `q_${idx + 1}`,
+        clue: q.clue,
+        answer: q.answer,
+      }));
+    }
+    return [];
+  }, [puzzleData]);
+
+  const crosswordData = useMemo(() => {
+    if (items.length > 0) {
+      return generateCrosswordLayout(items, { maxIterations: 80, seed: 42 });
+    }
+    return null;
+  }, [items]);
+
+  // Pre-fill answers from questions
+  const userInputs = useMemo(() => {
+    if (!crosswordData?.placedWords) return {};
+    const map = {};
+    crosswordData.placedWords.forEach((pw) => {
+      const isAcross = pw.direction === "ACROSS";
+      for (let i = 0; i < pw.length; i++) {
+        const r = isAcross ? pw.row : pw.row + i;
+        const c = isAcross ? pw.col + i : pw.col;
+        map[`${r},${c}`] = pw.answer[i];
+      }
+    });
+    return map;
+  }, [crosswordData]);
+
+  const wordStatuses = useMemo(() => {
+    if (!crosswordData?.placedWords) return {};
+    const map = {};
+    crosswordData.placedWords.forEach((pw) => {
+      map[`${pw.direction}-${pw.number}`] = "CORRECT";
+    });
+    return map;
+  }, [crosswordData]);
 
   if (type === "closed") {
     return (
@@ -92,7 +141,27 @@ export default function TTSStatusNotice({
   if (type === "completed") {
     return (
       <div className="min-h-screen bg-[#07130e] text-white flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-[#0c2218]/90 border border-emerald-500/30 rounded-3xl p-8 text-center space-y-6 shadow-2xl backdrop-blur-md">
+        <div className="max-w-md w-full bg-[#0c2218]/90 border border-emerald-500/40 rounded-3xl p-7 sm:p-8 text-center space-y-5 shadow-2xl backdrop-blur-md">
+          {/* SRE Brand Header */}
+          <div className="flex items-center justify-center gap-2">
+            <div
+              className="h-6 w-24 shrink-0 bg-white"
+              style={{
+                WebkitMaskImage: "url(/images/logo.webp)",
+                WebkitMaskSize: "contain",
+                WebkitMaskRepeat: "no-repeat",
+                WebkitMaskPosition: "center center",
+                maskImage: "url(/images/logo.webp)",
+                maskSize: "contain",
+                maskRepeat: "no-repeat",
+                maskPosition: "center center",
+              }}
+            />
+            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400">
+              SRE UPN Veteran Jawa Timur
+            </span>
+          </div>
+
           <div className="w-16 h-16 mx-auto rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
             <CheckCircle2 className="w-8 h-8" />
           </div>
@@ -103,11 +172,11 @@ export default function TTSStatusNotice({
             <p className="text-xs text-gray-300">
               {language === "en" ? (
                 <>
-                  You have already completed the assignment <strong>{ttsTitle}</strong>. This assignment is strictly limited to 1 attempt.
+                  You have already completed the assignment <strong>{ttsTitle}</strong>. You can still share your achievement card to social media!
                 </>
               ) : (
                 <>
-                  Anda sudah menyelesaikan penugasan <strong>{ttsTitle}</strong>. Penugasan ini dibatasi hanya 1 kali pengerjaan.
+                  Anda sudah menyelesaikan penugasan <strong>{ttsTitle}</strong>. Anda tetap dapat membagikan kartu hasil pengerjaan ke media sosial!
                 </>
               )}
             </p>
@@ -134,14 +203,49 @@ export default function TTSStatusNotice({
             </div>
           </div>
 
-          <Link
-            href={backUrl}
-            className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs transition-all shadow-lg shadow-emerald-500/20"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>{language === "en" ? "Back to Task List" : "Kembali ke Daftar Tugas"}</span>
-          </Link>
+          {/* BUTTONS: SHARE TO SOCIAL MEDIA & BACK */}
+          <div className="space-y-2.5 pt-1">
+            {puzzleData && crosswordData && (
+              <button
+                type="button"
+                onClick={() => setShowShareModal(true)}
+                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 hover:from-emerald-300 hover:to-cyan-300 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30 transition-all cursor-pointer active:scale-95"
+              >
+                <Share2 className="w-4 h-4 stroke-[2.5]" />
+                <span>Bagikan Kartu Hasil (Story 9:16)</span>
+                <Sparkles className="w-4 h-4 fill-current animate-pulse" />
+              </button>
+            )}
+
+            <Link
+              href={backUrl}
+              className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white font-extrabold text-xs transition-all cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>{language === "en" ? "Back to Task List" : "Kembali ke Daftar Tugas"}</span>
+            </Link>
+          </div>
         </div>
+
+        {/* SHARE MODAL */}
+        {puzzleData && crosswordData && (
+          <TTSShareCardModal
+            isOpen={showShareModal}
+            onClose={() => setShowShareModal(false)}
+            puzzleData={puzzleData}
+            crosswordData={crosswordData}
+            userInputs={userInputs}
+            wordStatuses={wordStatuses}
+            stats={{
+              elapsedTime: submission?.elapsedSeconds || 120,
+              mistakeCount: 0,
+              xpEarned: submission?.xpEarned || puzzleData?.rewardXp || 10,
+              score: submission?.score ?? 100,
+              starsEarned: 3,
+            }}
+            currentUser={currentUser}
+          />
+        )}
       </div>
     );
   }
