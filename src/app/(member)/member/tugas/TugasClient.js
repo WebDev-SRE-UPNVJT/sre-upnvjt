@@ -262,8 +262,13 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
 
               {/* XP Bounty */}
               <span className="flex items-center gap-1 text-[9px] sm:text-[10px] font-black px-2 sm:px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 font-mono shrink-0">
-                <Zap className="w-3 h-3 fill-amber-400" />+{task.rewardXp} XP
-                {parseBool(task.enableSpeedBonus, true) && (
+                <Zap className="w-3 h-3 fill-amber-400" />
+                {task.rewardXp > 0 ? (
+                  <>+{task.rewardXp} XP</>
+                ) : (
+                  <span>{language === "en" ? "Manual Review" : "Penilaian Manual"}</span>
+                )}
+                {task.rewardXp > 0 && parseBool(task.enableSpeedBonus, true) && (
                   <span className="text-[8px] sm:text-[9px] font-bold text-blue-500 ml-0.5" title={language === "en" ? "Speed bonus up to +10 XP for early submission" : "Bonus kecepatan hingga +10 XP jika submit sebelum deadline"}>
                     +Bonus
                   </span>
@@ -565,7 +570,12 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
               </span>
 
               <span className="flex items-center gap-1 text-[10px] sm:text-[11px] font-black text-amber-600 dark:text-amber-400 font-mono ml-auto">
-                <Zap className="w-3.5 h-3.5 fill-amber-400" />+{task.rewardXp} XP
+                <Zap className="w-3.5 h-3.5 fill-amber-400" />
+                {task.rewardXp > 0 ? (
+                  <>+{task.rewardXp} XP</>
+                ) : (
+                  <span>{language === "en" ? "Manual Review" : "Penilaian Manual"}</span>
+                )}
               </span>
             </div>
             <h2 className="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-snug flex items-center gap-1.5 truncate">
@@ -847,22 +857,53 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
                     </div>
                   </div>
                 ) : submission?.fileUrl ? (
-                  <div className="flex items-center gap-3 p-4 bg-emerald-500/8 border border-emerald-500/20 rounded-xl">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-black text-emerald-600 dark:text-emerald-400">
-                        {language === "en" ? "Your Submission" : "Laporan Quest Kamu"}
-                      </p>
-                      <p className="text-xs text-slate-500 dark:text-white/40 truncate mt-0.5">{submission.fileUrl}</p>
+                  <div className={`p-4 rounded-xl border space-y-2.5 ${
+                    status === "APPROVED"
+                      ? "bg-emerald-500/8 border-emerald-500/20"
+                      : "bg-amber-500/8 border-amber-500/20"
+                  }`}>
+                    <div className="flex items-center gap-3">
+                      {status === "APPROVED" ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                      ) : (
+                        <Clock className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <p className={`text-xs font-black uppercase tracking-wider ${
+                            status === "APPROVED"
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : "text-amber-600 dark:text-amber-400"
+                          }`}>
+                            {status === "APPROVED"
+                              ? (language === "en" ? "Quest Approved" : "Laporan Tugas Disetujui")
+                              : (language === "en" ? "Under Review by Mentor" : "Sedang Ditinjau oleh Mentor")}
+                          </p>
+                          {status === "APPROVED" ? (
+                            <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                              +{submission.xpEarned ?? task.rewardXp ?? 0} XP
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                              {language === "en" ? "XP will be awarded upon review" : "XP dinilai saat peninjauan"}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-white/40 truncate mt-0.5">{submission.fileUrl}</p>
+                      </div>
+                      <a
+                        href={submission.fileUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`p-1.5 rounded-lg transition-colors flex-shrink-0 ${
+                          status === "APPROVED"
+                            ? "hover:bg-emerald-500/20 text-emerald-500"
+                            : "hover:bg-amber-500/20 text-amber-500"
+                        }`}
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
                     </div>
-                    <a
-                      href={submission.fileUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="p-1.5 rounded-lg hover:bg-emerald-500/20 text-emerald-500 transition-colors flex-shrink-0"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
                   </div>
                 ) : null
               )}

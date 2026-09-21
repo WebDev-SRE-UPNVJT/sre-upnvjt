@@ -355,7 +355,11 @@ export default function PhaseProgressTree({ phaseHierarchy = [] }) {
                                     <div className="flex items-center gap-2.5 shrink-0">
                                       <span className="text-[11px] font-mono font-bold text-amber-500 flex items-center gap-0.5">
                                         <Zap className="w-3 h-3 fill-amber-400" />
-                                        +{taskItem.rewardXp} XP
+                                        {taskItem.rewardXp > 0 ? (
+                                          <>+{taskItem.rewardXp} XP</>
+                                        ) : (
+                                          <span>Manual</span>
+                                        )}
                                       </span>
 
                                       {isApproved ? (
