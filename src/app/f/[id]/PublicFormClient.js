@@ -1365,7 +1365,7 @@ Society of Renewable Energy • UPN Veteran Jawa Timur`;
           </div>
 
           {/* Account Verification Chip (Logged In vs Guest) */}
-          {form.collectUserData && (
+          {(form.collectUserData || form.limitOneResponse) && (
             <motion.div
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}

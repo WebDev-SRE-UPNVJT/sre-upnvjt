@@ -5,7 +5,7 @@ import { eq, or } from 'drizzle-orm';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import PublicFormClient from './PublicFormClient';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 
 async function getFormByIdOrUuid(idOrUuid) {
   if (!idOrUuid) return null;
@@ -113,6 +113,12 @@ export default async function PublicFormPage({ params }) {
     }
   } catch (e) {
     // Abaikan
+  }
+
+  // Jika formulir disetel merekam data akun atau dibatasi 1 respon per akun, wajibkan login
+  if ((form.collectUserData || form.limitOneResponse) && !sessionUser) {
+    const callbackUrl = `/f/${form.uuid || form.id || id}`;
+    redirect(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
   }
 
   return <PublicFormClient form={form} user={sessionUser} existingSubmission={existingSubmission} />;

@@ -81,6 +81,14 @@ export async function POST(req, { params }) {
     const finalEmail = (responderEmail || userEmail || autoEmail || '').trim();
     const finalNpm = (userNpm || autoNpm || '').trim();
 
+    // Wajibkan login jika rekam akun atau batasan 1 respon aktif
+    if ((form.collectUserData || form.limitOneResponse) && !finalMemberId) {
+      return NextResponse.json({
+        error: 'Formulir ini mewajibkan Anda untuk masuk ke akun terlebih dahulu.',
+        requireLogin: true,
+      }, { status: 401 });
+    }
+
     // Cek pembatasan 1 tanggapan per akun jika opsi limitOneResponse aktif
     if (form.limitOneResponse) {
       let existingSub = null;
