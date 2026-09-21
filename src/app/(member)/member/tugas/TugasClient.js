@@ -178,7 +178,7 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      className={`group relative bg-white dark:bg-[#08120e] border rounded-2xl p-4 sm:p-5 transition-all duration-300 cursor-pointer hover:scale-[1.008] overflow-hidden w-full max-w-full min-w-0 flex flex-col justify-between h-full ${
+      className={`group relative bg-white dark:bg-[#08120e] border rounded-2xl p-4 sm:p-5 transition-all duration-300 cursor-pointer hover:-translate-y-1 overflow-hidden w-full max-w-full min-w-0 flex flex-col justify-between h-full ${
         isLocked
           ? "border-amber-500/20 dark:border-amber-500/15 opacity-85 hover:border-amber-500/40 shadow-sm"
           : isMain
