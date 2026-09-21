@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { systemSetting } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import FloatingThemeToggle from "@/components/FloatingThemeToggle";
+import TopProgressBar from "@/components/TopProgressBar";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -111,6 +112,7 @@ export default async function RootLayout({ children }) {
     >
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-canvas text-ink font-sans">
         <Providers>
+          <TopProgressBar />
           <LanguageProvider initialLanguage={appLanguage}>
             <HeaderWrapper />
             <VisitorTrackerWrapper />
