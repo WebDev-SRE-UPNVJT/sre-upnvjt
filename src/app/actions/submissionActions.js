@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { task, taskSubmission, memberProfile, xpTransaction, mentorGroup, mentorGroupMember, user } from "@/db/schema";
+import { task, taskSubmission, memberProfile, xpTransaction, mentorGroup, mentorGroupMember, user, formSubmission } from "@/db/schema";
 import { eq, and, desc, asc, inArray, or } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
@@ -162,7 +162,12 @@ export async function getSubmissionsForReview() {
               division: { columns: { name: true } },
             },
           },
-          task: true,
+          task: {
+            with: {
+              formTemplate: true,
+              ttsCrossword: true,
+            },
+          },
           reviewer: {
             columns: { id: true, name: true, email: true },
           },
@@ -181,7 +186,12 @@ export async function getSubmissionsForReview() {
               division: { columns: { name: true } },
             },
           },
-          task: true,
+          task: {
+            with: {
+              formTemplate: true,
+              ttsCrossword: true,
+            },
+          },
           reviewer: {
             columns: { id: true, name: true, email: true },
           },
@@ -211,6 +221,26 @@ export async function getSubmissionsForReview() {
       });
     }
 
+    // Fetch formSubmissions for Form tasks if answers is not directly stored in taskSubmission
+    const formTemplateIds = Array.from(
+      new Set(rawSubmissions.map((s) => s.task?.formTemplateId).filter(Boolean))
+    );
+    let formSubMap = new Map();
+    if (formTemplateIds.length > 0) {
+      try {
+        const formSubs = await db.query.formSubmission.findMany({
+          where: inArray(formSubmission.formTemplateId, formTemplateIds),
+        });
+        formSubs.forEach((fs) => {
+          if (fs.memberId) {
+            formSubMap.set(`${fs.formTemplateId}_${fs.memberId}`, fs);
+          }
+        });
+      } catch (err) {
+        console.warn("[Submissions] Could not fetch auxiliary formSubmissions:", err.message);
+      }
+    }
+
     const formattedSubmissions = rawSubmissions.map((s) => {
       const tx = txMap.get(s.id);
       let bonusXp = 0;
@@ -225,8 +255,20 @@ export async function getSubmissionsForReview() {
 
       const grp = userToGroupMap.get(s.memberId) || null;
 
+      let effectiveAnswers = s.answers;
+      if (
+        (!effectiveAnswers || (Array.isArray(effectiveAnswers) && effectiveAnswers.length === 0)) &&
+        s.task?.formTemplateId
+      ) {
+        const matchingFs = formSubMap.get(`${s.task.formTemplateId}_${s.memberId}`);
+        if (matchingFs && matchingFs.answers) {
+          effectiveAnswers = matchingFs.answers;
+        }
+      }
+
       return {
         ...s,
+        answers: effectiveAnswers,
         bonusXp,
         group: grp,
       };
@@ -414,11 +456,15 @@ export async function reviewTaskSubmissionAction(submissionId, { status, feedbac
 
       if (parsedBonusXp > 0) {
         totalGainedXp += parsedBonusXp;
-        reasons.push(`Bonus Penilai: +${parsedBonusXp} XP`);
+        if ((submission.task?.rewardXp || 0) === 0 && speedBonusXp === 0) {
+          reasons.push(`Penilaian Tugas: ${submission.task?.title || "Tugas"} (+${parsedBonusXp} XP)`);
+        } else {
+          reasons.push(`Bonus Penilai: +${parsedBonusXp} XP`);
+        }
       }
     } else if (wasApproved && nowApproved && parsedBonusXp > 0) {
       totalGainedXp += parsedBonusXp;
-      reasons.push(`Bonus Tambahan Penilai: +${parsedBonusXp} XP`);
+      reasons.push(`Nilai / Bonus Tambahan Penilai: +${parsedBonusXp} XP`);
     }
 
     if (totalGainedXp > 0) {

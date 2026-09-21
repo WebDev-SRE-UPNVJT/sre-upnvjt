@@ -39,8 +39,12 @@ export default function TTSBuilderClient({ initialData = null, initialTTSList = 
   // Validation Mode Settings
   // validationMode: "MODAL" (Pop-up modal per pertanyaan) | "END" (Harus diisi semua baru cek)
   const [validationMode, setValidationMode] = useState(initialData?.validationMode || "MODAL");
-  // wrongAnswerBehavior: "RETRY" (Bisa diulang terus) | "REVEAL" (Langsung buka jawaban benar jika salah)
+  // wrongAnswerBehavior: "RETRY" (Bisa diulang terus / terbatas) | "REVEAL" (Langsung buka jawaban benar jika salah)
   const [wrongAnswerBehavior, setWrongAnswerBehavior] = useState(initialData?.wrongAnswerBehavior || "RETRY");
+  // maxRetryAttempts: null/empty for unlimited, or positive integer (e.g. 3)
+  const [maxRetryAttempts, setMaxRetryAttempts] = useState(
+    initialData?.maxRetryAttempts != null ? String(initialData.maxRetryAttempts) : ""
+  );
 
   // Questions & Answers
   const [items, setItems] = useState(() => {
@@ -78,6 +82,7 @@ export default function TTSBuilderClient({ initialData = null, initialTTSList = 
   const [activeModalWord, setActiveModalWord] = useState(null);
   const [modalInputLetters, setModalInputLetters] = useState([]);
   const [modalFeedback, setModalFeedback] = useState(null);
+  const [previewWordAttempts, setPreviewWordAttempts] = useState({});
   const modalInputRefs = useRef([]);
 
   const gridInputRefs = useRef({});
@@ -140,6 +145,7 @@ export default function TTSBuilderClient({ initialData = null, initialTTSList = 
     setTimeLimitMinutes("");
     setValidationMode("MODAL");
     setWrongAnswerBehavior("RETRY");
+    setMaxRetryAttempts("");
     setItems([
       { id: "item_1", clue: "", answer: "" },
       { id: "item_2", clue: "", answer: "" },
@@ -164,6 +170,7 @@ export default function TTSBuilderClient({ initialData = null, initialTTSList = 
         setTimeLimitMinutes(d.timeLimitMinutes || "");
         setValidationMode(d.validationMode || "MODAL");
         setWrongAnswerBehavior(d.wrongAnswerBehavior || "RETRY");
+        setMaxRetryAttempts(d.maxRetryAttempts != null ? String(d.maxRetryAttempts) : "");
         if (d.questions && d.questions.length > 0) {
           setItems(
             d.questions.map((q) => ({
@@ -235,6 +242,10 @@ export default function TTSBuilderClient({ initialData = null, initialTTSList = 
         rewardXp: rewardXp ? parseInt(rewardXp) : 15,
         validationMode,
         wrongAnswerBehavior,
+        maxRetryAttempts:
+          wrongAnswerBehavior === "RETRY" && maxRetryAttempts && parseInt(maxRetryAttempts) > 0
+            ? parseInt(maxRetryAttempts)
+            : null,
         isPublished: true,
         items,
       };
@@ -309,6 +320,7 @@ export default function TTSBuilderClient({ initialData = null, initialTTSList = 
     setActiveModalWord(null);
     setModalFeedback(null);
     setEndCheckFeedback(null);
+    setPreviewWordAttempts({});
   }, []);
 
   // Timer Effect in Play Mode
@@ -477,7 +489,14 @@ export default function TTSBuilderClient({ initialData = null, initialTTSList = 
         setModalFeedback(null);
       }, 900);
     } else {
-      if (wrongAnswerBehavior === "REVEAL") {
+      const wordKey = `${activeModalWord.direction}-${activeModalWord.number}`;
+      const currentAttempts = (previewWordAttempts[wordKey] || 0) + 1;
+      setPreviewWordAttempts((prev) => ({ ...prev, [wordKey]: currentAttempts }));
+
+      const limitNum = maxRetryAttempts && parseInt(maxRetryAttempts) > 0 ? parseInt(maxRetryAttempts) : null;
+      const isLimitReached = wrongAnswerBehavior === "RETRY" && limitNum && currentAttempts >= limitNum;
+
+      if (wrongAnswerBehavior === "REVEAL" || isLimitReached) {
         const isAcross = activeModalWord.direction === "ACROSS";
         const newInputs = { ...userInputs };
         for (let i = 0; i < activeModalWord.length; i++) {
@@ -489,7 +508,9 @@ export default function TTSBuilderClient({ initialData = null, initialTTSList = 
 
         setModalFeedback({
           type: "revealed",
-          message: `Jawaban salah! Kunci jawaban yang benar: "${correctWord}"`,
+          message: isLimitReached
+            ? `Batas ${limitNum}x percobaan salah tercapai! Kunci jawaban dibuka: "${correctWord}"`
+            : `Jawaban salah! Kunci jawaban yang benar: "${correctWord}"`,
         });
 
         checkOverallCompletion(newInputs);
@@ -499,9 +520,13 @@ export default function TTSBuilderClient({ initialData = null, initialTTSList = 
           setModalFeedback(null);
         }, 1800);
       } else {
+        const remaining = limitNum ? limitNum - currentAttempts : null;
         setModalFeedback({
           type: "error",
-          message: "Jawaban belum tepat! Silakan periksa kembali huruf yang Anda masukkan.",
+          message:
+            remaining !== null
+              ? `Jawaban belum tepat! Tersisa ${remaining} kesempatan lagi.`
+              : "Jawaban belum tepat! Silakan periksa kembali huruf yang Anda masukkan.",
         });
       }
     }
@@ -911,7 +936,11 @@ export default function TTSBuilderClient({ initialData = null, initialTTSList = 
                           {puzzle.validationMode === "END" ? "Cek Di Akhir" : "Modal Per-Soal"}
                         </span>
                         <span className="text-[10px] px-2 py-0.5 bg-gray-100 dark:bg-white/10 rounded-lg text-gray-600 dark:text-gray-300 font-medium">
-                          {puzzle.wrongAnswerBehavior === "REVEAL" ? "Buka Kunci" : "Bisa Diulang"}
+                          {puzzle.wrongAnswerBehavior === "REVEAL"
+                            ? "Buka Kunci (1x)"
+                            : puzzle.maxRetryAttempts
+                            ? `Bisa Diulang (Maks ${puzzle.maxRetryAttempts}x)`
+                            : "Bisa Diulang (Bebas)"}
                         </span>
                       </div>
                     </div>
@@ -1074,7 +1103,7 @@ export default function TTSBuilderClient({ initialData = null, initialTTSList = 
               </div>
 
               {/* Setting 2: Perilaku Jika Salah */}
-              <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-white/10">
+              <div className="space-y-3 pt-2 border-t border-gray-200 dark:border-white/10">
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">
                   Perilaku Jika Jawaban Salah:
                 </label>
@@ -1089,7 +1118,7 @@ export default function TTSBuilderClient({ initialData = null, initialTTSList = 
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Bisa Diulang Terus</span>
+                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Bisa Diulang</span>
                       {wrongAnswerBehavior === "RETRY" && <Check className="w-4 h-4 text-emerald-500" />}
                     </div>
                     <p className="text-[11px] leading-relaxed opacity-90">
@@ -1111,10 +1140,85 @@ export default function TTSBuilderClient({ initialData = null, initialTTSList = 
                       {wrongAnswerBehavior === "REVEAL" && <Check className="w-4 h-4 text-amber-500" />}
                     </div>
                     <p className="text-[11px] leading-relaxed opacity-90">
-                      Jika salah, sistem langsung menampilkan dan mengisi kunci jawaban yang benar.
+                      Jika 1x salah, sistem langsung menampilkan dan mengisi kunci jawaban yang benar.
                     </p>
                   </button>
                 </div>
+
+                {/* Sub-setting: Batas Percobaan Salah jika Mode RETRY */}
+                {wrongAnswerBehavior === "RETRY" && (
+                  <div className="mt-3 p-4 rounded-2xl bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                      <div>
+                        <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
+                          Batas Maksimal Percobaan per Soal:
+                        </span>
+                        <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                          Tentukan berapa kali peserta boleh mencoba salah sebelum kunci jawaban terbuka otomatis.
+                        </p>
+                      </div>
+                      <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 shrink-0">
+                        {!maxRetryAttempts || parseInt(maxRetryAttempts) <= 0
+                          ? "Tak Terbatas (Bebas)"
+                          : `Maksimal ${maxRetryAttempts}x Percobaan`}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setMaxRetryAttempts("")}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                          !maxRetryAttempts || parseInt(maxRetryAttempts) <= 0
+                            ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+                            : "bg-white dark:bg-[#0c1914] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:border-emerald-500"
+                        }`}
+                      >
+                        Bebas (Tanpa Batas)
+                      </button>
+
+                      {[2, 3, 5].map((preset) => (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => setMaxRetryAttempts(String(preset))}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                            maxRetryAttempts === String(preset)
+                              ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+                              : "bg-white dark:bg-[#0c1914] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:border-emerald-500"
+                          }`}
+                        >
+                          {preset}x Salah
+                        </button>
+                      ))}
+
+                      {/* Manual input */}
+                      <div className="flex items-center gap-1.5 pl-1">
+                        <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Atau manual:</span>
+                        <input
+                          type="number"
+                          min="1"
+                          max="20"
+                          value={maxRetryAttempts}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (!val) {
+                              setMaxRetryAttempts("");
+                            } else {
+                              const num = parseInt(val);
+                              if (!isNaN(num) && num >= 1 && num <= 50) {
+                                setMaxRetryAttempts(String(num));
+                              }
+                            }
+                          }}
+                          placeholder="Jumlah"
+                          className="w-16 px-2.5 py-1.5 text-xs font-bold text-center rounded-xl bg-white dark:bg-[#0c1914] border border-gray-300 dark:border-white/15 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        />
+                        <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">kali</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

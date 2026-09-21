@@ -317,6 +317,7 @@ export async function POST(req, { params }) {
               memberId: memberId,
               fileUrl: formResponseUrl,
               status: subStatus,
+              answers: answers || [],
               score: isQuizForm ? percentage : 100,
               correctCount: isQuizForm ? correctCount : null,
               wrongCount: isQuizForm ? Math.max(0, (totalScoredQuestions || 0) - correctCount) : null,
@@ -331,6 +332,7 @@ export async function POST(req, { params }) {
               .set({
                 fileUrl: formResponseUrl,
                 status: subStatus,
+                answers: answers || [],
                 score: isQuizForm ? percentage : 100,
                 correctCount: isQuizForm ? correctCount : null,
                 wrongCount: isQuizForm ? Math.max(0, (totalScoredQuestions || 0) - correctCount) : null,

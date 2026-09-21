@@ -177,6 +177,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
   const title = puzzleData?.title || "Teka-Teki Silang";
   const timeLimitMinutes = puzzleData?.timeLimitMinutes ? parseInt(puzzleData.timeLimitMinutes) : null;
   const wrongAnswerBehavior = puzzleData?.wrongAnswerBehavior || "RETRY";
+  const maxRetryAttempts = puzzleData?.maxRetryAttempts ? parseInt(puzzleData.maxRetryAttempts) : null;
 
   // Questions to items
   const items = useMemo(() => {
@@ -198,6 +199,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
   // User Answers State: { "row,col": "A" }
   const [userInputs, setUserInputs] = useState({});
   const [wordStatuses, setWordStatuses] = useState({}); // { "ACROSS-1": "CORRECT" | "WRONG" | "REVEALED" }
+  const [wordAttempts, setWordAttempts] = useState({}); // { "ACROSS-1": 1 }
 
   // Focus Modal Answering State
   const [activeWord, setActiveWord] = useState(null);
@@ -489,15 +491,25 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
       setMistakeCount(nextMistakes);
       setTimeout(() => setShakeWord(false), 450);
 
-      setFloatingXP({
-        text: "Jawaban Kurang Tepat",
-        sub: wrongAnswerBehavior === "RETRY" ? "Periksa kembali susunan hurufnya" : "Lanjut ke soal berikutnya",
-        key: Date.now(),
-        type: "wrong"
-      });
-      setTimeout(() => setFloatingXP(null), 1200);
+      // Track attempts for this specific word
+      const currentAttempts = (wordAttempts[wordKey] || 0) + 1;
+      const nextWordAttempts = { ...wordAttempts, [wordKey]: currentAttempts };
+      setWordAttempts(nextWordAttempts);
 
-      if (wrongAnswerBehavior === "REVEAL") {
+      const hasAttemptLimit = wrongAnswerBehavior === "RETRY" && maxRetryAttempts && maxRetryAttempts > 0;
+      const isLimitReached = hasAttemptLimit && currentAttempts >= maxRetryAttempts;
+
+      if (wrongAnswerBehavior === "REVEAL" || isLimitReached) {
+        setFloatingXP({
+          text: isLimitReached ? "Batas Percobaan Habis!" : "Jawaban Kurang Tepat",
+          sub: isLimitReached
+            ? `Batas ${maxRetryAttempts}x salah tercapai. Kunci jawaban dibuka.`
+            : "Lanjut ke soal berikutnya",
+          key: Date.now(),
+          type: "wrong",
+        });
+        setTimeout(() => setFloatingXP(null), 1400);
+
         const isAcross = activeWord.direction === "ACROSS";
         const newInputs = { ...userInputs };
         for (let i = 0; i < activeWord.length; i++) {
@@ -524,6 +536,18 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
           }
         }, 1100);
       } else {
+        const remainingAttempts = hasAttemptLimit ? maxRetryAttempts - currentAttempts : null;
+        setFloatingXP({
+          text: "Jawaban Kurang Tepat",
+          sub:
+            remainingAttempts !== null
+              ? `Tersisa ${remainingAttempts} kesempatan mencoba lagi`
+              : "Periksa kembali susunan hurufnya",
+          key: Date.now(),
+          type: "wrong",
+        });
+        setTimeout(() => setFloatingXP(null), 1200);
+
         setTimeout(() => {
           setTypedLetters(new Array(activeWord.length).fill(""));
           setActiveSlotIdx(0);
@@ -531,7 +555,18 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
         }, 600);
       }
     }
-  }, [activeWord, userInputs, wordStatuses, totalWords, wrongAnswerBehavior, isMuted, mistakeCount, handleSubmitAnswers]);
+  }, [
+    activeWord,
+    userInputs,
+    wordStatuses,
+    wordAttempts,
+    totalWords,
+    wrongAnswerBehavior,
+    maxRetryAttempts,
+    isMuted,
+    mistakeCount,
+    handleSubmitAnswers,
+  ]);
 
   const handleInputLetter = useCallback((char) => {
     if (!activeWord || answerState !== "typing") return;
@@ -1000,6 +1035,15 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
               </button>
 
               <div className="flex items-center gap-2">
+                {wrongAnswerBehavior === "RETRY" && maxRetryAttempts && maxRetryAttempts > 0 && (
+                  <div className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-amber-400/40 bg-amber-500/20 text-amber-300 text-[11px] font-black backdrop-blur-md">
+                    <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
+                    <span>
+                      {(wordAttempts[`${activeWord.direction}-${activeWord.number}`] || 0)}/{maxRetryAttempts} Kesempatan
+                    </span>
+                  </div>
+                )}
+
                 <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-400/40 bg-emerald-500/20 text-emerald-300 text-xs font-black uppercase tracking-wider backdrop-blur-md">
                   <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
                   <span>#{activeWord.number} • {activeWord.direction === "ACROSS" ? "Mendatar" : "Menurun"}</span>

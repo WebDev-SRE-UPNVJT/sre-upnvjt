@@ -723,6 +723,7 @@ export const ttsCrossword = pgTable('ttsCrossword', {
   rewardXp: integer('rewardXp').default(10).notNull(),
   validationMode: varchar('validationMode', { length: 50 }).default('MODAL').notNull(), // 'MODAL' | 'END'
   wrongAnswerBehavior: varchar('wrongAnswerBehavior', { length: 50 }).default('RETRY').notNull(), // 'RETRY' | 'REVEAL'
+  maxRetryAttempts: integer('maxRetryAttempts'), // null or 0 = unlimited retry, or positive number (e.g. 3)
   isPublished: boolean('isPublished').default(true).notNull(),
   createdById: integer('createdById').references(() => user.id, { onDelete: 'cascade' }).notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),

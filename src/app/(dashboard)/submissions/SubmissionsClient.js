@@ -28,6 +28,11 @@ import {
   UserCheck,
   Check,
   Copy,
+  Gamepad2,
+  ListChecks,
+  FileQuestion,
+  HelpCircle,
+  Sparkles,
 } from "lucide-react";
 import { hasAccess } from "@/lib/permissions";
 import { reviewTaskSubmissionAction } from "@/app/actions/submissionActions";
@@ -68,6 +73,359 @@ function formatTimingDifference(submittedAt, deadline) {
   }
 }
 
+/**
+ * Component to render answers for TTS, Forms, Quizzes, or Files
+ */
+function SubmissionAnswersViewer({ submission }) {
+  if (!submission) return null;
+
+  const isTTS =
+    submission.task?.submissionType === "TTS" ||
+    Boolean(submission.task?.ttsCrosswordId) ||
+    (Array.isArray(submission.answers) && submission.answers.length > 0 && submission.answers[0]?.clue !== undefined);
+
+  const isForm =
+    submission.task?.submissionType === "FORM" ||
+    Boolean(submission.task?.formTemplateId) ||
+    (Array.isArray(submission.answers) &&
+      submission.answers.length > 0 &&
+      (submission.answers[0]?.questionTitle !== undefined || submission.answers[0]?.questionId !== undefined));
+
+  // 1. Render TTS Crossword answers
+  if (isTTS) {
+    const rawAnswers = Array.isArray(submission.answers) ? submission.answers : [];
+    const crosswordQuestions = submission.task?.ttsCrossword?.questions || [];
+
+    let cluesList = [];
+    if (rawAnswers.length > 0 && rawAnswers[0]?.clue !== undefined) {
+      cluesList = rawAnswers;
+    } else {
+      const answersMap =
+        typeof submission.answers === "object" && submission.answers !== null && !Array.isArray(submission.answers)
+          ? submission.answers
+          : {};
+      cluesList = crosswordQuestions.map((q) => {
+        const uAns = String(
+          answersMap[q.id] || answersMap[String(q.id)] || answersMap[q.clue] || ""
+        )
+          .toUpperCase()
+          .replace(/[^A-Z0-9]/g, "");
+        const expected = String(q.answer || "")
+          .toUpperCase()
+          .replace(/[^A-Z0-9]/g, "");
+        const isCorrect = expected.length > 0 && expected === uAns;
+        return {
+          questionId: q.id,
+          clue: q.clue,
+          userAnswer: uAns || "-",
+          correctAnswer: expected,
+          isCorrect,
+          number: q.number,
+          orientation: q.orientation,
+        };
+      });
+    }
+
+    return (
+      <div className="space-y-4">
+        {/* TTS Score & Stats Summary */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Akurasi Skor</p>
+            <p className="text-lg font-black text-emerald-600 dark:text-emerald-400">
+              {submission.score != null ? `${submission.score}%` : "-"}
+            </p>
+          </div>
+          <div className="p-3 rounded-xl bg-teal-500/10 border border-teal-500/20 text-center">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Benar / Total</p>
+            <p className="text-lg font-black text-teal-600 dark:text-teal-400">
+              {submission.correctCount ?? cluesList.filter((c) => c.isCorrect).length} /{" "}
+              {submission.totalQuestions ?? cluesList.length}
+            </p>
+          </div>
+          <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-center">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Salah / Keliru</p>
+            <p className="text-lg font-black text-rose-600 dark:text-rose-400">
+              {submission.wrongCount ?? cluesList.filter((c) => !c.isCorrect).length}x
+            </p>
+          </div>
+          <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-center">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Waktu Selesai</p>
+            <p className="text-lg font-black text-blue-600 dark:text-blue-400">
+              {submission.timeTakenSeconds
+                ? `${Math.floor(submission.timeTakenSeconds / 60)}m ${submission.timeTakenSeconds % 60}s`
+                : "Tercatat"}
+            </p>
+          </div>
+        </div>
+
+        {/* Crossword Question List */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-bold text-gray-800 dark:text-white/90 flex items-center gap-1.5">
+              <Gamepad2 className="w-3.5 h-3.5 text-primary" />
+              Rincian Jawaban Teka-Teki Silang ({cluesList.length} Petunjuk)
+            </h4>
+          </div>
+
+          {cluesList.length === 0 ? (
+            <p className="text-xs text-gray-400 italic p-3 bg-gray-50 dark:bg-white/5 rounded-xl text-center">
+              Tidak ada rincian jawaban tersimpan untuk game ini.
+            </p>
+          ) : (
+            <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+              {cluesList.map((item, idx) => (
+                <div
+                  key={idx}
+                  className={`p-3 rounded-xl border transition-all text-xs ${
+                    item.isCorrect
+                      ? "bg-emerald-500/[0.03] border-emerald-500/20 dark:border-emerald-500/20"
+                      : "bg-rose-500/[0.03] border-rose-500/20 dark:border-rose-500/20"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2 mb-1.5">
+                    <span className="font-bold text-gray-800 dark:text-white/90">
+                      {idx + 1}. {item.clue || `Pertanyaan #${idx + 1}`}
+                    </span>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 flex items-center gap-1 ${
+                        item.isCorrect
+                          ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                          : "bg-rose-500/15 text-rose-600 dark:text-rose-400"
+                      }`}
+                    >
+                      {item.isCorrect ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                      {item.isCorrect ? "Benar" : "Salah / Terbuka"}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1 border-t border-gray-100 dark:border-white/5">
+                    <div>
+                      <span className="text-gray-400 text-[10px] uppercase font-bold block">Jawaban Member:</span>
+                      <span
+                        className={`font-mono font-bold ${
+                          item.isCorrect
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-rose-600 dark:text-rose-400"
+                        }`}
+                      >
+                        {item.userAnswer || "-"}
+                      </span>
+                    </div>
+                    {item.correctAnswer && (
+                      <div>
+                        <span className="text-gray-400 text-[10px] uppercase font-bold block">Kunci Jawaban:</span>
+                        <span className="font-mono font-bold text-emerald-700 dark:text-emerald-300">
+                          {item.correctAnswer}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // 2. Render Form / Questionnaire / Quiz answers
+  if (isForm) {
+    const rawAnswers = Array.isArray(submission.answers) ? submission.answers : [];
+    const formQuestions = submission.task?.formTemplate?.questions || [];
+    const isQuiz = Boolean(submission.task?.formTemplate?.isQuiz) || submission.score != null;
+
+    let questionEntries = [];
+    if (formQuestions.length > 0) {
+      questionEntries = formQuestions
+        .filter((q) => q && q.type !== "page_break")
+        .map((q, idx) => {
+          const matched = rawAnswers.find(
+            (a) => String(a.questionId) === String(q.id) || a.questionTitle === q.question
+          );
+          return {
+            index: idx + 1,
+            questionId: q.id,
+            questionTitle: q.question || `Pertanyaan #${idx + 1}`,
+            type: q.type || "text",
+            options: q.options || [],
+            points: q.points || 0,
+            value: matched ? matched.value : (rawAnswers[idx]?.value ?? "-"),
+          };
+        });
+    } else if (rawAnswers.length > 0) {
+      questionEntries = rawAnswers.map((a, idx) => ({
+        index: idx + 1,
+        questionId: a.questionId || idx,
+        questionTitle: a.questionTitle || `Pertanyaan #${idx + 1}`,
+        type: "text",
+        value: a.value,
+      }));
+    }
+
+    return (
+      <div className="space-y-4">
+        {/* Form / Quiz Summary Header */}
+        {isQuiz && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Skor Kuis</p>
+              <p className="text-lg font-black text-emerald-600 dark:text-emerald-400">
+                {submission.score != null ? `${submission.score}%` : "Tuntas"}
+              </p>
+            </div>
+            <div className="p-3 rounded-xl bg-teal-500/10 border border-teal-500/20 text-center">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Soal Terjawab</p>
+              <p className="text-lg font-black text-teal-600 dark:text-teal-400">
+                {
+                  questionEntries.filter(
+                    (q) => q.value !== undefined && q.value !== null && q.value !== ""
+                  ).length
+                }{" "}
+                / {questionEntries.length}
+              </p>
+            </div>
+            <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-center col-span-2 sm:col-span-1">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total XP Diperoleh</p>
+              <p className="text-lg font-black text-blue-600 dark:text-blue-400">
+                +{submission.xpEarned || submission.task?.rewardXp || 0} XP
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Questions & Answers List */}
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-bold text-gray-800 dark:text-white/90 flex items-center gap-1.5">
+              <FileText className="w-3.5 h-3.5 text-primary" />
+              Rekap Respon Formulir ({questionEntries.length} Pertanyaan)
+            </h4>
+          </div>
+
+          {questionEntries.length === 0 ? (
+            <p className="text-xs text-gray-400 italic p-3 bg-gray-50 dark:bg-white/5 rounded-xl text-center">
+              Tidak ada data respon formulir tersimpan untuk submisi ini.
+            </p>
+          ) : (
+            <div className="space-y-2.5 max-h-96 overflow-y-auto pr-1">
+              {questionEntries.map((q) => {
+                const val = q.value;
+                const isArrayVal = Array.isArray(val);
+                const isFileUrl =
+                  typeof val === "string" &&
+                  (val.startsWith("http://") ||
+                    val.startsWith("https://") ||
+                    val.includes("drive.google.com") ||
+                    val.includes("/uploads/"));
+
+                return (
+                  <div
+                    key={q.questionId || q.index}
+                    className="p-3.5 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 space-y-1.5 text-xs"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="font-bold text-gray-900 dark:text-white leading-snug">
+                        {q.index}. {q.questionTitle}
+                      </p>
+                      {q.points > 0 && (
+                        <span className="px-2 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold shrink-0">
+                          +{q.points} Poin
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Member's Answer */}
+                    <div className="pt-1">
+                      <span className="text-[10px] uppercase font-bold text-gray-400 block mb-1">
+                        Jawaban Responden:
+                      </span>
+
+                      {isArrayVal ? (
+                        <div className="flex flex-wrap gap-1.5">
+                          {val.length === 0 ? (
+                            <span className="text-gray-400 italic">(Dikosongkan)</span>
+                          ) : (
+                            val.map((item, idx) => (
+                              <span
+                                key={idx}
+                                className="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 font-semibold text-xs flex items-center gap-1"
+                              >
+                                <Check className="w-3 h-3 text-emerald-500" />
+                                {String(item)}
+                              </span>
+                            ))
+                          )}
+                        </div>
+                      ) : isFileUrl ? (
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={val}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-[#050e0a] font-bold text-xs hover:bg-primary-focus transition-all shadow-sm"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            <span>Buka Lampiran / Berkas Form</span>
+                          </a>
+                        </div>
+                      ) : (
+                        <div className="p-2.5 rounded-lg bg-white dark:bg-black/30 border border-gray-200/60 dark:border-white/5 font-medium text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+                          {val !== undefined && val !== null && String(val).trim() !== "" ? (
+                            String(val)
+                          ) : (
+                            <span className="text-gray-400 italic">(Tidak dijawab)</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // 3. Fallback for generic file/link submissions
+  return (
+    <div className="space-y-3">
+      {submission.fileUrl ? (
+        <div className="space-y-2">
+          <label className="text-xs font-bold text-gray-700 dark:text-white/80">Berkas / Tautan Tugas:</label>
+          <div className="space-y-2">
+            {submission.fileUrl.split(",").map((url, idx) => (
+              <div
+                key={idx}
+                className="p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 flex items-center justify-between gap-2 text-xs"
+              >
+                <span className="text-gray-700 dark:text-white/70 truncate flex-1 font-mono">
+                  {url.trim()}
+                </span>
+                <a
+                  href={url.trim()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 rounded-lg bg-primary text-[#050e0a] text-xs font-bold flex items-center gap-1 shrink-0"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" /> Buka
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <p className="text-xs text-gray-400 italic p-3 bg-gray-50 dark:bg-white/5 rounded-xl text-center">
+          Tidak ada berkas terlampir.
+        </p>
+      )}
+    </div>
+  );
+}
+
 export default function SubmissionsClient({ initialData, currentUser }) {
   const [submissions, setSubmissions] = useState(initialData?.submissions || []);
   const [tasks] = useState(initialData?.tasks || []);
@@ -90,7 +448,10 @@ export default function SubmissionsClient({ initialData, currentUser }) {
   const [reviewFeedback, setReviewFeedback] = useState("");
   const [reviewBonusXp, setReviewBonusXp] = useState("0");
   const [isSavingReview, setIsSavingReview] = useState(false);
-  const [copiedUrl, setCopiedUrl] = useState("");
+
+  // Standalone Answers View Modal State
+  const [answersModalOpen, setAnswersModalOpen] = useState(false);
+  const [answersTargetSub, setAnswersTargetSub] = useState(null);
 
   // Notification Toast
   const [notification, setNotification] = useState(null);
@@ -151,84 +512,40 @@ export default function SubmissionsClient({ initialData, currentUser }) {
     return { total, pending, approved, rejected, totalXpAwarded };
   }, [filteredSubmissions]);
 
-  // Group by Task for Accordion View
-  const taskGroups = useMemo(() => {
-    return tasks
-      .filter(
-        (t) =>
-          selectedTaskFilter === "ALL" || String(t.id) === String(selectedTaskFilter)
-      )
-      .map((t) => {
-        const taskSubs = filteredSubmissions.filter((s) => s.taskId === t.id);
-        return {
-          task: t,
-          submissions: taskSubs,
-        };
-      })
-      .filter((g) => {
-        if (
-          searchQuery.trim() ||
-          selectedStatusFilter !== "ALL" ||
-          selectedGroupFilter !== "ALL"
-        ) {
-          return g.submissions.length > 0;
-        }
-        return true;
-      });
-  }, [tasks, filteredSubmissions, selectedTaskFilter, searchQuery, selectedStatusFilter, selectedGroupFilter]);
+  // Group submissions by task for accordion layout
+  const submissionsByTask = useMemo(() => {
+    const map = new Map();
+    filteredSubmissions.forEach((sub) => {
+      const tId = sub.taskId;
+      if (!map.has(tId)) {
+        map.set(tId, {
+          task: sub.task || { id: tId, title: "Tugas", rewardXp: 0 },
+          items: [],
+        });
+      }
+      map.get(tId).items.push(sub);
+    });
+    return Array.from(map.values());
+  }, [filteredSubmissions]);
 
-  // Review Modal Handlers
-  const handleOpenReview = (sub) => {
-    setTargetSubmission(sub);
-    setReviewStatus(sub.status === "PENDING" ? "APPROVED" : sub.status);
-    setReviewFeedback(sub.feedback || "");
-    setReviewBonusXp((sub.bonusXp || 0).toString());
+  const handleOpenReview = (submission) => {
+    setTargetSubmission(submission);
+    setReviewStatus(submission.status || "APPROVED");
+    setReviewFeedback(submission.feedback || "");
+    setReviewBonusXp(String(submission.bonusXp || 0));
     setReviewModalOpen(true);
   };
 
-  // Live Calculation for Estimation in Modal
-  const estimationDetails = useMemo(() => {
-    if (!targetSubmission || !targetSubmission.task) {
-      return {
-        baseXp: 0,
-        speedBonusXp: 0,
-        customBonusXp: 0,
-        totalEstimatedXp: 0,
-        timingInfo: { isLate: false, text: "-" },
-      };
-    }
-
-    const currentTask = targetSubmission.task;
-    const baseXp = currentTask.rewardXp || 0;
-    const timingInfo = formatTimingDifference(targetSubmission.submittedAt, currentTask.deadline);
-
-    let speedBonusXp = 0;
-    if (currentTask.enableSpeedBonus !== false && !timingInfo.isLate) {
-      speedBonusXp = calculateSpeedBonusXp(
-        currentTask.createdAt,
-        currentTask.deadline,
-        targetSubmission.submittedAt
-      );
-    }
-
-    const customBonusXp = Math.max(0, parseInt(reviewBonusXp) || 0);
-    const totalEstimatedXp =
-      reviewStatus === "APPROVED" ? baseXp + speedBonusXp + customBonusXp : 0;
-
-    return {
-      baseXp,
-      speedBonusXp,
-      customBonusXp,
-      totalEstimatedXp,
-      timingInfo,
-    };
-  }, [targetSubmission, reviewStatus, reviewBonusXp]);
+  const handleOpenAnswersModal = (submission) => {
+    setAnswersTargetSub(submission);
+    setAnswersModalOpen(true);
+  };
 
   const handleSaveReview = async (e) => {
     e.preventDefault();
     if (!targetSubmission) return;
-    setIsSavingReview(true);
 
+    setIsSavingReview(true);
     try {
       const res = await reviewTaskSubmissionAction(targetSubmission.id, {
         status: reviewStatus,
@@ -243,60 +560,87 @@ export default function SubmissionsClient({ initialData, currentUser }) {
         notify("success", "Penilaian submisi berhasil disimpan!");
         setReviewModalOpen(false);
       } else {
-        notify("error", res.error || "Gagal menyimpan review submisi.");
+        notify("error", res.error || "Gagal menyimpan penilaian");
       }
     } catch (err) {
-      console.error(err);
-      notify("error", "Terjadi kesalahan koneksi.");
+      notify("error", "Terjadi kesalahan jaringan: " + err.message);
     } finally {
       setIsSavingReview(false);
     }
   };
 
-  // Export Submissions to Excel
+  const estimationDetails = useMemo(() => {
+    if (!targetSubmission)
+      return { baseXp: 0, speedBonusXp: 0, totalEstimatedXp: 0, isManualOnly: true, timingInfo: {} };
+
+    const baseXp = targetSubmission.task?.rewardXp || 0;
+    const isSpeedBonusEnabled = targetSubmission.task?.enableSpeedBonus !== false;
+    let speedBonusXp = 0;
+
+    if (isSpeedBonusEnabled && baseXp > 0) {
+      speedBonusXp = calculateSpeedBonusXp(
+        targetSubmission.task?.createdAt,
+        targetSubmission.task?.deadline,
+        targetSubmission.submittedAt
+      );
+    }
+
+    const addedScoreOrBonus = parseInt(reviewBonusXp) || 0;
+    const isManualOnly = baseXp === 0 && speedBonusXp === 0;
+    const totalEstimatedXp = isManualOnly ? addedScoreOrBonus : baseXp + speedBonusXp + addedScoreOrBonus;
+    const timingInfo = formatTimingDifference(
+      targetSubmission.submittedAt,
+      targetSubmission.task?.deadline
+    );
+
+    return { baseXp, speedBonusXp, totalEstimatedXp, isManualOnly, timingInfo };
+  }, [targetSubmission, reviewBonusXp]);
+
   const handleExportExcel = async () => {
     try {
       const workbook = new ExcelJS.Workbook();
-      workbook.creator = "SRE UPNVJT Portal";
-      workbook.created = new Date();
-
-      const sheet = workbook.addWorksheet("Daftar Submisi");
+      const sheet = workbook.addWorksheet("Submisi Tugas");
 
       sheet.addRow([
-        "ID Submisi",
+        "ID",
         "Nama Member",
         "NPM",
-        "Departemen",
-        "Kelompok",
+        "Email",
+        "Kelompok Mentoring",
         "Judul Tugas",
-        "Tanggal Submit",
+        "Tipe Submisi",
         "Status",
-        "XP Didapat",
-        "Link/File URL",
-        "Catatan Feedback",
+        "Skor / Akurasi",
+        "Reward XP",
+        "Bonus XP",
+        "Waktu Submit",
+        "Deadline",
+        "Keterangan Waktu",
+        "Berkas / Link",
+        "Catatan Penilai",
+        "Penilai",
       ]);
 
-      const headerRow = sheet.getRow(1);
-      headerRow.font = { bold: true, color: { argb: "FFFFFFFF" } };
-      headerRow.fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FF064E3B" },
-      };
-
       filteredSubmissions.forEach((s) => {
+        const timing = formatTimingDifference(s.submittedAt, s.task?.deadline);
         sheet.addRow([
           s.id,
           s.member?.name || "-",
           s.member?.npm || "-",
-          s.member?.department?.name || "-",
-          s.group?.groupName || "Belum ada kelompok",
+          s.member?.email || "-",
+          s.group?.groupName || "-",
           s.task?.title || "-",
-          s.submittedAt ? new Date(s.submittedAt).toLocaleString("id-ID") : "-",
+          s.task?.submissionType || "FILE",
           s.status,
-          s.xpEarned || 0,
+          s.score != null ? `${s.score}%` : "-",
+          s.xpEarned || s.task?.rewardXp || 0,
+          s.bonusXp || 0,
+          s.submittedAt ? new Date(s.submittedAt).toLocaleString("id-ID") : "-",
+          s.task?.deadline ? new Date(s.task.deadline).toLocaleString("id-ID") : "-",
+          timing.text,
           s.fileUrl || "-",
           s.feedback || "-",
+          s.reviewer?.name || "-",
         ]);
       });
 
@@ -319,12 +663,6 @@ export default function SubmissionsClient({ initialData, currentUser }) {
       console.error(err);
       notify("error", "Gagal export Excel: " + err.message);
     }
-  };
-
-  const handleCopyUrl = (url) => {
-    navigator.clipboard.writeText(url);
-    setCopiedUrl(url);
-    setTimeout(() => setCopiedUrl(""), 2000);
   };
 
   const quickFeedbackTemplates = [
@@ -381,8 +719,8 @@ export default function SubmissionsClient({ initialData, currentUser }) {
           </div>
           <p className="text-gray-500 dark:text-white/50 max-w-xl">
             {isRestrictedMentor
-              ? "Tinjau pengerjaan tugas, evaluasi hasil, dan berikan reward XP untuk member kelompok mentoring Anda."
-              : "Tinjau pengerjaan tugas operasional, berikan catatan feedback, dan nilai reward XP anggota SRE UPNVJT."}
+              ? "Tinjau pengerjaan tugas, evaluasi jawaban kuis/form/TTS, dan berikan reward XP untuk member kelompok mentoring Anda."
+              : "Tinjau pengerjaan tugas operasional, periksa detail jawaban peserta tanpa perlu buka spreadsheet, dan nilai reward XP."}
           </p>
         </div>
 
@@ -459,147 +797,179 @@ export default function SubmissionsClient({ initialData, currentUser }) {
 
         <div className="bg-white/40 dark:bg-white/[0.02] border border-gray-200/50 dark:border-white/10 rounded-2xl p-5 backdrop-blur-xl flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center font-bold">
-            <Zap className="w-6 h-6" />
+            <Award className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Total XP Diberi</p>
-            <h3 className="text-2xl font-black text-purple-600 dark:text-purple-400">+{stats.totalXpAwarded} XP</h3>
+            <p className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">XP Diberikan</p>
+            <h3 className="text-2xl font-black text-purple-600 dark:text-purple-400">+{stats.totalXpAwarded}</h3>
           </div>
         </div>
       </div>
 
-      {/* ── Filters Toolbar ── */}
-      <div className="bg-white/40 dark:bg-white/[0.02] border border-gray-200/50 dark:border-white/10 rounded-2xl p-4 mb-6 backdrop-blur-xl flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3 flex-wrap">
+      {/* ── Filter Dropdowns ── */}
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        {/* Task Filter */}
+        <div className="flex items-center gap-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs">
+          <FolderKanban className="w-4 h-4 text-gray-400" />
           <select
             value={selectedTaskFilter}
             onChange={(e) => setSelectedTaskFilter(e.target.value)}
-            className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-white/80 focus:outline-none focus:border-primary"
+            className="bg-transparent text-gray-900 dark:text-white font-medium focus:outline-none cursor-pointer"
           >
-            <option value="ALL">Semua Tugas ({tasks.length})</option>
+            <option value="ALL" className="dark:bg-[#0b1712]">Semua Penugasan ({tasks.length})</option>
             {tasks.map((t) => (
-              <option key={t.id} value={t.id}>
+              <option key={t.id} value={t.id} className="dark:bg-[#0b1712]">
                 {t.title}
               </option>
             ))}
           </select>
+        </div>
 
+        {/* Status Filter */}
+        <div className="flex items-center gap-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs">
+          <Filter className="w-4 h-4 text-gray-400" />
           <select
             value={selectedStatusFilter}
             onChange={(e) => setSelectedStatusFilter(e.target.value)}
-            className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-white/80 focus:outline-none focus:border-primary"
+            className="bg-transparent text-gray-900 dark:text-white font-medium focus:outline-none cursor-pointer"
           >
-            <option value="ALL">Semua Status</option>
-            <option value="PENDING">Menunggu Review</option>
-            <option value="APPROVED">Disetujui</option>
-            <option value="REJECTED">Ditolak / Revisi</option>
+            <option value="ALL" className="dark:bg-[#0b1712]">Semua Status Submisi</option>
+            <option value="PENDING" className="dark:bg-[#0b1712]">Menunggu Review</option>
+            <option value="APPROVED" className="dark:bg-[#0b1712]">Disetujui (Approved)</option>
+            <option value="REJECTED" className="dark:bg-[#0b1712]">Perlu Revisi (Rejected)</option>
           </select>
+        </div>
 
-          {!isRestrictedMentor && mentorGroups.length > 0 && (
+        {/* Group Filter */}
+        {mentorGroups.length > 0 && (
+          <div className="flex items-center gap-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs">
+            <Users className="w-4 h-4 text-gray-400" />
             <select
               value={selectedGroupFilter}
               onChange={(e) => setSelectedGroupFilter(e.target.value)}
-              className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-white/80 focus:outline-none focus:border-primary"
+              className="bg-transparent text-gray-900 dark:text-white font-medium focus:outline-none cursor-pointer"
             >
-              <option value="ALL">Semua Kelompok</option>
+              <option value="ALL" className="dark:bg-[#0b1712]">Semua Kelompok Mentoring</option>
               {mentorGroups.map((g) => (
-                <option key={g.id} value={g.id}>
+                <option key={g.id} value={g.id} className="dark:bg-[#0b1712]">
                   {g.name}
                 </option>
               ))}
             </select>
-          )}
-        </div>
-
-        <span className="text-xs text-gray-500 dark:text-white/40 font-semibold">
-          Menampilkan {filteredSubmissions.length} submisi
-        </span>
+          </div>
+        )}
       </div>
 
-      {/* ── Submissions Accordion List ── */}
-      {taskGroups.length === 0 ? (
-        <div className="bg-white/40 dark:bg-white/[0.02] border border-gray-200/50 dark:border-white/10 rounded-3xl p-16 text-center backdrop-blur-xl">
-          <div className="flex flex-col items-center gap-3 text-gray-500 dark:text-white/30">
-            <ShieldCheck className="w-12 h-12 text-gray-400" />
-            <p className="font-semibold text-base text-gray-900 dark:text-white">Tidak ada submisi ditemukan</p>
-            <p className="text-xs text-gray-500 dark:text-white/40">Coba sesuaikan kata kunci pencarian atau filter status.</p>
-          </div>
+      {/* ── Submissions Accordion / List ── */}
+      {submissionsByTask.length === 0 ? (
+        <div className="p-12 text-center bg-white/40 dark:bg-white/[0.02] border border-gray-200/50 dark:border-white/10 rounded-3xl backdrop-blur-xl">
+          <CheckSquare className="w-12 h-12 text-gray-300 dark:text-white/20 mx-auto mb-4" />
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">Tidak Ada Submisi Ditemukan</h3>
+          <p className="text-sm text-gray-500 dark:text-white/50 max-w-sm mx-auto mt-1">
+            Belum ada member yang mengumpulkan tugas atau tidak ada submisi yang sesuai filter yang dipilih.
+          </p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {taskGroups.map(({ task, submissions: taskSubs }) => {
-            const isCollapsed = Boolean(collapsedTasks[task.id]);
-            const pendingCount = taskSubs.filter((s) => s.status === "PENDING").length;
-            const approvedCount = taskSubs.filter((s) => s.status === "APPROVED").length;
+        <div className="space-y-6">
+          {submissionsByTask.map(({ task, items }) => {
+            const isCollapsed = collapsedTasks[task.id];
+            const pendingCount = items.filter((i) => i.status === "PENDING").length;
+            const approvedCount = items.filter((i) => i.status === "APPROVED").length;
+            const isTTSTask = task.submissionType === "TTS" || Boolean(task.ttsCrosswordId);
+            const isFormTask = task.submissionType === "FORM" || Boolean(task.formTemplateId);
 
             return (
               <div
                 key={task.id}
-                className="bg-white/40 dark:bg-white/[0.02] border border-gray-200/50 dark:border-white/10 rounded-3xl overflow-hidden backdrop-blur-xl shadow-lg transition-all"
+                className="bg-white/40 dark:bg-white/[0.02] border border-gray-200/50 dark:border-white/10 rounded-3xl overflow-hidden backdrop-blur-xl shadow-sm transition-all"
               >
-                {/* Header Accordion */}
+                {/* Accordion Header */}
                 <div
                   onClick={() => toggleTaskCollapse(task.id)}
-                  className="p-5 md:p-6 bg-gray-50/70 dark:bg-white/[0.03] border-b border-gray-200/50 dark:border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-gray-100/70 dark:hover:bg-white/[0.05] transition-all"
+                  className="p-5 md:p-6 flex items-center justify-between gap-4 cursor-pointer hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors border-b border-gray-100 dark:border-white/5"
                 >
-                  <div className="flex items-start md:items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
-                      <FolderKanban className="w-5 h-5" />
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold shrink-0">
+                      {isTTSTask ? (
+                        <Gamepad2 className="w-5 h-5" />
+                      ) : isFormTask ? (
+                        <FileText className="w-5 h-5" />
+                      ) : (
+                        <FolderKanban className="w-5 h-5" />
+                      )}
                     </div>
-                    <div>
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate">
                           {task.title}
                         </h3>
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 text-xs font-bold">
-                          <Award className="w-3.5 h-3.5" /> +{task.rewardXp} XP
-                        </span>
-                        <span className="px-2 py-0.5 rounded bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white/70 text-[10px] font-black uppercase">
-                          {task.category || "MAIN"}
-                        </span>
+                        {isTTSTask && (
+                          <span className="px-2 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-600 dark:text-purple-400 text-[10px] font-bold uppercase">
+                            TTS Crossword
+                          </span>
+                        )}
+                        {isFormTask && (
+                          <span className="px-2 py-0.5 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase">
+                            Formulir / Kuis
+                          </span>
+                        )}
                       </div>
-                      <div className="flex items-center gap-4 mt-1 text-xs text-gray-500 dark:text-white/50">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3.5 h-3.5 text-primary" />
-                          Tenggat: {task.deadline ? new Date(task.deadline).toLocaleDateString("id-ID", {
-                            day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
-                          }) : "Tanpa batas"}
-                        </span>
-                      </div>
+                      <p className="text-xs text-gray-500 dark:text-white/50 flex items-center gap-3 mt-0.5">
+                        <span>Reward: +{task.rewardXp || 0} XP</span>
+                        <span>•</span>
+                        <span>{items.length} Submisi Masuk</span>
+                        {task.deadline && (
+                          <>
+                            <span>•</span>
+                            <span className="flex items-center gap-1 text-gray-400">
+                              <Calendar className="w-3 h-3" />
+                              Deadline: {new Date(task.deadline).toLocaleDateString("id-ID")}
+                            </span>
+                          </>
+                        )}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between md:justify-end gap-3 pt-2 md:pt-0 border-t md:border-t-0 border-gray-200/40 dark:border-white/5">
+                  <div className="flex items-center gap-3 shrink-0">
                     <div className="flex items-center gap-2">
                       {pendingCount > 0 && (
-                        <span className="px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold flex items-center gap-1 animate-pulse">
-                          <Clock className="w-3 h-3" /> {pendingCount} Menunggu
+                        <span className="px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 text-xs font-bold flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> {pendingCount} Perlu Review
                         </span>
                       )}
-                      <span className="text-xs font-bold text-gray-500 dark:text-white/40">
-                        {approvedCount} / {taskSubs.length} Selesai
+                      <span className="px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" /> {approvedCount} Selesai
                       </span>
                     </div>
-                    <div className="w-8 h-8 rounded-xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-500">
-                      {isCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
-                    </div>
+
+                    <button
+                      type="button"
+                      className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors rounded-xl"
+                    >
+                      {isCollapsed ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
+                    </button>
                   </div>
                 </div>
 
-                {/* Body List */}
+                {/* Submissions Grid Inside Task Accordion */}
                 {!isCollapsed && (
-                  <div className="p-5 md:p-6">
-                    {taskSubs.length === 0 ? (
-                      <p className="text-xs text-gray-400 italic text-center py-6">
-                        Belum ada anggota yang mengumpulkan tugas ini.
+                  <div className="p-5 md:p-6 bg-white/[0.01]">
+                    {items.length === 0 ? (
+                      <p className="text-xs text-gray-400 italic text-center py-4">
+                        Tidak ada submisi untuk penugasan ini.
                       </p>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {taskSubs.map((sub) => {
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {items.map((sub) => {
                           const isPending = sub.status === "PENDING";
                           const isApproved = sub.status === "APPROVED";
                           const isRejected = sub.status === "REJECTED";
                           const timing = formatTimingDifference(sub.submittedAt, task.deadline);
+                          const hasAnswersData =
+                            (Array.isArray(sub.answers) && sub.answers.length > 0) ||
+                            isTTSTask ||
+                            isFormTask;
 
                           return (
                             <div
@@ -617,7 +987,11 @@ export default function SubmissionsClient({ initialData, currentUser }) {
                                 <div className="flex items-center gap-3 min-w-0">
                                   <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-white/10 flex items-center justify-center text-xs font-bold text-gray-700 dark:text-white shrink-0 overflow-hidden">
                                     {sub.member?.profilePictureUrl ? (
-                                      <img src={sub.member.profilePictureUrl} alt="" className="w-full h-full object-cover" />
+                                      <img
+                                        src={sub.member.profilePictureUrl}
+                                        alt=""
+                                        className="w-full h-full object-cover"
+                                      />
                                     ) : (
                                       sub.member?.name?.charAt(0).toUpperCase() || "?"
                                     )}
@@ -660,15 +1034,33 @@ export default function SubmissionsClient({ initialData, currentUser }) {
                               <div className="p-3 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-200/60 dark:border-white/5 space-y-2 text-xs">
                                 <div className="flex items-center justify-between text-[11px] text-gray-500 dark:text-white/50">
                                   <span>
-                                    Dikumpulkan: {sub.submittedAt ? new Date(sub.submittedAt).toLocaleString("id-ID") : "-"}
+                                    Dikumpulkan:{" "}
+                                    {sub.submittedAt
+                                      ? new Date(sub.submittedAt).toLocaleString("id-ID")
+                                      : "-"}
                                   </span>
-                                  <span className={`font-bold ${timing.isLate ? "text-rose-500" : "text-emerald-500"}`}>
+                                  <span
+                                    className={`font-bold ${
+                                      timing.isLate ? "text-rose-500" : "text-emerald-500"
+                                    }`}
+                                  >
                                     {timing.isLate ? "⚠️ " : "⚡ "}
                                     {timing.text}
                                   </span>
                                 </div>
 
-                                {sub.fileUrl && (
+                                {/* Skor Badge (jika TTS / Kuis / ada score) */}
+                                {sub.score != null && (
+                                  <div className="flex items-center justify-between bg-primary/10 px-2.5 py-1 rounded-lg text-primary font-bold text-xs">
+                                    <span>Skor Pengerjaan:</span>
+                                    <span>
+                                      {sub.score}% {sub.correctCount != null ? `(${sub.correctCount}/${sub.totalQuestions || "?"} Benar)` : ""}
+                                    </span>
+                                  </div>
+                                )}
+
+                                {/* Links or Quick Action */}
+                                {sub.fileUrl && !isTTSTask && !isFormTask && (
                                   <div className="flex items-center gap-2 pt-1 flex-wrap">
                                     {sub.fileUrl.split(",").map((url, idx) => (
                                       <a
@@ -679,7 +1071,9 @@ export default function SubmissionsClient({ initialData, currentUser }) {
                                         className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition-colors"
                                       >
                                         <ExternalLink className="w-3.5 h-3.5" />
-                                        <span>Buka Berkas {sub.fileUrl.split(",").length > 1 ? `#${idx + 1}` : ""}</span>
+                                        <span>
+                                          Buka Berkas {sub.fileUrl.split(",").length > 1 ? `#${idx + 1}` : ""}
+                                        </span>
                                       </a>
                                     ))}
                                   </div>
@@ -687,30 +1081,48 @@ export default function SubmissionsClient({ initialData, currentUser }) {
 
                                 {sub.feedback && (
                                   <div className="pt-2 border-t border-gray-200/50 dark:border-white/5 text-xs text-gray-600 dark:text-white/70">
-                                    <strong className="text-gray-900 dark:text-white">Catatan:</strong> {sub.feedback}
+                                    <strong className="text-gray-900 dark:text-white">Catatan:</strong>{" "}
+                                    {sub.feedback}
                                   </div>
                                 )}
                               </div>
 
-                              {/* Card Footer */}
-                              <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100 dark:border-white/5">
+                              {/* Card Footer Actions */}
+                              <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100 dark:border-white/5 flex-wrap">
                                 <div className="flex items-center gap-1.5 text-xs font-bold text-gray-700 dark:text-white/80">
                                   <Award className="w-4 h-4 text-primary" />
                                   <span>
-                                    {isApproved ? `+${sub.xpEarned || task.rewardXp || 0} XP Diberikan` : `Reward: +${task.rewardXp || 0} XP`}
+                                    {isApproved
+                                      ? `+${sub.xpEarned || task.rewardXp || 0} XP`
+                                      : `Reward: +${task.rewardXp || 0} XP`}
                                   </span>
                                 </div>
 
-                                {canReview && (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleOpenReview(sub)}
-                                    className="px-4 py-2 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-bold hover:bg-gray-800 dark:hover:bg-white/90 transition-all flex items-center gap-1.5 shadow-sm"
-                                  >
-                                    <CheckSquare className="w-3.5 h-3.5" />
-                                    <span>{isPending ? "Tinjau & Nilai" : "Ubah Penilaian"}</span>
-                                  </button>
-                                )}
+                                <div className="flex items-center gap-2">
+                                  {/* Button Lihat Detail Jawaban Tanpa Buka Spreadsheet */}
+                                  {hasAnswersData && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOpenAnswersModal(sub)}
+                                      className="px-3 py-2 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition-all flex items-center gap-1"
+                                      title="Lihat rincian jawaban member secara instan"
+                                    >
+                                      <Eye className="w-3.5 h-3.5" />
+                                      <span>Lihat Jawaban</span>
+                                    </button>
+                                  )}
+
+                                  {canReview && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOpenReview(sub)}
+                                      className="px-3.5 py-2 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-bold hover:bg-gray-800 dark:hover:bg-white/90 transition-all flex items-center gap-1.5 shadow-sm"
+                                    >
+                                      <CheckSquare className="w-3.5 h-3.5" />
+                                      <span>{isPending ? "Tinjau & Nilai" : "Ubah Nilai"}</span>
+                                    </button>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           );
@@ -725,7 +1137,118 @@ export default function SubmissionsClient({ initialData, currentUser }) {
         </div>
       )}
 
-      {/* ── Review & Grading Modal Matching Dashboard Standard ── */}
+      {/* ── Standalone Answers Viewer Modal (Tanpa Buka Spreadsheet) ── */}
+      <AnimatePresence>
+        {answersModalOpen && answersTargetSub && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white dark:bg-[#0b1712] border border-gray-200 dark:border-white/10 rounded-3xl p-6 md:p-8 max-w-3xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+            >
+              {/* Modal Header */}
+              <div className="flex justify-between items-start pb-4 border-b border-gray-100 dark:border-white/10">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold shrink-0">
+                    {answersTargetSub.task?.submissionType === "TTS" ||
+                    answersTargetSub.task?.ttsCrosswordId ? (
+                      <Gamepad2 className="w-6 h-6" />
+                    ) : (
+                      <FileText className="w-6 h-6" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white truncate">
+                      Detail Jawaban: {answersTargetSub.member?.name || `User ${answersTargetSub.memberId}`}
+                    </h2>
+                    <p className="text-xs text-gray-500 dark:text-white/50 mt-0.5 truncate">
+                      {answersTargetSub.task?.title} • NPM: {answersTargetSub.member?.npm || "-"} •{" "}
+                      {answersTargetSub.group?.groupName || "Belum Ada Kelompok"}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setAnswersModalOpen(false)}
+                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-white rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-colors shrink-0 ml-2"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="py-5 overflow-y-auto flex-1 pr-1 space-y-5">
+                {/* Submission Meta Bar */}
+                <div className="p-3.5 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 flex items-center justify-between gap-3 text-xs flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-gray-400" />
+                    <span className="text-gray-500">Dikumpulkan:</span>
+                    <span className="font-bold text-gray-900 dark:text-white">
+                      {answersTargetSub.submittedAt
+                        ? new Date(answersTargetSub.submittedAt).toLocaleString("id-ID")
+                        : "-"}
+                    </span>
+                  </div>
+                  <div>
+                    <span
+                      className={`font-bold ${
+                        formatTimingDifference(answersTargetSub.submittedAt, answersTargetSub.task?.deadline)
+                          .isLate
+                          ? "text-rose-500"
+                          : "text-emerald-500"
+                      }`}
+                    >
+                      {
+                        formatTimingDifference(
+                          answersTargetSub.submittedAt,
+                          answersTargetSub.task?.deadline
+                        ).text
+                      }
+                    </span>
+                  </div>
+                </div>
+
+                {/* Answers Component */}
+                <SubmissionAnswersViewer submission={answersTargetSub} />
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-between gap-3 pt-4 border-t border-gray-100 dark:border-white/10">
+                <span className="text-xs text-gray-400 flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5 text-primary" />
+                  Jawaban ditarik langsung dari database portal
+                </span>
+                <div className="flex items-center gap-2">
+                  {canReview && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAnswersModalOpen(false);
+                        handleOpenReview(answersTargetSub);
+                      }}
+                      className="px-5 py-2.5 rounded-xl bg-primary text-[#050e0a] font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:bg-primary-focus transition-all"
+                    >
+                      <CheckSquare className="w-4 h-4" />
+                      <span>Beri Penilaian & Nilai XP</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setAnswersModalOpen(false)}
+                    className="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-gray-700 dark:text-white/70 hover:bg-gray-100 dark:hover:bg-white/5 text-xs font-bold transition-colors"
+                  >
+                    Tutup
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Review & Grading Modal ── */}
       <AnimatePresence>
         {reviewModalOpen && targetSubmission && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
@@ -760,7 +1283,11 @@ export default function SubmissionsClient({ initialData, currentUser }) {
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-11 h-11 rounded-xl bg-gray-200 dark:bg-white/10 flex items-center justify-center text-sm font-bold text-gray-800 dark:text-white shrink-0 overflow-hidden">
                       {targetSubmission.member?.profilePictureUrl ? (
-                        <img src={targetSubmission.member.profilePictureUrl} alt="" className="w-full h-full object-cover" />
+                        <img
+                          src={targetSubmission.member.profilePictureUrl}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
                       ) : (
                         targetSubmission.member?.name?.charAt(0).toUpperCase() || "?"
                       )}
@@ -770,7 +1297,8 @@ export default function SubmissionsClient({ initialData, currentUser }) {
                         {targetSubmission.member?.name}
                       </p>
                       <p className="text-xs text-gray-400 truncate">
-                        NPM: {targetSubmission.member?.npm || "-"} • {targetSubmission.group?.groupName || "Belum ada kelompok"}
+                        NPM: {targetSubmission.member?.npm || "-"} •{" "}
+                        {targetSubmission.group?.groupName || "Belum ada kelompok"}
                       </p>
                     </div>
                   </div>
@@ -779,79 +1307,146 @@ export default function SubmissionsClient({ initialData, currentUser }) {
                 {/* Timing Analysis */}
                 <div className="p-3.5 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 flex items-center justify-between text-xs">
                   <span className="text-gray-500 dark:text-white/50">Waktu Dikumpulkan:</span>
-                  <span className={`font-bold ${estimationDetails.timingInfo.isLate ? "text-rose-500" : "text-emerald-500"}`}>
+                  <span
+                    className={`font-bold ${
+                      estimationDetails.timingInfo.isLate ? "text-rose-500" : "text-emerald-500"
+                    }`}
+                  >
                     {estimationDetails.timingInfo.isLate ? "⚠️ " : "⚡ "}
                     {estimationDetails.timingInfo.text}
                   </span>
                 </div>
 
-                {/* Submission Link/Files */}
-                {targetSubmission.fileUrl && (
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-700 dark:text-white/80">Berkas Pengerjaan:</label>
-                    <div className="space-y-2">
-                      {targetSubmission.fileUrl.split(",").map((url, idx) => (
-                        <div
-                          key={idx}
-                          className="p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 flex items-center justify-between gap-2"
-                        >
-                          <span className="text-xs text-gray-700 dark:text-white/70 truncate flex-1 font-mono">
-                            {url.trim()}
-                          </span>
-                          <a
-                            href={url.trim()}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-3 py-1.5 rounded-lg bg-primary text-[#050e0a] text-xs font-bold flex items-center gap-1 shrink-0"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5" /> Buka
-                          </a>
-                        </div>
-                      ))}
-                    </div>
+                {/* Embedded Answers Viewer Inside Review Modal */}
+                <div className="p-4 rounded-2xl bg-gray-50/70 dark:bg-white/[0.03] border border-gray-200/80 dark:border-white/10 space-y-3">
+                  <div className="flex items-center justify-between border-b border-gray-200/50 dark:border-white/5 pb-2">
+                    <label className="text-xs font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+                      <ListChecks className="w-4 h-4 text-primary" />
+                      Rincian Jawaban & Pengerjaan Member:
+                    </label>
                   </div>
-                )}
+                  <SubmissionAnswersViewer submission={targetSubmission} />
+                </div>
 
-                {/* Live Calculation & Estimation Box */}
-                <div className="p-4 rounded-2xl bg-emerald-500/[0.04] border border-emerald-500/25 space-y-2.5">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-                    <Award className="w-4 h-4" /> Estimasi Reward XP Member
-                  </h4>
-                  <div className="space-y-2 text-xs divide-y divide-emerald-500/10">
-                    <div className="flex justify-between pt-1">
-                      <span className="text-gray-500">Base Reward Tugas:</span>
-                      <span className="font-bold text-gray-900 dark:text-white">+{estimationDetails.baseXp} XP</span>
+                {/* Live Calculation & Estimation / Grading Box */}
+                <div className="p-5 rounded-2xl bg-emerald-500/[0.05] border border-emerald-500/30 space-y-4">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+                      <Award className="w-4 h-4 text-primary" />
+                      {estimationDetails.isManualOnly
+                        ? "Penilaian Nilai XP Tugas (Review Manual)"
+                        : "Estimasi Perolehan Reward XP Member"}
+                    </h4>
+                    {estimationDetails.isManualOnly ? (
+                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
+                        Input Nilai Manual
+                      </span>
+                    ) : (
+                      <span className="px-2.5 py-0.5 rounded-full bg-primary/15 border border-primary/30 text-primary text-[10px] font-bold">
+                        Reward Otomatis + Bonus
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Breakdown only if Base Reward or Speed Bonus > 0 */}
+                  {!estimationDetails.isManualOnly && (
+                    <div className="space-y-2 text-xs divide-y divide-emerald-500/10">
+                      <div className="flex justify-between pt-1">
+                        <span className="text-gray-500 dark:text-white/60">Base Reward Tugas:</span>
+                        <span className="font-bold text-gray-900 dark:text-white">
+                          +{estimationDetails.baseXp} XP
+                        </span>
+                      </div>
+                      {estimationDetails.speedBonusXp > 0 && (
+                        <div className="flex justify-between pt-2">
+                          <span className="text-gray-500 dark:text-white/60">Speed Bonus (Tepat Waktu):</span>
+                          <span className="font-bold text-emerald-500">
+                            +{estimationDetails.speedBonusXp} XP
+                          </span>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex justify-between pt-2">
-                      <span className="text-gray-500">Speed Bonus (Tepat Waktu):</span>
-                      <span className="font-bold text-emerald-500">+{estimationDetails.speedBonusXp} XP</span>
+                  )}
+
+                  {/* Large, Prominent Score Input Field */}
+                  <div className="space-y-2 pt-1">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-gray-800 dark:text-white flex items-center gap-1">
+                        <span>
+                          {estimationDetails.isManualOnly
+                            ? "Masukkan Nilai XP yang Diberikan:"
+                            : "Bonus Tambahan Penilai (Opsional):"}
+                        </span>
+                      </label>
+                      <span className="text-[11px] text-gray-400 font-medium">
+                        {estimationDetails.isManualOnly
+                          ? "Sesuai kualitas pengerjaan peserta"
+                          : "Tambahan di atas reward dasar"}
+                      </span>
                     </div>
-                    <div className="flex justify-between items-center pt-2">
-                      <span className="text-gray-500">Bonus Tambahan Penilai:</span>
-                      <div className="flex items-center gap-1">
+
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex-1">
                         <input
                           type="number"
                           min="0"
-                          max="200"
+                          max="10000"
                           value={reviewBonusXp}
                           onChange={(e) => setReviewBonusXp(e.target.value)}
-                          className="w-16 px-2 py-0.5 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/20 rounded-lg text-xs font-bold text-right text-gray-900 dark:text-white focus:outline-none focus:border-primary"
+                          placeholder="0"
+                          className="w-full h-14 pl-4 pr-16 bg-white dark:bg-black/40 border-2 border-emerald-500/40 focus:border-primary rounded-2xl text-2xl font-black text-gray-900 dark:text-white focus:outline-none shadow-sm transition-all"
                         />
-                        <span className="text-gray-400">XP</span>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 px-3 py-1 rounded-xl bg-primary/15 text-primary text-xs font-black pointer-events-none">
+                          XP
+                        </div>
                       </div>
                     </div>
-                    <div className="flex justify-between items-center pt-3 text-sm font-black">
-                      <span className="text-gray-900 dark:text-white">TOTAL XP DITERIMA:</span>
-                      <span className={`px-3 py-1 rounded-xl ${reviewStatus === "APPROVED" ? "bg-primary text-[#050e0a]" : "bg-rose-500/20 text-rose-500"}`}>
-                        {reviewStatus === "APPROVED" ? `+${estimationDetails.totalEstimatedXp} XP` : "0 XP (Ditolak)"}
-                      </span>
+
+                    {/* Quick Presets Pills */}
+                    <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                      <span className="text-[10px] uppercase font-bold text-gray-400 mr-1">Preset Cepat:</span>
+                      {(estimationDetails.isManualOnly
+                        ? [0, 10, 25, 50, 75, 100, 150, 200]
+                        : [0, 5, 10, 15, 25, 50]
+                      ).map((preset) => (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => setReviewBonusXp(String(preset))}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                            String(reviewBonusXp) === String(preset)
+                              ? "bg-primary text-[#050e0a] shadow-sm scale-105"
+                              : "bg-white/80 dark:bg-white/10 hover:bg-emerald-500/15 text-gray-700 dark:text-white/80 border border-gray-200/60 dark:border-white/10"
+                          }`}
+                        >
+                          {preset === 0 ? "0 XP" : `+${preset} XP`}
+                        </button>
+                      ))}
                     </div>
+                  </div>
+
+                  {/* Total XP Banner */}
+                  <div className="flex justify-between items-center pt-3 border-t border-emerald-500/20 text-sm font-black">
+                    <span className="text-gray-900 dark:text-white">TOTAL XP DITERIMA MEMBER:</span>
+                    <span
+                      className={`px-3.5 py-1.5 rounded-xl text-sm font-black tracking-wide ${
+                        reviewStatus === "APPROVED"
+                          ? "bg-primary text-[#050e0a] shadow-[0_0_15px_rgba(16,185,129,0.35)]"
+                          : "bg-rose-500/20 text-rose-500"
+                      }`}
+                    >
+                      {reviewStatus === "APPROVED"
+                        ? `+${estimationDetails.totalEstimatedXp} XP`
+                        : "0 XP (Ditolak)"}
+                    </span>
                   </div>
                 </div>
 
                 {/* Status Selection */}
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-700 dark:text-white/80">Keputusan Evaluasi:</label>
+                  <label className="text-xs font-bold text-gray-700 dark:text-white/80">
+                    Keputusan Evaluasi:
+                  </label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
@@ -883,7 +1478,9 @@ export default function SubmissionsClient({ initialData, currentUser }) {
                 {/* Feedback Notes */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-gray-700 dark:text-white/80">Catatan untuk Member:</label>
+                    <label className="text-xs font-bold text-gray-700 dark:text-white/80">
+                      Catatan untuk Member:
+                    </label>
                   </div>
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {quickFeedbackTemplates.map((template, idx) => (

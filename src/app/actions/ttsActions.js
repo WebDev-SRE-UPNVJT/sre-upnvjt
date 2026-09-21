@@ -93,6 +93,7 @@ export async function saveTTS(payload) {
       rewardXp,
       validationMode = "MODAL",
       wrongAnswerBehavior = "RETRY",
+      maxRetryAttempts = null,
       isPublished = true,
       items = [], // [{ id, clue, answer }]
     } = payload;
@@ -100,6 +101,11 @@ export async function saveTTS(payload) {
     if (!title || !title.trim()) {
       return { success: false, error: "Judul TTS wajib diisi" };
     }
+
+    const parsedMaxRetryAttempts =
+      wrongAnswerBehavior === "RETRY" && maxRetryAttempts && parseInt(maxRetryAttempts) > 0
+        ? parseInt(maxRetryAttempts)
+        : null;
 
     const validQuestions = items
       .filter((it) => it.clue && it.clue.trim() && it.answer && it.answer.trim())
@@ -127,6 +133,7 @@ export async function saveTTS(payload) {
           rewardXp: rewardXp ? parseInt(rewardXp) : 10,
           validationMode: validationMode || "MODAL",
           wrongAnswerBehavior: wrongAnswerBehavior || "RETRY",
+          maxRetryAttempts: parsedMaxRetryAttempts,
           isPublished: Boolean(isPublished),
           updatedAt: new Date(),
         })
@@ -158,6 +165,7 @@ export async function saveTTS(payload) {
           rewardXp: rewardXp ? parseInt(rewardXp) : 10,
           validationMode: validationMode || "MODAL",
           wrongAnswerBehavior: wrongAnswerBehavior || "RETRY",
+          maxRetryAttempts: parsedMaxRetryAttempts,
           isPublished: Boolean(isPublished),
           createdById: parseInt(session.user.id),
         })
