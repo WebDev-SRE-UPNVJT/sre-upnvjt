@@ -7,33 +7,37 @@ function ProgressBarInternal() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [visible, setVisible] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress] = useState(0); // 0 to 100
+  const [isFinishing, setIsFinishing] = useState(false);
 
   const timerRef = useRef(null);
   const finishTimeoutRef = useRef(null);
+  const resetTimeoutRef = useRef(null);
   const safetyTimeoutRef = useRef(null);
 
   const startProgress = () => {
-    // Clear any existing timers
+    // Clear all pending timers
     if (timerRef.current) clearInterval(timerRef.current);
     if (finishTimeoutRef.current) clearTimeout(finishTimeoutRef.current);
+    if (resetTimeoutRef.current) clearTimeout(resetTimeoutRef.current);
     if (safetyTimeoutRef.current) clearTimeout(safetyTimeoutRef.current);
 
+    setIsFinishing(false);
     setVisible(true);
-    setProgress(15);
+    setProgress(20);
 
-    // Incrementally advance progress to simulate loading state
+    // Continuous smooth trickle calculation
     timerRef.current = setInterval(() => {
       setProgress((prev) => {
-        if (prev < 35) return prev + 15;
-        if (prev < 65) return prev + 8;
-        if (prev < 85) return prev + 3;
-        if (prev < 92) return prev + 0.5;
-        return prev;
+        if (prev >= 90) return prev;
+        // As it gets closer to 90%, increments get progressively smaller & silky smooth
+        const remaining = 90 - prev;
+        const step = Math.max(0.5, remaining * 0.12);
+        return Math.min(90, prev + step);
       });
-    }, 150);
+    }, 200);
 
-    // Safety timeout in case navigation is cancelled or errors
+    // Safety fallback (10s)
     safetyTimeoutRef.current = setTimeout(() => {
       completeProgress();
     }, 10000);
@@ -43,23 +47,27 @@ function ProgressBarInternal() {
     if (timerRef.current) clearInterval(timerRef.current);
     if (safetyTimeoutRef.current) clearTimeout(safetyTimeoutRef.current);
 
+    setIsFinishing(true);
     setProgress(100);
 
+    // Wait for the bar to hit 100% smoothly before fading out
     finishTimeoutRef.current = setTimeout(() => {
       setVisible(false);
-      setProgress(0);
-    }, 350);
+      resetTimeoutRef.current = setTimeout(() => {
+        setProgress(0);
+        setIsFinishing(false);
+      }, 350);
+    }, 250);
   };
 
-  // Complete progress when route / searchParams change
+  // Complete progress on route/searchParam change
   useEffect(() => {
     completeProgress();
   }, [pathname, searchParams]);
 
-  // Intercept all internal link clicks to trigger progress bar immediately
+  // Intercept internal links for instantaneous feedback
   useEffect(() => {
     const handleDocumentClick = (e) => {
-      // Find closest anchor tag
       const anchor = e.target.closest("a");
       if (!anchor) return;
 
@@ -67,7 +75,6 @@ function ProgressBarInternal() {
       const target = anchor.getAttribute("target");
       const download = anchor.getAttribute("download");
 
-      // Skip non-navigation or external links
       if (
         !href ||
         href.startsWith("#") ||
@@ -86,15 +93,11 @@ function ProgressBarInternal() {
         return;
       }
 
-      // Check if URL points to same origin
       try {
         const url = new URL(href, window.location.origin);
         if (url.origin !== window.location.origin) return;
+        if (url.pathname === window.location.pathname && url.search === window.location.search) return;
 
-        // Skip if navigating to the exact same full URL (including hash)
-        if (url.href === window.location.href) return;
-
-        // Trigger loading bar
         startProgress();
       } catch (_) {}
     };
@@ -112,6 +115,7 @@ function ProgressBarInternal() {
       window.removeEventListener("sre:navigation-end", handleCustomEnd);
       if (timerRef.current) clearInterval(timerRef.current);
       if (finishTimeoutRef.current) clearTimeout(finishTimeoutRef.current);
+      if (resetTimeoutRef.current) clearTimeout(resetTimeoutRef.current);
       if (safetyTimeoutRef.current) clearTimeout(safetyTimeoutRef.current);
     };
   }, []);
@@ -119,23 +123,40 @@ function ProgressBarInternal() {
   if (!visible && progress === 0) return null;
 
   return (
-    <div
-      aria-hidden="true"
-      className="fixed top-0 left-0 right-0 z-[99999] pointer-events-none h-[3px] sm:h-[3.5px] bg-transparent"
-    >
+    <>
+      <style>{`
+        @keyframes sreBarShimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+        .sre-progress-shimmer {
+          background-size: 200% 100%;
+          animation: sreBarShimmer 2s linear infinite;
+        }
+      `}</style>
       <div
-        className="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.9)] transition-all ease-out"
-        style={{
-          width: `${progress}%`,
-          transitionDuration: progress === 100 ? "200ms" : "250ms",
-          opacity: visible ? 1 : 0,
-        }}
+        aria-hidden="true"
+        className="fixed top-0 left-0 right-0 z-[99999] pointer-events-none h-[3px] bg-transparent overflow-hidden"
       >
-        {/* Glowing Head / Leading Edge */}
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-24 h-4 bg-emerald-400/40 blur-sm rounded-full pointer-events-none -mr-4" />
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white/80 blur-[2px] rounded-full pointer-events-none -mr-1" />
+        <div
+          className="h-full bg-gradient-to-r from-emerald-600 via-teal-400 to-emerald-300 sre-progress-shimmer shadow-[0_0_14px_rgba(16,185,129,0.85)] origin-left"
+          style={{
+            transform: `scaleX(${progress / 100})`,
+            transitionProperty: "transform, opacity",
+            transitionDuration: isFinishing ? "250ms, 300ms" : "350ms, 200ms",
+            transitionTimingFunction: isFinishing
+              ? "cubic-bezier(0, 0, 0.2, 1), ease-out"
+              : "cubic-bezier(0.16, 1, 0.3, 1), ease-out",
+            opacity: visible ? 1 : 0,
+            willChange: "transform, opacity",
+          }}
+        >
+          {/* Subtle Glowing Head on the leading edge */}
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-28 h-4 bg-emerald-300/50 blur-[3px] rounded-full pointer-events-none -mr-4" />
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-6 h-3 bg-white/90 blur-[1px] rounded-full pointer-events-none -mr-1" />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
