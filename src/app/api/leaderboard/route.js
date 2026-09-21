@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { user, memberProfile, division, xpTransaction, role } from "@/db/schema";
-import { eq, desc, gte, sql } from "drizzle-orm";
+import { user, memberProfile, division, xpTransaction, role, department } from "@/db/schema";
+import { eq, desc, gte, sql, and } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 
@@ -23,7 +23,7 @@ export async function GET(req) {
     let ranked = [];
 
     if (period === "all") {
-      // All-time leaderboard from memberProfile
+      // All-time leaderboard from memberProfile (Khusus role MEMBER & Exclude Departemen SYS)
       const data = await db
         .select({
           id:                user.id,
@@ -38,8 +38,16 @@ export async function GET(req) {
         .from(memberProfile)
         .innerJoin(user, eq(user.id, memberProfile.userId))
         .leftJoin(role, eq(role.id, user.roleId))
+        .leftJoin(department, eq(department.id, user.departmentId))
         .leftJoin(division, eq(division.id, user.divisionId))
-        .where(sql`LOWER(${role.name}) = 'member'`)
+        .where(
+          and(
+            sql`LOWER(${role.name}) = 'member'`,
+            sql`COALESCE(LOWER(${department.code}), '') NOT IN ('sys', 'system')`,
+            sql`COALESCE(LOWER(${department.name}), '') NOT LIKE '%sys%'`,
+            sql`COALESCE(LOWER(${division.name}), '') NOT LIKE '%sys%'`
+          )
+        )
         .orderBy(desc(memberProfile.xp));
 
       ranked = data;
@@ -77,7 +85,7 @@ export async function GET(req) {
         return NextResponse.json(getAugmentedLeaderboard([]));
       }
 
-      // Join dengan data user (hanya role MEMBER)
+      // Join dengan data user (Khusus role MEMBER & Exclude Departemen SYS)
       const users = await db
         .select({
           id:                user.id,
@@ -91,13 +99,21 @@ export async function GET(req) {
         .from(user)
         .leftJoin(role, eq(role.id, user.roleId))
         .leftJoin(memberProfile, eq(memberProfile.userId, user.id))
+        .leftJoin(department, eq(department.id, user.departmentId))
         .leftJoin(division, eq(division.id, user.divisionId))
-        .where(sql`LOWER(${role.name}) = 'member'`);
+        .where(
+          and(
+            sql`LOWER(${role.name}) = 'member'`,
+            sql`COALESCE(LOWER(${department.code}), '') NOT IN ('sys', 'system')`,
+            sql`COALESCE(LOWER(${department.name}), '') NOT LIKE '%sys%'`,
+            sql`COALESCE(LOWER(${division.name}), '') NOT LIKE '%sys%'`
+          )
+        );
 
       const userMap = Object.fromEntries(users.map((u) => [u.id, u]));
 
       ranked = xpByUser
-        .filter((row) => Boolean(userMap[row.userId])) // Filter hanya user ber-role MEMBER
+        .filter((row) => Boolean(userMap[row.userId])) // Filter hanya user ber-role MEMBER & non-SYS
         .map((row) => ({
           ...userMap[row.userId],
           xp:   Number(row.totalXp),

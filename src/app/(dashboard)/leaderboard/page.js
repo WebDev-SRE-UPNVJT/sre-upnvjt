@@ -3,8 +3,8 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import { hasAccess } from "@/lib/permissions";
 import { db } from "@/lib/db";
-import { user, memberProfile, division } from "@/db/schema";
-import { eq, desc, asc } from "drizzle-orm";
+import { user, memberProfile, division, role, department } from "@/db/schema";
+import { eq, desc, asc, sql, and } from "drizzle-orm";
 import LeaderboardClient from "./LeaderboardClient";
 import { getAugmentedLeaderboard } from "@/lib/dummyLeaderboard";
 
@@ -23,7 +23,7 @@ export default async function LeaderboardAdminPage() {
     redirect("/dashboard");
   }
 
-  // Fetch leaderboard data
+  // Fetch leaderboard data (Khusus role MEMBER & Exclude Departemen SYS)
   const data = await db
     .select({
       id: user.id,
@@ -33,20 +33,45 @@ export default async function LeaderboardAdminPage() {
       xp: memberProfile.xp,
       level: memberProfile.level,
       divisionName: division.name,
+      roleName: role.name,
     })
     .from(memberProfile)
     .innerJoin(user, eq(user.id, memberProfile.userId))
+    .leftJoin(role, eq(role.id, user.roleId))
+    .leftJoin(department, eq(department.id, user.departmentId))
     .leftJoin(division, eq(division.id, user.divisionId))
+    .where(
+      and(
+        sql`LOWER(${role.name}) = 'member'`,
+        sql`COALESCE(LOWER(${department.code}), '') NOT IN ('sys', 'system')`,
+        sql`COALESCE(LOWER(${department.name}), '') NOT LIKE '%sys%'`,
+        sql`COALESCE(LOWER(${division.name}), '') NOT LIKE '%sys%'`
+      )
+    )
     .orderBy(desc(memberProfile.xp));
 
   const ranked = getAugmentedLeaderboard(data);
 
-  // Fetch users list for manual XP award modal
-  const members = await db.query.user.findMany({
-    where: eq(user.isActive, true),
-    orderBy: [asc(user.name)],
-    columns: { id: true, name: true },
-  });
+  // Fetch users list for manual XP award modal (Khusus role MEMBER & non-SYS)
+  const members = await db
+    .select({
+      id: user.id,
+      name: user.name,
+    })
+    .from(user)
+    .innerJoin(role, eq(role.id, user.roleId))
+    .leftJoin(department, eq(department.id, user.departmentId))
+    .leftJoin(division, eq(division.id, user.divisionId))
+    .where(
+      and(
+        eq(user.isActive, true),
+        sql`LOWER(${role.name}) = 'member'`,
+        sql`COALESCE(LOWER(${department.code}), '') NOT IN ('sys', 'system')`,
+        sql`COALESCE(LOWER(${department.name}), '') NOT LIKE '%sys%'`,
+        sql`COALESCE(LOWER(${division.name}), '') NOT LIKE '%sys%'`
+      )
+    )
+    .orderBy(asc(user.name));
 
   return (
     <LeaderboardClient

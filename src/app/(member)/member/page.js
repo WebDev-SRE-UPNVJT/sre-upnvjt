@@ -3,8 +3,8 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { user, memberProfile, task, taskSubmission, attendance, pptModule, literatureItem, xpTransaction, division, pptPhase, pptModuleProgress } from "@/db/schema";
-import { eq, desc, asc, and } from "drizzle-orm";
+import { user, memberProfile, task, taskSubmission, attendance, pptModule, literatureItem, xpTransaction, division, pptPhase, pptModuleProgress, role, department } from "@/db/schema";
+import { eq, desc, asc, and, sql } from "drizzle-orm";
 import MemberDashboardClient from "./MemberDashboardClient";
 import { getAugmentedLeaderboard } from "@/lib/dummyLeaderboard";
 
@@ -43,7 +43,7 @@ export default async function MemberDashboardPage() {
     profile = newProfile;
   }
 
-  // Fetch leaderboard to calculate rank
+  // Fetch leaderboard to calculate rank (Khusus role MEMBER & Exclude Departemen SYS)
   const dbProfiles = await db
     .select({
       id: user.id,
@@ -53,10 +53,21 @@ export default async function MemberDashboardPage() {
       xp: memberProfile.xp,
       level: memberProfile.level,
       divisionName: division.name,
+      roleName: role.name,
     })
     .from(memberProfile)
     .innerJoin(user, eq(user.id, memberProfile.userId))
+    .leftJoin(role, eq(role.id, user.roleId))
+    .leftJoin(department, eq(department.id, user.departmentId))
     .leftJoin(division, eq(division.id, user.divisionId))
+    .where(
+      and(
+        sql`LOWER(${role.name}) = 'member'`,
+        sql`COALESCE(LOWER(${department.code}), '') NOT IN ('sys', 'system')`,
+        sql`COALESCE(LOWER(${department.name}), '') NOT LIKE '%sys%'`,
+        sql`COALESCE(LOWER(${division.name}), '') NOT LIKE '%sys%'`
+      )
+    )
     .orderBy(desc(memberProfile.xp));
 
   const augmented = getAugmentedLeaderboard(dbProfiles);
