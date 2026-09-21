@@ -259,7 +259,7 @@ export default function PhaseProgressTree({ phaseHierarchy = [] }) {
                             <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
                               {mod.isCompleted ? (
                                 <Link
-                                  href={`/member/materi/${mod.id}`}
+                                  href={`/member/materi/${mod.slug || mod.id}`}
                                   className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-white/50 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-all flex items-center gap-1"
                                 >
                                   <span>Baca Ulang</span>
@@ -267,7 +267,7 @@ export default function PhaseProgressTree({ phaseHierarchy = [] }) {
                                 </Link>
                               ) : (
                                 <Link
-                                  href={`/member/materi/${mod.id}`}
+                                  href={`/member/materi/${mod.slug || mod.id}`}
                                   className="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center gap-1 shadow-sm transition-all"
                                 >
                                   <span>{mod.progressPct > 0 ? "Lanjutkan" : "Buka Modul"}</span>

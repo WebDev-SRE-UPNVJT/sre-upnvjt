@@ -35,7 +35,7 @@ export async function GET() {
           columns: { id: true, title: true }
         },
         pptModule: {
-          columns: { id: true, title: true, coverImageUrl: true }
+          columns: { id: true, slug: true, title: true, coverImageUrl: true }
         }
       }
     });

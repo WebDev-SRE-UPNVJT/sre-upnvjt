@@ -27,6 +27,7 @@ export default async function MemberMateriPage() {
   const modules = await db
     .select({
       id: pptModule.id,
+      slug: pptModule.slug,
       phaseId: pptModule.phaseId,
       phaseName: pptPhase.name,
       phaseOrder: pptPhase.order,

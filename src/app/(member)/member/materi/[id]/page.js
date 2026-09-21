@@ -16,24 +16,34 @@ export default async function MateriDetailPage({ params }) {
   }
 
   const resolvedParams = await params;
-  const id = resolvedParams?.id;
-  const moduleId = Number(id);
+  const paramKey = resolvedParams?.id || resolvedParams?.slug;
 
-  if (!moduleId || isNaN(moduleId)) {
+  if (!paramKey) {
     redirect("/member/materi");
   }
 
-  // Fetch module data on the server side
-  const moduleData = await db.query.pptModule.findFirst({
-    where: eq(pptModule.id, moduleId),
+  // Fetch module data on the server side (check slug first, fallback to id)
+  let moduleData = await db.query.pptModule.findFirst({
+    where: eq(pptModule.slug, String(paramKey)),
     with: {
       phase: true,
     },
   });
 
+  if (!moduleData && !isNaN(Number(paramKey))) {
+    moduleData = await db.query.pptModule.findFirst({
+      where: eq(pptModule.id, Number(paramKey)),
+      with: {
+        phase: true,
+      },
+    });
+  }
+
   if (!moduleData) {
     redirect("/member/materi");
   }
+
+  const moduleId = moduleData.id;
 
   // Fetch slides
   const slidesData = await db.query.pptSlide.findMany({

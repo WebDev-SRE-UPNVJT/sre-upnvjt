@@ -3,17 +3,30 @@ import { db } from "@/lib/db";
 import { pptModule, pptSlide } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getServerSession } from "next-auth/next";
+import { generateModuleSlug } from "@/app/actions/pptActions";
 
 export async function GET(req, { params }) {
   try {
     const resolvedParams = await params;
-    const id = parseInt(resolvedParams.id);
-    const mod = await db.query.pptModule.findFirst({
-      where: (t, { eq }) => eq(t.id, id),
+    const identifier = resolvedParams.id;
+    const isNum = !isNaN(Number(identifier));
+
+    let mod = await db.query.pptModule.findFirst({
+      where: (t, { eq }) => eq(t.slug, String(identifier)),
       with: {
         slides: { orderBy: [asc(pptSlide.order)] },
       },
     });
+
+    if (!mod && isNum) {
+      mod = await db.query.pptModule.findFirst({
+        where: (t, { eq }) => eq(t.id, Number(identifier)),
+        with: {
+          slides: { orderBy: [asc(pptSlide.order)] },
+        },
+      });
+    }
 
     if (!mod) return NextResponse.json({ error: "Module not found" }, { status: 404 });
     return NextResponse.json(mod);
@@ -38,9 +51,16 @@ export async function PUT(req, { params }) {
       return NextResponse.json({ error: "Judul modul wajib diisi" }, { status: 400 });
     }
 
+    const existing = await db.query.pptModule.findFirst({ where: eq(pptModule.id, id) });
+    let slug = existing?.slug;
+    if (!slug || (title && title !== existing?.title)) {
+      slug = await generateModuleSlug(title, id);
+    }
+
     const [updated] = await db.update(pptModule)
       .set({
         title,
+        slug,
         description: description || null,
         notes: notes || null,
         coverImageUrl: coverImageUrl || null,

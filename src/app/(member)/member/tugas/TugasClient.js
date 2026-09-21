@@ -685,7 +685,7 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
                 </div>
               </div>
               <Link
-                href={`/member/materi/${task.pptModule.id}`}
+                href={`/member/materi/${task.pptModule.slug || task.pptModule.id}`}
                 target="_blank"
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-sm transition-all shrink-0 ml-auto sm:ml-0"
               >

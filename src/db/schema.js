@@ -422,6 +422,7 @@ export const pptModule = pgTable('pptModule', {
   id: serial('id').primaryKey(),
   phaseId: integer('phaseId').references(() => pptPhase.id, { onDelete: 'set null' }),
   title: varchar('title', { length: 255 }).notNull(),
+  slug: varchar('slug', { length: 255 }).unique(),
   description: text('description'),
   notes: text('notes'),
   coverImageUrl: varchar('coverImageUrl', { length: 1000 }),

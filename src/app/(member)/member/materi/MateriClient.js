@@ -19,7 +19,7 @@ export default function MateriClient({ initialModules = [], initialPhases = [], 
   const router = useRouter();
 
   const handleOpenModule = (mod) => {
-    router.push(`/member/materi/${mod.id}`);
+    router.push(`/member/materi/${mod.slug || mod.id}`);
   };
 
   const [progressMap, setProgressMap] = useState(initialProgressMap || {});

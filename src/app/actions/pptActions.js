@@ -69,12 +69,41 @@ export async function deletePptPhase(id) {
   }
 }
 
+// ─── Slug Helper ─────────────────────────────────────────────────────────────
+function slugify(text) {
+  return (text || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export async function generateModuleSlug(title, currentId = null) {
+  let baseSlug = slugify(title) || "materi";
+  let slug = baseSlug;
+  let counter = 1;
+
+  while (true) {
+    const existing = await db.query.pptModule.findFirst({
+      where: eq(pptModule.slug, slug),
+      columns: { id: true },
+    });
+    if (!existing || (currentId && existing.id === currentId)) {
+      return slug;
+    }
+    counter++;
+    slug = `${baseSlug}-${counter}`;
+  }
+}
+
 // ─── Module Actions ───────────────────────────────────────────────────────────
 export async function getPptModules() {
   try {
     const modules = await db
       .select({
         id: pptModule.id,
+        slug: pptModule.slug,
         phaseId: pptModule.phaseId,
         phaseName: pptPhase.name,
         phaseOrder: pptPhase.order,
@@ -101,15 +130,31 @@ export async function getPptModules() {
   }
 }
 
-export async function getPptModule(id) {
+export async function getPptModule(identifier) {
   try {
-    const mod = await db.query.pptModule.findFirst({
-      where: (t, { eq }) => eq(t.id, id),
+    const isNum = !isNaN(Number(identifier));
+    let mod = null;
+
+    // Try finding by slug first
+    mod = await db.query.pptModule.findFirst({
+      where: (t, { eq }) => eq(t.slug, String(identifier)),
       with: {
         phase: true,
         slides: { orderBy: [asc(pptSlide.order)] },
       },
     });
+
+    // Fallback to ID if not found and identifier is numeric
+    if (!mod && isNum) {
+      mod = await db.query.pptModule.findFirst({
+        where: (t, { eq }) => eq(t.id, Number(identifier)),
+        with: {
+          phase: true,
+          slides: { orderBy: [asc(pptSlide.order)] },
+        },
+      });
+    }
+
     return { success: true, data: mod || null };
   } catch (error) {
     console.error("Error fetching PPT module:", error);
@@ -121,8 +166,11 @@ export async function createPptModule(data, createdById) {
   try {
     const { title, description, notes, coverImageUrl, isPublished, phaseId } = data;
     const parsedPhaseId = phaseId ? parseInt(phaseId) : null;
+    const slug = await generateModuleSlug(title);
+
     const [result] = await db.insert(pptModule).values({
       title,
+      slug,
       description: description || null,
       notes: notes || null,
       coverImageUrl: coverImageUrl || null,
@@ -154,9 +202,15 @@ export async function updatePptModule(id, data) {
 
     const parsedPhaseId = phaseId !== undefined ? (phaseId ? parseInt(phaseId) : null) : undefined;
 
+    let slug = existing?.slug;
+    if (!slug || (title && title !== existing?.title)) {
+      slug = await generateModuleSlug(title || existing?.title, id);
+    }
+
     const [result] = await db.update(pptModule)
       .set({
         title,
+        slug,
         description: description || null,
         notes: notes || null,
         coverImageUrl: coverImageUrl || null,

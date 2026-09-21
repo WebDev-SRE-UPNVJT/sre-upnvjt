@@ -2,13 +2,16 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { pptModule, pptSlide } from "@/db/schema";
 import { desc, count, eq } from "drizzle-orm";
+import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { generateModuleSlug } from "@/app/actions/pptActions";
 
 export async function GET() {
   try {
     const modules = await db
       .select({
         id: pptModule.id,
+        slug: pptModule.slug,
         title: pptModule.title,
         description: pptModule.description,
         coverImageUrl: pptModule.coverImageUrl,
@@ -43,8 +46,11 @@ export async function POST(req) {
       return NextResponse.json({ error: "Judul modul wajib diisi" }, { status: 400 });
     }
 
+    const slug = await generateModuleSlug(title);
+
     const [result] = await db.insert(pptModule).values({
       title,
+      slug,
       description: description || null,
       coverImageUrl: coverImageUrl || null,
       isPublished: Boolean(isPublished),
