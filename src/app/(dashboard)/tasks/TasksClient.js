@@ -7,7 +7,7 @@ import {
   AlertTriangle, FolderKanban, FileText, Calendar, Award,
   Clock, Check, Eye, ExternalLink, ShieldCheck, ChevronDown, ChevronUp, Filter,
   Download, FileSpreadsheet, Upload, RefreshCw, Crown, Swords, Gamepad2, Puzzle,
-  UploadCloud, Link2 as LinkIcon, Lock, Zap, BookOpen, Presentation,
+  UploadCloud, Link2 as LinkIcon, Lock, Zap, BookOpen, Presentation, CheckSquare,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
