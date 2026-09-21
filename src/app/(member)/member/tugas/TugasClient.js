@@ -774,101 +774,6 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
             </div>
           ) : (
             <>
-              {/* TTS Game Launcher Card */}
-              {(task.submissionType === "TTS" || task.ttsCrosswordId) && (
-                <div className="p-5 bg-purple-500/10 border border-purple-500/25 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
-                      <Gamepad2 className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                        {language === "en" ? "Interactive Crossword Quest" : "Misi Teka-Teki Silang (TTS)"}
-                      </h4>
-                      <p className="text-xs text-slate-500 dark:text-white/50 mt-0.5">
-                        {submission
-                          ? (language === "en"
-                            ? `Crossword completed! Score: ${submission.score ?? 100}% (+${submission.xpEarned ?? task.rewardXp} XP)`
-                            : `Tugas TTS telah selesai dikerjakan (Skor: ${submission.score ?? 100}%, +${submission.xpEarned ?? task.rewardXp} XP).`)
-                          : isLateSubmissionBlocked
-                          ? (language === "en"
-                            ? "Assignment deadline has passed. Crossword submission is now closed."
-                            : "Tenggat waktu penugasan telah berakhir. Misi TTS ini sudah ditutup untuk pengumpulan.")
-                          : (language === "en"
-                            ? "Play and complete all grid questions to claim XP bounty! (1x attempt)"
-                            : "Mainkan dan selesaikan seluruh kotak teka-teki silang untuk klaim XP! (Hanya 1x pengerjaan)")}
-                      </p>
-                    </div>
-                  </div>
-                  {submission ? (
-                    <div className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center justify-center gap-2 shrink-0">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>{language === "en" ? "Completed (1x)" : "Sudah Dikerjakan (1x)"}</span>
-                    </div>
-                  ) : isLateSubmissionBlocked ? (
-                    <div className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-600 dark:text-rose-400 font-bold text-xs flex items-center justify-center gap-2 shrink-0 opacity-80 cursor-not-allowed">
-                      <Lock className="w-3.5 h-3.5" />
-                      <span>{language === "en" ? "Submission Closed" : "Pengumpulan Ditutup"}</span>
-                    </div>
-                  ) : (
-                    <Link
-                      href={`/games/tts/${task.ttsCrosswordId || 1}?taskId=${task.id}`}
-                      className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-600/20 transition-all shrink-0"
-                    >
-                      <Play className="w-3.5 h-3.5 fill-current" />
-                      <span>{language === "en" ? "Play Crossword" : "Mulai Mainkan TTS"}</span>
-                    </Link>
-                  )}
-                </div>
-              )}
-
-              {/* Form Template Launcher Card */}
-              {(task.submissionType === "FORM" || task.formTemplateId) && (
-                <div className="p-5 bg-teal-500/10 border border-teal-500/25 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-12 h-12 rounded-xl bg-teal-500/20 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
-                      <FileText className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                        {language === "en" ? "Custom Form Mission" : "Misi Pengisian Formulir"}
-                      </h4>
-                      <p className="text-xs text-slate-500 dark:text-white/50 mt-0.5">
-                        {submission
-                          ? (language === "en"
-                            ? `Form submitted! (+${submission.xpEarned ?? task.rewardXp} XP earned)`
-                            : `Formulir telah berhasil dikirim (+${submission.xpEarned ?? task.rewardXp} XP diperoleh).`)
-                          : isLateSubmissionBlocked
-                          ? (language === "en"
-                            ? "Assignment deadline has passed. Form submission is now closed."
-                            : "Tenggat waktu penugasan telah berakhir. Formulir ini sudah ditutup untuk pengumpulan.")
-                          : (language === "en"
-                            ? "Fill and submit the designated response form to finish this quest."
-                            : "Isi dan kirimkan formulir tanggapan untuk menyelesaikan quest ini.")}
-                      </p>
-                    </div>
-                  </div>
-                  {submission ? (
-                    <div className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center justify-center gap-2 shrink-0">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>{language === "en" ? "Form Submitted" : "Sudah Dikirim"}</span>
-                    </div>
-                  ) : isLateSubmissionBlocked ? (
-                    <div className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-600 dark:text-rose-400 font-bold text-xs flex items-center justify-center gap-2 shrink-0 opacity-80 cursor-not-allowed">
-                      <Lock className="w-3.5 h-3.5" />
-                      <span>{language === "en" ? "Submission Closed" : "Pengumpulan Ditutup"}</span>
-                    </div>
-                  ) : (
-                    <Link
-                      href={`/f/${task.formTemplate?.uuid || task.formTemplateId || ""}`}
-                      className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-teal-600/20 transition-all shrink-0"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                      <span>{language === "en" ? "Open Form" : "Buka Formulir"}</span>
-                    </Link>
-                  )}
-                </div>
-              )}
 
               {/* Reviewer Feedback (Approved) */}
               {status === "APPROVED" && submission?.feedback && (
@@ -1096,6 +1001,102 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
             </>
           )}
         </div>
+
+        {/* ── Modal Sticky Bottom Footer for Form / TTS Tasks ─── */}
+        {!isLocked && (task.submissionType === "FORM" || task.formTemplateId) && (
+          <div className="p-4 sm:p-5 border-t border-slate-100 dark:border-white/10 bg-slate-50/90 dark:bg-[#07130e]/95 backdrop-blur-md shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3.5">
+            <div className="flex items-center gap-3 min-w-0 w-full sm:w-auto">
+              <div className="w-10 h-10 rounded-xl bg-teal-500/20 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
+                <FileText className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
+                  {task.formTemplate?.title || (language === "en" ? "Assignment Form" : "Formulir Penugasan")}
+                </h4>
+                <p className="text-[11px] text-slate-500 dark:text-white/50 truncate mt-0.5">
+                  {submission
+                    ? (language === "en"
+                      ? `Form submitted! (+${submission.xpEarned ?? task.rewardXp} XP earned)`
+                      : `Formulir telah dikirim (+${submission.xpEarned ?? task.rewardXp} XP diperoleh)`)
+                    : isLateSubmissionBlocked
+                    ? (language === "en"
+                      ? "Deadline has passed. Form submission is closed."
+                      : "Tenggat waktu berakhir. Pengumpulan formulir ditutup.")
+                    : (language === "en"
+                      ? "Fill and submit the response form to complete this quest."
+                      : "Isi dan kirimkan formulir tanggapan untuk menyelesaikan tugas.")}
+                </p>
+              </div>
+            </div>
+            {submission ? (
+              <div className="w-full sm:w-auto px-4 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center justify-center gap-2 shrink-0">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>{language === "en" ? "Form Submitted" : "Sudah Dikirim"}</span>
+              </div>
+            ) : isLateSubmissionBlocked ? (
+              <div className="w-full sm:w-auto px-4 py-2 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-600 dark:text-rose-400 font-bold text-xs flex items-center justify-center gap-2 shrink-0 opacity-80 cursor-not-allowed">
+                <Lock className="w-3.5 h-3.5" />
+                <span>{language === "en" ? "Submission Closed" : "Pengumpulan Ditutup"}</span>
+              </div>
+            ) : (
+              <Link
+                href={`/f/${task.formTemplate?.uuid || task.formTemplateId || ""}`}
+                target="_blank"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-teal-600/20 transition-all shrink-0 cursor-pointer"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>{language === "en" ? "Open Form" : "Buka Formulir"}</span>
+              </Link>
+            )}
+          </div>
+        )}
+
+        {!isLocked && (task.submissionType === "TTS" || task.ttsCrosswordId) && (
+          <div className="p-4 sm:p-5 border-t border-slate-100 dark:border-white/10 bg-slate-50/90 dark:bg-[#07130e]/95 backdrop-blur-md shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3.5">
+            <div className="flex items-center gap-3 min-w-0 w-full sm:w-auto">
+              <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                <Gamepad2 className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
+                  {task.ttsCrossword?.title || (language === "en" ? "Interactive Crossword" : "Teka-Teki Silang (TTS)")}
+                </h4>
+                <p className="text-[11px] text-slate-500 dark:text-white/50 truncate mt-0.5">
+                  {submission
+                    ? (language === "en"
+                      ? `Crossword completed! Score: ${submission.score ?? 100}% (+${submission.xpEarned ?? task.rewardXp} XP)`
+                      : `TTS selesai dikerjakan (Skor: ${submission.score ?? 100}%, +${submission.xpEarned ?? task.rewardXp} XP)`)
+                    : isLateSubmissionBlocked
+                    ? (language === "en"
+                      ? "Deadline has passed. Crossword submission is closed."
+                      : "Tenggat waktu berakhir. Pengumpulan TTS ditutup.")
+                    : (language === "en"
+                      ? "Solve all grid questions to claim XP (1x attempt)."
+                      : "Selesaikan seluruh kotak teka-teki silang untuk klaim XP (1x pengerjaan).")}
+                </p>
+              </div>
+            </div>
+            {submission ? (
+              <div className="w-full sm:w-auto px-4 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center justify-center gap-2 shrink-0">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>{language === "en" ? "Completed (1x)" : "Sudah Dikerjakan (1x)"}</span>
+              </div>
+            ) : isLateSubmissionBlocked ? (
+              <div className="w-full sm:w-auto px-4 py-2 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-600 dark:text-rose-400 font-bold text-xs flex items-center justify-center gap-2 shrink-0 opacity-80 cursor-not-allowed">
+                <Lock className="w-3.5 h-3.5" />
+                <span>{language === "en" ? "Submission Closed" : "Pengumpulan Ditutup"}</span>
+              </div>
+            ) : (
+              <Link
+                href={`/games/tts/${task.ttsCrosswordId || 1}?taskId=${task.id}`}
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-600/20 transition-all shrink-0 cursor-pointer"
+              >
+                <Play className="w-3.5 h-3.5 fill-current" />
+                <span>{language === "en" ? "Play Crossword" : "Mulai Mainkan TTS"}</span>
+              </Link>
+            )}
+          </div>
+        )}
       </motion.div>
     </motion.div>
   );
