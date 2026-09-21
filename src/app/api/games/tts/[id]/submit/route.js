@@ -281,8 +281,9 @@ export async function POST(req, { params }) {
       }
     } else {
       // Standalone TTS game (without linked task)
-      xpEarned = crossword.rewardXp || 10;
-      if (score < 50) {
+      const configuredXp = crossword.rewardXp !== undefined && crossword.rewardXp !== null ? crossword.rewardXp : 0;
+      xpEarned = configuredXp;
+      if (score < 50 && xpEarned > 0) {
         xpEarned = Math.round(xpEarned * (score / 100));
       }
 

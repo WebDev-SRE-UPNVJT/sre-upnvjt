@@ -120,6 +120,10 @@ export async function saveTTS(payload) {
       return { success: false, error: "Minimal masukkan 2 pertanyaan dan jawaban yang valid" };
     }
 
+    const parsedRewardXp = rewardXp !== undefined && rewardXp !== "" && !isNaN(parseInt(rewardXp))
+      ? Math.max(0, parseInt(rewardXp))
+      : 0;
+
     let savedCrosswordId = id ? parseInt(id) : null;
 
     if (savedCrosswordId) {
@@ -130,7 +134,7 @@ export async function saveTTS(payload) {
           title: title.trim(),
           description: description?.trim() || null,
           timeLimitMinutes: timeLimitMinutes ? parseInt(timeLimitMinutes) : null,
-          rewardXp: rewardXp ? parseInt(rewardXp) : 10,
+          rewardXp: parsedRewardXp,
           validationMode: validationMode || "MODAL",
           wrongAnswerBehavior: wrongAnswerBehavior || "RETRY",
           maxRetryAttempts: parsedMaxRetryAttempts,
@@ -162,7 +166,7 @@ export async function saveTTS(payload) {
           slug,
           description: description?.trim() || null,
           timeLimitMinutes: timeLimitMinutes ? parseInt(timeLimitMinutes) : null,
-          rewardXp: rewardXp ? parseInt(rewardXp) : 10,
+          rewardXp: parsedRewardXp,
           validationMode: validationMode || "MODAL",
           wrongAnswerBehavior: wrongAnswerBehavior || "RETRY",
           maxRetryAttempts: parsedMaxRetryAttempts,

@@ -809,11 +809,13 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
             <span>{timeLimitMinutes ? formatSeconds(timeRemaining) : formatSeconds(elapsedTime)}</span>
           </div>
 
-          {/* XP REWARD */}
-          <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-500 dark:text-amber-400 font-mono font-black text-xs">
-            <Zap className="w-3.5 h-3.5 fill-amber-400" />
-            <span>+{puzzleData?.rewardXp || 10} XP</span>
-          </div>
+          {/* XP REWARD (Only if rewardXp > 0) */}
+          {(puzzleData?.rewardXp !== undefined && puzzleData?.rewardXp !== null ? puzzleData.rewardXp : 0) > 0 && (
+            <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-500 dark:text-amber-400 font-mono font-black text-xs">
+              <Zap className="w-3.5 h-3.5 fill-amber-400" />
+              <span>+{puzzleData.rewardXp} XP</span>
+            </div>
+          )}
 
           {/* 2 THEME SELECTOR BUTTON */}
           <button
@@ -1390,7 +1392,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
                   <span className="text-[9px] opacity-60 uppercase font-black block">XP Reward</span>
                   <span className="text-base sm:text-lg font-black text-amber-400 flex items-center justify-center gap-1">
                     <Zap className="w-3.5 h-3.5 fill-amber-400" />
-                    +{submissionResult ? submissionResult.xpEarned : (puzzleData?.rewardXp || 10)} XP
+                    +{(submissionResult?.xpEarned !== undefined ? submissionResult.xpEarned : (puzzleData?.rewardXp ?? 0))} XP
                   </span>
                 </div>
                 <div>

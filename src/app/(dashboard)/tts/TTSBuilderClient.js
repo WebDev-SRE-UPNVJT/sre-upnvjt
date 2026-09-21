@@ -33,7 +33,9 @@ export default function TTSBuilderClient({ initialData = null, initialTTSList = 
   // Assignment Metadata & Rules Settings
   const [title, setTitle] = useState(initialData?.title || "");
   const [description, setDescription] = useState(initialData?.description || "");
-  const [rewardXp, setRewardXp] = useState(initialData?.rewardXp || 15);
+  const [rewardXp, setRewardXp] = useState(
+    initialData?.rewardXp !== undefined && initialData?.rewardXp !== null ? String(initialData.rewardXp) : "0"
+  );
   const [timeLimitMinutes, setTimeLimitMinutes] = useState(initialData?.timeLimitMinutes || "");
 
   // Validation Mode Settings
@@ -141,7 +143,7 @@ export default function TTSBuilderClient({ initialData = null, initialTTSList = 
     setCurrentCrosswordId(null);
     setTitle("");
     setDescription("");
-    setRewardXp(15);
+    setRewardXp("0");
     setTimeLimitMinutes("");
     setValidationMode("MODAL");
     setWrongAnswerBehavior("RETRY");
@@ -166,7 +168,7 @@ export default function TTSBuilderClient({ initialData = null, initialTTSList = 
         setCurrentCrosswordId(d.id);
         setTitle(d.title);
         setDescription(d.description || "");
-        setRewardXp(d.rewardXp || 15);
+        setRewardXp(d.rewardXp !== undefined && d.rewardXp !== null ? String(d.rewardXp) : "0");
         setTimeLimitMinutes(d.timeLimitMinutes || "");
         setValidationMode(d.validationMode || "MODAL");
         setWrongAnswerBehavior(d.wrongAnswerBehavior || "RETRY");
@@ -239,7 +241,7 @@ export default function TTSBuilderClient({ initialData = null, initialTTSList = 
         title: title.trim(),
         description: description?.trim() || null,
         timeLimitMinutes: timeLimitMinutes ? parseInt(timeLimitMinutes) : null,
-        rewardXp: rewardXp ? parseInt(rewardXp) : 15,
+        rewardXp: rewardXp !== "" ? Math.max(0, parseInt(rewardXp) || 0) : 0,
         validationMode,
         wrongAnswerBehavior,
         maxRetryAttempts:
@@ -907,9 +909,20 @@ export default function TTSBuilderClient({ initialData = null, initialTTSList = 
                     <div className="space-y-3">
                       {/* Top Badges */}
                       <div className="flex items-center justify-between gap-2">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-primary/10 text-primary">
-                          {puzzle.questionCount || puzzle.questions?.length || 0} Soal
-                        </span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-primary/10 text-primary">
+                            {puzzle.questionCount || puzzle.questions?.length || 0} Soal
+                          </span>
+                          {puzzle.rewardXp > 0 ? (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                              +{puzzle.rewardXp} XP
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400">
+                              0 XP
+                            </span>
+                          )}
+                        </div>
 
                         <span className="text-[10px] text-gray-400 font-mono">
                           {new Date(puzzle.createdAt).toLocaleDateString("id-ID", {
@@ -1037,6 +1050,84 @@ export default function TTSBuilderClient({ initialData = null, initialTTSList = 
                   placeholder="Tuliskan petunjuk untuk anggota / mahasiswa dalam menyelesaikan TTS ini..."
                   className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl text-xs text-gray-800 dark:text-gray-200 focus:outline-none focus:border-primary transition-colors resize-none"
                 />
+              </div>
+
+              {/* Reward XP & Batas Waktu */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                {/* Reward XP */}
+                <div className="space-y-1.5 p-3.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                      <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
+                      <span>Reward XP (Gamifikasi)</span>
+                    </label>
+                    <span className="text-[11px] font-black text-amber-500 font-mono">
+                      {parseInt(rewardXp) > 0 ? `+${rewardXp} XP` : "0 XP (Tanpa XP)"}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-tight">
+                    XP yang didapat member saat menyelesaikan TTS ini.
+                  </p>
+                  <div className="flex items-center gap-1.5 pt-1">
+                    <input
+                      type="number"
+                      min="0"
+                      max="1000"
+                      value={rewardXp}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (!val) setRewardXp("0");
+                        else {
+                          const n = parseInt(val);
+                          setRewardXp(isNaN(n) ? "0" : String(Math.max(0, n)));
+                        }
+                      }}
+                      placeholder="0"
+                      className="w-full px-3 py-1.5 bg-white dark:bg-[#0c1914] border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                    <div className="flex gap-1 shrink-0">
+                      {[0, 10, 25, 50].map((xpVal) => (
+                        <button
+                          key={xpVal}
+                          type="button"
+                          onClick={() => setRewardXp(String(xpVal))}
+                          className={`px-2 py-1.5 rounded-xl text-[10px] font-black border transition-all ${
+                            rewardXp === String(xpVal)
+                              ? "bg-amber-500 text-slate-950 border-amber-500 shadow-sm"
+                              : "bg-white dark:bg-white/5 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-white/10 hover:border-amber-400"
+                          }`}
+                        >
+                          {xpVal === 0 ? "0" : `+${xpVal}`}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Batas Waktu */}
+                <div className="space-y-1.5 p-3.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                      <Timer className="w-3.5 h-3.5 text-cyan-500" />
+                      <span>Batas Waktu (Menit)</span>
+                    </label>
+                    <span className="text-[11px] font-bold text-cyan-500 font-mono">
+                      {timeLimitMinutes ? `${timeLimitMinutes} Menit` : "Tanpa Batas"}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-tight">
+                    Kosongkan jika pengerjaan tidak dibatasi durasi.
+                  </p>
+                  <input
+                    type="number"
+                    min="1"
+                    max="180"
+                    value={timeLimitMinutes}
+                    onChange={(e) => setTimeLimitMinutes(e.target.value)}
+                    placeholder="Contoh: 15 (menit)"
+                    className="w-full px-3 py-1.5 bg-white dark:bg-[#0c1914] border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  />
+                </div>
               </div>
 
               {/* Total Soal */}

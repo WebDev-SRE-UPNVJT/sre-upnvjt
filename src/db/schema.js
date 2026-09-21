@@ -720,7 +720,7 @@ export const ttsCrossword = pgTable('ttsCrossword', {
   slug: varchar('slug', { length: 255 }).unique().notNull(),
   description: text('description'),
   timeLimitMinutes: integer('timeLimitMinutes'),
-  rewardXp: integer('rewardXp').default(10).notNull(),
+  rewardXp: integer('rewardXp').default(0).notNull(),
   validationMode: varchar('validationMode', { length: 50 }).default('MODAL').notNull(), // 'MODAL' | 'END'
   wrongAnswerBehavior: varchar('wrongAnswerBehavior', { length: 50 }).default('RETRY').notNull(), // 'RETRY' | 'REVEAL'
   maxRetryAttempts: integer('maxRetryAttempts'), // null or 0 = unlimited retry, or positive number (e.g. 3)
