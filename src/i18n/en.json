@@ -129,8 +129,8 @@
       "main": "Main Quests (Core Missions)",
       "side": "Side Quests (Extra Missions)"
     },
-    "main_desc": "Primary organizational objectives with high XP bounties and high priority.",
-    "side_desc": "Secondary challenges and weekly missions to boost your XP progress.",
+    "main_desc": "Primary organizational objectives with XP bounties and high priority.",
+    "side_desc": "Secondary challenges and  missions to boost your XP progress.",
     "empty_main": "No Main Quests match your active filters.",
     "empty_side": "No Side Quests match your active filters.",
     "stats": {

@@ -247,6 +247,20 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
                     : (t("member_tasks.side_quest_badge") || "Side Quest")}
                 </span>
 
+                {(task.submissionType === "TTS" || task.ttsCrosswordId) && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 text-[8px] sm:text-[9px] font-bold">
+                    <Gamepad2 className="w-2.5 h-2.5" />
+                    <span>TTS</span>
+                  </span>
+                )}
+
+                {(task.submissionType === "FORM" || task.formTemplateId) && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 text-[8px] sm:text-[9px] font-bold">
+                    <FileText className="w-2.5 h-2.5" />
+                    <span>Form</span>
+                  </span>
+                )}
+
                 <span
                   className={`inline-flex items-center text-[8px] sm:text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
                     task.isRequired !== false
@@ -300,47 +314,23 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
             )}
           </div>
 
-          {/* Bottom Metas (anchored with mt-auto) */}
-          <div className="flex items-center justify-between gap-2 mt-3.5 pt-3 border-t border-slate-100 dark:border-white/5 flex-wrap min-w-0">
-            <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-              {/* Deadline chip */}
-              <span
-                className={`flex items-center gap-1 text-[9px] sm:text-[10px] font-bold px-2 sm:px-2.5 py-1 rounded-xl border transition-all truncate ${
-                  dlInfo.isOverdue
-                    ? "bg-rose-500/10 text-rose-500 border-rose-500/25 font-black"
-                    : dlInfo.isUrgent
-                    ? "bg-rose-500/10 text-rose-400 border-rose-500/20 font-bold animate-pulse"
-                    : dlInfo.isSoon
-                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 font-bold"
-                    : "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/50 border-slate-200 dark:border-white/10"
-                }`}
-              >
-                <Clock className="w-3 h-3 shrink-0" />
-                <span className="truncate">{dlInfo.text}</span>
-              </span>
-
-              {/* Task Type badge (TTS / Form) */}
-              {(task.submissionType === "TTS" || task.ttsCrosswordId) && (
-                <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 text-[9px] sm:text-[10px] font-bold shrink-0">
-                  <Gamepad2 className="w-3 h-3" />
-                  <span>TTS Game</span>
-                </span>
-              )}
-
-              {(task.submissionType === "FORM" || task.formTemplateId) && (
-                <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 text-[9px] sm:text-[10px] font-bold shrink-0">
-                  <FileText className="w-3 h-3" />
-                  <span>Formulir</span>
-                </span>
-              )}
-
-              {task.pptModule && (
-                <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[9px] sm:text-[10px] font-bold shrink-0 truncate max-w-[150px]" title={`Modul Materi: ${task.pptModule.title}`}>
-                  <Presentation className="w-3 h-3 shrink-0" />
-                  <span className="truncate">{task.pptModule.title}</span>
-                </span>
-              )}
-            </div>
+          {/* Bottom Metas: Clean & Streamlined (Deadline on Left, Status Badge on Right) */}
+          <div className="flex items-center justify-between gap-2 mt-3.5 pt-3 border-t border-slate-100 dark:border-white/5 min-w-0">
+            {/* Deadline chip */}
+            <span
+              className={`inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-bold px-2 sm:px-2.5 py-1 rounded-xl border transition-all truncate min-w-0 ${
+                dlInfo.isOverdue
+                  ? "bg-rose-500/10 text-rose-500 border-rose-500/25 font-black"
+                  : dlInfo.isUrgent
+                  ? "bg-rose-500/10 text-rose-400 border-rose-500/20 font-bold animate-pulse"
+                  : dlInfo.isSoon
+                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 font-bold"
+                  : "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/50 border-slate-200 dark:border-white/10"
+              }`}
+            >
+              <Clock className="w-3 h-3 shrink-0" />
+              <span className="truncate">{dlInfo.text}</span>
+            </span>
 
             {/* Status badge */}
             <span
@@ -360,7 +350,7 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
         </div>
 
         {/* Action Arrow */}
-        <ChevronRight className="hidden lg:block w-4 h-4 text-slate-300 dark:text-white/20 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all flex-shrink-0 self-center" />
+        <ChevronRight className="hidden lg:block w-4 h-4 text-slate-300 dark:text-white/20 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition-all flex-shrink-0 self-center" />
       </div>
 
       {/* Rejected feedback preview */}

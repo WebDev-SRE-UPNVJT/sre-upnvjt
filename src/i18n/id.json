@@ -129,8 +129,8 @@
       "main": "Main Quest (Misi Utama)",
       "side": "Side Quest (Misi Sampingan)"
     },
-    "main_desc": "Misi utama organisasi dengan hadiah XP besar dan prioritas tinggi.",
-    "side_desc": "Misi sampingan dan tantangan mingguan untuk mendongkrak perolehan XP.",
+    "main_desc": "Misi utama organisasi dengan hadiah XP dan prioritas tinggi.",
+    "side_desc": "Misi sampingan dan tantangan untuk mendongkrak perolehan XP.",
     "empty_main": "Tidak ada Main Quest yang sesuai dengan filter.",
     "empty_side": "Tidak ada Side Quest yang sesuai dengan filter.",
     "stats": {
