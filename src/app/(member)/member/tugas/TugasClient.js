@@ -519,7 +519,7 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5 md:p-6 bg-black/75 backdrop-blur-md select-none overflow-y-auto overscroll-contain"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5 md:p-6 bg-black/75 backdrop-blur-md overflow-y-auto overscroll-contain"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <motion.div
@@ -527,7 +527,7 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.94, y: 15 }}
         transition={{ type: "spring", stiffness: 320, damping: 28 }}
-        className="w-full max-w-2xl max-h-[88vh] sm:max-h-[90vh] flex flex-col bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden relative my-auto overscroll-contain"
+        className="w-full max-w-2xl max-h-[88vh] sm:max-h-[90vh] flex flex-col bg-white dark:bg-[#07130e] border border-slate-200 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden relative my-auto overscroll-contain select-text selection:bg-emerald-500/25 selection:text-emerald-950 dark:selection:text-emerald-100"
       >
         {/* Header */}
         <div className="flex items-start justify-between p-4 sm:p-6 pb-3 sm:pb-4 bg-white dark:bg-[#07130e] border-b border-slate-100 dark:border-white/5 shrink-0">
@@ -641,7 +641,7 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
                   {language === "en" ? "1. Introduction & Context" : "1. Pendahuluan"}
                 </span>
                 <div
-                  className="text-xs sm:text-sm text-slate-700 dark:text-white/80 leading-relaxed font-normal prose prose-sm dark:prose-invert max-w-none break-words [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_img]:rounded-xl [&_a]:text-emerald-500 [&_a]:underline"
+                  className="text-xs sm:text-sm text-slate-700 dark:text-white/80 leading-relaxed font-normal prose prose-sm dark:prose-invert max-w-none break-words select-text cursor-text selection:bg-emerald-500/25 selection:text-emerald-950 dark:selection:text-emerald-100 [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_img]:rounded-xl [&_a]:text-emerald-500 [&_a]:underline"
                   dangerouslySetInnerHTML={{ __html: task.introduction }}
                 />
               </div>
@@ -657,7 +657,7 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
                     : (language === "en" ? "2. Main Quest Tasks & Questions" : "2. Tugas & Pertanyaan")}
                 </span>
                 <div
-                  className="text-xs sm:text-sm text-slate-700 dark:text-white/80 leading-relaxed font-normal prose prose-sm dark:prose-invert max-w-none break-words [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_img]:rounded-xl [&_a]:text-emerald-500 [&_a]:underline"
+                  className="text-xs sm:text-sm text-slate-700 dark:text-white/80 leading-relaxed font-normal prose prose-sm dark:prose-invert max-w-none break-words select-text cursor-text selection:bg-emerald-500/25 selection:text-emerald-950 dark:selection:text-emerald-100 [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_img]:rounded-xl [&_a]:text-emerald-500 [&_a]:underline"
                   dangerouslySetInnerHTML={{ __html: task.instructions }}
                 />
               </div>
@@ -671,7 +671,7 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
                   {language === "en" ? "3. Submission Guidelines" : "3. Arahan Pengumpulan"}
                 </span>
                 <div
-                  className="text-xs sm:text-sm text-slate-700 dark:text-white/80 leading-relaxed font-normal prose prose-sm dark:prose-invert max-w-none break-words [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_img]:rounded-xl [&_a]:text-amber-500 [&_a]:underline"
+                  className="text-xs sm:text-sm text-slate-700 dark:text-white/80 leading-relaxed font-normal prose prose-sm dark:prose-invert max-w-none break-words select-text cursor-text selection:bg-amber-500/25 selection:text-amber-950 dark:selection:text-amber-100 [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_img]:rounded-xl [&_a]:text-amber-500 [&_a]:underline"
                   dangerouslySetInnerHTML={{ __html: task.submissionGuidelines }}
                 />
               </div>
@@ -1254,7 +1254,7 @@ export default function TugasClient({ user, initialTasks, initialSubmissions, in
   };
 
   return (
-    <div className="w-full max-w-full space-y-6 sm:space-y-8 select-none overflow-x-hidden">
+    <div className="w-full max-w-full space-y-6 sm:space-y-8 overflow-x-hidden">
       {/* ── Header ───────────────────────────────────────────────── */}
       <motion.div
         initial={{ opacity: 0, y: -12 }}

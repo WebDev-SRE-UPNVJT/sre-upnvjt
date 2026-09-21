@@ -264,7 +264,7 @@ export default function RiwayatTugasClient({ submissions = [] }) {
   const rejected = submissions.filter((s) => s.status === "REJECTED").length;
 
   return (
-    <div className="w-full max-w-full space-y-6 sm:space-y-8 select-none overflow-x-hidden">
+    <div className="w-full max-w-full space-y-6 sm:space-y-8 overflow-x-hidden">
       {/* ── Header ─────────────────────────────────────────────── */}
       <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
         <Link
