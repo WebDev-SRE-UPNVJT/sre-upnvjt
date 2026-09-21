@@ -86,8 +86,51 @@ export default function TTSBuilderClient({ initialData = null, initialTTSList = 
   const [modalFeedback, setModalFeedback] = useState(null);
   const [previewWordAttempts, setPreviewWordAttempts] = useState({});
   const modalInputRefs = useRef([]);
-
   const gridInputRefs = useRef({});
+
+  // Group letters into word segments for multi-word answers
+  const builderModalSegments = useMemo(() => {
+    if (!activeModalWord) return [];
+
+    let rawAnswer = String(activeModalWord.originalAnswer || "").trim();
+
+    const matchedItem = items.find(
+      (it) =>
+        String(it.id) === String(activeModalWord.id) ||
+        String(it.clue || "").trim().toLowerCase() === String(activeModalWord.clue || "").trim().toLowerCase()
+    );
+
+    if (matchedItem?.answer && (/[\s_-]/.test(matchedItem.answer))) {
+      rawAnswer = String(matchedItem.answer).trim();
+    } else if (!rawAnswer || !/[\s_-]/.test(rawAnswer)) {
+      if (matchedItem?.answer) {
+        rawAnswer = String(matchedItem.answer).trim();
+      }
+    }
+
+    if (!rawAnswer) {
+      rawAnswer = String(activeModalWord.answer || "").trim();
+    }
+
+    const parts = rawAnswer.split(/[\s_-]+/).filter(Boolean);
+    const totalPartsLen = parts.reduce((acc, p) => acc + p.replace(/[^A-Za-z0-9]/g, "").length, 0);
+
+    if (parts.length > 1 && totalPartsLen === activeModalWord.length) {
+      let currentGlobalIdx = 0;
+      return parts.map((part) => {
+        const cleanPart = part.replace(/[^A-Za-z0-9]/g, "");
+        const startIdx = currentGlobalIdx;
+        currentGlobalIdx += cleanPart.length;
+        return {
+          text: cleanPart,
+          startIdx,
+          length: cleanPart.length,
+        };
+      });
+    }
+
+    return [{ text: activeModalWord.answer, startIdx: 0, length: activeModalWord.length }];
+  }, [activeModalWord, items]);
 
   // Generate crossword layout whenever items change or shuffle is triggered
   const crosswordData = useMemo(() => {
@@ -2021,24 +2064,47 @@ export default function TTSBuilderClient({ initialData = null, initialTTSList = 
                   Masukkan {activeModalWord.length} Huruf Jawaban:
                 </div>
 
-                <div className="flex flex-wrap items-center justify-center gap-2 py-2">
-                  {Array.from({ length: activeModalWord.length }).map((_, idx) => {
-                    const char = modalInputLetters[idx] || "";
+                <div className="w-full max-w-full py-2 px-1 flex flex-wrap items-center justify-center gap-y-3 gap-x-2 sm:gap-x-4">
+                  {builderModalSegments.map((segment, segIdx) => {
+                    const effectiveSegmentLen = segment.length > 8 ? Math.ceil(segment.length / 2) : segment.length;
+                    let boxClass = "w-10 h-13 text-xl sm:w-13 sm:h-16 sm:text-2xl md:w-14 md:h-16 md:text-2xl";
+                    if (effectiveSegmentLen >= 8) {
+                      boxClass = "w-8.5 h-11 text-base min-[380px]:w-9 min-[380px]:h-12 min-[380px]:text-lg sm:w-11 sm:h-14 sm:text-xl md:w-13 md:h-16 md:text-2xl";
+                    } else {
+                      boxClass = "w-9 h-12 text-lg min-[380px]:w-10 min-[380px]:h-13 min-[380px]:text-xl sm:w-12 sm:h-15 sm:text-2xl md:w-14 md:h-17 md:text-3xl";
+                    }
 
                     return (
-                      <div key={`letter_box_${idx}`} className="relative">
-                        <input
-                          ref={(el) => (modalInputRefs.current[idx] = el)}
-                          type="text"
-                          maxLength={1}
-                          value={char}
-                          onChange={(e) => handleModalLetterChange(idx, e.target.value)}
-                          onKeyDown={(e) => handleModalKeyDown(e, idx)}
-                          className="w-12 h-14 md:w-14 md:h-16 text-center text-xl md:text-2xl font-mono font-black uppercase bg-gray-50 dark:bg-black/40 border-2 border-gray-300 dark:border-white/20 focus:border-primary dark:focus:border-primary rounded-2xl text-gray-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-primary/20 transition-all shadow-sm"
-                        />
-                        <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] font-mono text-gray-400">
-                          {idx + 1}
-                        </span>
+                      <div key={segIdx} className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 max-w-full">
+                        {segIdx > 0 && builderModalSegments.length > 1 && (
+                          <div className="flex items-center justify-center px-0.5 text-primary font-mono font-black text-xl sm:text-2xl select-none shrink-0 drop-shadow">
+                            -
+                          </div>
+                        )}
+
+                        <div className="flex flex-wrap items-center justify-center gap-1 min-[380px]:gap-1.5 sm:gap-2 max-w-full">
+                          {Array.from({ length: segment.length }).map((_, letterOffset) => {
+                            const idx = segment.startIdx + letterOffset;
+                            const char = modalInputLetters[idx] || "";
+
+                            return (
+                              <div key={`letter_box_${idx}`} className="relative shrink-0">
+                                <input
+                                  ref={(el) => (modalInputRefs.current[idx] = el)}
+                                  type="text"
+                                  maxLength={1}
+                                  value={char}
+                                  onChange={(e) => handleModalLetterChange(idx, e.target.value)}
+                                  onKeyDown={(e) => handleModalKeyDown(e, idx)}
+                                  className={`${boxClass} text-center font-mono font-black uppercase bg-gray-50 dark:bg-black/40 border-2 border-gray-300 dark:border-white/20 focus:border-primary dark:focus:border-primary rounded-xl md:rounded-2xl text-gray-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-primary/20 transition-all shadow-sm`}
+                                />
+                                <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[8px] sm:text-[9px] font-mono text-gray-400 select-none">
+                                  {idx + 1}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
                     );
                   })}

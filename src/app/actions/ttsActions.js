@@ -111,7 +111,7 @@ export async function saveTTS(payload) {
       .filter((it) => it.clue && it.clue.trim() && it.answer && it.answer.trim())
       .map((it, idx) => ({
         clue: it.clue.trim(),
-        answer: String(it.answer).toUpperCase().replace(/[^A-Z0-9]/g, ""),
+        answer: String(it.answer).trim().toUpperCase().replace(/[^A-Z0-9\s_-]/g, ""),
         points: 10,
         order: idx,
       }));

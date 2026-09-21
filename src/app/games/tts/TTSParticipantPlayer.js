@@ -222,6 +222,50 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
     return [...crosswordData.clues.across, ...crosswordData.clues.down];
   }, [crosswordData]);
 
+  // Word segments breakdown for multi-word answers with spaces/hyphens
+  const activeWordSegments = useMemo(() => {
+    if (!activeWord) return [];
+
+    let rawAnswer = String(activeWord.originalAnswer || "").trim();
+
+    const matchedQ = puzzleData?.questions?.find(
+      (q) =>
+        String(q.id) === String(activeWord.id) ||
+        String(q.clue || "").trim().toLowerCase() === String(activeWord.clue || "").trim().toLowerCase()
+    );
+
+    if (matchedQ?.answer && (/[\s_-]/.test(matchedQ.answer))) {
+      rawAnswer = String(matchedQ.answer).trim();
+    } else if (!rawAnswer || !/[\s_-]/.test(rawAnswer)) {
+      if (matchedQ?.answer) {
+        rawAnswer = String(matchedQ.answer).trim();
+      }
+    }
+
+    if (!rawAnswer) {
+      rawAnswer = String(activeWord.answer || "").trim();
+    }
+
+    const parts = rawAnswer.split(/[\s_-]+/).filter(Boolean);
+    const totalPartsLen = parts.reduce((acc, p) => acc + p.replace(/[^A-Za-z0-9]/g, "").length, 0);
+
+    if (parts.length > 1 && totalPartsLen === activeWord.length) {
+      let currentGlobalIdx = 0;
+      return parts.map((part) => {
+        const cleanPart = part.replace(/[^A-Za-z0-9]/g, "");
+        const startIdx = currentGlobalIdx;
+        currentGlobalIdx += cleanPart.length;
+        return {
+          text: cleanPart,
+          startIdx,
+          length: cleanPart.length,
+        };
+      });
+    }
+
+    return [{ text: activeWord.answer, startIdx: 0, length: activeWord.length }];
+  }, [activeWord, puzzleData]);
+
   const totalWords = allClueWords.length;
 
   const correctWordsCount = useMemo(() => {
@@ -676,7 +720,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
     : "bg-gradient-to-b from-[#f2faf5] via-[#e6f6ed] to-[#d9f0e3] text-slate-900";
 
   return (
-    <div className={`fixed inset-0 w-screen h-screen overflow-hidden select-none font-sans flex flex-col justify-between transition-colors duration-500 ${bgThemeClass}`}>
+    <div className={`fixed inset-0 w-full h-[100dvh] overflow-hidden select-none font-sans flex flex-col justify-between transition-colors duration-500 ${bgThemeClass}`}>
       {/* CELEBRATION EXPLOSION */}
       {showCelebrationParticles && <ParticleExplosion count={40} />}
 
@@ -848,7 +892,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
       {/* ========================================================================= */}
       {/* 2. MAIN BOARD VIEW */}
       {/* ========================================================================= */}
-      <main className="relative z-10 flex-1 w-full max-w-5xl mx-auto flex flex-col items-center justify-center p-3 sm:p-6 overflow-auto">
+      <main className="relative z-10 flex-1 min-h-0 w-full max-w-5xl mx-auto flex flex-col items-center justify-center p-2 sm:p-5 overflow-auto">
         {/* SUBTITLE BANNER */}
         <div
           className={`mb-2 sm:mb-4 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border text-[10px] sm:text-xs font-black uppercase tracking-wider flex items-center gap-1.5 sm:gap-2 shadow-sm text-center ${
@@ -863,17 +907,16 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
 
         {/* SQUARE CROSSWORD GRID */}
         {crosswordData.grid && crosswordData.grid.length > 0 ? (
-          <div className="w-full flex items-center justify-center max-h-full overflow-auto py-2">
+          <div className="w-full flex items-center justify-center py-2 px-1">
             <div
-              className={`grid gap-[4px] sm:gap-[7px] select-none p-3 sm:p-6 rounded-3xl border shadow-2xl transition-colors duration-500 ${
+              className={`grid gap-[2px] sm:gap-[5px] md:gap-[6px] select-none p-2 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl border shadow-2xl transition-colors duration-500 w-full ${
                 isDark
-                  ? "bg-black/75 border-emerald-500/30 shadow-[0_0_60px_rgba(0,0,0,0.8)]"
+                  ? "bg-black/80 border-emerald-500/30 shadow-[0_0_60px_rgba(0,0,0,0.8)]"
                   : "bg-white/95 border-emerald-600/30 shadow-[0_15px_40px_rgba(4,120,87,0.15)]"
               }`}
               style={{
                 gridTemplateColumns: `repeat(${crosswordData.cols}, minmax(0, 1fr))`,
-                maxWidth: `min(100%, ${Math.min(crosswordData.cols * 52, 720)}px)`,
-                width: "100%",
+                maxWidth: `min(100%, ${Math.min(crosswordData.cols * 50, 720)}px)`,
               }}
             >
               {crosswordData.grid.map((row, rIdx) =>
@@ -891,29 +934,29 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
                     <motion.button
                       key={cellKey}
                       type="button"
-                      whileHover={{ scale: 1.08, y: -2 }}
-                      whileTap={{ scale: 0.92 }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                       onMouseEnter={() => setHoveredCell({ row: rIdx, col: cIdx })}
                       onMouseLeave={() => setHoveredCell(null)}
                       onClick={() => handleCellClick(cell, rIdx, cIdx)}
-                      className={`relative aspect-square w-full rounded-xl sm:rounded-2xl flex items-center justify-center font-mono font-black text-xs sm:text-2xl transition-all cursor-pointer shadow-md ${
+                      className={`relative aspect-square w-full rounded-[3px] sm:rounded-md md:rounded-lg flex items-center justify-center font-mono font-black text-[11px] sm:text-lg md:text-2xl transition-all cursor-pointer shadow-sm ${
                         isDark
                           ? userLetter
-                            ? "border-2 border-emerald-400 bg-gradient-to-b from-[#123e2d] to-[#0a271c] text-emerald-300 shadow-[0_3px_0_#051811]"
+                            ? "border border-emerald-400 bg-gradient-to-b from-[#123e2d] to-[#0a271c] text-emerald-300 shadow-[0_2px_0_#051811]"
                             : isWordHovered
-                            ? "border-2 border-emerald-400 bg-[#0f2e21] text-white shadow-[0_3px_0_#061a12]"
-                            : "border-2 border-white/30 bg-[#081c13] text-white hover:border-emerald-400 hover:bg-[#0f2e21] shadow-[0_3px_0_#040d09]"
+                            ? "border border-emerald-400 bg-[#0f2e21] text-white shadow-[0_2px_0_#061a12]"
+                            : "border border-white/30 bg-[#081c13] text-white hover:border-emerald-400 hover:bg-[#0f2e21] shadow-[0_2px_0_#040d09]"
                           : userLetter
-                          ? "border-2 border-emerald-600 bg-emerald-100 text-emerald-950 shadow-[0_3px_0_#047857]"
+                          ? "border border-emerald-600 bg-emerald-100 text-emerald-950 shadow-[0_2px_0_#047857]"
                           : isWordHovered
-                          ? "border-2 border-emerald-600 bg-emerald-50 text-slate-900 shadow-[0_3px_0_#94a3b8]"
-                          : "border-2 border-slate-300 bg-white text-slate-900 hover:border-emerald-600 hover:bg-emerald-50 shadow-[0_3px_0_#cbd5e1]"
+                          ? "border border-emerald-600 bg-emerald-50 text-slate-900 shadow-[0_2px_0_#94a3b8]"
+                          : "border border-slate-300 bg-white text-slate-900 hover:border-emerald-600 hover:bg-emerald-50 shadow-[0_2px_0_#cbd5e1]"
                       }`}
                     >
                       {/* Starting clue number */}
                       {cell.number && (
                         <span
-                          className={`absolute top-0.5 left-0.5 sm:left-1 text-[7px] sm:text-[11px] font-black leading-none ${
+                          className={`absolute top-0 left-0.5 sm:left-1 text-[6.5px] sm:text-[9px] md:text-[11px] font-black leading-none select-none ${
                             isDark ? "text-emerald-400" : "text-emerald-700"
                           }`}
                         >
@@ -922,7 +965,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
                       )}
 
                       {/* Letter */}
-                      <span className="mt-0.5 font-mono font-black tracking-wider drop-shadow">
+                      <span className="font-mono font-black leading-none drop-shadow">
                         {userLetter}
                       </span>
                     </motion.button>
@@ -942,10 +985,10 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
       {/* 3. BOTTOM FOOTER BAR */}
       {/* ========================================================================= */}
       <footer
-        className={`relative z-20 w-full px-4 sm:px-6 py-2 sm:py-3 flex items-center justify-center sm:justify-between backdrop-blur-md border-t shrink-0 gap-2 transition-colors duration-500 pb-[max(0.65rem,env(safe-area-inset-bottom))] ${
+        className={`relative z-20 w-full px-4 sm:px-6 py-3 sm:py-3.5 flex items-center justify-center sm:justify-between backdrop-blur-xl border-t shrink-0 gap-3 transition-colors duration-500 pb-[max(1.25rem,env(safe-area-inset-bottom,1.25rem))] ${
           isDark
-            ? "border-white/10 bg-[#020b06]/85 text-white"
-            : "border-slate-300 bg-white/90 text-slate-900 shadow-sm"
+            ? "border-emerald-500/20 bg-[#020b06]/95 text-white shadow-[0_-4px_25px_rgba(0,0,0,0.6)]"
+            : "border-slate-300 bg-white/95 text-slate-900 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]"
         }`}
       >
         <Link
@@ -962,15 +1005,15 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
         <button
           type="button"
           onClick={() => setShowClueDrawer(true)}
-          className={`inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-2 sm:py-2.5 rounded-full border font-black text-xs transition-all shadow-md active:scale-95 cursor-pointer ${
+          className={`inline-flex items-center justify-center gap-2 px-7 sm:px-8 py-2.5 sm:py-3 rounded-full border font-black text-xs sm:text-sm transition-all shadow-lg active:scale-95 cursor-pointer ${
             isDark
-              ? "border-emerald-500/40 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300"
-              : "border-emerald-600 bg-emerald-600 hover:bg-emerald-700 text-white"
+              ? "border-emerald-400/50 bg-emerald-500/25 hover:bg-emerald-500/35 text-emerald-300 shadow-emerald-950/50"
+              : "border-emerald-600 bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/30"
           }`}
         >
-          <BookOpen className="w-4 h-4" />
+          <BookOpen className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
           <span>Daftar Soal</span>
-          <span className={`px-2 py-0.5 rounded-full text-[10px] font-black leading-none ${isDark ? "bg-emerald-400/25 text-emerald-300" : "bg-white/25 text-white"}`}>
+          <span className={`px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-black leading-none ${isDark ? "bg-emerald-400/30 text-emerald-200" : "bg-white/30 text-white"}`}>
             {correctWordsCount}/{totalWords}
           </span>
         </button>
@@ -1068,71 +1111,92 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
                 e.stopPropagation();
                 hiddenInputRef.current?.focus();
               }}
-              className="w-full max-w-lg mx-auto flex flex-col items-center justify-center my-auto py-4 space-y-5 text-center"
+              className="w-full max-w-2xl mx-auto flex flex-col items-center justify-center my-auto py-4 space-y-5 text-center"
             >
               {/* CLEAN QUESTION TEXT WITHOUT BACKGROUND BOX */}
               <div className="space-y-1.5 px-2">
                 <span className="text-[11px] font-black uppercase tracking-widest text-emerald-400 block drop-shadow">
-                  Pertanyaan ({activeWord.length} Huruf)
+                  Pertanyaan ({activeWord.length} Huruf{activeWordSegments.length > 1 ? ` • ${activeWordSegments.map((s) => s.length).join(" + ")}` : ""})
                 </span>
-                <h2 className="text-lg sm:text-2xl md:text-3xl font-black leading-snug tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
+                <h2 className="text-lg sm:text-2xl md:text-3xl font-black leading-snug tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] max-w-xl mx-auto">
                   {activeWord.clue}
                 </h2>
               </div>
 
-              {/* LETTER SLOTS */}
-              <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 flex-wrap py-2 max-w-full">
-                {typedLetters.map((letter, idx) => {
-                  const isActive = activeSlotIdx === idx;
-                  const isFilled = Boolean(letter);
-                  const isLongWord = typedLetters.length > 7;
+              {/* LETTER SLOTS: Auto-scaled, touch-friendly, multi-word aware with wrap */}
+              <div className="w-full max-w-2xl mx-auto py-3 px-2 flex flex-wrap items-center justify-center gap-y-3 gap-x-2 sm:gap-x-4">
+                {activeWordSegments.map((segment, segIdx) => {
+                  const effectiveSegmentLen = segment.length > 8 ? Math.ceil(segment.length / 2) : segment.length;
+                  let slotSizeClass = "w-10 h-13 text-xl sm:w-13 sm:h-16 sm:text-2xl md:w-15 md:h-18 md:text-3xl";
+                  if (effectiveSegmentLen >= 8) {
+                    slotSizeClass = "w-8.5 h-11 text-base min-[380px]:w-9 min-[380px]:h-12 min-[380px]:text-lg sm:w-11 sm:h-14 sm:text-xl md:w-13 md:h-16 md:text-2xl";
+                  } else {
+                    slotSizeClass = "w-9 h-12 text-lg min-[380px]:w-10 min-[380px]:h-13 min-[380px]:text-xl sm:w-12 sm:h-15 sm:text-2xl md:w-14 md:h-17 md:text-3xl";
+                  }
 
                   return (
-                    <motion.button
-                      key={idx}
-                      type="button"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setActiveSlotIdx(idx);
-                        hiddenInputRef.current?.focus();
-                      }}
-                      className={`${
-                        isLongWord
-                          ? "w-9 h-11 text-lg sm:w-12 sm:h-14 sm:text-2xl md:w-14 md:h-16 md:text-3xl"
-                          : "w-11 h-13 text-xl sm:w-14 sm:h-16 sm:text-2xl md:w-16 md:h-20 md:text-3xl"
-                      } rounded-xl sm:rounded-2xl flex items-center justify-center font-black font-mono uppercase transition-all relative cursor-pointer select-none ${
-                        answerState === "correct"
-                          ? "bg-emerald-400 border-2 border-emerald-200 text-slate-950 shadow-[0_4px_0_#047857] scale-105"
-                          : answerState === "wrong"
-                          ? "bg-rose-600 border-2 border-rose-300 text-white shadow-[0_4px_0_#9f1239]"
-                          : isFilled
-                          ? "bg-gradient-to-b from-[#144230] to-[#092419] border-2 border-emerald-400 text-emerald-300 shadow-[0_4px_0_#051710]"
-                          : isActive
-                          ? "bg-[#0b261b] border-2 border-emerald-400 text-white shadow-[0_4px_0_#05150f] ring-4 ring-emerald-500/40 scale-105"
-                          : "bg-[#081811]/90 border-2 border-white/30 text-white/40 shadow-[0_3px_0_#030b07]"
-                      }`}
-                    >
-                      {letter ? (
-                        <motion.span
-                          initial={{ scale: 0.5, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{ type: "spring", stiffness: 500, damping: 20 }}
-                          className="drop-shadow-md"
-                        >
-                          {letter}
-                        </motion.span>
-                      ) : (
-                        isActive && (
-                          <span className="w-3 sm:w-5 h-1 rounded-full bg-emerald-500 opacity-90 animate-pulse" />
-                        )
+                    <div key={segIdx} className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 max-w-full">
+                      {/* Hyphen/Separator between word clusters */}
+                      {segIdx > 0 && activeWordSegments.length > 1 && (
+                        <div className="flex items-center justify-center px-0.5 text-emerald-400 font-mono font-black text-xl sm:text-2xl md:text-3xl select-none shrink-0 drop-shadow animate-pulse">
+                          -
+                        </div>
                       )}
 
-                      <span className="absolute -bottom-1 text-[7px] sm:text-[8px] font-bold opacity-60 text-white select-none">
-                        {idx + 1}
-                      </span>
-                    </motion.button>
+                      {/* Word cluster */}
+                      <div className="flex flex-wrap items-center justify-center gap-1 min-[380px]:gap-1.5 sm:gap-2 max-w-full">
+                        {Array.from({ length: segment.length }).map((_, letterOffset) => {
+                          const idx = segment.startIdx + letterOffset;
+                          const letter = typedLetters[idx] || "";
+                          const isActive = activeSlotIdx === idx;
+                          const isFilled = Boolean(letter);
+
+                          return (
+                            <motion.button
+                              key={idx}
+                              type="button"
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveSlotIdx(idx);
+                                hiddenInputRef.current?.focus();
+                              }}
+                              className={`${slotSizeClass} rounded-xl sm:rounded-2xl flex items-center justify-center font-black font-mono uppercase transition-all relative cursor-pointer select-none shrink-0 ${
+                                answerState === "correct"
+                                  ? "bg-emerald-400 border-2 border-emerald-200 text-slate-950 shadow-[0_4px_0_#047857] scale-105"
+                                  : answerState === "wrong"
+                                  ? "bg-rose-600 border-2 border-rose-300 text-white shadow-[0_4px_0_#9f1239]"
+                                  : isFilled
+                                  ? "bg-gradient-to-b from-[#144230] to-[#092419] border-2 border-emerald-400 text-emerald-300 shadow-[0_4px_0_#051710]"
+                                  : isActive
+                                  ? "bg-[#0b261b] border-2 border-emerald-400 text-white shadow-[0_4px_0_#05150f] ring-4 ring-emerald-500/40 scale-105"
+                                  : "bg-[#081811]/90 border-2 border-white/30 text-white/40 shadow-[0_3px_0_#030b07]"
+                              }`}
+                            >
+                              {letter ? (
+                                <motion.span
+                                  initial={{ scale: 0.5, opacity: 0 }}
+                                  animate={{ scale: 1, opacity: 1 }}
+                                  transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                                  className="drop-shadow-md"
+                                >
+                                  {letter}
+                                </motion.span>
+                              ) : (
+                                isActive && (
+                                  <span className="w-2.5 sm:w-4 h-1 rounded-full bg-emerald-500 opacity-90 animate-pulse" />
+                                )
+                              )}
+
+                              <span className="absolute -bottom-1 text-[7px] sm:text-[9px] font-bold opacity-60 text-white select-none">
+                                {idx + 1}
+                              </span>
+                            </motion.button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   );
                 })}
               </div>
