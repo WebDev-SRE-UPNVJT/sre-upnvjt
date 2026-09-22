@@ -3,17 +3,27 @@
 import { db } from "@/lib/db";
 import {
   user,
+  role,
   department,
   activity,
   literatureItem,
 } from "@/db/schema";
-import { eq, count } from "drizzle-orm";
+import { eq, count, and, sql } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 
 async function fetchDashboardStatsInternal() {
   try {
     const [usersRes, literatureRes, deptsRes, activitiesRes] = await Promise.allSettled([
-      db.select({ value: count() }).from(user).where(eq(user.isActive, true)),
+      db
+        .select({ value: count() })
+        .from(user)
+        .innerJoin(role, eq(user.roleId, role.id))
+        .where(
+          and(
+            eq(user.isActive, true),
+            sql`LOWER(${role.name}) = 'member'`
+          )
+        ),
       db.select({ value: count() }).from(literatureItem),
       db.select({ value: count() }).from(department),
       db.select({ value: count() }).from(activity),
