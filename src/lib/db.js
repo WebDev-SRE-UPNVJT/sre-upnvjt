@@ -14,10 +14,11 @@ let client;
 let db;
 
 const dbConfig = {
-  max: process.env.NODE_ENV === 'production' ? 10 : 20,
-  idle_timeout: 20,
-  connect_timeout: 10,
+  max: process.env.NODE_ENV === 'production' ? 10 : 10,
+  idle_timeout: 30,
+  connect_timeout: 30,
   prepare: false,
+  ssl: { rejectUnauthorized: false },
 };
 
 if (!globalThis.globalDbClient) {
