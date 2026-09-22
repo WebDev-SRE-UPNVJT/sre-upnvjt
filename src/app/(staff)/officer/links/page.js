@@ -1,10 +1,12 @@
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
 import ShortlinkClient from "./ShortlinkClient";
 import { db } from "@/lib/db";
 import { shortlink, user } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "SRE Links | Staff SRE UPNVJT",
@@ -26,6 +28,7 @@ export default async function ShortlinkPage() {
       originalUrl: shortlink.originalUrl,
       description: shortlink.description,
       clicks: shortlink.clicks,
+      isActive: shortlink.isActive,
       createdAt: shortlink.createdAt,
       creatorName: user.name,
     })
@@ -33,12 +36,15 @@ export default async function ShortlinkPage() {
     .leftJoin(user, eq(shortlink.createdById, user.id))
     .orderBy(desc(shortlink.createdAt));
 
-    initialLinks = data.map(link => ({
+    initialLinks = (data || []).map(link => ({
       ...link,
-      createdAt: link.createdAt ? link.createdAt.toISOString() : null,
+      clicks: Number(link.clicks) || 0,
+      isActive: link.isActive !== undefined && link.isActive !== null ? Boolean(link.isActive) : true,
+      createdAt: link.createdAt ? (link.createdAt instanceof Date ? link.createdAt.toISOString() : new Date(link.createdAt).toISOString()) : null,
     }));
   } catch (error) {
     console.error("Failed to fetch initial links:", error);
+    initialLinks = [];
   }
 
   return <ShortlinkClient initialLinks={initialLinks} />;

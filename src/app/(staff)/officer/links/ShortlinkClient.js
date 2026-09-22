@@ -49,22 +49,37 @@ export default function ShortlinkClient({ initialLinks = [] }) {
     setTimeout(() => setNotification(null), 4000);
   };
 
+  // Helper for safe date format
+  const formatDate = (dateVal) => {
+    if (!dateVal) return "-";
+    try {
+      const d = new Date(dateVal);
+      if (isNaN(d.getTime())) return "-";
+      return d.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+    } catch (e) {
+      return "-";
+    }
+  };
+
   // KPI Calculations
   const totalClicks = useMemo(() => {
-    return links.reduce((acc, curr) => acc + (curr.clicks || 0), 0);
+    if (!Array.isArray(links)) return 0;
+    return links.reduce((acc, curr) => acc + (Number(curr?.clicks) || 0), 0);
   }, [links]);
 
   const topLink = useMemo(() => {
-    if (!links.length) return null;
-    return [...links].sort((a, b) => (b.clicks || 0) - (a.clicks || 0))[0];
+    if (!Array.isArray(links) || !links.length) return null;
+    return [...links].sort((a, b) => (Number(b?.clicks) || 0) - (Number(a?.clicks) || 0))[0];
   }, [links]);
 
   const filteredLinks = useMemo(() => {
+    if (!Array.isArray(links)) return [];
     return links.filter(link => {
-      const q = searchQuery.toLowerCase().trim();
+      if (!link) return false;
+      const q = (searchQuery || "").toLowerCase().trim();
       if (!q) return true;
       return (
-        link.slug.toLowerCase().includes(q) ||
+        (link.slug && link.slug.toLowerCase().includes(q)) ||
         (link.description && link.description.toLowerCase().includes(q)) ||
         (link.originalUrl && link.originalUrl.toLowerCase().includes(q)) ||
         (link.creatorName && link.creatorName.toLowerCase().includes(q))
@@ -479,7 +494,7 @@ export default function ShortlinkClient({ initialLinks = [] }) {
                 <div className="flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-white/40 font-medium">
                   <Clock className="w-3 h-3 opacity-70" />
                   <span>
-                    {link.createdAt ? new Date(link.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "-"}
+                    {formatDate(link.createdAt)}
                   </span>
                 </div>
                 

@@ -3,7 +3,7 @@ import { db } from '@/lib/db';
 import { shortlink, user, department } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/authOptions';
 import { hasAccess } from '@/lib/permissions';
 
 export async function GET(req) {
