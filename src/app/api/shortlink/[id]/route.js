@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/authOptions";
 import { db } from "@/lib/db";
 import { shortlink } from "@/db/schema";
 import { eq, sql, and, ne } from "drizzle-orm";
+import { hasAccess } from "@/lib/permissions";
 
 export const dynamic = 'force-dynamic';
 
@@ -30,6 +31,14 @@ export async function PUT(req, { params }) {
 
     if (!existingLink) {
       return NextResponse.json({ error: "Shortlink not found" }, { status: 404 });
+    }
+
+    const userId = session.user.id ? parseInt(session.user.id, 10) : null;
+    const isSuperOrAdmin = hasAccess(session.user, "shortlinks", "update") || session.user.roleName === "SUPER_ADMIN" || session.user.roleName === "ADMIN";
+
+    // Non-admin officers can only edit their own links
+    if (!isSuperOrAdmin && existingLink.createdById !== userId) {
+      return NextResponse.json({ error: "Anda hanya memiliki izin untuk mengedit tautan yang Anda buat sendiri" }, { status: 403 });
     }
 
     const updateData = {};
@@ -88,14 +97,26 @@ export async function DELETE(req, { params }) {
       return NextResponse.json({ error: "Invalid link ID" }, { status: 400 });
     }
 
+    const existingLink = await db.query.shortlink.findFirst({
+      where: eq(shortlink.id, linkId),
+    });
+
+    if (!existingLink) {
+      return NextResponse.json({ error: "Shortlink not found" }, { status: 404 });
+    }
+
+    const userId = session.user.id ? parseInt(session.user.id, 10) : null;
+    const isSuperOrAdmin = hasAccess(session.user, "shortlinks", "delete") || session.user.roleName === "SUPER_ADMIN" || session.user.roleName === "ADMIN";
+
+    // Non-admin officers can only delete their own links
+    if (!isSuperOrAdmin && existingLink.createdById !== userId) {
+      return NextResponse.json({ error: "Anda hanya memiliki izin untuk menghapus tautan yang Anda buat sendiri" }, { status: 403 });
+    }
+
     const deleted = await db
       .delete(shortlink)
       .where(eq(shortlink.id, linkId))
       .returning();
-
-    if (!deleted.length) {
-      return NextResponse.json({ error: "Shortlink not found" }, { status: 404 });
-    }
 
     return NextResponse.json({ message: "Shortlink deleted successfully" });
   } catch (error) {

@@ -19,7 +19,9 @@ export default async function ShortlinkPage() {
     redirect("/login");
   }
 
-  // Fetch initial shortlinks
+  const userId = parseInt(session.user.id, 10);
+
+  // Fetch only shortlinks created by this officer
   let initialLinks = [];
   try {
     const data = await db.select({
@@ -34,6 +36,7 @@ export default async function ShortlinkPage() {
     })
     .from(shortlink)
     .leftJoin(user, eq(shortlink.createdById, user.id))
+    .where(eq(shortlink.createdById, userId))
     .orderBy(desc(shortlink.createdAt));
 
     initialLinks = (data || []).map(link => ({
