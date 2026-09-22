@@ -10,6 +10,7 @@ import {
   Send, BookOpen, Layers
 } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useLanguage } from "@/i18n/LanguageProvider";
 import { resolveImageUrl } from "@/lib/imageUrl";
 import { getCategoryBadgeStyle } from "@/app/(dashboard)/content/ContentClient";
 
@@ -27,9 +28,9 @@ const LinkedinIcon = ({ className = "w-4 h-4" }) => (
 
 export default function ArticleDetailClient({ articleData, relatedArticles = [] }) {
   const { resolvedTheme } = useTheme();
+  const { language, t } = useLanguage();
   const [mounted, setMounted] = useState(false);
-  // 1. Language state: "en" (default) or "id"
-  const [currentLang, setCurrentLang] = useState("en");
+  const currentLang = language || "en";
   const [copied, setCopied] = useState(false);
   const [fontSizeMultiplier, setFontSizeMultiplier] = useState(1); // 0.92 (small), 1 (normal), 1.12 (large)
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -67,8 +68,29 @@ export default function ArticleDetailClient({ articleData, relatedArticles = [] 
 
   // 3. Active Title & Body based on language selection
   const displayTitle = currentLang === "id" && articleData.titleId ? articleData.titleId : articleData.title;
-  const displayBody = currentLang === "id" && articleData.bodyId ? articleData.bodyId : articleData.body;
+  const rawBody = currentLang === "id" && articleData.bodyId ? articleData.bodyId : articleData.body;
   const isFallbackToEnglish = currentLang === "id" && !articleData.bodyId;
+
+  // Sanitize inline styles from editor (strip hardcoded color & background to ensure full theme contrast)
+  const displayBody = useMemo(() => {
+    if (!rawBody) return "";
+    let clean = rawBody;
+    // Strip all <font ...> and </font> tags
+    clean = clean.replace(/<\/?font\b[^>]*>/gi, "");
+    // Strip inline color, background-color, background from style attributes
+    clean = clean.replace(/style\s*=\s*(["'])([\s\S]*?)\1/gi, (match, quote, styleContent) => {
+      const keptStyles = styleContent
+        .split(";")
+        .map(rule => rule.trim())
+        .filter(rule => {
+          if (!rule) return false;
+          const prop = rule.split(":")[0]?.trim().toLowerCase();
+          return prop && !["color", "background-color", "background"].includes(prop);
+        });
+      return keptStyles.length > 0 ? `style="${keptStyles.join("; ")}"` : "";
+    });
+    return clean;
+  }, [rawBody]);
 
   // 4. Calculate estimated reading time & word count
   const { readTimeMin, wordCount } = useMemo(() => {
@@ -125,39 +147,15 @@ export default function ArticleDetailClient({ articleData, relatedArticles = [] 
 
       <main className="relative z-10 pt-20 sm:pt-32 pb-16 sm:pb-24 px-4 sm:px-8 max-w-4xl lg:max-w-5xl xl:max-w-5xl mx-auto">
         
-        {/* ── Sleek Top Navigation Bar (Back + Compact Language Switcher) ── */}
+        {/* ── Sleek Top Navigation Bar (Back Link) ── */}
         <div className="flex items-center justify-between gap-3 mb-6 sm:mb-8">
           <Link 
             href="/articles" 
             className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-white/90 hover:text-yellow-300 transition-colors py-1.5 px-2.5 -ml-2.5 rounded-lg hover:bg-white/10"
           >
             <ChevronLeft className="w-4 h-4" />
-            <span>Semua Artikel</span>
+            <span>{currentLang === "id" ? "Semua Artikel" : "All Articles"}</span>
           </Link>
-
-          {/* Compact Bilingual Switcher */}
-          <div className="inline-flex items-center bg-black/20 dark:bg-black/50 border border-white/20 p-1 rounded-xl backdrop-blur-md">
-            <button
-              onClick={() => setCurrentLang("en")}
-              className={`px-2.5 sm:px-3 py-1 rounded-lg text-[11px] font-bold tracking-wide transition-all cursor-pointer ${
-                currentLang === "en"
-                  ? "bg-yellow-300 text-slate-950 font-black shadow-sm"
-                  : "text-white/70 hover:text-white"
-              }`}
-            >
-              EN
-            </button>
-            <button
-              onClick={() => setCurrentLang("id")}
-              className={`px-2.5 sm:px-3 py-1 rounded-lg text-[11px] font-bold tracking-wide transition-all cursor-pointer ${
-                currentLang === "id"
-                  ? "bg-yellow-300 text-slate-950 font-black shadow-sm"
-                  : "text-white/70 hover:text-white"
-              }`}
-            >
-              ID
-            </button>
-          </div>
         </div>
 
         {/* Fallback Notice if ID not translated */}
@@ -253,38 +251,42 @@ export default function ArticleDetailClient({ articleData, relatedArticles = [] 
         ) : null}
 
         {/* ── Clean Reading Canvas (Free from cramped boxes) ─────────────── */}
-        <div className="bg-[#099c6d]/40 dark:bg-[#07150f]/80 border border-white/15 dark:border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-10 md:p-12 shadow-xl backdrop-blur-md mb-12">
+        <div className="bg-white dark:bg-[#07150f]/85 text-slate-800 dark:text-gray-100 border border-emerald-950/10 dark:border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-10 md:p-12 shadow-2xl backdrop-blur-md mb-12">
           
           {/* Subtle Font Scale Bar */}
-          <div className="flex items-center justify-between pb-4 mb-6 border-b border-white/15 text-xs text-white/70">
+          <div className="flex items-center justify-between pb-4 mb-6 border-b border-slate-200/80 dark:border-white/15 text-xs text-slate-500 dark:text-white/70">
             <div className="flex items-center gap-1.5 font-medium">
-              <BookOpen className="w-3.5 h-3.5 text-yellow-300" />
+              <BookOpen className="w-3.5 h-3.5 text-emerald-600 dark:text-yellow-300" />
               <span>{wordCount} kata</span>
             </div>
             
             <div className="flex items-center gap-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-white/50 mr-1">Teks:</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/50 mr-1">Teks:</span>
               <button 
-                onClick={() => setFontSizeMultiplier(0.88)} 
-                className={`px-2 py-0.5 rounded-md font-bold text-xs transition-colors cursor-pointer ${fontSizeMultiplier === 0.88 ? 'bg-yellow-300 text-slate-950 font-black' : 'bg-black/20 hover:bg-black/40 text-white'}`}
+                onClick={() => setFontSizeMultiplier(0.9)} 
+                className={`px-2.5 py-0.5 rounded-md font-bold text-xs transition-all cursor-pointer ${fontSizeMultiplier === 0.9 ? 'bg-emerald-600 text-white dark:bg-yellow-300 dark:text-slate-950 font-black shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-white/10 dark:hover:bg-white/20 dark:text-white'}`}
+                title="Ukuran teks kecil"
               >
                 A-
               </button>
               <button 
                 onClick={() => setFontSizeMultiplier(1)} 
-                className={`px-2 py-0.5 rounded-md font-bold text-xs transition-colors cursor-pointer ${fontSizeMultiplier === 1 ? 'bg-yellow-300 text-slate-950 font-black' : 'bg-black/20 hover:bg-black/40 text-white'}`}
+                className={`px-2.5 py-0.5 rounded-md font-bold text-xs transition-all cursor-pointer ${fontSizeMultiplier === 1 ? 'bg-emerald-600 text-white dark:bg-yellow-300 dark:text-slate-950 font-black shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-white/10 dark:hover:bg-white/20 dark:text-white'}`}
+                title="Ukuran teks normal"
               >
                 A
               </button>
               <button 
-                onClick={() => setFontSizeMultiplier(1.18)} 
-                className={`px-2 py-0.5 rounded-md font-bold text-xs transition-colors cursor-pointer ${fontSizeMultiplier === 1.18 ? 'bg-yellow-300 text-slate-950 font-black' : 'bg-black/20 hover:bg-black/40 text-white'}`}
+                onClick={() => setFontSizeMultiplier(1.15)} 
+                className={`px-2.5 py-0.5 rounded-md font-bold text-xs transition-all cursor-pointer ${fontSizeMultiplier === 1.15 ? 'bg-emerald-600 text-white dark:bg-yellow-300 dark:text-slate-950 font-black shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-white/10 dark:hover:bg-white/20 dark:text-white'}`}
+                title="Ukuran teks besar"
               >
                 A+
               </button>
               <button 
-                onClick={() => setFontSizeMultiplier(1.35)} 
-                className={`px-2 py-0.5 rounded-md font-bold text-xs transition-colors cursor-pointer ${fontSizeMultiplier === 1.35 ? 'bg-yellow-300 text-slate-950 font-black' : 'bg-black/20 hover:bg-black/40 text-white'}`}
+                onClick={() => setFontSizeMultiplier(1.3)} 
+                className={`px-2.5 py-0.5 rounded-md font-bold text-xs transition-all cursor-pointer ${fontSizeMultiplier === 1.3 ? 'bg-emerald-600 text-white dark:bg-yellow-300 dark:text-slate-950 font-black shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-white/10 dark:hover:bg-white/20 dark:text-white'}`}
+                title="Ukuran teks ekstra besar"
               >
                 A++
               </button>
@@ -300,22 +302,22 @@ export default function ArticleDetailClient({ articleData, relatedArticles = [] 
           />
 
           {/* End divider */}
-          <div className="flex items-center justify-center gap-3 my-10 pt-6 border-t border-white/15">
-            <span className="w-10 h-0.5 bg-gradient-to-r from-transparent to-yellow-300" />
-            <Sparkles className="w-4 h-4 text-yellow-300" />
-            <span className="w-10 h-0.5 bg-gradient-to-l from-transparent to-yellow-300" />
+          <div className="flex items-center justify-center gap-3 my-10 pt-6 border-t border-slate-200/80 dark:border-white/15">
+            <span className="w-10 h-0.5 bg-gradient-to-r from-transparent to-emerald-500 dark:to-yellow-300" />
+            <Sparkles className="w-4 h-4 text-emerald-600 dark:text-yellow-300" />
+            <span className="w-10 h-0.5 bg-gradient-to-l from-transparent to-emerald-500 dark:to-yellow-300" />
           </div>
 
           {/* Bottom Share Row */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left pt-2">
             <div>
-              <h4 className="text-sm sm:text-base font-bold text-white">Bagikan wawasan ini</h4>
-              <p className="text-[11px] text-white/70">Akselerasi transisi energi bersih dengan menyebarkan artikel ini.</p>
+              <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Bagikan wawasan ini</h4>
+              <p className="text-[11px] text-slate-500 dark:text-white/70">Akselerasi transisi energi bersih dengan menyebarkan artikel ini.</p>
             </div>
             
             <button
               onClick={handleCopyLink}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-yellow-300 hover:bg-yellow-400 text-slate-950 font-black text-xs transition-all shadow-md cursor-pointer"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-yellow-300 dark:hover:bg-yellow-400 dark:text-slate-950 font-black text-xs transition-all shadow-md cursor-pointer"
             >
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               <span>{copied ? "Tautan Tersalin!" : "Salin Tautan Artikel"}</span>
