@@ -32,16 +32,52 @@ const DAYS_EN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 function parseDateTimeString(val) {
   if (!val) return null;
   try {
-    const d = new Date(val);
-    if (isNaN(d.getTime())) return null;
-
-    // Extract year, month, date, hours, minutes
     const pad = (n) => String(n).padStart(2, "0");
-    const year = d.getFullYear();
-    const month = d.getMonth();
-    const date = d.getDate();
-    const hours = d.getHours();
-    const minutes = d.getMinutes();
+
+    // Case 1: Simple string like "YYYY-MM-DDTHH:mm" without timezone offset
+    if (typeof val === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(val)) {
+      const [datePart, timePart] = val.split("T");
+      const [yearStr, monthStr, dayStr] = datePart.split("-");
+      const [hourStr, minStr] = timePart.split(":");
+      const year = parseInt(yearStr, 10);
+      const month = parseInt(monthStr, 10) - 1;
+      const date = parseInt(dayStr, 10);
+      const hours = parseInt(hourStr, 10);
+      const minutes = parseInt(minStr, 10);
+
+      return {
+        year,
+        month,
+        date,
+        hours,
+        minutes,
+        formattedStr: `${year}-${pad(month + 1)}-${pad(date)}T${pad(hours)}:${pad(minutes)}:00+07:00`,
+      };
+    }
+
+    // Case 2: Full ISO string with timezone or Date object
+    const d = typeof val === "string" ? new Date(val) : val;
+    if (!d || isNaN(d.getTime())) return null;
+
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Jakarta",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    const parts = formatter.formatToParts(d);
+    const getPart = (type) => parts.find((p) => p.type === type)?.value;
+
+    const year = parseInt(getPart("year"), 10);
+    const month = parseInt(getPart("month"), 10) - 1;
+    const date = parseInt(getPart("day"), 10);
+    let hours = parseInt(getPart("hour"), 10);
+    if (hours === 24) hours = 0;
+    const minutes = parseInt(getPart("minute"), 10);
 
     return {
       year,
@@ -50,7 +86,7 @@ function parseDateTimeString(val) {
       hours,
       minutes,
       dateObj: d,
-      formattedStr: `${year}-${pad(month + 1)}-${pad(date)}T${pad(hours)}:${pad(minutes)}`,
+      formattedStr: `${year}-${pad(month + 1)}-${pad(date)}T${pad(hours)}:${pad(minutes)}:00+07:00`,
     };
   } catch (e) {
     return null;
@@ -150,7 +186,7 @@ export default function DateTimePicker24({
   const pad = (n) => String(n).padStart(2, "0");
 
   const applyDateTime = (y, m, d, h, min) => {
-    const formatted = `${y}-${pad(m + 1)}-${pad(d)}T${pad(h)}:${pad(min)}`;
+    const formatted = `${y}-${pad(m + 1)}-${pad(d)}T${pad(h)}:${pad(min)}:00+07:00`;
     if (onChange) {
       onChange({ target: { value: formatted, name } });
     }
@@ -197,20 +233,32 @@ export default function DateTimePicker24({
   };
 
   const handlePreset = (offsetDays, hour = 23, minute = 59) => {
-    const target = new Date();
-    target.setDate(target.getDate() + offsetDays);
+    const now = new Date();
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Jakarta",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour12: false,
+    });
+    const parts = formatter.formatToParts(now);
+    const getPart = (type) => parts.find((p) => p.type === type)?.value;
+    const y = parseInt(getPart("year"), 10);
+    const m = parseInt(getPart("month"), 10) - 1;
+    const d = parseInt(getPart("day"), 10);
 
-    const y = target.getFullYear();
-    const m = target.getMonth();
-    const d = target.getDate();
+    const target = new Date(Date.UTC(y, m, d + offsetDays));
+    const targetY = target.getUTCFullYear();
+    const targetM = target.getUTCMonth();
+    const targetD = target.getUTCDate();
 
-    setViewYear(y);
-    setViewMonth(m);
-    setTempDate(d);
+    setViewYear(targetY);
+    setViewMonth(targetM);
+    setTempDate(targetD);
     setTempHour(hour);
     setTempMinute(minute);
 
-    applyDateTime(y, m, d, hour, minute);
+    applyDateTime(targetY, targetM, targetD, hour, minute);
   };
 
   const handleClear = () => {

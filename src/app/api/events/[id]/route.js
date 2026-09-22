@@ -4,6 +4,7 @@ import { event, eventRegistration } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
+import { parseJakartaDate } from "@/lib/dateUtils";
 
 export async function PUT(req, { params }) {
   try {
@@ -36,7 +37,7 @@ export async function PUT(req, { params }) {
         title,
         description: description || null,
         bannerUrl: bannerUrl || null,
-        eventDate: new Date(eventDate),
+        eventDate: parseJakartaDate(eventDate),
         location: location || null,
         category: category || null,
         registrationType: registrationType || "OPEN",

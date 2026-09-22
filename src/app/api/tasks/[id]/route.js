@@ -4,6 +4,7 @@ import { task, taskSubmission } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
+import { parseJakartaDate } from "@/lib/dateUtils";
 
 function parseBool(val, defaultVal = true) {
   if (val === undefined || val === null) return defaultVal;
@@ -102,7 +103,7 @@ export async function PUT(req, { params }) {
       ttsScoringMode: ttsScoringMode ? String(ttsScoringMode).toUpperCase() : "COMPLETION",
       formScoringMode: formScoringMode ? String(formScoringMode).toUpperCase() : "COMPLETION",
       prerequisiteTaskId: (category === "SIDE" && prerequisiteTaskId) ? parseInt(prerequisiteTaskId) : null,
-      deadline: new Date(deadline),
+      deadline: parseJakartaDate(deadline),
       enableSpeedBonus: parseBool(enableSpeedBonus, true),
       allowLateSubmission: parseBool(allowLateSubmission, true),
       folderId: folderId ? String(folderId).trim() : null,

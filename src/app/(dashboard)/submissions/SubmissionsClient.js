@@ -34,6 +34,8 @@ import {
   HelpCircle,
   Sparkles,
 } from "lucide-react";
+import { toast } from "sonner";
+import { formatJakartaDisplay } from "@/lib/dateUtils";
 import { hasAccess } from "@/lib/permissions";
 import { reviewTaskSubmissionAction } from "@/app/actions/submissionActions";
 import { calculateSpeedBonusXp } from "@/lib/xpUtils";
@@ -636,7 +638,7 @@ export default function SubmissionsClient({ initialData, currentUser }) {
           s.xpEarned || s.task?.rewardXp || 0,
           s.bonusXp || 0,
           s.submittedAt ? new Date(s.submittedAt).toLocaleString("id-ID") : "-",
-          s.task?.deadline ? new Date(s.task.deadline).toLocaleString("id-ID") : "-",
+          s.task?.deadline ? `${formatJakartaDisplay(s.task.deadline)} WIB` : "-",
           timing.text,
           s.fileUrl || "-",
           s.feedback || "-",
@@ -923,7 +925,7 @@ export default function SubmissionsClient({ initialData, currentUser }) {
                             <span>•</span>
                             <span className="flex items-center gap-1 text-gray-400">
                               <Calendar className="w-3 h-3" />
-                              Deadline: {new Date(task.deadline).toLocaleDateString("id-ID")}
+                              Deadline: {formatJakartaDisplay(task.deadline)} WIB
                             </span>
                           </>
                         )}

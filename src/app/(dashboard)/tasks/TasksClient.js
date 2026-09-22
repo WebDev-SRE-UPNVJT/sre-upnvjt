@@ -16,6 +16,7 @@ import * as XLSX from "xlsx";
 import { calculateSpeedBonusXp } from "@/lib/xpUtils";
 import DateTimePicker24 from "@/components/ui/DateTimePicker24";
 import TinyMCEEditor from "@/components/editor/TinyMCEEditor";
+import { formatJakartaISO, formatJakartaDisplay, parseJakartaDate } from "@/lib/dateUtils";
 
 const EMPTY_TASK = {
   title: "",
@@ -187,9 +188,7 @@ export default function TasksClient({ initialTasks, initialSubmissions, availabl
 
   const handleOpenTaskModal = (tk = null) => {
     if (tk) {
-      const date = new Date(tk.deadline);
-      const tzOffset = date.getTimezoneOffset() * 60000;
-      const localISOTime = (new Date(date.getTime() - tzOffset)).toISOString().slice(0, 16);
+      const localISOTime = formatJakartaISO(tk.deadline);
       
       setTaskForm({
         title: tk.title,
@@ -934,9 +933,7 @@ export default function TasksClient({ initialTasks, initialSubmissions, availabl
                               }`}>
                                 <Calendar className={`w-3.5 h-3.5 ${isOverdue ? "text-red-500" : "text-primary"}`} />
                                 <span>
-                                  {new Date(tk.deadline).toLocaleDateString("id-ID", {
-                                    day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false
-                                  })}
+                                  {formatJakartaDisplay(tk.deadline)} WIB
                                 </span>
                                 {isOverdue && (
                                   <span className="ml-1 text-[9px] uppercase font-black px-1.5 py-0.5 rounded bg-red-500 text-white">
@@ -1099,9 +1096,7 @@ export default function TasksClient({ initialTasks, initialSubmissions, availabl
                         <div className="flex items-center gap-4 mt-1 text-xs text-gray-500 dark:text-white/50">
                           <span className="flex items-center gap-1">
                             <Calendar className="w-3.5 h-3.5 text-primary" />
-                            Tenggat: {new Date(tk.deadline).toLocaleDateString("id-ID", {
-                              day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
-                            })}
+                            Tenggat: {formatJakartaDisplay(tk.deadline)} WIB
                           </span>
                         </div>
                       </div>

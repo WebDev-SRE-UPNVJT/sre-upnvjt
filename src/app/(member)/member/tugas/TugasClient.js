@@ -14,6 +14,7 @@ import { useLanguage } from "@/i18n/LanguageProvider";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { EmptyState } from "../components/ui/CommonUI";
+import { formatJakartaDisplay, parseJakartaDate } from "@/lib/dateUtils";
 
 // ─── HTML Stripper Helper ───────────────────────────────────────────────────
 export function stripHtml(html) {
@@ -145,7 +146,7 @@ function getDeadlineInfo(deadlineStr, t, language) {
   } else if (diffDays <= 3) {
     return { isOverdue: false, text: t("member_tasks.due_days", { count: diffDays }) || `Tenggat ${diffDays} hari lagi`, isSoon: true, isUrgent: false };
   } else {
-    const formatted = deadline.toLocaleDateString(language === "en" ? "en-US" : "id-ID", { day: "numeric", month: "short", year: "numeric" });
+    const formatted = formatJakartaDisplay(deadline, { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false }, language === "en" ? "en-US" : "id-ID");
     return { isOverdue: false, text: t("member_tasks.due_date", { days: diffDays, formatted }) || `${diffDays} hari lagi (${formatted})`, isSoon: false, isUrgent: false };
   }
 }
@@ -710,11 +711,14 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
                 >
                   <Calendar className={`w-3.5 h-3.5 ${isOverdue ? "text-rose-500" : ""}`} />
                   {t("member_tasks.modal.deadline") || "Tenggat Waktu"}:{" "}
-                  {new Date(task.deadline).toLocaleDateString(language === "en" ? "en-US" : "id-ID", {
+                  {formatJakartaDisplay(task.deadline, {
                     day: "numeric",
                     month: "long",
                     year: "numeric",
-                  })}
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                  }, language === "en" ? "en-US" : "id-ID")} WIB
                   {isOverdue && (
                     <span className="ml-1 text-[9px] uppercase font-black px-1.5 py-0.5 rounded bg-rose-500 text-white">
                       {t("member_tasks.modal.overdue_tag") || "Lewat Waktu"}

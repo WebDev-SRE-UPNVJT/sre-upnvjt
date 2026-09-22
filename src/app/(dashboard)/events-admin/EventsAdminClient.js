@@ -12,6 +12,7 @@ import { hasAccess } from "@/lib/permissions";
 import { resolveImageUrl } from "@/lib/imageUrl";
 import { compressImageToWebP } from "@/lib/imageCompressor";
 import DateTimePicker24 from "@/components/ui/DateTimePicker24";
+import { formatJakartaISO, formatJakartaDisplay } from "@/lib/dateUtils";
 
 const EMPTY_EVENT = {
   title: "", description: "", bannerUrl: "", eventDate: "",
@@ -74,9 +75,7 @@ export default function EventsAdminClient({ initialEvents, initialRegistrations,
 
   const handleOpenEventModal = (ev = null) => {
     if (ev) {
-      const date = new Date(ev.eventDate);
-      const tzOffset = date.getTimezoneOffset() * 60000;
-      const localISOTime = (new Date(date.getTime() - tzOffset)).toISOString().slice(0, 16);
+      const localISOTime = formatJakartaISO(ev.eventDate);
       
       setEventForm({
         title: ev.title,
@@ -310,9 +309,7 @@ export default function EventsAdminClient({ initialEvents, initialRegistrations,
                       <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-white/50">
                         <Calendar className="w-4 h-4 text-primary shrink-0" />
                         <span>
-                          {new Date(ev.eventDate).toLocaleDateString("id-ID", {
-                            day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
-                          })}
+                          {formatJakartaDisplay(ev.eventDate)} WIB
                         </span>
                       </div>
                       {ev.location && (

@@ -9,6 +9,7 @@ import {
 import Link from "next/link";
 import { EmptyState } from "../../components/ui/CommonUI";
 import { useLanguage } from "@/i18n/LanguageProvider";
+import { formatJakartaDisplay } from "@/lib/dateUtils";
 
 // ─── Status config ──────────────────────────────────────────────────────────
 const STATUS_CFG = {
@@ -224,14 +225,15 @@ function SubmissionItem({ sub, index }) {
                     <p className="text-[10px] text-slate-400 dark:text-white/30 flex items-center gap-1">
                       <Clock className="w-3 h-3 shrink-0" />
                       {t("member_task_history.card.task_deadline", {
-                        date: new Date(sub.task.deadline).toLocaleDateString(
-                          language === "en" ? "en-US" : "id-ID",
-                          { day: "numeric", month: "long", year: "numeric" }
-                        ),
+                        date: formatJakartaDisplay(
+                          sub.task.deadline,
+                          { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false },
+                          language === "en" ? "en-US" : "id-ID"
+                        ) + " WIB",
                       }) ||
                         (language === "en"
-                          ? `Quest deadline: ${new Date(sub.task.deadline).toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" })}`
-                          : `Tenggat waktu: ${new Date(sub.task.deadline).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}`)}
+                          ? `Quest deadline: ${formatJakartaDisplay(sub.task.deadline, { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false }, "en-US")} WIB`
+                          : `Tenggat waktu: ${formatJakartaDisplay(sub.task.deadline, { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false }, "id-ID")} WIB`)}
                     </p>
                   )}
                 </div>
