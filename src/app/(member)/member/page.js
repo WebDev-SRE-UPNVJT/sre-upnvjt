@@ -136,6 +136,9 @@ export default async function MemberDashboardPage() {
       const tasksWithSub = modTasks.map((t) => {
         const sub = submissions.find((s) => s.taskId === t.id);
         const isApproved = sub?.status === "APPROVED";
+        const isLocked = t.prerequisiteTaskId
+          ? !submissions.some((s) => s.taskId === t.prerequisiteTaskId && s.status === "APPROVED")
+          : false;
 
         totalPhaseItems += 1;
         if (isApproved) completedPhaseItems += 1;
@@ -145,9 +148,24 @@ export default async function MemberDashboardPage() {
           title: t.title,
           rewardXp: t.rewardXp,
           category: t.category,
+          prerequisiteTaskId: t.prerequisiteTaskId,
+          isLocked,
           submission: sub || null,
           isApproved,
         };
+      });
+
+      // Sort tasks: Main Quest first
+      tasksWithSub.sort((a, b) => {
+        const isMainA =
+          a.category === "MAIN" ||
+          (!a.category && ((a.rewardXp || 0) >= 50 || (a.title || "").toLowerCase().includes("main")));
+        const isMainB =
+          b.category === "MAIN" ||
+          (!b.category && ((b.rewardXp || 0) >= 50 || (b.title || "").toLowerCase().includes("main")));
+        if (isMainA && !isMainB) return -1;
+        if (!isMainA && isMainB) return 1;
+        return 0;
       });
 
       return {
@@ -199,6 +217,9 @@ export default async function MemberDashboardPage() {
       const tasksWithSub = modTasks.map((t) => {
         const sub = submissions.find((s) => s.taskId === t.id);
         const isApproved = sub?.status === "APPROVED";
+        const isLocked = t.prerequisiteTaskId
+          ? !submissions.some((s) => s.taskId === t.prerequisiteTaskId && s.status === "APPROVED")
+          : false;
 
         unphasedTotal += 1;
         if (isApproved) unphasedCompleted += 1;
@@ -208,9 +229,24 @@ export default async function MemberDashboardPage() {
           title: t.title,
           rewardXp: t.rewardXp,
           category: t.category,
+          prerequisiteTaskId: t.prerequisiteTaskId,
+          isLocked,
           submission: sub || null,
           isApproved,
         };
+      });
+
+      // Sort tasks: Main Quest first
+      tasksWithSub.sort((a, b) => {
+        const isMainA =
+          a.category === "MAIN" ||
+          (!a.category && ((a.rewardXp || 0) >= 50 || (a.title || "").toLowerCase().includes("main")));
+        const isMainB =
+          b.category === "MAIN" ||
+          (!b.category && ((b.rewardXp || 0) >= 50 || (b.title || "").toLowerCase().includes("main")));
+        if (isMainA && !isMainB) return -1;
+        if (!isMainA && isMainB) return 1;
+        return 0;
       });
 
       return {

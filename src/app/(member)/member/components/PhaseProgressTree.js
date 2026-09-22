@@ -20,6 +20,7 @@ import {
   ArrowUpRight,
   Check,
   Award,
+  Lock,
 } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageProvider";
 import { SectionHeader } from "./ui/CommonUI";
@@ -66,7 +67,7 @@ export default function PhaseProgressTree({ phaseHierarchy = [] }) {
 
   return (
     <div className="space-y-4">
-      {/* ── Section Header (matches Recent XP Activities & dashboard sections) ── */}
+      {/* ── Section Header ── */}
       <SectionHeader
         icon={Layers}
         title={t("member_dashboard.phase_tree.title") || (language === "en" ? "Phase Learning Tree" : "Roadmap Pembelajaran")}
@@ -120,7 +121,7 @@ export default function PhaseProgressTree({ phaseHierarchy = [] }) {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/40">
-                          FASE {pIdx + 1}
+                          {language === "en" ? `PHASE ${pIdx + 1}` : `FASE ${pIdx + 1}`}
                         </span>
                         {isPhaseCompleted ? (
                           <span className="px-1.5 sm:px-2 py-0.5 rounded-md bg-emerald-500 text-slate-950 text-[9px] font-black uppercase tracking-wider">
@@ -200,200 +201,234 @@ export default function PhaseProgressTree({ phaseHierarchy = [] }) {
                           : "Belum ada materi atau tugas di fase ini."}
                       </p>
                     ) : (
-                      phase.modules.map((mod, mIdx) => (
-                        <div key={mod.id} className="relative">
-                          {/* ── Module Card ─────────────────────────────── */}
-                          <div
-                            className={`p-4 rounded-xl border transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                              mod.isCompleted
-                                ? "bg-slate-50/80 dark:bg-white/[0.02] border-slate-200/80 dark:border-white/5"
-                                : "bg-white dark:bg-[#091812] border-slate-200 dark:border-white/10 hover:border-emerald-500/40 shadow-sm"
-                            }`}
-                          >
-                            <div className="flex items-start gap-3 min-w-0">
-                              {/* Module Icon Node */}
-                              <div
-                                className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 font-bold ${
-                                  mod.isCompleted
-                                    ? "bg-emerald-500 text-slate-950"
-                                    : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                                }`}
-                              >
-                                {mod.isCompleted ? (
-                                  <Check className="w-4 h-4 stroke-[3]" />
-                                ) : (
-                                  <Presentation className="w-4 h-4" />
-                                )}
-                              </div>
+                      phase.modules.map((mod, mIdx) => {
+                        // Prioritize Main Quests at the top of each module
+                        const sortedTasks = [...(mod.tasks || [])].sort((a, b) => {
+                          const isMainA =
+                            a.category === "MAIN" ||
+                            (!a.category && ((a.rewardXp || 0) >= 50 || (a.title || "").toLowerCase().includes("main")));
+                          const isMainB =
+                            b.category === "MAIN" ||
+                            (!b.category && ((b.rewardXp || 0) >= 50 || (b.title || "").toLowerCase().includes("main")));
+                          if (isMainA && !isMainB) return -1;
+                          if (!isMainA && isMainB) return 1;
+                          return 0;
+                        });
 
-                              <div className="min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-white/40">
-                                    Modul {mIdx + 1}
-                                  </span>
-                                  {mod.slideCount > 0 && (
-                                    <span className="text-[10px] font-bold text-slate-400 dark:text-white/40">
-                                      • {mod.slideCount} Slide
-                                    </span>
-                                  )}
-                                  {mod.isCompleted && (
-                                    <span className="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[9px] font-black uppercase tracking-wider">
-                                      Selesai Dibaca
-                                    </span>
+                        return (
+                          <div key={mod.id} className="relative">
+                            {/* ── Module Card ─────────────────────────────── */}
+                            <div
+                              className={`p-4 rounded-xl border transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                                mod.isCompleted
+                                  ? "bg-slate-50/80 dark:bg-white/[0.02] border-slate-200/80 dark:border-white/5"
+                                  : "bg-white dark:bg-[#091812] border-slate-200 dark:border-white/10 hover:border-emerald-500/40 shadow-sm"
+                              }`}
+                            >
+                              <div className="flex items-start gap-3 min-w-0">
+                                {/* Module Icon Node */}
+                                <div
+                                  className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 font-bold ${
+                                    mod.isCompleted
+                                      ? "bg-emerald-500 text-slate-950"
+                                      : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                                  }`}
+                                >
+                                  {mod.isCompleted ? (
+                                    <Check className="w-4 h-4 stroke-[3]" />
+                                  ) : (
+                                    <Presentation className="w-4 h-4" />
                                   )}
                                 </div>
 
-                                <h4
-                                  className={`text-sm sm:text-base font-bold mt-1 leading-snug ${
-                                    mod.isCompleted
-                                      ? "line-through text-slate-400 dark:text-white/40 font-medium"
-                                      : "text-slate-900 dark:text-white"
-                                  }`}
-                                >
-                                  {mod.title}
-                                </h4>
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-white/40">
+                                      {language === "en" ? `Module ${mIdx + 1}` : `Modul ${mIdx + 1}`}
+                                    </span>
+                                    {mod.slideCount > 0 && (
+                                      <span className="text-[10px] font-bold text-slate-400 dark:text-white/40">
+                                        • {mod.slideCount} {language === "en" ? "Slides" : "Slide"}
+                                      </span>
+                                    )}
+                                    {mod.isCompleted && (
+                                      <span className="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[9px] font-black uppercase tracking-wider">
+                                        {language === "en" ? "Completed" : "Selesai Dibaca"}
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  <h4
+                                    className={`text-sm sm:text-base font-bold mt-1 leading-snug ${
+                                      mod.isCompleted
+                                        ? "line-through text-slate-400 dark:text-white/40 font-medium"
+                                        : "text-slate-900 dark:text-white"
+                                    }`}
+                                  >
+                                    {mod.title}
+                                  </h4>
+                                </div>
+                              </div>
+
+                              {/* Module Action Button */}
+                              <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                                {mod.isCompleted ? (
+                                  <Link
+                                    href={`/member/materi/${mod.slug || mod.id}`}
+                                    className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-white/50 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-all flex items-center gap-1"
+                                  >
+                                    <span>{language === "en" ? "Review" : "Baca Ulang"}</span>
+                                    <ArrowUpRight className="w-3.5 h-3.5" />
+                                  </Link>
+                                ) : (
+                                  <Link
+                                    href={`/member/materi/${mod.slug || mod.id}`}
+                                    className="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center gap-1 shadow-sm transition-all"
+                                  >
+                                    <span>
+                                      {language === "en"
+                                        ? mod.progressPct > 0
+                                          ? "Continue"
+                                          : "Open Module"
+                                        : mod.progressPct > 0
+                                        ? "Lanjutkan"
+                                        : "Buka Modul"}
+                                    </span>
+                                    <ChevronRight className="w-3.5 h-3.5" />
+                                  </Link>
+                                )}
                               </div>
                             </div>
 
-                            {/* Module Action Button */}
-                            <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                              {mod.isCompleted ? (
-                                <Link
-                                  href={`/member/materi/${mod.slug || mod.id}`}
-                                  className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-white/50 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-all flex items-center gap-1"
-                                >
-                                  <span>Baca Ulang</span>
-                                  <ArrowUpRight className="w-3.5 h-3.5" />
-                                </Link>
-                              ) : (
-                                <Link
-                                  href={`/member/materi/${mod.slug || mod.id}`}
-                                  className="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center gap-1 shadow-sm transition-all"
-                                >
-                                  <span>{mod.progressPct > 0 ? "Lanjutkan" : "Buka Modul"}</span>
-                                  <ChevronRight className="w-3.5 h-3.5" />
-                                </Link>
-                              )}
-                            </div>
-                          </div>
+                            {/* ── Sub-tree: Quests Linked to this Module ─── */}
+                            {sortedTasks.length > 0 && (
+                              <div className="relative ml-3 sm:ml-7 pl-3.5 sm:pl-5 border-l-2 border-slate-200 dark:border-white/10 space-y-2.5 sm:space-y-3 pt-3 pb-1">
+                                {sortedTasks.map((taskItem) => {
+                                  const isMain =
+                                    taskItem.category === "MAIN" ||
+                                    (!taskItem.category && (taskItem.rewardXp || 0) >= 50);
+                                  const isApproved = taskItem.isApproved;
+                                  const isPending = taskItem.submission?.status === "PENDING";
+                                  const isRejected = taskItem.submission?.status === "REJECTED";
+                                  const isLocked = !!taskItem.isLocked;
 
-                          {/* ── Sub-tree: Quests Linked to this Module ─── */}
-                          {mod.tasks && mod.tasks.length > 0 && (
-                            <div className="relative ml-6 sm:ml-8 pl-5 sm:pl-6 border-l-2 border-slate-200 dark:border-white/10 space-y-3 pt-3 pb-1">
-                              {mod.tasks.map((taskItem) => {
-                                const isMain =
-                                  taskItem.category === "MAIN" ||
-                                  (!taskItem.category && (taskItem.rewardXp || 0) >= 50);
-                                const isApproved = taskItem.isApproved;
-                                const isPending = taskItem.submission?.status === "PENDING";
-                                const isRejected = taskItem.submission?.status === "REJECTED";
+                                  return (
+                                    <Link
+                                      key={taskItem.id}
+                                      href={`/member/tugas?taskId=${taskItem.id}`}
+                                      className={`group relative flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 p-3 sm:p-3.5 rounded-xl border transition-all cursor-pointer ${
+                                        isApproved
+                                          ? "bg-slate-50/60 dark:bg-white/[0.01] border-slate-200/60 dark:border-white/5 hover:border-emerald-500/40"
+                                          : isLocked
+                                          ? "bg-slate-100/60 dark:bg-white/[0.02] border-slate-200/80 dark:border-white/10 hover:border-amber-500/40 opacity-90"
+                                          : isMain
+                                          ? "bg-amber-500/[0.03] dark:bg-amber-500/[0.04] border-amber-500/20 hover:border-amber-500/50 hover:shadow-sm"
+                                          : "bg-blue-500/[0.03] dark:bg-blue-500/[0.04] border-blue-500/20 hover:border-blue-500/50 hover:shadow-sm"
+                                      }`}
+                                    >
+                                      {/* Horizontal Elbow Branch Line */}
+                                      <div className="absolute -left-3.5 sm:-left-5 top-5 sm:top-1/2 sm:-translate-y-1/2 w-3.5 sm:w-5 h-0.5 bg-slate-200 dark:border-white/10 pointer-events-none" />
 
-                                return (
-                                  <div
-                                    key={taskItem.id}
-                                    className={`relative flex items-center justify-between gap-3 p-3 sm:p-3.5 rounded-xl border transition-all ${
-                                      isApproved
-                                        ? "bg-slate-50/60 dark:bg-white/[0.01] border-slate-200/60 dark:border-white/5"
-                                        : isMain
-                                        ? "bg-amber-500/[0.03] dark:bg-amber-500/[0.04] border-amber-500/20 hover:border-amber-500/40"
-                                        : "bg-blue-500/[0.03] dark:bg-blue-500/[0.04] border-blue-500/20 hover:border-blue-500/40"
-                                    }`}
-                                  >
-                                    {/* Horizontal Elbow Branch Line */}
-                                    <div className="absolute -left-5 sm:-left-6 top-1/2 -translate-y-1/2 w-5 sm:w-6 h-0.5 bg-slate-200 dark:bg-white/10" />
+                                      {/* Top Row (Mobile) / Left Content (Desktop) */}
+                                      <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
+                                        {/* Status Icon */}
+                                        <div
+                                          className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 ${
+                                            isApproved
+                                              ? "bg-emerald-500 text-slate-950"
+                                              : isLocked
+                                              ? "bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                                              : isPending
+                                              ? "bg-amber-500/20 text-amber-500"
+                                              : isMain
+                                              ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                                              : "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                                          }`}
+                                        >
+                                          {isApproved ? (
+                                            <Check className="w-3.5 h-3.5 stroke-[3]" />
+                                          ) : isLocked ? (
+                                            <Lock className="w-3.5 h-3.5" />
+                                          ) : isPending ? (
+                                            <Clock className="w-3.5 h-3.5" />
+                                          ) : isMain ? (
+                                            <Crown className="w-3.5 h-3.5 fill-current" />
+                                          ) : (
+                                            <Target className="w-3.5 h-3.5" />
+                                          )}
+                                        </div>
 
-                                    {/* Left Content */}
-                                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                                      {/* Status Icon */}
-                                      <div
-                                        className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
-                                          isApproved
-                                            ? "bg-emerald-500 text-slate-950"
-                                            : isPending
-                                            ? "bg-amber-500/20 text-amber-500"
-                                            : isMain
-                                            ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                                            : "bg-blue-500/10 text-blue-600 dark:text-blue-400"
-                                        }`}
-                                      >
-                                        {isApproved ? (
-                                          <Check className="w-3.5 h-3.5 stroke-[3]" />
-                                        ) : isPending ? (
-                                          <Clock className="w-3.5 h-3.5" />
-                                        ) : isMain ? (
-                                          <Crown className="w-3.5 h-3.5 fill-current" />
-                                        ) : (
-                                          <Target className="w-3.5 h-3.5" />
-                                        )}
+                                        {/* Quest Type Pill */}
+                                        <span
+                                          className={`text-[9px] font-black px-1.5 sm:px-2 py-0.5 rounded uppercase tracking-wider shrink-0 ${
+                                            isMain
+                                              ? "bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25"
+                                              : "bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/25"
+                                          }`}
+                                        >
+                                          {isMain ? "Main Quest" : "Side Quest"}
+                                        </span>
+
+                                        {/* Title */}
+                                        <span
+                                          className={`text-xs font-bold truncate transition-colors flex-1 min-w-0 ${
+                                            isApproved
+                                              ? "line-through text-slate-400 dark:text-white/40 font-medium"
+                                              : isLocked
+                                              ? "text-slate-600 dark:text-slate-300"
+                                              : "text-slate-800 dark:text-slate-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400"
+                                          }`}
+                                          title={taskItem.title}
+                                        >
+                                          {taskItem.title}
+                                        </span>
                                       </div>
 
-                                      {/* Quest Type Pill */}
-                                      <span
-                                        className={`text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider shrink-0 ${
-                                          isMain
-                                            ? "bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25"
-                                            : "bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/25"
-                                        }`}
-                                      >
-                                        {isMain ? "Main Quest" : "Side Quest"}
-                                      </span>
+                                      {/* Bottom Row (Mobile) / Right Side (Desktop) */}
+                                      <div className="flex items-center justify-between sm:justify-end gap-2.5 shrink-0 pt-2 sm:pt-0 border-t border-slate-100 dark:border-white/5 sm:border-t-0 pl-8 sm:pl-0">
+                                        <span className="text-[11px] font-mono font-bold text-amber-500 flex items-center gap-0.5 shrink-0">
+                                          <Zap className="w-3 h-3 fill-amber-400" />
+                                          {taskItem.rewardXp > 0 ? (
+                                            <>+{taskItem.rewardXp} XP</>
+                                          ) : (
+                                            <span>Manual</span>
+                                          )}
+                                        </span>
 
-                                      {/* Title */}
-                                      <span
-                                        className={`text-xs font-bold truncate ${
-                                          isApproved
-                                            ? "line-through text-slate-400 dark:text-white/40 font-medium"
-                                            : "text-slate-800 dark:text-slate-200"
-                                        }`}
-                                        title={taskItem.title}
-                                      >
-                                        {taskItem.title}
-                                      </span>
-                                    </div>
-
-                                    {/* Right Status & XP */}
-                                    <div className="flex items-center gap-2.5 shrink-0">
-                                      <span className="text-[11px] font-mono font-bold text-amber-500 flex items-center gap-0.5">
-                                        <Zap className="w-3 h-3 fill-amber-400" />
-                                        {taskItem.rewardXp > 0 ? (
-                                          <>+{taskItem.rewardXp} XP</>
+                                        {/* Action / Status Pill */}
+                                        {isLocked ? (
+                                          <div className="px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shrink-0">
+                                            <Lock className="w-3 h-3" />
+                                            <span>{language === "en" ? "Locked" : "Terkunci"}</span>
+                                          </div>
+                                        ) : isApproved ? (
+                                          <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-wider shrink-0">
+                                            {language === "en" ? "Approved" : "Selesai"}
+                                          </span>
+                                        ) : isPending ? (
+                                          <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-600 dark:text-amber-400 text-[10px] font-bold uppercase tracking-wider shrink-0">
+                                            {language === "en" ? "Review" : "Menunggu"}
+                                          </span>
+                                        ) : isRejected ? (
+                                          <div className="px-2.5 py-1 rounded-md bg-rose-500 group-hover:bg-rose-600 text-white text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all shrink-0">
+                                            <span>{language === "en" ? "Revise" : "Revisi"}</span>
+                                            <ChevronRight className="w-3 h-3" />
+                                          </div>
                                         ) : (
-                                          <span>Manual</span>
+                                          <div className="px-2.5 py-1 rounded-md bg-slate-900 group-hover:bg-emerald-500 dark:bg-white/10 dark:group-hover:bg-emerald-400 text-white dark:group-hover:text-slate-950 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-all shadow-sm shrink-0">
+                                            <span>{language === "en" ? "Do Quest" : "Kerjakan"}</span>
+                                            <ChevronRight className="w-3 h-3" />
+                                          </div>
                                         )}
-                                      </span>
-
-                                      {isApproved ? (
-                                        <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-wider">
-                                          Approved
-                                        </span>
-                                      ) : isPending ? (
-                                        <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-600 dark:text-amber-400 text-[10px] font-bold uppercase tracking-wider">
-                                          Review
-                                        </span>
-                                      ) : isRejected ? (
-                                        <Link
-                                          href="/member/tugas"
-                                          className="px-2.5 py-1 rounded-md bg-rose-500 hover:bg-rose-400 text-white text-[10px] font-bold uppercase tracking-wider"
-                                        >
-                                          Revisi
-                                        </Link>
-                                      ) : (
-                                        <Link
-                                          href="/member/tugas"
-                                          className="px-2.5 py-1 rounded-md bg-slate-900 hover:bg-emerald-500 dark:bg-white/10 dark:hover:bg-emerald-400 text-white dark:hover:text-slate-950 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-all"
-                                        >
-                                          <span>Kerjakan</span>
-                                          <ChevronRight className="w-3 h-3" />
-                                        </Link>
-                                      )}
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      ))
+                                      </div>
+                                    </Link>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })
                     )}
                   </motion.div>
                 )}
@@ -405,3 +440,4 @@ export default function PhaseProgressTree({ phaseHierarchy = [] }) {
     </div>
   );
 }
+
