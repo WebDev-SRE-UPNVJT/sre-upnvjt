@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { user } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import bcrypt from "bcryptjs";
 
 export async function PUT(req) {
@@ -39,6 +39,8 @@ export async function PUT(req) {
 
     await db.update(user).set({
       password: hashedPassword,
+      mustChangePassword: false,
+      updatedAt: new Date(),
     }).where(eq(user.id, parseInt(session.user.id)));
 
     return NextResponse.json({ success: true });

@@ -47,6 +47,7 @@ export const user = pgTable('user', {
   npm: varchar('npm', { length: 255 }).unique(),
   positionName: varchar('positionName', { length: 255 }),
   isActive: boolean('isActive').default(true).notNull(),
+  mustChangePassword: boolean('mustChangePassword').default(false).notNull(),
   roleId: integer('roleId').references(() => role.id).notNull(),
   departmentId: integer('departmentId').references(() => department.id, { onDelete: 'set null' }),
   divisionId: integer('divisionId').references(() => division.id, { onDelete: 'set null' }),

@@ -1,11 +1,12 @@
 import React from "react";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { memberProfile, user } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import MemberNavbarClient from "./MemberNavbarClient";
+import ForceChangePasswordModal from "@/components/auth/ForceChangePasswordModal";
 
 export const dynamic = "force-dynamic";
 
@@ -16,15 +17,24 @@ export default async function MemberLayout({ children }) {
     redirect("/login");
   }
 
+  const userIdInt = parseInt(session.user.id);
+
+  // Load user data to check mustChangePassword status
+  const currentUser = await db.query.user.findFirst({
+    where: eq(user.id, userIdInt),
+  });
+
+  const mustChangePassword = !!currentUser?.mustChangePassword;
+
   // Load the member's profile for XP & Level
   let profile = await db.query.memberProfile.findFirst({
-    where: eq(memberProfile.userId, parseInt(session.user.id)),
+    where: eq(memberProfile.userId, userIdInt),
   });
 
   if (!profile) {
     // If somehow profile is missing, initialize it
     const [newProfile] = await db.insert(memberProfile).values({
-      userId: parseInt(session.user.id),
+      userId: userIdInt,
       xp: 0,
       level: 1,
     }).returning();
@@ -33,6 +43,14 @@ export default async function MemberLayout({ children }) {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#07130e] text-slate-900 dark:text-white transition-colors duration-500 flex flex-col overflow-x-hidden">
+      {/* Forced Password Change Modal on First Login */}
+      {mustChangePassword && (
+        <ForceChangePasswordModal 
+          mustChangePassword={mustChangePassword} 
+          userEmail={session.user.email} 
+        />
+      )}
+
       <MemberNavbarClient
         user={session.user}
         profile={profile}

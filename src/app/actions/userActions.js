@@ -45,6 +45,7 @@ export async function createUser(data) {
       npm: npm || null,
       positionName: positionName || null,
       isActive: isActive === "true" || isActive === true,
+      mustChangePassword: data.mustChangePassword !== undefined ? (data.mustChangePassword === "true" || data.mustChangePassword === true) : true,
       roleId: parseInt(roleId),
       departmentId: departmentId ? parseInt(departmentId) : null,
       divisionId: divisionId ? parseInt(divisionId) : null,
@@ -90,8 +91,15 @@ export async function updateUser(id, data) {
       divisionId: divisionId ? parseInt(divisionId) : null,
     };
 
+    if (data.mustChangePassword !== undefined) {
+      updateData.mustChangePassword = data.mustChangePassword === "true" || data.mustChangePassword === true;
+    }
+
     if (password && password.trim() !== "") {
       updateData.password = await bcrypt.hash(password, 10);
+      if (data.mustChangePassword === undefined) {
+        updateData.mustChangePassword = true;
+      }
     }
 
     await db.update(user).set(updateData).where(eq(user.id, id));
@@ -267,6 +275,7 @@ export async function importUsers(rows) {
         npm: npm || null,
         positionName: positionName || null,
         isActive,
+        mustChangePassword: true,
         roleId,
         departmentId,
         divisionId,
