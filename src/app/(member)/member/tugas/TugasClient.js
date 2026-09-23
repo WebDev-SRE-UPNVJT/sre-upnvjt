@@ -235,7 +235,7 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
               <div className="flex items-center gap-1.5 flex-wrap">
                 {/* Category Badge (Preserves category color: Amber for Main, Emerald for Side) */}
                 <span
-                  className={`inline-flex items-center gap-1 text-[8px] sm:text-[9px] font-black uppercase tracking-wider px-2 sm:px-2.5 py-0.5 rounded-full border ${
+                  className={`inline-flex items-center gap-1 text-[8px] sm:text-[9px] font-black uppercase tracking-wider px-2 sm:px-2.5 py-0.5 rounded-md border ${
                     isMain
                       ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/25"
                       : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20"
@@ -253,7 +253,7 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
 
                 {/* TTS Badge (Purple) */}
                 {(task.submissionType === "TTS" || task.ttsCrosswordId) && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20 text-[8px] sm:text-[9px] font-bold">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20 text-[8px] sm:text-[9px] font-bold">
                     <Gamepad2 className="w-2.5 h-2.5" />
                     <span>TTS</span>
                   </span>
@@ -261,7 +261,7 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
 
                 {/* Form Badge (Teal) */}
                 {(task.submissionType === "FORM" || task.formTemplateId) && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-500/20 text-[8px] sm:text-[9px] font-bold">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-500/20 text-[8px] sm:text-[9px] font-bold">
                     <FileText className="w-2.5 h-2.5" />
                     <span>Form</span>
                   </span>
@@ -269,7 +269,7 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
 
                 {/* Requirement Tag (Rose for Mandatory, Sky Blue for Optional) */}
                 <span
-                  className={`inline-flex items-center text-[8px] sm:text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                  className={`inline-flex items-center text-[8px] sm:text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${
                     task.isRequired !== false
                       ? "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20"
                       : "bg-sky-500/10 text-sky-700 dark:text-sky-400 border-sky-500/20"
@@ -283,7 +283,7 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
 
               {/* XP or Manual Review Tag */}
               {task.rewardXp > 0 ? (
-                <span className="flex items-center gap-1 text-[9px] sm:text-[10px] font-black px-2 sm:px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 font-mono shrink-0">
+                <span className="flex items-center gap-1 text-[9px] sm:text-[10px] font-black px-2 sm:px-2.5 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 font-mono shrink-0">
                   <Zap className="w-3 h-3 fill-amber-400" />
                   <span>+{task.rewardXp} XP</span>
                   {parseBool(task.enableSpeedBonus, true) && (
@@ -293,7 +293,7 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
                   )}
                 </span>
               ) : (
-                <span className="flex items-center gap-1 text-[8px] sm:text-[9px] font-bold px-2 sm:px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-white/60 font-mono shrink-0">
+                <span className="flex items-center gap-1 text-[8px] sm:text-[9px] font-bold px-2 sm:px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-white/60 font-mono shrink-0">
                   <Clock className="w-2.5 h-2.5 text-slate-400" />
                   <span>{language === "en" ? "Manual Review" : "Penilaian Manual"}</span>
                 </span>
@@ -313,7 +313,7 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
 
             {/* Prerequisite Tag if locked (Clean Neutral Style) */}
             {isLocked && task.prerequisiteTask && (
-              <div className="mt-2.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/10 text-[10px] sm:text-[11px] font-medium text-slate-600 dark:text-white/70 flex items-center gap-1.5">
+              <div className="mt-2.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/10 text-[10px] sm:text-[11px] font-medium text-slate-600 dark:text-white/70 flex items-center gap-1.5">
                 <Lock className="w-3 h-3 text-slate-400 shrink-0" />
                 <span className="truncate">
                   {language === "en"
@@ -328,7 +328,7 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
           <div className="flex items-center justify-between gap-2 mt-3.5 pt-3 border-t border-slate-100 dark:border-white/5 min-w-0">
             {/* Deadline chip */}
             <span
-              className={`inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-bold px-2 sm:px-2.5 py-1 rounded-xl border transition-all truncate min-w-0 ${
+              className={`inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-bold px-2 sm:px-2.5 py-1 rounded-md border transition-all truncate min-w-0 ${
                 dlInfo.isOverdue
                   ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/25 font-black"
                   : dlInfo.isUrgent
@@ -344,7 +344,7 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
 
             {/* Status badge */}
             <span
-              className={`text-[9px] sm:text-[10px] font-black px-2.5 py-1 rounded-xl border uppercase tracking-wider shrink-0 flex items-center gap-1 ${
+              className={`text-[9px] sm:text-[10px] font-black px-2.5 py-1 rounded-md border uppercase tracking-wider shrink-0 flex items-center gap-1 ${
                 isLocked
                   ? "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/40 border-slate-200 dark:border-white/10"
                   : isLateBlocked
@@ -534,7 +534,7 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
           <div className="flex-1 pr-3 min-w-0">
             <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
               <span
-                className={`inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-black px-2.5 py-0.5 sm:py-1 rounded-full border uppercase tracking-wider ${
+                className={`inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-black px-2.5 py-0.5 sm:py-1 rounded-md border uppercase tracking-wider ${
                   isMain
                     ? "bg-amber-500/10 text-amber-600 dark:text-amber-300 border-amber-500/25"
                     : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border-emerald-500/20"
@@ -547,7 +547,7 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
               </span>
 
               <span
-                className={`inline-flex items-center text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 sm:py-1 rounded-full border ${
+                className={`inline-flex items-center text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 sm:py-1 rounded-md border ${
                   task.isRequired !== false
                     ? "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20"
                     : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
@@ -559,7 +559,7 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
               </span>
 
               <span
-                className={`text-[9px] sm:text-[10px] font-black px-2.5 py-0.5 sm:py-1 rounded-lg border uppercase tracking-wider flex items-center gap-1 ${
+                className={`text-[9px] sm:text-[10px] font-black px-2.5 py-0.5 sm:py-1 rounded-md border uppercase tracking-wider flex items-center gap-1 ${
                   isLocked
                     ? "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/40 border-slate-200 dark:border-white/10"
                     : statusCfg.badge
@@ -575,7 +575,7 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
                   <span>+{task.rewardXp} XP</span>
                 </span>
               ) : (
-                <span className="flex items-center gap-1 text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-white/60 font-mono ml-auto">
+                <span className="flex items-center gap-1 text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-white/60 font-mono ml-auto">
                   <Clock className="w-2.5 h-2.5 text-slate-400" />
                   <span>{language === "en" ? "Manual Review" : "Penilaian Manual"}</span>
                 </span>
@@ -793,8 +793,8 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
 
               {/* Reviewer Feedback (Approved) */}
               {status === "APPROVED" && submission?.feedback && (
-                <div className="flex items-start gap-3 p-4 bg-emerald-500/10 border border-emerald-500/25 rounded-2xl shadow-sm">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                <div className="flex items-start gap-3 p-4 bg-emerald-500/10 border border-emerald-500/25 rounded-xl shadow-sm">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
                     <CheckCircle2 className="w-4 h-4" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -802,7 +802,7 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
                       <p className="text-xs font-black text-emerald-700 dark:text-emerald-300 uppercase tracking-wider">
                         {language === "en" ? "Reviewer & Mentor Evaluation:" : "Catatan & Evaluasi Mentor / Reviewer:"}
                       </p>
-                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-mono">
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-500 text-slate-950 font-mono">
                         +{submission.xpEarned ?? task.rewardXp} XP
                       </span>
                     </div>
@@ -815,7 +815,7 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
 
               {/* Rejected feedback */}
               {status === "REJECTED" && submission?.feedback && (
-                <div className="flex items-start gap-3 p-4 bg-rose-500/8 border border-rose-500/20 rounded-2xl shadow-sm">
+                <div className="flex items-start gap-3 p-4 bg-rose-500/8 border border-rose-500/20 rounded-xl shadow-sm">
                   <AlertTriangle className="w-4 h-4 text-rose-500 flex-shrink-0 mt-0.5" />
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-black text-rose-600 dark:text-rose-400 mb-1 uppercase tracking-wider">
@@ -890,7 +890,7 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
                               +{submission.xpEarned ?? task.rewardXp ?? 0} XP
                             </span>
                           ) : (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                               {language === "en" ? "XP will be awarded upon review" : "XP dinilai saat peninjauan"}
                             </span>
                           )}
@@ -1263,7 +1263,7 @@ export default function TugasClient({ user, initialTasks, initialSubmissions, in
         className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-4"
       >
         <div>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black text-emerald-600 dark:text-emerald-400 tracking-widest uppercase mb-3 shadow-sm">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black text-emerald-600 dark:text-emerald-400 tracking-widest uppercase mb-3 shadow-sm">
             <Compass className="w-3.5 h-3.5 text-emerald-500" /> {t("member_tasks.badge_active") || "SRE Quest Board"}
           </span>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-black tracking-tighter text-slate-900 dark:text-white leading-none">
@@ -1311,7 +1311,7 @@ export default function TugasClient({ user, initialTasks, initialSubmissions, in
           >
             <Sparkles className="w-3.5 h-3.5" />
             <span>{t("member_tasks.categories.all") || "Semua Quest"}</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-200 dark:bg-white/10 font-bold">
+            <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-200 dark:bg-white/10 font-bold">
               {tasks.length}
             </span>
           </button>
@@ -1326,7 +1326,7 @@ export default function TugasClient({ user, initialTasks, initialSubmissions, in
           >
             <Crown className="w-3.5 h-3.5 fill-current text-amber-500" />
             <span>{t("member_tasks.categories.main") || "Main Quest (Misi Utama)"}</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold border border-amber-500/25">
+            <span className="text-[10px] px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold border border-amber-500/25">
               {mainQuests.length}
             </span>
           </button>
@@ -1341,7 +1341,7 @@ export default function TugasClient({ user, initialTasks, initialSubmissions, in
           >
             <Swords className="w-3.5 h-3.5 text-emerald-500" />
             <span>{t("member_tasks.categories.side") || "Side Quest (Misi Sampingan)"}</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/25">
+            <span className="text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/25">
               {sideQuests.length}
             </span>
           </button>
@@ -1374,7 +1374,7 @@ export default function TugasClient({ user, initialTasks, initialSubmissions, in
                   }`}
                 >
                   <span>{label}</span>
-                  <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${statusFilter === key ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : "bg-slate-200 dark:bg-white/10"}`}>
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded-md font-bold ${statusFilter === key ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : "bg-slate-200 dark:bg-white/10"}`}>
                     {count}
                   </span>
                 </button>
@@ -1424,7 +1424,7 @@ export default function TugasClient({ user, initialTasks, initialSubmissions, in
                 <div>
                   <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
                     <span>{language === "en" ? "Main Quests" : "Main Quest (Misi Utama)"}</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-mono font-bold">
+                    <span className="text-xs px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 font-mono font-bold">
                       {filteredMainQuests.length}
                     </span>
                   </h2>
@@ -1470,7 +1470,7 @@ export default function TugasClient({ user, initialTasks, initialSubmissions, in
                 <div>
                   <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
                     <span>{language === "en" ? "Side Quests" : "Side Quest (Misi Sampingan)"}</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono font-bold">
+                    <span className="text-xs px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono font-bold">
                       {filteredSideQuests.length}
                     </span>
                   </h2>

@@ -349,7 +349,7 @@ export default function RiwayatTugasClient({ submissions = [] }) {
               >
                 <span>{label}</span>
                 <span
-                  className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${
+                  className={`text-[9px] px-1.5 py-0.5 rounded-md font-bold ${
                     filter === key
                       ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
                       : "bg-slate-200 dark:bg-white/10 text-slate-500 dark:text-white/40"
