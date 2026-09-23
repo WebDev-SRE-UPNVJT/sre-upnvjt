@@ -44,28 +44,34 @@ export function isTaskLocked(task, submissions = []) {
 // ─── Status config ──────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
   NOT_STARTED: {
-    badge: "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/50 border-slate-200 dark:border-white/10",
-    border: "hover:border-slate-400/40 dark:hover:border-white/20",
+    badge: "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white/50 border-slate-200 dark:border-white/10",
+    border: "hover:border-slate-300 dark:hover:border-white/20",
     glow: "hover:shadow-[0_4px_20px_rgba(0,0,0,0.06)]",
     dot: "bg-slate-300 dark:bg-white/20",
   },
   PENDING: {
-    badge: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/25",
+    badge: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/25",
     border: "hover:border-amber-500/40",
     glow: "hover:shadow-[0_4px_20px_rgba(245,158,11,0.12)]",
     dot: "bg-amber-400 animate-pulse",
   },
   APPROVED: {
-    badge: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/25",
+    badge: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25",
     border: "hover:border-emerald-500/40",
     glow: "hover:shadow-[0_4px_20px_rgba(16,185,129,0.12)]",
     dot: "bg-emerald-400",
   },
   REJECTED: {
-    badge: "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/25",
+    badge: "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/25",
     border: "hover:border-rose-500/40",
     glow: "hover:shadow-[0_4px_20px_rgba(244,63,94,0.12)]",
     dot: "bg-rose-400",
+  },
+  LOCKED: {
+    badge: "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/40 border-slate-200 dark:border-white/10",
+    border: "border-slate-200/90 dark:border-white/10",
+    glow: "",
+    dot: "bg-slate-300 dark:bg-white/20",
   },
 };
 
@@ -109,7 +115,7 @@ export function getQuestType(task) {
     title.includes("side quest") ||
     title.includes("sampingan") ||
     title.includes("opsional") ||
-    desc.includes("side quest")
+    combinedDesc.includes("side quest")
   ) {
     return "SIDE";
   }
@@ -163,7 +169,7 @@ function getStatus(taskId, submissions) {
 function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
   const { t, language } = useLanguage();
   const status = getStatus(task.id, submission ? [submission] : []);
-  const cfg = STATUS_CONFIG[status];
+  const cfg = isLocked ? STATUS_CONFIG.LOCKED : STATUS_CONFIG[status];
   const dlInfo = getDeadlineInfo(task.deadline, t, language);
   const isLateBlocked = task.allowLateSubmission === false && dlInfo.isOverdue && status !== "APPROVED";
   const statusLabel = isLocked
@@ -181,18 +187,18 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
       transition={{ delay: index * 0.04, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
       className={`group relative bg-white dark:bg-[#08120e] border rounded-2xl p-4 sm:p-5 transition-all duration-300 cursor-pointer hover:-translate-y-1 overflow-hidden w-full max-w-full min-w-0 flex flex-col justify-between h-full ${
         isLocked
-          ? "border-amber-500/20 dark:border-amber-500/15 opacity-85 hover:border-amber-500/40 shadow-sm"
+          ? "border-slate-200/90 dark:border-white/10 opacity-90 hover:border-slate-300 dark:hover:border-white/20 shadow-sm"
           : isMain
           ? "border-amber-500/25 dark:border-amber-500/20 hover:border-amber-400/50 shadow-[0_4px_20px_rgba(245,158,11,0.04)] hover:shadow-[0_8px_30px_rgba(245,158,11,0.12)]"
-          : "border-slate-200/80 dark:border-white/5 hover:border-emerald-500/40 hover:shadow-[0_8px_30px_rgba(16,185,129,0.08)]"
+          : "border-slate-200/80 dark:border-white/10 hover:border-emerald-500/40 hover:shadow-[0_8px_30px_rgba(16,185,129,0.08)]"
       }`}
       onClick={() => onOpen(task)}
     >
-      {/* Harmonious Subtle Ambient Glow */}
+      {/* Subtle Ambient Glow */}
       <div
         className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none ${
           isLocked
-            ? "bg-gradient-to-br from-amber-500/[0.04] via-transparent to-transparent"
+            ? "bg-gradient-to-br from-slate-500/[0.02] via-transparent to-transparent"
             : isMain
             ? "bg-gradient-to-br from-amber-500/[0.05] via-transparent to-transparent"
             : "bg-gradient-to-br from-emerald-500/[0.04] via-transparent to-transparent"
@@ -200,16 +206,16 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
       />
 
       {/* Top Status Dot Indicator */}
-      <div className={`absolute top-3.5 sm:top-4 right-3.5 sm:right-4 w-2 h-2 rounded-full ${isLocked ? "bg-amber-400" : cfg.dot}`} />
+      <div className={`absolute top-3.5 sm:top-4 right-3.5 sm:right-4 w-2 h-2 rounded-full ${cfg.dot}`} />
 
       <div className="flex items-start gap-3 sm:gap-4 relative z-10 w-full min-w-0 flex-1">
         {/* Quest Icon Badge */}
         <div
           className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 border shadow-sm ${
             isLocked
-              ? "bg-amber-500/10 border-amber-500/25 text-amber-500 dark:text-amber-400 group-hover:scale-105"
+              ? "bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-400 dark:text-white/40 group-hover:scale-105"
               : isMain
-              ? "bg-amber-500/10 border-amber-500/25 text-amber-500 dark:text-amber-300 group-hover:scale-105"
+              ? "bg-amber-500/10 border-amber-500/25 text-amber-600 dark:text-amber-300 group-hover:scale-105"
               : "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400 group-hover:scale-105"
           }`}
         >
@@ -227,18 +233,15 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
             {/* Quest Category, Mandatory Tag & XP Bounty Row */}
             <div className="flex items-center justify-between gap-1.5 mb-2 w-full flex-wrap min-w-0 pr-3">
               <div className="flex items-center gap-1.5 flex-wrap">
+                {/* Category Badge (Preserves category color: Amber for Main, Emerald for Side) */}
                 <span
                   className={`inline-flex items-center gap-1 text-[8px] sm:text-[9px] font-black uppercase tracking-wider px-2 sm:px-2.5 py-0.5 rounded-full border ${
-                    isLocked
-                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-300 border-amber-500/25"
-                      : isMain
-                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-300 border-amber-500/25"
-                      : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border-emerald-500/20"
+                    isMain
+                      ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/25"
+                      : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20"
                   }`}
                 >
-                  {isLocked ? (
-                    <Lock className="w-2.5 h-2.5" />
-                  ) : isMain ? (
+                  {isMain ? (
                     <Crown className="w-2.5 h-2.5 fill-current" />
                   ) : (
                     <Sparkles className="w-2.5 h-2.5" />
@@ -248,25 +251,28 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
                     : (t("member_tasks.side_quest_badge") || "Side Quest")}
                 </span>
 
+                {/* TTS Badge (Purple) */}
                 {(task.submissionType === "TTS" || task.ttsCrosswordId) && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 text-[8px] sm:text-[9px] font-bold">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20 text-[8px] sm:text-[9px] font-bold">
                     <Gamepad2 className="w-2.5 h-2.5" />
                     <span>TTS</span>
                   </span>
                 )}
 
+                {/* Form Badge (Teal) */}
                 {(task.submissionType === "FORM" || task.formTemplateId) && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 text-[8px] sm:text-[9px] font-bold">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-500/20 text-[8px] sm:text-[9px] font-bold">
                     <FileText className="w-2.5 h-2.5" />
                     <span>Form</span>
                   </span>
                 )}
 
+                {/* Requirement Tag (Rose for Mandatory, Sky Blue for Optional) */}
                 <span
                   className={`inline-flex items-center text-[8px] sm:text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
                     task.isRequired !== false
-                      ? "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20"
-                      : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
+                      ? "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20"
+                      : "bg-sky-500/10 text-sky-700 dark:text-sky-400 border-sky-500/20"
                   }`}
                 >
                   {task.isRequired !== false
@@ -275,25 +281,28 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
                 </span>
               </div>
 
-              {/* XP Bounty */}
-              <span className="flex items-center gap-1 text-[9px] sm:text-[10px] font-black px-2 sm:px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 font-mono shrink-0">
-                <Zap className="w-3 h-3 fill-amber-400" />
-                {task.rewardXp > 0 ? (
-                  <>+{task.rewardXp} XP</>
-                ) : (
+              {/* XP or Manual Review Tag */}
+              {task.rewardXp > 0 ? (
+                <span className="flex items-center gap-1 text-[9px] sm:text-[10px] font-black px-2 sm:px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 font-mono shrink-0">
+                  <Zap className="w-3 h-3 fill-amber-400" />
+                  <span>+{task.rewardXp} XP</span>
+                  {parseBool(task.enableSpeedBonus, true) && (
+                    <span className="text-[8px] sm:text-[9px] font-bold text-blue-500 ml-0.5" title={language === "en" ? "Speed bonus up to +10 XP for early submission" : "Bonus kecepatan hingga +10 XP jika submit sebelum deadline"}>
+                      +Bonus
+                    </span>
+                  )}
+                </span>
+              ) : (
+                <span className="flex items-center gap-1 text-[8px] sm:text-[9px] font-bold px-2 sm:px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-white/60 font-mono shrink-0">
+                  <Clock className="w-2.5 h-2.5 text-slate-400" />
                   <span>{language === "en" ? "Manual Review" : "Penilaian Manual"}</span>
-                )}
-                {task.rewardXp > 0 && parseBool(task.enableSpeedBonus, true) && (
-                  <span className="text-[8px] sm:text-[9px] font-bold text-blue-500 ml-0.5" title={language === "en" ? "Speed bonus up to +10 XP for early submission" : "Bonus kecepatan hingga +10 XP jika submit sebelum deadline"}>
-                    +Bonus
-                  </span>
-                )}
-              </span>
+                </span>
+              )}
             </div>
 
             {/* Title */}
-            <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-white group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors line-clamp-2 leading-snug flex items-center gap-1.5">
-              {isLocked && <Lock className="w-3.5 h-3.5 text-amber-500 shrink-0" />}
+            <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2 leading-snug flex items-center gap-1.5">
+              {isLocked && <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-white/40 shrink-0" />}
               <span>{task.title}</span>
             </h4>
 
@@ -302,10 +311,10 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
               {stripHtml(task.introduction) || stripHtml(task.instructions) || stripHtml(task.submissionGuidelines) || ""}
             </p>
 
-            {/* Prerequisite Tag if locked */}
+            {/* Prerequisite Tag if locked (Clean Neutral Style) */}
             {isLocked && task.prerequisiteTask && (
-              <div className="mt-2.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[10px] sm:text-[11px] font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
-                <Lock className="w-3 h-3 shrink-0" />
+              <div className="mt-2.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/10 text-[10px] sm:text-[11px] font-medium text-slate-600 dark:text-white/70 flex items-center gap-1.5">
+                <Lock className="w-3 h-3 text-slate-400 shrink-0" />
                 <span className="truncate">
                   {language === "en"
                     ? `Requires: ${task.prerequisiteTask.title}`
@@ -321,12 +330,12 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
             <span
               className={`inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-bold px-2 sm:px-2.5 py-1 rounded-xl border transition-all truncate min-w-0 ${
                 dlInfo.isOverdue
-                  ? "bg-rose-500/10 text-rose-500 border-rose-500/25 font-black"
+                  ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/25 font-black"
                   : dlInfo.isUrgent
-                  ? "bg-rose-500/10 text-rose-400 border-rose-500/20 font-bold animate-pulse"
+                  ? "bg-rose-500/10 text-rose-500 border-rose-500/20 font-bold animate-pulse"
                   : dlInfo.isSoon
-                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 font-bold"
-                  : "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/50 border-slate-200 dark:border-white/10"
+                  ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20 font-bold"
+                  : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white/50 border-slate-200 dark:border-white/10"
               }`}
             >
               <Clock className="w-3 h-3 shrink-0" />
@@ -337,7 +346,7 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
             <span
               className={`text-[9px] sm:text-[10px] font-black px-2.5 py-1 rounded-xl border uppercase tracking-wider shrink-0 flex items-center gap-1 ${
                 isLocked
-                  ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/25"
+                  ? "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/40 border-slate-200 dark:border-white/10"
                   : isLateBlocked
                   ? "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/25"
                   : cfg.badge
@@ -552,7 +561,7 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
               <span
                 className={`text-[9px] sm:text-[10px] font-black px-2.5 py-0.5 sm:py-1 rounded-lg border uppercase tracking-wider flex items-center gap-1 ${
                   isLocked
-                    ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/25"
+                    ? "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/40 border-slate-200 dark:border-white/10"
                     : statusCfg.badge
                 }`}
               >
@@ -560,17 +569,20 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
                 {statusLabel}
               </span>
 
-              <span className="flex items-center gap-1 text-[10px] sm:text-[11px] font-black text-amber-600 dark:text-amber-400 font-mono ml-auto">
-                <Zap className="w-3.5 h-3.5 fill-amber-400" />
-                {task.rewardXp > 0 ? (
-                  <>+{task.rewardXp} XP</>
-                ) : (
+              {task.rewardXp > 0 ? (
+                <span className="flex items-center gap-1 text-[10px] sm:text-[11px] font-black text-amber-700 dark:text-amber-300 font-mono ml-auto">
+                  <Zap className="w-3.5 h-3.5 fill-amber-400" />
+                  <span>+{task.rewardXp} XP</span>
+                </span>
+              ) : (
+                <span className="flex items-center gap-1 text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-white/60 font-mono ml-auto">
+                  <Clock className="w-2.5 h-2.5 text-slate-400" />
                   <span>{language === "en" ? "Manual Review" : "Penilaian Manual"}</span>
-                )}
-              </span>
+                </span>
+              )}
             </div>
             <h2 className="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-snug flex items-center gap-1.5 truncate">
-              {isLocked && <Lock className="w-4 h-4 text-amber-500 shrink-0" />}
+              {isLocked && <Lock className="w-4 h-4 text-slate-400 dark:text-white/40 shrink-0" />}
               <span className="truncate">{task.title}</span>
             </h2>
           </div>
@@ -584,17 +596,17 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
         </div>
 
         <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto flex-1 overscroll-contain">
-          {/* Prerequisite Locked Alert Banner */}
+          {/* Prerequisite Locked Alert Banner (Neutral Slate) */}
           {isLocked && (
-            <div className="p-4.5 bg-amber-500/10 border border-amber-500/25 rounded-xl flex items-start gap-3.5 shadow-sm">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center shrink-0">
+            <div className="p-4 sm:p-4.5 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-xl flex items-start gap-3.5 shadow-sm">
+              <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/50 border border-slate-200 dark:border-white/10 flex items-center justify-center shrink-0">
                 <Lock className="w-5 h-5" />
               </div>
               <div className="space-y-1">
-                <h4 className="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                <h4 className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-wider">
                   {language === "en" ? "Side Quest Locked (Prerequisite Required)" : "Misi Terkunci (Prasyarat Belum Terpenuhi)"}
                 </h4>
-                <p className="text-xs text-slate-600 dark:text-white/70 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-white/70 leading-relaxed font-normal">
                   {language === "en"
                     ? `This Side Quest is locked. You must complete and receive an APPROVED status on "${task.prerequisiteTask?.title || "Prerequisite Main Quest"}" to unlock.`
                     : `Side Quest ini sedang terkunci. Anda harus menyelesaikan dan menunggu status APPROVED pada Main Quest "${task.prerequisiteTask?.title || "Misi Utama Prasyarat"}" terlebih dahulu sebelum dapat mengerjakan tugas ini.`}
@@ -763,8 +775,8 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
 
           {/* Action Sections: If locked, show locked barrier instead of action buttons */}
           {isLocked ? (
-            <div className="p-8 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-center space-y-2.5">
-              <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto">
+            <div className="p-8 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 rounded-xl text-center space-y-2.5">
+              <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-400 dark:text-white/40 flex items-center justify-center mx-auto">
                 <Lock className="w-6 h-6" />
               </div>
               <h4 className="text-sm font-black text-slate-800 dark:text-white">
@@ -1143,33 +1155,21 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
 export default function TugasClient({ user, initialTasks, initialSubmissions, initialTaskId }) {
   const { t, language } = useLanguage();
   const router = useRouter();
-  const [tasks] = useState(initialTasks ?? []);
-  const [submissions, setSubm] = useState(initialSubmissions ?? []);
+  const [tasks] = useState(() => initialTasks ?? []);
+  const [submissions, setSubm] = useState(() => initialSubmissions ?? []);
   const [activeTask, setActive] = useState(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const qTaskId = urlParams.get("taskId") || initialTaskId;
+      if (qTaskId && initialTasks) {
+        return initialTasks.find((t) => String(t.id) === String(qTaskId)) || null;
+      }
+    }
     if (initialTaskId && initialTasks) {
       return initialTasks.find((t) => String(t.id) === String(initialTaskId)) || null;
     }
     return null;
   });
-
-  // Handle URL query param navigation (e.g. ?taskId=123)
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const urlParams = new URLSearchParams(window.location.search);
-      const qTaskId = urlParams.get("taskId") || initialTaskId;
-      if (qTaskId && tasks.length > 0) {
-        const found = tasks.find((t) => String(t.id) === String(qTaskId));
-        if (found) {
-          setActive(found);
-        }
-      }
-    }
-  }, [tasks, initialTaskId]);
-
-  // Sync state if initialSubmissions prop updates from server
-  useEffect(() => {
-    setSubm(initialSubmissions ?? []);
-  }, [initialSubmissions]);
 
   // Refresh server state when window / tab gains focus
   useEffect(() => {
@@ -1214,9 +1214,8 @@ export default function TugasClient({ user, initialTasks, initialSubmissions, in
     return { mainQuests: mains, sideQuests: sides };
   }, [tasks]);
 
-  // Filter tasks based on category, status, and search
-  const filterTaskList = (taskList) => {
-    return taskList
+  const filteredMainQuests = useMemo(() => {
+    return mainQuests
       .filter((tk) => {
         const status = getStatus(tk.id, submissions);
         if (statusFilter !== "ALL" && status !== statusFilter) return false;
@@ -1224,10 +1223,18 @@ export default function TugasClient({ user, initialTasks, initialSubmissions, in
         return true;
       })
       .sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
-  };
+  }, [mainQuests, statusFilter, search, submissions]);
 
-  const filteredMainQuests = useMemo(() => filterTaskList(mainQuests), [mainQuests, statusFilter, search, submissions]);
-  const filteredSideQuests = useMemo(() => filterTaskList(sideQuests), [sideQuests, statusFilter, search, submissions]);
+  const filteredSideQuests = useMemo(() => {
+    return sideQuests
+      .filter((tk) => {
+        const status = getStatus(tk.id, submissions);
+        if (statusFilter !== "ALL" && status !== statusFilter) return false;
+        if (search && !tk.title.toLowerCase().includes(search.toLowerCase())) return false;
+        return true;
+      })
+      .sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+  }, [sideQuests, statusFilter, search, submissions]);
 
   // Overall Stats
   const approvedCount = submissions.filter((s) => s.status === "APPROVED").length;
