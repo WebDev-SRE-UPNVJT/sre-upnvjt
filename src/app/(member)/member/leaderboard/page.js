@@ -1,6 +1,6 @@
 import React from "react";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { user, memberProfile, division, role, department } from "@/db/schema";
@@ -18,7 +18,12 @@ export const metadata = {
 export default async function MemberLeaderboardPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session) {
+  if (!session || !session.user || !session.user.id) {
+    redirect("/login");
+  }
+
+  const userIdInt = parseInt(session.user.id);
+  if (isNaN(userIdInt)) {
     redirect("/login");
   }
 

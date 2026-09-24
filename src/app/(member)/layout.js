@@ -13,11 +13,14 @@ export const dynamic = "force-dynamic";
 export default async function MemberLayout({ children }) {
   const session = await getServerSession(authOptions);
 
-  if (!session) {
+  if (!session || !session.user || !session.user.id) {
     redirect("/login");
   }
 
   const userIdInt = parseInt(session.user.id);
+  if (isNaN(userIdInt)) {
+    redirect("/login");
+  }
 
   // Load user data to check mustChangePassword status
   const currentUser = await db.query.user.findFirst({
@@ -32,13 +35,20 @@ export default async function MemberLayout({ children }) {
   });
 
   if (!profile) {
-    // If somehow profile is missing, initialize it
-    const [newProfile] = await db.insert(memberProfile).values({
-      userId: userIdInt,
-      xp: 0,
-      level: 1,
-    }).returning();
-    profile = newProfile;
+    // If somehow profile is missing, initialize it safely
+    try {
+      await db.insert(memberProfile).values({
+        userId: userIdInt,
+        xp: 0,
+        level: 1,
+      }).onConflictDoNothing();
+      
+      profile = await db.query.memberProfile.findFirst({
+        where: eq(memberProfile.userId, userIdInt),
+      }) || { userId: userIdInt, xp: 0, level: 1 };
+    } catch (e) {
+      profile = { userId: userIdInt, xp: 0, level: 1 };
+    }
   }
 
   return (

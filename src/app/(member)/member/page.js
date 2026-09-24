@@ -1,6 +1,6 @@
 import React from "react";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { user, memberProfile, task, taskSubmission, attendance, pptModule, literatureItem, xpTransaction, division, pptPhase, pptModuleProgress, role, department } from "@/db/schema";
@@ -13,108 +13,132 @@ export const dynamic = "force-dynamic";
 export default async function MemberDashboardPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session) {
+  if (!session || !session.user || !session.user.id) {
     redirect("/login");
   }
 
   const userIdInt = parseInt(session.user.id);
+  if (isNaN(userIdInt)) {
+    redirect("/login");
+  }
 
-  // Fetch current user and profile
-  const currentUser = await db.query.user.findFirst({
-    where: eq(user.id, userIdInt),
-    with: {
-      role: true,
-      department: true,
-    }
-  });
-
-  if (!currentUser) redirect("/login");
-
+  // Ensure memberProfile exists safely without race condition
   let profile = await db.query.memberProfile.findFirst({
     where: eq(memberProfile.userId, userIdInt),
   });
 
   if (!profile) {
-    const [newProfile] = await db.insert(memberProfile).values({
-      userId: userIdInt,
-      xp: 0,
-      level: 1,
-    }).returning();
-    profile = newProfile;
+    try {
+      await db.insert(memberProfile).values({
+        userId: userIdInt,
+        xp: 0,
+        level: 1,
+      }).onConflictDoNothing();
+
+      profile = await db.query.memberProfile.findFirst({
+        where: eq(memberProfile.userId, userIdInt),
+      }) || { userId: userIdInt, xp: 0, level: 1 };
+    } catch (e) {
+      profile = { userId: userIdInt, xp: 0, level: 1 };
+    }
   }
 
-  // Fetch leaderboard to calculate rank (Khusus role MEMBER & Exclude Departemen SYS)
-  const dbProfiles = await db
-    .select({
-      id: user.id,
-      name: user.name,
-      npm: user.npm,
-      profilePictureUrl: user.profilePictureUrl,
-      xp: memberProfile.xp,
-      level: memberProfile.level,
-      divisionName: division.name,
-      roleName: role.name,
-    })
-    .from(memberProfile)
-    .innerJoin(user, eq(user.id, memberProfile.userId))
-    .leftJoin(role, eq(role.id, user.roleId))
-    .leftJoin(department, eq(department.id, user.departmentId))
-    .leftJoin(division, eq(division.id, user.divisionId))
-    .where(
-      and(
-        sql`LOWER(${role.name}) = 'member'`,
-        sql`COALESCE(LOWER(${department.code}), '') NOT IN ('sys', 'system')`,
-        sql`COALESCE(LOWER(${department.name}), '') NOT LIKE '%sys%'`,
-        sql`COALESCE(LOWER(${division.name}), '') NOT LIKE '%sys%'`
+  // Fetch all parallel queries concurrently to optimize execution time
+  const [
+    currentUser,
+    dbProfiles,
+    allTasks,
+    submissions,
+    attendanceLogs,
+    allPublishedModules,
+    allModuleProgress,
+    allPhases,
+    latestLiterature,
+    xpLogs,
+  ] = await Promise.all([
+    db.query.user.findFirst({
+      where: eq(user.id, userIdInt),
+      with: {
+        role: true,
+        department: true,
+      },
+    }),
+    db
+      .select({
+        id: user.id,
+        name: user.name,
+        npm: user.npm,
+        profilePictureUrl: user.profilePictureUrl,
+        xp: memberProfile.xp,
+        level: memberProfile.level,
+        divisionName: division.name,
+        roleName: role.name,
+      })
+      .from(memberProfile)
+      .innerJoin(user, eq(user.id, memberProfile.userId))
+      .leftJoin(role, eq(role.id, user.roleId))
+      .leftJoin(department, eq(department.id, user.departmentId))
+      .leftJoin(division, eq(division.id, user.divisionId))
+      .where(
+        and(
+          sql`LOWER(${role.name}) = 'member'`,
+          sql`COALESCE(LOWER(${department.code}), '') NOT IN ('sys', 'system')`,
+          sql`COALESCE(LOWER(${department.name}), '') NOT LIKE '%sys%'`,
+          sql`COALESCE(LOWER(${division.name}), '') NOT LIKE '%sys%'`
+        )
       )
-    )
-    .orderBy(desc(memberProfile.xp));
+      .orderBy(desc(memberProfile.xp)),
+    db.query.task.findMany({
+      orderBy: [asc(task.deadline)],
+    }),
+    db.query.taskSubmission.findMany({
+      where: eq(taskSubmission.memberId, userIdInt),
+    }),
+    db.query.attendance.findMany({
+      where: eq(attendance.memberId, userIdInt),
+      orderBy: [desc(attendance.createdAt)],
+    }),
+    db.query.pptModule.findMany({
+      where: eq(pptModule.isPublished, true),
+      orderBy: [asc(pptModule.createdAt)],
+      with: {
+        slides: true,
+      },
+    }),
+    db.query.pptModuleProgress.findMany({
+      where: eq(pptModuleProgress.userId, userIdInt),
+    }),
+    db.query.pptPhase.findMany({
+      orderBy: [asc(pptPhase.order), asc(pptPhase.id)],
+    }),
+    db.query.literatureItem.findFirst({
+      where: eq(literatureItem.isPublished, true),
+      orderBy: [desc(literatureItem.createdAt)],
+      with: {
+        category: true,
+      },
+    }),
+    db.query.xpTransaction.findMany({
+      where: eq(xpTransaction.userId, userIdInt),
+      orderBy: [desc(xpTransaction.createdAt)],
+      limit: 5,
+    }),
+  ]);
+
+  if (!currentUser) redirect("/login");
 
   const augmented = getAugmentedLeaderboard(dbProfiles);
   const userRankObj = augmented.find(item => item.id === userIdInt);
-  const currentRank = userRankObj ? userRankObj.rank : augmented.length;
-
-  // Fetch tasks and user's submissions
-  const allTasks = await db.query.task.findMany({
-    orderBy: [asc(task.deadline)],
-  });
-
-  const submissions = await db.query.taskSubmission.findMany({
-    where: eq(taskSubmission.memberId, userIdInt),
-  });
+  const currentRank = userRankObj ? userRankObj.rank : (augmented.length > 0 ? augmented.length + 1 : 1);
 
   // Calculate completed tasks
   const completedTasksCount = submissions.filter(s => s.status === "APPROVED").length;
 
   // Calculate attendance logs and streak
-  const attendanceLogs = await db.query.attendance.findMany({
-    where: eq(attendance.memberId, userIdInt),
-    orderBy: [desc(attendance.createdAt)],
-  });
-
   const presentCount = attendanceLogs.filter(a => a.status === "PRESENT" || a.status === "LATE").length;
-
-  // Fetch all published modules with slides
-  const allPublishedModules = await db.query.pptModule.findMany({
-    where: eq(pptModule.isPublished, true),
-    orderBy: [asc(pptModule.createdAt)],
-    with: {
-      slides: true,
-    },
-  });
 
   // Latest PPT module for banner
   const latestPpt = allPublishedModules[allPublishedModules.length - 1] || null;
-
-  // Fetch user's module progresses from DB
-  const allModuleProgress = await db.query.pptModuleProgress.findMany({
-    where: eq(pptModuleProgress.userId, userIdInt),
-  });
-
-  // Fetch all Phases
-  const allPhases = await db.query.pptPhase.findMany({
-    orderBy: [asc(pptPhase.order), asc(pptPhase.id)],
-  });
 
   // Construct Phase Progress Hierarchy
   const phaseHierarchy = allPhases.map((phase) => {
@@ -275,22 +299,6 @@ export default async function MemberDashboardPage() {
       progressPct: unphasedTotal > 0 ? Math.round((unphasedCompleted / unphasedTotal) * 100) : 0,
     });
   }
-
-  // Fetch latest literature item
-  const latestLiterature = await db.query.literatureItem.findFirst({
-    where: eq(literatureItem.isPublished, true),
-    orderBy: [desc(literatureItem.createdAt)],
-    with: {
-      category: true,
-    },
-  });
-
-  // Fetch recent XP transactions
-  const xpLogs = await db.query.xpTransaction.findMany({
-    where: eq(xpTransaction.userId, userIdInt),
-    orderBy: [desc(xpTransaction.createdAt)],
-    limit: 5,
-  });
 
   return (
     <MemberDashboardClient
