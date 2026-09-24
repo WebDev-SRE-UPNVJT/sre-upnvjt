@@ -1,4 +1,4 @@
-import { Inter, Outfit } from "next/font/google";
+import { Inter, Outfit, Montserrat } from "next/font/google";
 import "./globals.css";
 import { HeaderWrapper, FooterWrapper, VisitorTrackerWrapper } from "@/components/NavigationWrapper";
 import { Providers } from "@/components/Providers";
@@ -19,6 +19,13 @@ const outfit = Outfit({
   variable: "--font-display",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800"],
+});
+
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
+  subsets: ["latin"],
+  weight: ["800", "900"],
+  style: ["normal", "italic"],
 });
 
 export const metadata = {
@@ -108,7 +115,7 @@ export default async function RootLayout({ children }) {
     <html
       lang={appLanguage}
       suppressHydrationWarning
-      className={`${inter.variable} ${outfit.variable} h-full antialiased scroll-smooth`}
+      className={`${inter.variable} ${outfit.variable} ${montserrat.variable} h-full antialiased scroll-smooth`}
     >
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-canvas text-ink font-sans">
         <Providers>

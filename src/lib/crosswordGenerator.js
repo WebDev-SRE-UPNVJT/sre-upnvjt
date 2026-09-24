@@ -70,11 +70,18 @@ export function generateCrosswordLayout(items = [], options = {}) {
   let bestScore = -Infinity;
 
   for (let iteration = 0; iteration < maxIterations; iteration++) {
-    // Sort items: longest words first, with deterministic seeded perturbation for different iterations
-    const wordsToPlace = [...validItems].sort((a, b) => {
-      if (iteration === 0) return b.length - a.length;
-      return (b.length + (rng() * 2 - 1)) - (a.length + (rng() * 2 - 1));
-    });
+    // Deterministic item ordering per iteration: precompute scores before sorting to ensure identical SSR & CSR outputs
+    let wordsToPlace;
+    if (iteration === 0) {
+      wordsToPlace = [...validItems].sort((a, b) => b.length - a.length || String(a.id).localeCompare(String(b.id)));
+    } else {
+      const itemsWithJitter = validItems.map((item) => ({
+        item,
+        score: item.length + (rng() * 2 - 1),
+      }));
+      itemsWithJitter.sort((a, b) => b.score - a.score || String(a.item.id).localeCompare(String(b.item.id)));
+      wordsToPlace = itemsWithJitter.map((x) => x.item);
+    }
 
     const gridMap = new Map(); // key: `${r},${c}` => { char, acrossWordId, downWordId }
     const placed = [];
@@ -97,8 +104,8 @@ export function generateCrosswordLayout(items = [], options = {}) {
       const validPlacements = findPossiblePlacements(gridMap, word, placed);
 
       if (validPlacements.length > 0) {
-        // Pick best placement based on proximity to center and intersections
-        validPlacements.sort((a, b) => b.score - a.score);
+        // Pick best placement based on proximity to center and intersections with deterministic tie-breakers
+        validPlacements.sort((a, b) => b.score - a.score || a.row - b.row || a.col - b.col || a.direction.localeCompare(b.direction));
         const bestPlacement = validPlacements[0];
 
         placeWordOnMap(gridMap, word, bestPlacement.row, bestPlacement.col, bestPlacement.direction);

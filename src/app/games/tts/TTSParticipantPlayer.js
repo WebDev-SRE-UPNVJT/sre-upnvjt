@@ -150,10 +150,6 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
   const [isFullscreen, setIsFullscreen] = useState(false);
   const hiddenInputRef = useRef(null);
 
-  // 2 Selectable Themes: "dark" (Cyber Emerald) vs "light" (Modern Pearl)
-  const [gameTheme, setGameTheme] = useState("dark");
-  const isDark = gameTheme === "dark";
-
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -280,16 +276,22 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
     return { title: "Explorer", level: userLvl, icon: Sparkles, color: "text-emerald-400" };
   }, [currentUser]);
 
-  // Star Rating on completion
-  const starsEarned = useMemo(() => {
-    const effectiveCorrect = submissionResult?.correctCount !== undefined ? submissionResult.correctCount : correctWordsCount;
-    const effectiveMistakes = submissionResult?.wrongCount !== undefined ? submissionResult.wrongCount : mistakeCount;
-    const isPerfect = effectiveCorrect === totalWords && effectiveMistakes === 0;
+  // Dynamic Accuracy Score (0 - 100%)
+  const computedAccuracyScore = useMemo(() => {
+    if (submissionResult?.score !== undefined) return submissionResult.score;
+    if (totalWords > 0) {
+      return Math.max(0, Math.min(100, Math.round((correctWordsCount / totalWords) * 100)));
+    }
+    return 0;
+  }, [submissionResult, correctWordsCount, totalWords]);
 
-    if (isPerfect && elapsedTime <= 180) return 3;
-    if (effectiveCorrect >= Math.ceil(totalWords * 0.5) && effectiveMistakes <= 2) return 2;
-    return 1;
-  }, [submissionResult, correctWordsCount, mistakeCount, totalWords, elapsedTime]);
+  // Star Rating on completion based on accuracy percentage
+  const starsEarned = useMemo(() => {
+    if (computedAccuracyScore >= 80) return 3;
+    if (computedAccuracyScore >= 50) return 2;
+    if (computedAccuracyScore >= 20) return 1;
+    return 0;
+  }, [computedAccuracyScore]);
 
   // Hovered word cells set for active word lighting
   const hoveredWordCells = useMemo(() => {
@@ -425,6 +427,25 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
   };
 
   // Submit answers to server
+  // Navigate between words directly from answering modal
+  const handlePrevWord = () => {
+    if (!activeWord || !crosswordData?.placedWords?.length) return;
+    const currentIndex = crosswordData.placedWords.findIndex(
+      (w) => w.direction === activeWord.direction && w.number === activeWord.number
+    );
+    const prevIndex = (currentIndex - 1 + crosswordData.placedWords.length) % crosswordData.placedWords.length;
+    handleSelectWord(crosswordData.placedWords[prevIndex]);
+  };
+
+  const handleNextWord = () => {
+    if (!activeWord || !crosswordData?.placedWords?.length) return;
+    const currentIndex = crosswordData.placedWords.findIndex(
+      (w) => w.direction === activeWord.direction && w.number === activeWord.number
+    );
+    const nextIndex = (currentIndex + 1) % crosswordData.placedWords.length;
+    handleSelectWord(crosswordData.placedWords[nextIndex]);
+  };
+
   const handleSubmitAnswers = useCallback(
     async (finalStatuses = wordStatuses, finalInputs = userInputs, currentMistakes = mistakeCount) => {
       if (hasSubmitted || isSubmitting) return;
@@ -714,31 +735,65 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
     setIsTimerRunning(true);
   };
 
-  // 2 Distinct Layout Themes:
-  const bgThemeClass = isDark
-    ? "bg-[#030f09] text-white"
-    : "bg-gradient-to-b from-[#f2faf5] via-[#e6f6ed] to-[#d9f0e3] text-slate-900";
-
   return (
-    <div className={`fixed inset-0 w-full h-[100dvh] overflow-hidden select-none font-sans flex flex-col justify-between transition-colors duration-500 ${bgThemeClass}`}>
+    <div className="fixed inset-0 w-full h-[100dvh] max-h-[100dvh] overflow-hidden select-none font-sans flex flex-col justify-between bg-gradient-to-b from-[#d8f3e5] via-[#f7fdf9] to-[#dcf5e7] text-slate-900 transition-colors duration-500 relative px-2 sm:px-4 md:px-6 py-1.5 sm:py-2.5">
+      {/* ========================================================================= */}
+      {/* ULTRA-RICH AMBIENT BOTANICAL FOLIAGE & SUNLIGHT RAYS (PURE CSS & SVG) */}
+      {/* ========================================================================= */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 select-none">
+        {/* Ambient Top Sunlight & Radial Glows matching reference */}
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[850px] h-[450px] bg-gradient-to-b from-[#bef264]/40 via-[#34d399]/25 to-transparent rounded-full blur-[100px] pointer-events-none" />
+        
+        {/* Top-Left Vibrant Lime-Yellow Glow */}
+        <div className="absolute -top-24 -left-24 w-80 sm:w-[450px] h-80 sm:h-[450px] rounded-full bg-gradient-to-br from-[#eab308]/30 via-[#84cc16]/40 to-transparent blur-[75px]" />
+        
+        {/* Top-Right Emerald Canopy Glow */}
+        <div className="absolute -top-24 -right-24 w-80 sm:w-[450px] h-80 sm:h-[450px] rounded-full bg-gradient-to-bl from-[#10b981]/50 via-[#047857]/40 to-transparent blur-[75px]" />
+        
+        {/* Center Bright White Radiance for Crossword Grid Focus */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-4xl h-[65%] bg-white/70 rounded-full blur-[85px] pointer-events-none" />
+
+        {/* Bottom-Left Botanical Atmosphere */}
+        <div className="absolute -bottom-24 -left-20 w-80 sm:w-[400px] h-80 sm:h-[400px] rounded-full bg-gradient-to-tr from-[#10b981]/40 via-[#34d399]/30 to-transparent blur-3xl" />
+
+        {/* Bottom-Right Golden Lime Atmosphere */}
+        <div className="absolute -bottom-24 -right-20 w-80 sm:w-[400px] h-80 sm:h-[400px] rounded-full bg-gradient-to-tl from-[#84cc16]/45 via-[#22c55e]/35 to-transparent blur-3xl" />
+
+        {/* Top-Left Organic Leaves */}
+        <div className="absolute -top-12 -left-12 sm:-top-8 sm:-left-8 w-48 sm:w-72 h-48 sm:h-72 pointer-events-none filter blur-[3px] opacity-75 animate-[pulse_6s_ease-in-out_infinite]">
+          <svg viewBox="0 0 200 200" className="w-full h-full fill-emerald-800/60 transform -rotate-12">
+            <path d="M0,0 C120,20 180,110 170,160 C120,190 40,140 0,0 Z" />
+            <path d="M30,0 C140,50 190,140 180,180 C130,200 50,150 30,0 Z" fill="#65a30d" opacity="0.7" />
+          </svg>
+        </div>
+
+        {/* Top-Right Organic Leaves */}
+        <div className="absolute -top-12 -right-12 sm:-top-8 sm:-right-8 w-48 sm:w-72 h-48 sm:h-72 pointer-events-none filter blur-[3px] opacity-75 animate-[pulse_7s_ease-in-out_infinite]">
+          <svg viewBox="0 0 200 200" className="w-full h-full fill-emerald-900/60 transform rotate-12 scale-x-[-1]">
+            <path d="M0,0 C120,20 180,110 170,160 C120,190 40,140 0,0 Z" />
+            <path d="M30,0 C140,50 190,140 180,180 C130,200 50,150 30,0 Z" fill="#4d7c0f" opacity="0.7" />
+          </svg>
+        </div>
+
+        {/* Bottom-Left Organic Leaves */}
+        <div className="absolute -bottom-14 -left-14 sm:-bottom-10 sm:-left-10 w-52 sm:w-80 h-52 sm:h-80 pointer-events-none filter blur-[4px] opacity-70">
+          <svg viewBox="0 0 200 200" className="w-full h-full fill-emerald-800/70 -rotate-45">
+            <path d="M0,200 C80,120 160,110 200,50 C180,10 90,60 0,200 Z" />
+            <path d="M0,170 C90,90 170,80 200,20 C180,-10 90,40 0,170 Z" fill="#84cc16" opacity="0.6" />
+          </svg>
+        </div>
+
+        {/* Bottom-Right Organic Leaves */}
+        <div className="absolute -bottom-14 -right-14 sm:-bottom-10 sm:-right-10 w-52 sm:w-80 h-52 sm:h-80 pointer-events-none filter blur-[4px] opacity-75">
+          <svg viewBox="0 0 200 200" className="w-full h-full fill-lime-800/70 rotate-45 scale-x-[-1]">
+            <path d="M0,200 C80,120 160,110 200,50 C180,10 90,60 0,200 Z" />
+            <path d="M0,170 C90,90 170,80 200,20 C180,-10 90,40 0,170 Z" fill="#15803d" opacity="0.6" />
+          </svg>
+        </div>
+      </div>
+
       {/* CELEBRATION EXPLOSION */}
       {showCelebrationParticles && <ParticleExplosion count={40} />}
-
-      {/* AMBIENT BACKGROUND GLOW */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        {isDark ? (
-          <>
-            <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-emerald-500/10 blur-3xl opacity-70" />
-            <div className="absolute bottom-10 -right-10 w-96 h-96 rounded-full bg-teal-500/15 blur-3xl opacity-60" />
-            <div className="absolute top-1/3 -left-20 w-72 h-72 rounded-full bg-emerald-950/40 blur-3xl opacity-50" />
-          </>
-        ) : (
-          <>
-            <div className="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-emerald-200/40 blur-3xl" />
-            <div className="absolute bottom-10 -left-10 w-96 h-96 rounded-full bg-teal-200/40 blur-3xl" />
-          </>
-        )}
-      </div>
 
       {/* FLOATING XP BANNER */}
       <AnimatePresence>
@@ -768,157 +823,202 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
       </AnimatePresence>
 
       {/* ========================================================================= */}
-      {/* 1. TOP HEADER HUD */}
+      {/* 1. TOP BRANDING & CONTROLS (COMPACT HEADER BAR) */}
       {/* ========================================================================= */}
-      <header
-        className={`relative z-20 w-full px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between backdrop-blur-xl border-b transition-colors duration-500 shrink-0 gap-2 ${
-          isDark
-            ? "border-emerald-500/20 bg-[#020b06]/90 text-white"
-            : "border-emerald-600/20 bg-white/90 text-slate-900 shadow-sm"
-        }`}
-      >
-        {/* LEFT: SRE LOGO & TITLE */}
-        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+      <div className="relative z-20 w-full max-w-5xl mx-auto flex items-center justify-between gap-1.5 sm:gap-3 shrink-0 py-0.5 px-0.5">
+        {/* LEFT: BACK BUTTON + SRE LOGO */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <Link
             href={onBackUrl}
-            className={`p-1.5 sm:p-2 rounded-xl border transition-all cursor-pointer shrink-0 shadow-sm ${
-              isDark ? "bg-white/5 hover:bg-white/15 border-white/10 text-gray-300 hover:text-white" : "bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700"
-            }`}
+            className="p-1.5 sm:p-2 rounded-xl border border-emerald-600/30 bg-white/95 hover:bg-white text-[#064e3b] backdrop-blur-md transition-all cursor-pointer shrink-0 shadow-sm active:scale-95"
             title="Kembali"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
           </Link>
 
-          <div className="flex items-center gap-2 min-w-0">
-            <div
-              className={`h-6 w-20 sm:h-7 sm:w-28 shrink-0 transition-all duration-300 ${
-                isDark ? "bg-white" : "bg-[#047857]"
-              }`}
-              style={{
-                WebkitMaskImage: "url(/images/logo.webp)",
-                WebkitMaskSize: "contain",
-                WebkitMaskRepeat: "no-repeat",
-                WebkitMaskPosition: "left center",
-                maskImage: "url(/images/logo.webp)",
-                maskSize: "contain",
-                maskRepeat: "no-repeat",
-                maskPosition: "left center",
-              }}
-            />
-            <div className="min-w-0">
-              <h1 className="text-xs sm:text-sm font-black tracking-tight truncate max-w-[85px] xs:max-w-[130px] sm:max-w-xs">
-                {title}
-              </h1>
-              <div className="hidden sm:flex items-center gap-1.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider">
-                <span className={isDark ? "text-emerald-400" : "text-emerald-700 font-extrabold"}>SRE UPNVJT</span>
-                <span>•</span>
-                <span className={isDark ? "text-gray-400" : "text-slate-600"}>Teka-Teki Silang</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* CENTER: PROGRESS BAR */}
-        <div className="hidden md:flex flex-col items-center gap-1 max-w-xs w-full px-4">
-          <div className="flex items-center justify-between w-full text-[10px] font-black uppercase tracking-wider">
-            <span className={`flex items-center gap-1 ${isDark ? "text-emerald-400" : "text-emerald-700"}`}>
-              <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-              <span>Progres Pengerjaan</span>
-            </span>
-            <span className={isDark ? "text-gray-300" : "text-slate-700 font-bold"}>
-              {correctWordsCount} / {totalWords} Soal
-            </span>
-          </div>
-          <div className={`w-full h-2 rounded-full overflow-hidden border ${isDark ? "bg-black/60 border-emerald-500/30" : "bg-slate-200 border-slate-300"}`}>
-            <motion.div
-              className="h-full bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${totalWords > 0 ? (correctWordsCount / totalWords) * 100 : 0}%` }}
-              transition={{ duration: 0.4 }}
-            />
-          </div>
-        </div>
-
-        {/* RIGHT: THEME SWITCHER, TIMER, XP, SOUND */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          {/* DIGITAL TIMER */}
           <div
-            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl border font-mono font-black text-xs sm:text-sm shadow-sm ${
-              isDark
-                ? "bg-black/60 border-emerald-500/40 text-emerald-300"
-                : "bg-white border-emerald-600/30 text-emerald-800"
-            }`}
-          >
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
-            <span>{timeLimitMinutes ? formatSeconds(timeRemaining) : formatSeconds(elapsedTime)}</span>
-          </div>
+            className="h-7 w-20 min-[380px]:h-8 min-[380px]:w-24 sm:h-9 sm:w-32 md:h-10 md:w-36 shrink-0 bg-[#064e3b] filter drop-shadow-[0_1px_3px_rgba(6,78,59,0.2)]"
+            style={{
+              WebkitMaskImage: "url(/images/logo.webp)",
+              WebkitMaskSize: "contain",
+              WebkitMaskRepeat: "no-repeat",
+              WebkitMaskPosition: "left center",
+              maskImage: "url(/images/logo.webp)",
+              maskSize: "contain",
+              maskRepeat: "no-repeat",
+              maskPosition: "left center",
+            }}
+          />
+        </div>
 
-          {/* XP REWARD (Only if rewardXp > 0) */}
+        {/* CENTER: DAFTAR SOAL & SOUND (NO TIMER) */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* TOP DAFTAR SOAL BUTTON */}
+          <button
+            type="button"
+            onClick={() => setShowClueDrawer(true)}
+            className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-emerald-600/30 bg-white/95 hover:bg-white text-[#064e3b] font-black text-[11px] sm:text-xs backdrop-blur-md shadow-sm active:scale-95 cursor-pointer transition-all"
+            title="Buka Daftar Soal"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-emerald-700" />
+            <span>Soal</span>
+            <span className="px-1.5 py-0.5 rounded-md text-[9.5px] font-mono font-black leading-none bg-emerald-100 text-emerald-900 border border-emerald-300/60">
+              {correctWordsCount}/{totalWords}
+            </span>
+          </button>
+
+          {/* XP REWARD */}
           {(puzzleData?.rewardXp !== undefined && puzzleData?.rewardXp !== null ? puzzleData.rewardXp : 0) > 0 && (
-            <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-500 dark:text-amber-400 font-mono font-black text-xs">
-              <Zap className="w-3.5 h-3.5 fill-amber-400" />
+            <div className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-100/95 border border-amber-400 text-amber-900 font-mono font-black text-xs backdrop-blur-md shadow-sm">
+              <Zap className="w-3.5 h-3.5 fill-amber-500 text-amber-600" />
               <span>+{puzzleData.rewardXp} XP</span>
             </div>
           )}
 
-          {/* 2 THEME SELECTOR BUTTON */}
-          <button
-            type="button"
-            onClick={() => setGameTheme(isDark ? "light" : "dark")}
-            className={`p-1.5 sm:px-3 sm:py-1 rounded-xl border font-black text-[11px] flex items-center gap-1.5 transition-all cursor-pointer shadow-sm ${
-              isDark
-                ? "bg-emerald-950/80 border-emerald-400 text-emerald-300 hover:bg-emerald-900"
-                : "bg-emerald-100 border-emerald-600 text-emerald-900 hover:bg-emerald-200"
-            }`}
-            title="Ganti Tema Visual"
-          >
-            {isDark ? <Moon className="w-3.5 h-3.5 text-emerald-400" /> : <Sun className="w-3.5 h-3.5 text-amber-600" />}
-            <span className="hidden md:inline">{isDark ? "" : ""}</span>
-          </button>
-
           {/* SOUND TOGGLE */}
           <button
             onClick={() => setIsMuted(!isMuted)}
-            className={`p-1.5 sm:p-2 rounded-xl border transition-all cursor-pointer shadow-sm ${
-              isDark ? "bg-white/5 hover:bg-white/15 border-white/10 text-gray-300" : "bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700"
-            }`}
+            className="p-1.5 sm:p-2 rounded-xl border border-emerald-600/30 bg-white/95 hover:bg-white text-[#064e3b] backdrop-blur-md transition-all cursor-pointer shadow-sm active:scale-95"
             title={isMuted ? "Suara Aktif" : "Bisukan Suara"}
           >
-            {isMuted ? <VolumeX className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-rose-400" /> : <Volume2 className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-emerald-500" />}
+            {isMuted ? <VolumeX className="w-4 h-4 text-rose-500" /> : <Volume2 className="w-4 h-4 text-emerald-600" />}
           </button>
         </div>
-      </header>
+
+        {/* RIGHT: LWM (LEARNING WORKING MEANING) LOGO */}
+        <div className="flex items-center shrink-0" title="Learning Working Meaning">
+          <div
+            className="h-7 w-20 min-[380px]:h-8 min-[380px]:w-24 sm:h-9 sm:w-32 md:h-10 md:w-36 shrink-0 bg-[#064e3b] hover:bg-emerald-700 filter drop-shadow-[0_1px_3px_rgba(6,78,59,0.2)] hover:scale-105 transition-all"
+            style={{
+              WebkitMaskImage: "url(/images/LWM.webp)",
+              WebkitMaskSize: "contain",
+              WebkitMaskRepeat: "no-repeat",
+              WebkitMaskPosition: "right center",
+              maskImage: "url(/images/LWM.webp)",
+              maskSize: "contain",
+              maskRepeat: "no-repeat",
+              maskPosition: "right center",
+            }}
+          />
+        </div>
+      </div>
 
       {/* ========================================================================= */}
-      {/* 2. MAIN BOARD VIEW */}
+      {/* 2. MAIN BOARD VIEW (STRICT AUTO FIT, ZERO SCROLL) */}
       {/* ========================================================================= */}
-      <main className="relative z-10 flex-1 min-h-0 w-full max-w-5xl mx-auto flex flex-col items-center justify-center p-2 sm:p-5 overflow-auto">
-        {/* SUBTITLE BANNER */}
-        <div
-          className={`mb-2 sm:mb-4 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border text-[10px] sm:text-xs font-black uppercase tracking-wider flex items-center gap-1.5 sm:gap-2 shadow-sm text-center ${
-            isDark
-              ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
-              : "bg-emerald-100 border-emerald-400 text-emerald-900"
-          }`}
-        >
-          <Sparkles className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-emerald-500 shrink-0" />
+      <main className="relative z-10 flex-1 min-h-0 w-full max-w-5xl mx-auto flex flex-col items-center justify-between overflow-hidden py-0.5">
+        {/* ===================================================================== */}
+        {/* SRE CATALYST ACADEMY 3D TYPOGRAPHY BANNER */}
+        {/* ===================================================================== */}
+        <div className="flex flex-col items-center text-center my-0 relative select-none shrink-0 w-full px-1">
+          {/* QUOTE */}
+          <p className="text-[9px] sm:text-[11px] font-black italic uppercase tracking-widest text-[#064e3b] font-sans drop-shadow-sm leading-none mb-0.5">
+            &ldquo;Fill the Boxes, Power the Future&rdquo;
+          </p>
+
+          {/* MAIN 3D VECTOR SVG TITLE */}
+          <div className="relative inline-flex flex-col items-center group cursor-default max-w-full">
+            {/* 4-Point Golden Star Sparkle Glint on top-left of 'S' */}
+            <div className="absolute -top-2 -left-1.5 sm:-top-3 sm:-left-2.5 pointer-events-none z-20">
+              <svg viewBox="0 0 40 40" className="w-5 h-5 sm:w-7 sm:h-7 text-amber-300 fill-amber-300 filter drop-shadow-[0_0_8px_rgba(251,191,36,0.95)] animate-pulse">
+                <path d="M20,0 L23,17 L40,20 L23,23 L20,40 L17,23 L0,20 L17,17 Z" />
+              </svg>
+            </div>
+
+            {/* Vector SVG Text Container for 100% Crisp Vector Rendering */}
+            <svg
+              viewBox="0 0 520 140"
+              className="w-[200px] min-[380px]:w-[230px] sm:w-[320px] md:w-[380px] max-h-[7.5vh] sm:max-h-[9vh] h-auto overflow-visible select-none"
+              style={{
+                filter: "drop-shadow(0 4px 12px rgba(4,120,87,0.3))",
+              }}
+            >
+              <defs>
+                <linearGradient id="catalystTextGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#4ade80" />
+                  <stop offset="45%" stopColor="#22c55e" />
+                  <stop offset="85%" stopColor="#15803d" />
+                  <stop offset="100%" stopColor="#064e3b" />
+                </linearGradient>
+              </defs>
+
+              {/* SRE CATALYST */}
+              <text
+                x="260"
+                y="56"
+                textAnchor="middle"
+                fontSize="52"
+                fontWeight="900"
+                fontStyle="italic"
+                fontFamily="var(--font-montserrat), 'Montserrat', 'Plus Jakarta Sans', sans-serif"
+                stroke="#ffffff"
+                strokeWidth="12"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                fill="url(#catalystTextGrad)"
+                paintOrder="stroke fill"
+                letterSpacing="-1.5"
+              >
+                SRE CATALYST
+              </text>
+
+              {/* ACADEMY */}
+              <text
+                x="260"
+                y="120"
+                textAnchor="middle"
+                fontSize="62"
+                fontWeight="900"
+                fontStyle="italic"
+                fontFamily="var(--font-montserrat), 'Montserrat', 'Plus Jakarta Sans', sans-serif"
+                stroke="#ffffff"
+                strokeWidth="14"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                fill="url(#catalystTextGrad)"
+                paintOrder="stroke fill"
+                letterSpacing="-2"
+              >
+                ACADEMY
+              </text>
+            </svg>
+
+            {/* TILTED DYNAMIC MODULE BADGE (COMPACT 3D RIBBON) */}
+            <div className="mt-0.5 inline-flex items-center gap-1 px-2.5 sm:px-3.5 py-0.5 bg-gradient-to-r from-[#032e1a] via-[#064e3b] to-[#047857] text-[#bef264] rounded-md sm:rounded-lg text-[9px] sm:text-[11px] font-black uppercase tracking-wider shadow-[0_2px_8px_rgba(6,78,59,0.3)] border-2 border-white -rotate-1 transform hover:rotate-0 transition-transform duration-300 max-w-[92vw]">
+              <Sparkles className="w-2.5 sm:w-3 h-2.5 sm:h-3 text-[#bef264] shrink-0 animate-spin" />
+              <span className="truncate drop-shadow max-w-[200px] sm:max-w-xs">{title}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* SUBTITLE INSTRUCTION */}
+        <div className="my-0.5 px-2.5 py-0.5 rounded-full border border-emerald-500/30 bg-white/90 text-emerald-950 text-[8px] sm:text-[9.5px] font-extrabold uppercase tracking-wider flex items-center gap-1 shadow-xs text-center shrink-0">
+          <Sparkles className="w-2.5 h-2.5 text-emerald-600 shrink-0" />
           <span>Klik kotak untuk mengisi jawaban</span>
         </div>
 
-        {/* SQUARE CROSSWORD GRID */}
+        {/* SQUARE CROSSWORD GRID (NATIVE SVG VECTOR BOARD - PERFECT FIT & CRISP BORDERS) */}
         {crosswordData.grid && crosswordData.grid.length > 0 ? (
-          <div className="w-full flex items-center justify-center py-2 px-1">
-            <div
-              className={`grid gap-[2px] sm:gap-[5px] md:gap-[6px] select-none p-2 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl border shadow-2xl transition-colors duration-500 w-full ${
-                isDark
-                  ? "bg-black/80 border-emerald-500/30 shadow-[0_0_60px_rgba(0,0,0,0.8)]"
-                  : "bg-white/95 border-emerald-600/30 shadow-[0_15px_40px_rgba(4,120,87,0.15)]"
-              }`}
-              style={{
-                gridTemplateColumns: `repeat(${crosswordData.cols}, minmax(0, 1fr))`,
-                maxWidth: `min(100%, ${Math.min(crosswordData.cols * 50, 720)}px)`,
-              }}
+          <div className="w-full flex-1 min-h-0 flex items-center justify-center p-1 sm:p-2 overflow-hidden">
+            <svg
+              viewBox={`-8 -8 ${crosswordData.cols * 36 + 16} ${crosswordData.rows * 36 + 16}`}
+              className="max-h-full max-w-full w-auto h-auto select-none filter drop-shadow-[0_10px_25px_rgba(6,78,59,0.18)]"
+              preserveAspectRatio="xMidYMid meet"
             >
+              {/* Outer Card Background & Border (Always tightly hugging the puzzle) */}
+              <rect
+                x="-6"
+                y="-6"
+                width={crosswordData.cols * 36 + 12}
+                height={crosswordData.rows * 36 + 12}
+                rx="14"
+                fill="#ffffff"
+                stroke="#10b981"
+                strokeWidth="2"
+                strokeOpacity="0.8"
+              />
+
+              {/* Crossword Letter Cells */}
               {crosswordData.grid.map((row, rIdx) =>
                 row.map((cell, cIdx) => {
                   const cellKey = `${rIdx},${cIdx}`;
@@ -927,103 +1027,142 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
                   const isWordHovered = hoveredWordCells.has(cellKey);
 
                   if (!isLetterCell) {
-                    return <div key={cellKey} className="aspect-square w-full opacity-0 pointer-events-none" />;
+                    return null;
                   }
 
                   return (
-                    <motion.button
+                    <g
                       key={cellKey}
-                      type="button"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      transform={`translate(${cIdx * 36}, ${rIdx * 36})`}
+                      onClick={() => handleCellClick(cell, rIdx, cIdx)}
                       onMouseEnter={() => setHoveredCell({ row: rIdx, col: cIdx })}
                       onMouseLeave={() => setHoveredCell(null)}
-                      onClick={() => handleCellClick(cell, rIdx, cIdx)}
-                      className={`relative aspect-square w-full rounded-[3px] sm:rounded-md md:rounded-lg flex items-center justify-center font-mono font-black text-[11px] sm:text-lg md:text-2xl transition-all cursor-pointer shadow-sm ${
-                        isDark
-                          ? userLetter
-                            ? "border border-emerald-400 bg-gradient-to-b from-[#123e2d] to-[#0a271c] text-emerald-300 shadow-[0_2px_0_#051811]"
-                            : isWordHovered
-                            ? "border border-emerald-400 bg-[#0f2e21] text-white shadow-[0_2px_0_#061a12]"
-                            : "border border-white/30 bg-[#081c13] text-white hover:border-emerald-400 hover:bg-[#0f2e21] shadow-[0_2px_0_#040d09]"
-                          : userLetter
-                          ? "border border-emerald-600 bg-emerald-100 text-emerald-950 shadow-[0_2px_0_#047857]"
-                          : isWordHovered
-                          ? "border border-emerald-600 bg-emerald-50 text-slate-900 shadow-[0_2px_0_#94a3b8]"
-                          : "border border-slate-300 bg-white text-slate-900 hover:border-emerald-600 hover:bg-emerald-50 shadow-[0_2px_0_#cbd5e1]"
-                      }`}
+                      className="cursor-pointer group"
                     >
-                      {/* Starting clue number */}
+                      {/* Crisp High-Contrast Cell Box */}
+                      <rect
+                        x="1.5"
+                        y="1.5"
+                        width="33"
+                        height="33"
+                        rx="4"
+                        fill={userLetter ? "#dcfce7" : isWordHovered ? "#ecfdf5" : "#ffffff"}
+                        stroke={userLetter ? "#047857" : isWordHovered ? "#10b981" : "#64748b"}
+                        strokeWidth={userLetter ? "2" : isWordHovered ? "2" : "1.5"}
+                      />
+
+                      {/* 3D Push Bevel Highlight */}
+                      <line
+                        x1="3"
+                        y1="3"
+                        x2="33"
+                        y2="3"
+                        stroke={userLetter ? "#86efac" : "#f1f5f9"}
+                        strokeWidth="1"
+                        strokeLinecap="round"
+                      />
+
+                      {/* Starting Clue Number */}
                       {cell.number && (
-                        <span
-                          className={`absolute top-0 left-0.5 sm:left-1 text-[6.5px] sm:text-[9px] md:text-[11px] font-black leading-none select-none ${
-                            isDark ? "text-emerald-400" : "text-emerald-700"
-                          }`}
+                        <text
+                          x="3.5"
+                          y="9.5"
+                          fontSize="8"
+                          fontWeight="900"
+                          fontFamily="var(--font-montserrat), sans-serif"
+                          fill="#064e3b"
+                          className="select-none pointer-events-none"
                         >
                           {cell.number}
-                        </span>
+                        </text>
                       )}
 
-                      {/* Letter */}
-                      <span className="font-mono font-black leading-none drop-shadow">
-                        {userLetter}
-                      </span>
-                    </motion.button>
+                      {/* Typed Answer Letter */}
+                      {userLetter && (
+                        <text
+                          x="18"
+                          y="24.5"
+                          textAnchor="middle"
+                          fontSize="17"
+                          fontWeight="900"
+                          fontFamily="var(--font-montserrat), monospace"
+                          fill="#022c22"
+                          className="select-none pointer-events-none"
+                        >
+                          {userLetter}
+                        </text>
+                      )}
+                    </g>
                   );
                 })
               )}
-            </div>
+            </svg>
           </div>
         ) : (
-          <div className="text-center py-12 opacity-60 text-sm">
+          <div className="text-center py-4 opacity-60 text-xs font-bold text-slate-700">
             Papan TTS belum memiliki soal.
           </div>
         )}
-      </main>
 
-      {/* ========================================================================= */}
-      {/* 3. BOTTOM FOOTER BAR */}
-      {/* ========================================================================= */}
-      <footer
-        className={`relative z-20 w-full px-4 sm:px-6 py-3 sm:py-3.5 flex items-center justify-center sm:justify-between backdrop-blur-xl border-t shrink-0 gap-3 transition-colors duration-500 pb-[max(1.25rem,env(safe-area-inset-bottom,1.25rem))] ${
-          isDark
-            ? "border-emerald-500/20 bg-[#020b06]/95 text-white shadow-[0_-4px_25px_rgba(0,0,0,0.6)]"
-            : "border-slate-300 bg-white/95 text-slate-900 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]"
-        }`}
-      >
-        <Link
-          href={onBackUrl}
-          className={`hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-bold transition-all cursor-pointer shrink-0 ${
-            isDark ? "border-white/10 bg-white/5 hover:bg-white/15 text-gray-300 hover:text-white" : "border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-800"
-          }`}
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Kembali</span>
-        </Link>
+        {/* BOTTOM BRANDING PILL & SOCIAL FOOTNOTE */}
+        <div className="flex flex-col items-center gap-1 w-full select-none shrink-0 pt-0.5">
+          {/* Glossy Pill with Right Star Sparkle */}
+          <div className="relative inline-flex items-center">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-0.5 sm:py-1 rounded-full bg-gradient-to-r from-emerald-950 via-emerald-900 to-emerald-800 text-white font-black text-[8.5px] sm:text-[10.5px] tracking-wider uppercase shadow-[0_3px_10px_rgba(6,78,59,0.3)] border-2 border-white">
+              <span>SRE SC UPNVJT 2026</span>
+            </div>
+            {/* Sparkle on right corner */}
+            <div className="absolute -top-1 -right-1.5 pointer-events-none">
+              <svg viewBox="0 0 30 30" className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 fill-amber-300 filter drop-shadow-[0_0_6px_rgba(251,191,36,0.9)] animate-pulse">
+                <path d="M15,0 L17,13 L30,15 L17,17 L15,30 L13,17 L0,15 L13,13 Z" />
+              </svg>
+            </div>
+          </div>
 
-        {/* DAFTAR SOAL BUTTON - CENTERED ON MOBILE */}
-        <button
-          type="button"
-          onClick={() => setShowClueDrawer(true)}
-          className={`inline-flex items-center justify-center gap-2 px-7 sm:px-8 py-2.5 sm:py-3 rounded-full border font-black text-xs sm:text-sm transition-all shadow-lg active:scale-95 cursor-pointer ${
-            isDark
-              ? "border-emerald-400/50 bg-emerald-500/25 hover:bg-emerald-500/35 text-emerald-300 shadow-emerald-950/50"
-              : "border-emerald-600 bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/30"
-          }`}
-        >
-          <BookOpen className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-          <span>Daftar Soal</span>
-          <span className={`px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-black leading-none ${isDark ? "bg-emerald-400/30 text-emerald-200" : "bg-white/30 text-white"}`}>
-            {correctWordsCount}/{totalWords}
-          </span>
-        </button>
+          {/* TWO-COLUMN SOCIAL HANDLES (LEFT) AND HASHTAGS (RIGHT) */}
+          <div className="w-full max-w-4xl px-2 sm:px-4 flex items-end justify-between gap-2">
+            {/* Left: Stacked Social Accounts */}
+            <div className="flex flex-col items-start gap-0.5 text-[8px] sm:text-[9.5px] font-black text-[#064e3b]">
+              <a
+                href="https://instagram.com/sre.upnjatim"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1 hover:text-emerald-700 transition-colors"
+              >
+                <svg viewBox="0 0 24 24" className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0 fill-none stroke-[#064e3b] stroke-[2.2] stroke-linecap-round stroke-linejoin-round">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                </svg>
+                <span>sre.upnjatim</span>
+              </a>
+              <a
+                href="mailto:upnvjatim@sre.co.id"
+                className="flex items-center gap-1 hover:text-emerald-700 transition-colors"
+              >
+                <svg viewBox="0 0 24 24" className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0 fill-none stroke-[#064e3b] stroke-[2.2] stroke-linecap-round stroke-linejoin-round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                  <polyline points="22,6 12,13 2,6" />
+                </svg>
+                <span>upnvjatim@sre.co.id</span>
+              </a>
+              <div className="flex items-center gap-1">
+                <svg viewBox="0 0 24 24" className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0 fill-[#064e3b]">
+                  <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.45a1.64 1.64 0 1 0 0 3.28 1.64 1.64 0 0 0 0-3.28z" />
+                </svg>
+                <span>SRE SC UPN Veteran Jawa Timur</span>
+              </div>
+            </div>
 
-        <div className="hidden sm:flex items-center gap-2">
-          <span className="text-[11px] opacity-70 font-bold">
-            Mode: {isDark ? "Cyber Emerald" : "Modern Pearl"}
-          </span>
+            {/* Right: Bold Hashtag */}
+            <div className="text-right shrink-0">
+              <span className="text-[8.5px] sm:text-xs font-black tracking-wide text-[#064e3b] uppercase block">
+                #SREUPNVJT #Energizens
+              </span>
+            </div>
+          </div>
         </div>
-      </footer>
+      </main>
 
       {/* ========================================================================= */}
       {/* 4. FOCUS ANSWERING MODAL */}
@@ -1036,7 +1175,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
             onClick={handleCloseModal}
-            className="fixed inset-0 z-50 flex flex-col items-center justify-between p-4 sm:p-6 bg-black/60 backdrop-blur-lg overflow-y-auto select-none text-white"
+            className="fixed inset-0 z-50 flex flex-col items-center justify-between p-3 sm:p-6 bg-black/70 backdrop-blur-lg overflow-y-auto sm:overflow-hidden select-none text-white"
           >
             {/* INVISIBLE KEYBOARD INPUT */}
             <input
@@ -1065,47 +1204,71 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
               aria-label="Ketik jawaban Anda"
             />
 
-            {/* TOP BAR / CLOSE BUTTONS */}
+            {/* TOP BAR / NAVIGATION */}
             <div
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-lg mx-auto flex items-center justify-between gap-2 shrink-0 pt-2 sm:pt-0"
+              className="w-full max-w-2xl mx-auto flex items-center justify-between gap-1.5 sm:gap-2 shrink-0 pt-1 sm:pt-0"
             >
+              {/* Back button */}
               <button
                 type="button"
                 onClick={handleCloseModal}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/20 bg-black/40 hover:bg-black/60 text-xs font-bold text-white transition-all active:scale-95 cursor-pointer shadow-md backdrop-blur-md"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border border-white/15 bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 hover:text-white text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-md backdrop-blur-md shrink-0"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Kembali ke Papan</span>
+                <span>
+                  Kembali <span className="hidden sm:inline">ke Papan</span>
+                </span>
               </button>
 
-              <div className="flex items-center gap-2">
+              {/* Center: Clue Badge & Attempts */}
+              <div className="flex items-center gap-1 sm:gap-1.5 overflow-hidden shrink">
                 {wrongAnswerBehavior === "RETRY" && maxRetryAttempts && maxRetryAttempts > 0 && (
-                  <div className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-amber-400/40 bg-amber-500/20 text-amber-300 text-[11px] font-black backdrop-blur-md">
-                    <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
+                  <div className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg border border-amber-400/40 bg-amber-500/15 text-amber-300 text-[10px] sm:text-xs font-mono font-bold backdrop-blur-md shadow-sm shrink-0">
+                    <ShieldAlert className="w-3 h-3 text-amber-400" />
                     <span>
-                      {(wordAttempts[`${activeWord.direction}-${activeWord.number}`] || 0)}/{maxRetryAttempts} Kesempatan
+                      {Math.max(0, maxRetryAttempts - (wordAttempts[`${activeWord.direction}-${activeWord.number}`] || 0))}x <span className="hidden min-[400px]:inline">Kesempatan</span>
                     </span>
                   </div>
                 )}
 
-                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-400/40 bg-emerald-500/20 text-emerald-300 text-xs font-black uppercase tracking-wider backdrop-blur-md">
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>#{activeWord.number} • {activeWord.direction === "ACROSS" ? "Mendatar" : "Menurun"}</span>
+                <div className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg border border-emerald-400/40 bg-emerald-500/15 text-emerald-300 text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider backdrop-blur-md shadow-sm truncate">
+                  <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400 shrink-0" />
+                  <span className="truncate">#{activeWord.number} • {activeWord.direction === "ACROSS" ? "Mendatar" : "Menurun"}</span>
                 </div>
+              </div>
 
+              {/* Right: Quick Nav & Close Button Group */}
+              <div className="flex items-center bg-zinc-900/90 border border-white/15 rounded-xl p-0.5 shadow-md backdrop-blur-md shrink-0">
+                <button
+                  type="button"
+                  onClick={handlePrevWord}
+                  className="p-1.5 sm:p-2 rounded-lg hover:bg-white/10 text-zinc-300 hover:text-white transition-all active:scale-90 cursor-pointer"
+                  title="Soal Sebelumnya"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextWord}
+                  className="p-1.5 sm:p-2 rounded-lg hover:bg-white/10 text-zinc-300 hover:text-white transition-all active:scale-90 cursor-pointer"
+                  title="Soal Selanjutnya"
+                >
+                  <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </button>
+                <div className="w-px h-3.5 bg-white/15 mx-0.5" />
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="p-1.5 sm:p-2 rounded-full border border-white/20 bg-black/40 hover:bg-black/60 text-white transition-all active:scale-95 cursor-pointer shadow-md backdrop-blur-md"
+                  className="p-1.5 sm:p-2 rounded-lg hover:bg-rose-500/20 text-zinc-400 hover:text-rose-300 transition-all active:scale-90 cursor-pointer"
                   title="Tutup Modal"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </button>
               </div>
             </div>
 
-            {/* MAIN CONTENT AREA (NO BOX / CARD BACKGROUND) */}
+            {/* MAIN CONTENT AREA */}
             <div
               onClick={(e) => {
                 e.stopPropagation();
@@ -1113,7 +1276,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
               }}
               className="w-full max-w-2xl mx-auto flex flex-col items-center justify-center my-auto py-4 space-y-5 text-center"
             >
-              {/* CLEAN QUESTION TEXT WITHOUT BACKGROUND BOX */}
+              {/* QUESTION TEXT */}
               <div className="space-y-1.5 px-2">
                 <span className="text-[11px] font-black uppercase tracking-widest text-emerald-400 block drop-shadow">
                   Pertanyaan ({activeWord.length} Huruf{activeWordSegments.length > 1 ? ` • ${activeWordSegments.map((s) => s.length).join(" + ")}` : ""})
@@ -1123,7 +1286,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
                 </h2>
               </div>
 
-              {/* LETTER SLOTS: Auto-scaled, touch-friendly, multi-word aware with wrap */}
+              {/* LETTER SLOTS */}
               <div className="w-full max-w-2xl mx-auto py-3 px-2 flex flex-wrap items-center justify-center gap-y-3 gap-x-2 sm:gap-x-4">
                 {activeWordSegments.map((segment, segIdx) => {
                   const effectiveSegmentLen = segment.length > 8 ? Math.ceil(segment.length / 2) : segment.length;
@@ -1202,7 +1365,19 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
               </div>
 
               {/* QUICK ACTION BUTTONS */}
-              <div className="flex items-center justify-center gap-2.5 pt-1 shrink-0 flex-wrap">
+              <div className="flex items-center justify-center gap-1.5 sm:gap-2 pt-1 shrink-0 flex-wrap">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePrevWord();
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-white/15 bg-zinc-900/90 hover:bg-zinc-800 text-xs font-bold text-zinc-200 hover:text-white transition-all active:scale-95 cursor-pointer shadow-md backdrop-blur-md"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  <span>Sebelumnya</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={(e) => {
@@ -1210,7 +1385,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
                     handleBackspace();
                     hiddenInputRef.current?.focus();
                   }}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-rose-500/40 bg-rose-950/80 hover:bg-rose-900 text-xs font-bold text-rose-300 hover:text-white transition-all active:scale-95 cursor-pointer shadow-lg backdrop-blur-md"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-rose-500/40 bg-rose-950/80 hover:bg-rose-900 text-xs font-bold text-rose-300 hover:text-white transition-all active:scale-95 cursor-pointer shadow-md backdrop-blur-md"
                 >
                   <Delete className="w-3.5 h-3.5" />
                   <span>Hapus (⌫)</span>
@@ -1224,14 +1399,26 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
                     setActiveSlotIdx(0);
                     hiddenInputRef.current?.focus();
                   }}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-white/20 bg-slate-800/80 hover:bg-slate-700 text-xs font-bold text-slate-300 hover:text-white transition-all active:scale-95 cursor-pointer shadow-lg backdrop-blur-md"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-white/15 bg-zinc-800/80 hover:bg-zinc-700 text-xs font-bold text-zinc-300 hover:text-white transition-all active:scale-95 cursor-pointer shadow-md backdrop-blur-md"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>Kosongkan</span>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNextWord();
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-white/15 bg-zinc-900/90 hover:bg-zinc-800 text-xs font-bold text-zinc-200 hover:text-white transition-all active:scale-95 cursor-pointer shadow-md backdrop-blur-md"
+                >
+                  <span>Berikutnya</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
               </div>
 
-              <p className="text-[11px] sm:text-xs tracking-wide font-medium text-center opacity-70 text-white drop-shadow">
+              <p className="text-[11px] sm:text-xs tracking-wide font-medium text-center opacity-70 text-zinc-300 drop-shadow">
                 Ketik jawaban langsung menggunakan keyboard HP / Laptop Anda
               </p>
             </div>
@@ -1252,18 +1439,16 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className={`border-2 rounded-3xl sm:rounded-[36px] p-5 sm:p-7 max-w-2xl w-full max-h-[88vh] flex flex-col relative overflow-hidden backdrop-blur-3xl shadow-2xl ${
-                isDark ? "bg-[#071711] border-emerald-500/40 text-white" : "bg-white border-emerald-600/40 text-slate-900"
-              }`}
+              className="border-2 rounded-3xl sm:rounded-[36px] p-5 sm:p-7 max-w-2xl w-full max-h-[88vh] flex flex-col relative overflow-hidden backdrop-blur-3xl shadow-2xl bg-white border-emerald-600/40 text-slate-900"
             >
-              <div className="flex items-center justify-between pb-4 border-b border-current/10 shrink-0">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-200 shrink-0">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 flex items-center justify-center font-black">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 border border-emerald-300 flex items-center justify-center font-black">
                     <BookOpen className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="font-black text-sm sm:text-base">Daftar Pertanyaan TTS</h3>
-                    <p className="text-[11px] opacity-70">
+                    <h3 className="font-black text-sm sm:text-base text-slate-900">Daftar Pertanyaan TTS</h3>
+                    <p className="text-[11px] text-slate-500">
                       Klik salah satu pertanyaan untuk langsung mengisi jawabannya.
                     </p>
                   </div>
@@ -1271,7 +1456,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
 
                 <button
                   onClick={() => setShowClueDrawer(false)}
-                  className="p-1.5 rounded-full bg-black/10 dark:bg-white/10 hover:opacity-80 transition-all cursor-pointer"
+                  className="p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all cursor-pointer"
                   title="Tutup"
                 >
                   <X className="w-4 h-4" />
@@ -1282,7 +1467,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
               <div className="flex-1 overflow-y-auto py-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* MENDATAR */}
                 <div className="space-y-2.5">
-                  <div className="flex items-center justify-between px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-black text-xs uppercase tracking-wider">
+                  <div className="flex items-center justify-between px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 font-black text-xs uppercase tracking-wider">
                     <span>Mendatar (Across)</span>
                     <span>{crosswordData.clues.across.length} Soal</span>
                   </div>
@@ -1305,24 +1490,22 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
                           }}
                           className={`w-full text-left p-3 rounded-2xl border transition-all flex items-start gap-2.5 cursor-pointer active:scale-98 ${
                             isSolved
-                              ? "bg-emerald-500/10 border-emerald-500/30 opacity-90"
-                              : isDark
-                              ? "bg-black/30 hover:bg-emerald-950/40 border-white/10 hover:border-emerald-500/40"
-                              : "bg-slate-50 hover:bg-emerald-50 border-slate-200 hover:border-emerald-300"
+                              ? "bg-emerald-50 border-emerald-300 opacity-90"
+                              : "bg-slate-50 hover:bg-emerald-50 border-slate-200 hover:border-emerald-300 text-slate-900"
                           }`}
                         >
                           <div
                             className={`w-6 h-6 rounded-lg flex items-center justify-center font-black text-xs shrink-0 ${
                               isSolved
-                                ? "bg-emerald-500 text-slate-950"
-                                : "bg-emerald-500/20 text-emerald-500"
+                                ? "bg-emerald-600 text-white"
+                                : "bg-emerald-100 text-emerald-800 border border-emerald-300"
                             }`}
                           >
                             {isSolved ? "✓" : item.number}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs font-bold leading-snug line-clamp-2">{item.clue}</p>
-                            <span className="text-[10px] opacity-60 font-mono mt-0.5 block">
+                            <p className="text-xs font-bold leading-snug line-clamp-2 text-slate-900">{item.clue}</p>
+                            <span className="text-[10px] text-slate-500 font-mono mt-0.5 block">
                               {item.length} Huruf {isSolved && "• Terjawab"}
                             </span>
                           </div>
@@ -1334,7 +1517,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
 
                 {/* MENURUN */}
                 <div className="space-y-2.5">
-                  <div className="flex items-center justify-between px-2 py-1 rounded-lg bg-teal-500/10 border border-teal-500/20 text-teal-600 dark:text-teal-400 font-black text-xs uppercase tracking-wider">
+                  <div className="flex items-center justify-between px-2.5 py-1 rounded-lg bg-teal-50 border border-teal-200 text-teal-800 font-black text-xs uppercase tracking-wider">
                     <span>Menurun (Down)</span>
                     <span>{crosswordData.clues.down.length} Soal</span>
                   </div>
@@ -1357,24 +1540,22 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
                           }}
                           className={`w-full text-left p-3 rounded-2xl border transition-all flex items-start gap-2.5 cursor-pointer active:scale-98 ${
                             isSolved
-                              ? "bg-teal-500/10 border-teal-500/30 opacity-90"
-                              : isDark
-                              ? "bg-black/30 hover:bg-teal-950/40 border-white/10 hover:border-teal-500/40"
-                              : "bg-slate-50 hover:bg-teal-50 border-slate-200 hover:border-teal-300"
+                              ? "bg-teal-50 border-teal-300 opacity-90"
+                              : "bg-slate-50 hover:bg-teal-50 border-slate-200 hover:border-teal-300 text-slate-900"
                           }`}
                         >
                           <div
                             className={`w-6 h-6 rounded-lg flex items-center justify-center font-black text-xs shrink-0 ${
                               isSolved
-                                ? "bg-teal-500 text-slate-950"
-                                : "bg-teal-500/20 text-teal-500"
+                                ? "bg-teal-600 text-white"
+                                : "bg-teal-100 text-teal-800 border border-teal-300"
                             }`}
                           >
                             {isSolved ? "✓" : item.number}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs font-bold leading-snug line-clamp-2">{item.clue}</p>
-                            <span className="text-[10px] opacity-60 font-mono mt-0.5 block">
+                            <p className="text-xs font-bold leading-snug line-clamp-2 text-slate-900">{item.clue}</p>
+                            <span className="text-[10px] text-slate-500 font-mono mt-0.5 block">
                               {item.length} Huruf {isSolved && "• Terjawab"}
                             </span>
                           </div>
@@ -1394,17 +1575,29 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
       {/* ========================================================================= */}
       <AnimatePresence>
         {showWinModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/55 backdrop-blur-md overflow-hidden select-none">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-2xl overflow-hidden select-none">
             <motion.div
-              initial={{ opacity: 0, scale: 0.85, y: 20 }}
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.85, y: 20 }}
-              className="border-2 rounded-3xl sm:rounded-[40px] p-5 sm:p-8 max-w-lg w-full text-center space-y-4 sm:space-y-6 relative overflow-hidden backdrop-blur-3xl shadow-2xl bg-[#071911] border-emerald-400/50 text-white"
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: "spring", duration: 0.5, bounce: 0.12 }}
+              className="border border-white/10 border-t-emerald-400/90 rounded-2xl p-6 sm:p-8 max-w-md w-full text-center relative overflow-hidden backdrop-blur-3xl shadow-[0_25px_70px_rgba(0,0,0,0.95),0_0_40px_rgba(16,185,129,0.12)] bg-gradient-to-b from-[#0e1a14] via-[#09120e] to-[#040806] text-white"
             >
-              {/* SRE Logo */}
-              <div className="flex items-center justify-center gap-2">
+              {/* Refined Ambient Glow & Cyber Accents */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4/5 h-36 bg-gradient-to-b from-emerald-500/20 to-transparent blur-3xl pointer-events-none" />
+              <div className="absolute -top-12 -right-12 w-32 h-32 bg-teal-500/10 blur-2xl rounded-full pointer-events-none" />
+              <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-emerald-500/10 blur-2xl rounded-full pointer-events-none" />
+
+              {/* Minimal Corner Crosshairs */}
+              <div className="absolute top-3 left-3 w-2.5 h-2.5 border-t border-l border-emerald-400/70 pointer-events-none" />
+              <div className="absolute top-3 right-3 w-2.5 h-2.5 border-t border-r border-emerald-400/70 pointer-events-none" />
+              <div className="absolute bottom-3 left-3 w-2.5 h-2.5 border-b border-l border-emerald-400/70 pointer-events-none" />
+              <div className="absolute bottom-3 right-3 w-2.5 h-2.5 border-b border-r border-emerald-400/70 pointer-events-none" />
+
+              {/* SRE Logo Header */}
+              <div className="flex items-center justify-center relative z-10 mb-2">
                 <div
-                  className="h-7 w-24 shrink-0 bg-white"
+                  className="h-5 w-24 shrink-0 bg-white/90 drop-shadow-[0_0_10px_rgba(255,255,255,0.25)]"
                   style={{
                     WebkitMaskImage: "url(/images/logo.webp)",
                     WebkitMaskSize: "contain",
@@ -1416,108 +1609,139 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
                     maskPosition: "center center",
                   }}
                 />
-                <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400">SRE UPN Veteran Jawa Timur</span>
               </div>
 
-              {/* TROPHY & 3-STAR RATING CELEBRATION */}
-              <div className="relative pt-1">
-                <div className="relative inline-flex mb-2">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-emerald-300 text-slate-950 flex items-center justify-center shadow-[0_0_35px_rgba(16,185,129,0.5)] border-2 border-emerald-200/50 animate-bounce">
-                    <Trophy className="w-8 h-8 sm:w-10 sm:h-10 text-slate-950 drop-shadow-md" />
+              {/* HERO MEDALLION CELEBRATION */}
+              <div className="relative z-10 pt-1 pb-2">
+                <div className="relative inline-flex items-center justify-center mb-3">
+                  {/* Outer Ring Glow */}
+                  <div className={`absolute -inset-2 rounded-2xl blur-lg transition-all duration-500 opacity-60 ${
+                    computedAccuracyScore >= 80
+                      ? "bg-amber-500/40"
+                      : computedAccuracyScore >= 50
+                      ? "bg-emerald-500/40"
+                      : "bg-teal-500/30"
+                  }`} />
+
+                  {/* Medallion Base */}
+                  <div
+                    className={`w-16 h-16 sm:w-18 sm:h-18 rounded-2xl flex items-center justify-center border transition-all duration-300 shadow-2xl relative ${
+                      computedAccuracyScore >= 80
+                        ? "bg-gradient-to-br from-amber-500/30 via-zinc-900 to-amber-950/60 border-amber-400/70 shadow-[0_0_30px_rgba(251,191,36,0.3)]"
+                        : computedAccuracyScore >= 50
+                        ? "bg-gradient-to-br from-emerald-500/30 via-zinc-900 to-teal-950/60 border-emerald-400/70 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
+                        : "bg-gradient-to-br from-cyan-500/20 via-zinc-900 to-zinc-950 border-cyan-400/50 shadow-[0_0_25px_rgba(6,182,212,0.25)]"
+                    }`}
+                  >
+                    <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/15 to-transparent rounded-t-2xl pointer-events-none" />
+                    {computedAccuracyScore >= 80 ? (
+                      <Trophy className="w-8 h-8 sm:w-9 sm:h-9 text-amber-300 drop-shadow-[0_0_15px_rgba(251,191,36,0.9)] animate-pulse" />
+                    ) : computedAccuracyScore >= 50 ? (
+                      <Sparkles className="w-8 h-8 sm:w-9 sm:h-9 text-emerald-300 drop-shadow-[0_0_15px_rgba(16,185,129,0.9)]" />
+                    ) : (
+                      <Target className="w-8 h-8 sm:w-9 sm:h-9 text-cyan-300 drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]" />
+                    )}
                   </div>
                 </div>
 
-                {/* 3D GOLD STARS */}
-                <div className="flex items-center justify-center gap-3 mt-1 mb-2">
-                  {[1, 2, 3].map((starNum) => (
-                    <div key={starNum} className="text-amber-400">
-                      <Star className={`w-8 h-8 sm:w-10 sm:h-10 fill-amber-400 text-amber-300 drop-shadow-[0_0_12px_rgba(251,191,36,0.8)] ${starNum === 2 ? "scale-125" : ""}`} />
-                    </div>
-                  ))}
+                {/* LUMINOUS STARS TIER */}
+                <div className="flex items-center justify-center gap-3">
+                  {[1, 2, 3].map((starNum) => {
+                    const isEarned = starNum <= starsEarned;
+                    return (
+                      <div key={starNum} className="relative flex items-center justify-center">
+                        {isEarned && (
+                          <div className="absolute inset-0 bg-amber-400/30 blur-md rounded-full" />
+                        )}
+                        <Star
+                          className={`w-6 h-6 sm:w-7 sm:h-7 transition-all duration-300 relative z-10 ${
+                            isEarned
+                              ? "fill-amber-400 text-amber-300 drop-shadow-[0_0_12px_rgba(251,191,36,0.9)] scale-110"
+                              : "fill-zinc-800/40 text-zinc-700/80 stroke-[1.5]"
+                          } ${starNum === 2 && isEarned ? "scale-125" : ""}`}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                  <Crown className="w-3.5 h-3.5" />
-                  <span>MISI TTS SELESAI</span>
+              {/* TITLE & DESCRIPTION */}
+              <div className="space-y-1.5 relative z-10">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[9px] font-mono font-bold uppercase tracking-[0.2em] bg-emerald-950/90 text-emerald-400 border border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.2)]">
+                  <Crown className="w-3 h-3 text-emerald-400" />
+                  <span>MISI SELESAI</span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                  Kemenangan Gemilang!
+                <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white drop-shadow-sm">
+                  {computedAccuracyScore >= 80
+                    ? "Kemenangan Gemilang! 🌟"
+                    : computedAccuracyScore >= 50
+                    ? "Kerja Bagus! ✨"
+                    : "Teka-Teki Selesai! 🧩"}
                 </h2>
-                <p className="text-xs sm:text-sm opacity-80 text-gray-300">
-                  Selamat! Anda berhasil menuntaskan seluruh teka-teki silang &quot;{title}&quot;.
+                <p className="text-xs text-zinc-300/80 leading-relaxed max-w-xs mx-auto">
+                  {computedAccuracyScore >= 80
+                    ? `Akurasi sempurna ${computedAccuracyScore}%! ${correctWordsCount} dari ${totalWords} pertanyaan berhasil diselesaikan.`
+                    : `Menyelesaikan ${correctWordsCount} dari ${totalWords} soal dengan akurasi ${computedAccuracyScore}%.`}
                 </p>
               </div>
 
-              {/* STATS GRID */}
-              <div className="grid grid-cols-3 gap-2 bg-black/40 border border-white/10 rounded-2xl p-3 text-center">
-                <div>
-                  <span className="text-[9px] opacity-60 uppercase font-black block">XP Reward</span>
-                  <span className="text-base sm:text-lg font-black text-amber-400 flex items-center justify-center gap-1">
+              {/* STATS TELEMETRY HUD */}
+              <div className="grid grid-cols-3 gap-2.5 my-4 relative z-10">
+                <div className="bg-zinc-900/60 border border-white/10 rounded-xl p-3 text-center backdrop-blur-md shadow-inner group hover:border-amber-400/40 transition-colors">
+                  <span className="text-[9px] text-zinc-400 uppercase font-mono tracking-wider block font-semibold">XP REWARD</span>
+                  <span className="text-sm sm:text-base font-black text-amber-400 flex items-center justify-center gap-1 mt-1">
                     <Zap className="w-3.5 h-3.5 fill-amber-400" />
-                    +{(submissionResult?.xpEarned !== undefined ? submissionResult.xpEarned : (puzzleData?.rewardXp ?? 0))} XP
+                    +{(submissionResult?.xpEarned !== undefined ? submissionResult.xpEarned : (puzzleData?.rewardXp ?? 0))}
                   </span>
                 </div>
-                <div>
-                  <span className="text-[9px] opacity-60 uppercase font-black block">Waktu Selesai</span>
-                  <span className="text-base sm:text-lg font-black text-cyan-400 flex items-center justify-center gap-1">
+                <div className="bg-zinc-900/60 border border-white/10 rounded-xl p-3 text-center backdrop-blur-md shadow-inner group hover:border-cyan-400/40 transition-colors">
+                  <span className="text-[9px] text-zinc-400 uppercase font-mono tracking-wider block font-semibold">WAKTU</span>
+                  <span className="text-sm sm:text-base font-black text-cyan-300 flex items-center justify-center gap-1 mt-1">
                     <Timer className="w-3.5 h-3.5" />
                     {formatSeconds(elapsedTime)}
                   </span>
                 </div>
-                <div>
-                  <span className="text-[9px] opacity-60 uppercase font-black block">Skor / Akurasi</span>
-                  <span className="text-base sm:text-lg font-black text-emerald-400 flex items-center justify-center gap-1">
+                <div className="bg-zinc-900/60 border border-white/10 rounded-xl p-3 text-center backdrop-blur-md shadow-inner group hover:border-emerald-400/40 transition-colors">
+                  <span className="text-[9px] text-zinc-400 uppercase font-mono tracking-wider block font-semibold">AKURASI</span>
+                  <span className={`text-sm sm:text-base font-black flex items-center justify-center gap-1 mt-1 ${computedAccuracyScore >= 80 ? "text-emerald-400" : computedAccuracyScore >= 50 ? "text-teal-400" : "text-cyan-400"}`}>
                     <Target className="w-3.5 h-3.5" />
-                    {submissionResult ? `${submissionResult.score}%` : "100%"}
+                    {computedAccuracyScore}%
                   </span>
                 </div>
               </div>
 
-              {/* BUTTONS */}
-              <div className="flex flex-col gap-2.5 pt-2">
-                {/* SHARE TO SOCIAL MEDIA BUTTON */}
+              {/* STREAMLINED ACTION BUTTONS (NO MAIN LAGI) */}
+              <div className="flex flex-col gap-2.5 pt-1 relative z-10">
+                {/* PRIMARY STORY SHARE BUTTON */}
                 <button
                   type="button"
                   onClick={() => setShowShareModal(true)}
-                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 hover:from-emerald-300 hover:to-cyan-300 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/40 hover:shadow-emerald-500/60 transition-all cursor-pointer active:scale-95 border border-emerald-200/50"
+                  className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 hover:from-emerald-400 hover:to-cyan-300 text-zinc-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(16,185,129,0.4)] hover:shadow-[0_0_35px_rgba(16,185,129,0.6)] transition-all cursor-pointer active:scale-[0.98] border border-emerald-200/60 tracking-wide"
                 >
                   <Share2 className="w-4 h-4 stroke-[2.5]" />
                   <span>Bagikan ke Media Sosial (Story 9:16)</span>
-                  <Sparkles className="w-4 h-4 fill-current animate-pulse" />
+                  <Sparkles className="w-4 h-4 fill-current" />
                 </button>
 
-                <div className="flex flex-col sm:flex-row items-center gap-2.5">
-                  {!taskId && (
-                    <button
-                      onClick={handleResetPuzzle}
-                      disabled={isSubmitting}
-                      className="w-full py-3 rounded-2xl bg-black/40 hover:bg-black/60 border border-white/10 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-50 text-white"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                      <span>Main Lagi</span>
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    disabled={isSubmitting}
-                    onClick={() => {
-                      window.location.href = onBackUrl;
-                    }}
-                    className="w-full py-3 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/20 text-white font-black text-xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
-                  >
-                    <Check className="w-4 h-4 stroke-[3]" />
-                    <span>
-                      {isSubmitting
-                        ? "Menyimpan Data..."
-                        : onBackUrl.includes("tugas")
-                        ? "Kembali ke Quest Tugas"
-                        : "Selesai & Keluar"}
-                    </span>
-                  </button>
-                </div>
+                {/* ELEGANT EXIT / BACK BUTTON */}
+                <button
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={() => {
+                    window.location.href = onBackUrl;
+                  }}
+                  className="w-full py-3 rounded-xl bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700/70 hover:border-zinc-500 text-zinc-200 hover:text-white font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98] disabled:opacity-50 tracking-wide shadow-sm"
+                >
+                  <Check className="w-4 h-4 stroke-[2.5] text-emerald-400" />
+                  <span>
+                    {isSubmitting
+                      ? "Menyimpan Data..."
+                      : onBackUrl.includes("tugas")
+                      ? "Kembali ke Quest Tugas"
+                      : "Selesai & Keluar"}
+                  </span>
+                </button>
               </div>
             </motion.div>
           </div>
@@ -1538,11 +1762,7 @@ export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/t
           elapsedTime,
           mistakeCount: submissionResult?.wrongCount !== undefined ? submissionResult.wrongCount : mistakeCount,
           xpEarned: submissionResult ? submissionResult.xpEarned : (puzzleData?.rewardXp || 10),
-          score: submissionResult
-            ? submissionResult.score
-            : totalWords > 0
-            ? Math.max(0, Math.round((correctWordsCount / totalWords) * 100))
-            : 100,
+          score: computedAccuracyScore,
           starsEarned,
         }}
         currentUser={currentUser}
