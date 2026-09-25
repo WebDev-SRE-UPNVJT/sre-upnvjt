@@ -30,6 +30,7 @@ export default function TTSShareCardModal({
   const [linkCopied, setLinkCopied] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
+  const [igGuide, setIgGuide] = useState(false); // Panduan post-download IG Story
 
   const title = puzzleData?.title || "Teka-Teki Silang";
   const playerName = currentUser?.name || currentUser?.username || "SRE Member";
@@ -44,7 +45,7 @@ export default function TTSShareCardModal({
 
   const totalWords = (crosswordData?.clues?.across?.length || 0) + (crosswordData?.clues?.down?.length || 0);
 
-  // Generate Image from Card using html2canvas directly matching the exact live DOM preview
+  // Generate Image from Card using html2canvas with ultra HD crisp rendering
   const generateCanvasImage = async () => {
     if (!cardRef.current) return null;
     setIsGenerating(true);
@@ -54,19 +55,42 @@ export default function TTSShareCardModal({
         await document.fonts.ready;
       }
 
+      // Pre-wait for overlay frame image if present
+      const frameImg = cardRef.current.querySelector("img");
+      if (frameImg && !frameImg.complete) {
+        await new Promise((resolve) => {
+          frameImg.onload = resolve;
+          frameImg.onerror = resolve;
+        });
+      }
+
+      // 4x scale factor generates a crisp ~1480px x 2632px Full HD+ image
+      const scale = Math.max((typeof window !== "undefined" && window.devicePixelRatio) || 1, 4);
+
       const canvas = await html2canvas(cardRef.current, {
-        scale: 3, // Ultra-sharp 3x resolution (1110px x 1974px)
+        scale: scale,
         useCORS: true,
         allowTaint: true,
         backgroundColor: "#ffffff",
-        width: 370,
-        height: 658,
-        scrollX: 0,
-        scrollY: 0,
-        x: 0,
-        y: 0,
         logging: false,
         imageTimeout: 15000,
+        onclone: (clonedDoc) => {
+          const clonedCard = clonedDoc.getElementById("tts-share-portrait-card");
+          if (clonedCard) {
+            clonedCard.style.transform = "none";
+            clonedCard.style.webkitFontSmoothing = "antialiased";
+            clonedCard.style.textRendering = "optimizeLegibility";
+            clonedCard.style.boxSizing = "border-box";
+            
+            // Remove crossorigin from local relative images in clone to prevent CORS canvas tainting
+            const imgs = clonedCard.querySelectorAll("img");
+            imgs.forEach((img) => {
+              if (img.getAttribute("src")?.startsWith("/")) {
+                img.removeAttribute("crossorigin");
+              }
+            });
+          }
+        },
       });
 
       return canvas;
@@ -180,6 +204,11 @@ export default function TTSShareCardModal({
     }
   };
 
+  // Deteksi apakah user di mobile (iOS/Android)
+  const isMobile = () =>
+    typeof navigator !== "undefined" &&
+    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
   // Direct Instagram Story Share Handler
   const shareToInstagramStory = async () => {
     try {
@@ -191,8 +220,8 @@ export default function TTSShareCardModal({
         const safeTitle = title.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase();
         const file = new File([blob], `TTS-SRE-${safeTitle}.png`, { type: "image/png" });
 
-        // Native share sheet (Mobile Safari/Chrome on iOS & Android gives 1-tap direct Instagram Story option)
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        // Mobile: gunakan Web Share API — Instagram muncul langsung di share sheet
+        if (isMobile() && navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
             await navigator.share({
               files: [file],
@@ -201,21 +230,29 @@ export default function TTSShareCardModal({
             });
             setShareSuccess(true);
             setTimeout(() => setShareSuccess(false), 3000);
+            return;
           } catch (e) {
-            if (e.name !== "AbortError") {
-              handleDownloadImage();
-              window.open("https://www.instagram.com/", "_blank");
-            }
+            if (e.name === "AbortError") return; // user batalkan share sheet
+            // jika gagal, fallthrough ke download
           }
-        } else {
-          // Desktop / Non-mobile fallback: Download 9:16 story and open Instagram web
-          handleDownloadImage();
-          window.open("https://www.instagram.com/", "_blank");
         }
+
+        // Desktop / fallback: auto-download + tampilkan panduan langkah
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `TTS-SRE-${safeTitle}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        setDownloadSuccess(true);
+        setTimeout(() => setDownloadSuccess(false), 3000);
+        // Tampilkan panduan cara upload ke IG Story
+        setIgGuide(true);
       }, "image/png");
     } catch (err) {
       console.error("Instagram Story share error:", err);
-      handleDownloadImage();
     }
   };
 
@@ -291,7 +328,6 @@ export default function TTSShareCardModal({
                   <img
                     src="/images/tts_story_frame.png"
                     alt="SRE Catalyst Story Frame"
-                    crossOrigin="anonymous"
                     className="absolute inset-0 w-full h-full object-fill pointer-events-none"
                     style={{
                       display: "block",
@@ -344,6 +380,8 @@ export default function TTSShareCardModal({
                           }}
                         >
                           <svg
+                            width="100%"
+                            height="100%"
                             viewBox={`0 0 ${crosswordData.cols * 36} ${crosswordData.rows * 36}`}
                             className="w-full h-full max-w-full max-h-full select-none"
                             preserveAspectRatio="xMidYMid meet"
@@ -654,6 +692,25 @@ export default function TTSShareCardModal({
                     </svg>
                     <span>Bagikan ke Instagram Story</span>
                   </button>
+
+                  {/* PANDUAN POST-DOWNLOAD IG STORY (desktop fallback) */}
+                  {igGuide && (
+                    <div className="rounded-xl border border-purple-500/30 bg-purple-950/40 p-3.5 text-left space-y-2">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-bold text-purple-300">📲 Cara Upload ke Instagram Story</p>
+                        <button
+                          onClick={() => setIgGuide(false)}
+                          className="text-purple-400 hover:text-white transition-colors text-xs"
+                        >✕</button>
+                      </div>
+                      <ol className="text-xs text-purple-200/80 space-y-1 list-none">
+                        <li className="flex gap-2"><span className="text-purple-400 font-bold">1.</span><span>Gambar sudah <strong className="text-white">terunduh otomatis</strong> ke folder Downloads kamu.</span></li>
+                        <li className="flex gap-2"><span className="text-purple-400 font-bold">2.</span><span>Buka aplikasi <strong className="text-white">Instagram</strong> di HP kamu.</span></li>
+                        <li className="flex gap-2"><span className="text-purple-400 font-bold">3.</span><span>Tap ikon <strong className="text-white">+</strong> → pilih <strong className="text-white">Story</strong>.</span></li>
+                        <li className="flex gap-2"><span className="text-purple-400 font-bold">4.</span><span>Pilih gambar <strong className="text-white">TTS-SRE-...</strong> dari galeri, lalu posting!</span></li>
+                      </ol>
+                    </div>
+                  )}
 
                   {/* DOWNLOAD PNG BUTTON */}
                   <button
