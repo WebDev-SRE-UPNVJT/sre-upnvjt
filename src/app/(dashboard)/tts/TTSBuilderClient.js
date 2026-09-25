@@ -9,7 +9,7 @@ import {
   BookOpen, Clock, AlertTriangle, ArrowRight, CornerDownLeft,
   Settings2, ChevronRight, Share2, ZoomIn, ZoomOut, Maximize2,
   Save, Award, CheckSquare, Loader2, FileCheck, Sliders, CheckCircle,
-  HelpCircleIcon, AlertCircle, ListFilter, Search, Edit3, ExternalLink
+  HelpCircleIcon, AlertCircle, ListFilter, Search, Edit3, ExternalLink, Zap, Timer
 } from "lucide-react";
 import { generateCrosswordLayout, sanitizeAnswer } from "@/lib/crosswordGenerator";
 import { saveTTS, deleteTTS, getTTSList, getTTSById } from "@/app/actions/ttsActions";
