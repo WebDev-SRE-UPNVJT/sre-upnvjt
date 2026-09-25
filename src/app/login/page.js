@@ -117,19 +117,19 @@ function LoginFormContent() {
   React.useEffect(() => {
     if (status === "authenticated" && !isLoading) {
       if (callbackUrl && callbackUrl.startsWith("/") && !callbackUrl.startsWith("//")) {
-        router.replace(callbackUrl);
+        window.location.replace(callbackUrl);
         return;
       }
       const role = session?.user?.roleName;
       if (role === "MEMBER") {
-        router.replace("/member");
+        window.location.replace("/member");
       } else if (role === "STAFF") {
-        router.replace("/officer");
+        window.location.replace("/officer");
       } else {
-        router.replace("/dashboard");
+        window.location.replace("/dashboard");
       }
     }
-  }, [status, session, isLoading, callbackUrl, router]);
+  }, [status, session, isLoading, callbackUrl]);
 
   React.useEffect(() => {
     fetch("/api/settings/system")
@@ -178,11 +178,11 @@ function LoginFormContent() {
         destination = "/officer";
       }
 
-      router.replace(destination);
-      router.refresh();
+      // Use window.location.replace to guarantee clean cookie transfer & avoid router lock
+      window.location.replace(destination);
     } catch (err) {
       console.error("Login redirect error:", err);
-      router.replace("/dashboard");
+      window.location.replace("/dashboard");
     }
   };
 
