@@ -102,21 +102,44 @@ export default function TTSShareCardModal({
     }
   };
 
-  // Download Image Handler
+  // Download Image Handler (Direct Save to Gallery on Mobile via Share Sheet)
   const handleDownloadImage = async () => {
     try {
       const canvas = await generateCanvasImage();
       if (!canvas) return;
 
-      const dataUrl = canvas.toDataURL("image/png");
-      const link = document.createElement("a");
-      const safeTitle = title.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase();
-      link.download = `TTS-SRE-${safeTitle}.png`;
-      link.href = dataUrl;
-      link.click();
+      canvas.toBlob(async (blob) => {
+        if (!blob) return;
+        const safeTitle = title.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase();
+        const fileName = `TTS-SRE-${safeTitle}.png`;
+        const file = new File([blob], fileName, { type: "image/png" });
 
-      setDownloadSuccess(true);
-      setTimeout(() => setDownloadSuccess(false), 3000);
+        // Pada perangkat mobile (iOS / Android), gunakan Web Share API jika tersedia 
+        // agar menu "Simpan Gambar" / "Save Image" muncul langsung menuju Galeri Foto
+        if (isMobile() && navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: `Hasil TTS SRE: ${title}`,
+            });
+            setDownloadSuccess(true);
+            setTimeout(() => setDownloadSuccess(false), 3000);
+            return;
+          } catch (e) {
+            if (e.name === "AbortError") return; // User membatalkan menu share
+          }
+        }
+
+        // Fallback untuk Desktop atau browser tanpa Web Share API
+        const dataUrl = canvas.toDataURL("image/png");
+        const link = document.createElement("a");
+        link.download = fileName;
+        link.href = dataUrl;
+        link.click();
+
+        setDownloadSuccess(true);
+        setTimeout(() => setDownloadSuccess(false), 3000);
+      }, "image/png");
     } catch (e) {
       console.error("Download failed:", e);
     }
