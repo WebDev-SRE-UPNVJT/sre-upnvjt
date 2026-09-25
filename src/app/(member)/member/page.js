@@ -6,7 +6,6 @@ import { db } from "@/lib/db";
 import { user, memberProfile, task, taskSubmission, attendance, pptModule, literatureItem, xpTransaction, division, pptPhase, pptModuleProgress, role, department } from "@/db/schema";
 import { eq, desc, asc, and, sql } from "drizzle-orm";
 import MemberDashboardClient from "./MemberDashboardClient";
-import { getAugmentedLeaderboard } from "@/lib/dummyLeaderboard";
 
 export const dynamic = "force-dynamic";
 
@@ -46,7 +45,7 @@ export default async function MemberDashboardPage() {
   // Fetch all parallel queries concurrently to optimize execution time
   const [
     currentUser,
-    dbProfiles,
+    higherRankCount,
     allTasks,
     submissions,
     attendanceLogs,
@@ -58,21 +57,32 @@ export default async function MemberDashboardPage() {
   ] = await Promise.all([
     db.query.user.findFirst({
       where: eq(user.id, userIdInt),
+      columns: {
+        id: true,
+        name: true,
+        email: true,
+        npm: true,
+        profilePictureUrl: true,
+      },
       with: {
-        role: true,
-        department: true,
+        role: {
+          columns: {
+            id: true,
+            name: true,
+          },
+        },
+        department: {
+          columns: {
+            id: true,
+            name: true,
+            code: true,
+          },
+        },
       },
     }),
     db
       .select({
-        id: user.id,
-        name: user.name,
-        npm: user.npm,
-        profilePictureUrl: user.profilePictureUrl,
-        xp: memberProfile.xp,
-        level: memberProfile.level,
-        divisionName: division.name,
-        roleName: role.name,
+        count: sql`COUNT(*)::int`,
       })
       .from(memberProfile)
       .innerJoin(user, eq(user.id, memberProfile.userId))
@@ -84,52 +94,110 @@ export default async function MemberDashboardPage() {
           sql`LOWER(${role.name}) = 'member'`,
           sql`COALESCE(LOWER(${department.code}), '') NOT IN ('sys', 'system')`,
           sql`COALESCE(LOWER(${department.name}), '') NOT LIKE '%sys%'`,
-          sql`COALESCE(LOWER(${division.name}), '') NOT LIKE '%sys%'`
+          sql`COALESCE(LOWER(${division.name}), '') NOT LIKE '%sys%'`,
+          sql`${memberProfile.xp} > ${profile.xp || 0}`
         )
-      )
-      .orderBy(desc(memberProfile.xp)),
+      ),
     db.query.task.findMany({
       orderBy: [asc(task.deadline)],
+      columns: {
+        id: true,
+        title: true,
+        rewardXp: true,
+        category: true,
+        prerequisiteTaskId: true,
+        pptModuleId: true,
+        deadline: true,
+      },
     }),
     db.query.taskSubmission.findMany({
       where: eq(taskSubmission.memberId, userIdInt),
+      columns: {
+        id: true,
+        taskId: true,
+        status: true,
+      },
     }),
     db.query.attendance.findMany({
       where: eq(attendance.memberId, userIdInt),
       orderBy: [desc(attendance.createdAt)],
+      columns: {
+        id: true,
+        status: true,
+      },
     }),
     db.query.pptModule.findMany({
       where: eq(pptModule.isPublished, true),
       orderBy: [asc(pptModule.createdAt)],
+      columns: {
+        id: true,
+        title: true,
+        phaseId: true,
+        createdAt: true,
+      },
       with: {
-        slides: true,
+        slides: {
+          columns: {
+            id: true,
+          },
+        },
       },
     }),
     db.query.pptModuleProgress.findMany({
       where: eq(pptModuleProgress.userId, userIdInt),
+      columns: {
+        moduleId: true,
+        currentSlideIdx: true,
+        maxSlideIdx: true,
+        isCompleted: true,
+      },
     }),
     db.query.pptPhase.findMany({
       orderBy: [asc(pptPhase.order), asc(pptPhase.id)],
+      columns: {
+        id: true,
+        name: true,
+        description: true,
+        order: true,
+      },
     }),
     db.query.literatureItem.findFirst({
       where: eq(literatureItem.isPublished, true),
       orderBy: [desc(literatureItem.createdAt)],
+      columns: {
+        id: true,
+        title: true,
+        description: true,
+        coverUrl: true,
+        fileUrl: true,
+        createdAt: true,
+      },
       with: {
-        category: true,
+        category: {
+          columns: {
+            id: true,
+            name: true,
+          },
+        },
       },
     }),
     db.query.xpTransaction.findMany({
       where: eq(xpTransaction.userId, userIdInt),
       orderBy: [desc(xpTransaction.createdAt)],
       limit: 5,
+      columns: {
+        id: true,
+        amount: true,
+        reason: true,
+        sourceType: true,
+        createdAt: true,
+      },
     }),
   ]);
 
   if (!currentUser) redirect("/login");
 
-  const augmented = getAugmentedLeaderboard(dbProfiles);
-  const userRankObj = augmented.find(item => item.id === userIdInt);
-  const currentRank = userRankObj ? userRankObj.rank : (augmented.length > 0 ? augmented.length + 1 : 1);
+  const currentRank = (higherRankCount[0]?.count || 0) + 1;
 
   // Calculate completed tasks
   const completedTasksCount = submissions.filter(s => s.status === "APPROVED").length;

@@ -104,7 +104,12 @@ function LoginFormContent() {
 
   React.useEffect(() => {
     setMounted(true);
-  }, []);
+    try {
+      router.prefetch("/member");
+      router.prefetch("/officer");
+      router.prefetch("/dashboard");
+    } catch (_) {}
+  }, [router]);
 
   const isLight = mounted && (theme === "light" || resolvedTheme === "light");
 
@@ -112,19 +117,19 @@ function LoginFormContent() {
   React.useEffect(() => {
     if (status === "authenticated" && !isLoading) {
       if (callbackUrl && callbackUrl.startsWith("/") && !callbackUrl.startsWith("//")) {
-        window.location.href = callbackUrl;
+        router.replace(callbackUrl);
         return;
       }
       const role = session?.user?.roleName;
       if (role === "MEMBER") {
-        window.location.href = "/member";
+        router.replace("/member");
       } else if (role === "STAFF") {
-        window.location.href = "/officer";
+        router.replace("/officer");
       } else {
-        window.location.href = "/dashboard";
+        router.replace("/dashboard");
       }
     }
-  }, [status, session, isLoading, callbackUrl]);
+  }, [status, session, isLoading, callbackUrl, router]);
 
   React.useEffect(() => {
     fetch("/api/settings/system")
@@ -173,11 +178,11 @@ function LoginFormContent() {
         destination = "/officer";
       }
 
-      // Using window.location.href ensures clean cookie transfer & bypasses client router lag on Vercel
-      window.location.href = destination;
+      router.replace(destination);
+      router.refresh();
     } catch (err) {
       console.error("Login redirect error:", err);
-      window.location.href = "/dashboard";
+      router.replace("/dashboard");
     }
   };
 

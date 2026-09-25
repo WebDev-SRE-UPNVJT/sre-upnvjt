@@ -22,17 +22,26 @@ export default async function MemberLayout({ children }) {
     redirect("/login");
   }
 
-  // Load user data to check mustChangePassword status
-  const currentUser = await db.query.user.findFirst({
-    where: eq(user.id, userIdInt),
-  });
+  // Parallel load of mustChangePassword and profile with lean columns
+  const [currentUser, memberProfileResult] = await Promise.all([
+    db.query.user.findFirst({
+      where: eq(user.id, userIdInt),
+      columns: {
+        mustChangePassword: true,
+      },
+    }),
+    db.query.memberProfile.findFirst({
+      where: eq(memberProfile.userId, userIdInt),
+      columns: {
+        userId: true,
+        xp: true,
+        level: true,
+      },
+    }),
+  ]);
 
   const mustChangePassword = !!currentUser?.mustChangePassword;
-
-  // Load the member's profile for XP & Level
-  let profile = await db.query.memberProfile.findFirst({
-    where: eq(memberProfile.userId, userIdInt),
-  });
+  let profile = memberProfileResult;
 
   if (!profile) {
     // If somehow profile is missing, initialize it safely
