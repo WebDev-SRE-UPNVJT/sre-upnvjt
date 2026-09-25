@@ -25,6 +25,7 @@ export default function TTSShareCardModal({
   currentUser,
 }) {
   const cardRef = useRef(null);
+  const hdCardRef = useRef(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
@@ -45,9 +46,10 @@ export default function TTSShareCardModal({
 
   const totalWords = (crosswordData?.clues?.across?.length || 0) + (crosswordData?.clues?.down?.length || 0);
 
-  // Generate Image from Card using html2canvas with ultra HD crisp rendering
+  // Generate Image from Card using native 1080x1920 HD canvas capture
   const generateCanvasImage = async () => {
-    if (!cardRef.current) return null;
+    const targetRef = hdCardRef.current || cardRef.current;
+    if (!targetRef) return null;
     setIsGenerating(true);
 
     try {
@@ -56,7 +58,7 @@ export default function TTSShareCardModal({
       }
 
       // Pre-wait for overlay frame image if present
-      const frameImg = cardRef.current.querySelector("img");
+      const frameImg = targetRef.querySelector("img");
       if (frameImg && !frameImg.complete) {
         await new Promise((resolve) => {
           frameImg.onload = resolve;
@@ -64,25 +66,21 @@ export default function TTSShareCardModal({
         });
       }
 
-      // 4x scale factor generates a crisp ~1480px x 2632px Full HD+ image
-      const scale = Math.max((typeof window !== "undefined" && window.devicePixelRatio) || 1, 4);
-
-      const canvas = await html2canvas(cardRef.current, {
-        scale: scale,
+      const canvas = await html2canvas(targetRef, {
+        scale: 1, // 1:1 pixel scale on native 1080x1920 Full HD element
         useCORS: true,
         allowTaint: true,
         backgroundColor: "#ffffff",
         logging: false,
         imageTimeout: 15000,
         onclone: (clonedDoc) => {
-          const clonedCard = clonedDoc.getElementById("tts-share-portrait-card");
+          const clonedCard = clonedDoc.getElementById("tts-share-portrait-card-hd") || clonedDoc.getElementById("tts-share-portrait-card");
           if (clonedCard) {
             clonedCard.style.transform = "none";
             clonedCard.style.webkitFontSmoothing = "antialiased";
             clonedCard.style.textRendering = "optimizeLegibility";
             clonedCard.style.boxSizing = "border-box";
-            
-            // Remove crossorigin from local relative images in clone to prevent CORS canvas tainting
+
             const imgs = clonedCard.querySelectorAll("img");
             imgs.forEach((img) => {
               if (img.getAttribute("src")?.startsWith("/")) {
@@ -775,6 +773,366 @@ export default function TTSShareCardModal({
             </div>
           </div>
         </motion.div>
+      </div>
+
+      {/* HIDDEN OFF-SCREEN NATIVE 1080x1920 FULL-HD EXPORT CONTAINER */}
+      <div
+        style={{
+          position: "fixed",
+          left: "-9999px",
+          top: "-9999px",
+          width: "1080px",
+          height: "1920px",
+          zIndex: -9999,
+          pointerEvents: "none",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          ref={hdCardRef}
+          id="tts-share-portrait-card-hd"
+          style={{
+            width: "1080px",
+            height: "1920px",
+            borderRadius: "0px",
+            fontFamily: "var(--font-montserrat), 'Montserrat', 'Inter', sans-serif",
+            color: "#064e3b",
+            boxShadow: "none",
+            paddingTop: "496px",
+            paddingBottom: "336px",
+            paddingLeft: "41px",
+            paddingRight: "41px",
+            boxSizing: "border-box",
+            backgroundColor: "#ffffff",
+            position: "relative",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          {/* FOREGROUND HIGH-RES STORY POSTER FRAME */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/tts_story_frame.png"
+            alt="SRE Catalyst Story Frame HD"
+            style={{
+              display: "block",
+              width: "1080px",
+              height: "1920px",
+              position: "absolute",
+              inset: 0,
+              zIndex: 30,
+              pointerEvents: "none",
+            }}
+          />
+
+          {/* 1. HERO CROSSWORD BOARD AT 1080p */}
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              position: "relative",
+              zIndex: 10,
+              marginBottom: "29px",
+              flexShrink: 0,
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: "#ffffff",
+                border: "6px solid #10b981",
+                borderRadius: "35px",
+                boxShadow: "0 9px 40px rgba(6,78,59,0.14)",
+                padding: "12px",
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                overflow: "hidden",
+                boxSizing: "border-box",
+              }}
+            >
+              {crosswordData?.grid && crosswordData.grid.length > 0 && (
+                <div
+                  style={{
+                    aspectRatio: `${crosswordData.cols} / ${crosswordData.rows}`,
+                    height: "510px",
+                    maxWidth: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <svg
+                    width="100%"
+                    height="100%"
+                    viewBox={`0 0 ${crosswordData.cols * 36} ${crosswordData.rows * 36}`}
+                    className="w-full h-full max-w-full max-h-full select-none"
+                    preserveAspectRatio="xMidYMid meet"
+                    shapeRendering="geometricPrecision"
+                    textRendering="geometricPrecision"
+                  >
+                    {crosswordData.grid.map((row, rIdx) =>
+                      row.map((cell, cIdx) => {
+                        const cellKey = `${rIdx},${cIdx}`;
+                        const isLetterCell = Boolean(cell && cell.char);
+                        const answeredChar = userInputs[cellKey] || cell?.char || "";
+
+                        if (!isLetterCell) return null;
+
+                        let isCellWrong = false;
+                        if (crosswordData?.placedWords) {
+                          const associatedWords = crosswordData.placedWords.filter(
+                            (w) =>
+                              (w.direction === "ACROSS" && w.row === rIdx && cIdx >= w.col && cIdx < w.col + w.length) ||
+                              (w.direction === "DOWN" && w.col === cIdx && rIdx >= w.row && rIdx < w.row + w.length)
+                          );
+                          if (associatedWords.length > 0) {
+                            const allCorrect = associatedWords.every(
+                              (w) => wordStatuses && wordStatuses[`${w.direction}-${w.number}`] === "CORRECT"
+                            );
+                            isCellWrong = !allCorrect;
+                          }
+                        }
+
+                        return (
+                          <g key={cellKey} transform={`translate(${cIdx * 36}, ${rIdx * 36})`}>
+                            <rect
+                              x="1.5"
+                              y="1.5"
+                              width="33"
+                              height="33"
+                              rx="4"
+                              fill={isCellWrong ? "#fee2e2" : "#dcfce7"}
+                              stroke={isCellWrong ? "#ef4444" : "#059669"}
+                              strokeWidth="1.8"
+                            />
+                            {cell.number && (
+                              <text
+                                x="4"
+                                y="9.5"
+                                fontSize="8"
+                                fontWeight="900"
+                                fontFamily="sans-serif"
+                                fill={isCellWrong ? "#dc2626" : "#047857"}
+                              >
+                                {cell.number}
+                              </text>
+                            )}
+                            <text
+                              x="18"
+                              y="24.5"
+                              textAnchor="middle"
+                              fontSize="17"
+                              fontWeight="900"
+                              fontFamily="monospace"
+                              fill={isCellWrong ? "#991b1b" : "#022c22"}
+                            >
+                              {answeredChar}
+                            </text>
+                          </g>
+                        );
+                      })
+                    )}
+                  </svg>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 2. CARD HASIL & DAFTAR SOAL AT 1080p */}
+          <div
+            style={{
+              backgroundColor: "#ffffff",
+              border: "6px solid #10b981",
+              borderRadius: "35px",
+              boxShadow: "0 6px 24px rgba(6,78,59,0.08)",
+              padding: "20px 26px",
+              display: "flex",
+              flexDirection: "column",
+              flexShrink: 0,
+              textAlign: "left",
+              width: "100%",
+              position: "relative",
+              zIndex: 10,
+              boxSizing: "border-box",
+            }}
+          >
+            {/* PROFILE & SCORE */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: "15px",
+              }}
+            >
+              <span
+                style={{
+                  color: "#022c22",
+                  fontSize: "28px",
+                  fontWeight: "900",
+                  letterSpacing: "0.01em",
+                }}
+              >
+                {playerName}
+              </span>
+
+              <div style={{ display: "flex", alignItems: "center", gap: "18px", flexShrink: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "29px" }}>
+                  {[1, 2, 3].map((s) => {
+                    const numStars =
+                      typeof stats.starsEarned === "number"
+                        ? stats.starsEarned
+                        : stats.score >= 80
+                        ? 3
+                        : stats.score >= 50
+                        ? 2
+                        : stats.score >= 20
+                        ? 1
+                        : 0;
+                    const isLit = s <= numStars;
+                    return (
+                      <span
+                        key={s}
+                        style={{ color: isLit ? "#f59e0b" : "#cbd5e1" }}
+                      >
+                        ★
+                      </span>
+                    );
+                  })}
+                </div>
+                <span
+                  style={{
+                    color: stats.score >= 80 ? "#059669" : stats.score >= 50 ? "#0d9488" : "#e11d48",
+                    fontSize: "28px",
+                    fontWeight: "900",
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  {stats.score}% SKOR
+                </span>
+              </div>
+            </div>
+
+            {/* CLUES LIST */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                columnGap: "24px",
+                fontSize: "19px",
+                lineHeight: 1.35,
+              }}
+            >
+              {/* MENDATAR */}
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <span
+                  style={{
+                    color: "#065f46",
+                    fontWeight: "900",
+                    textTransform: "uppercase",
+                    fontSize: "19px",
+                    letterSpacing: "0.05em",
+                    display: "block",
+                    marginBottom: "9px",
+                  }}
+                >
+                  Mendatar
+                </span>
+                {crosswordData.clues?.across?.map((item) => {
+                  const wordKey = `ACROSS-${item.number}`;
+                  const isCorrect = Boolean(wordStatuses && wordStatuses[wordKey] === "CORRECT");
+
+                  return (
+                    <div
+                      key={`across-${item.number}`}
+                      style={{ display: "flex", alignItems: "flex-start", gap: "9px", marginBottom: "9px" }}
+                    >
+                      <span
+                        style={{
+                          color: isCorrect ? "#059669" : "#e11d48",
+                          fontSize: "20px",
+                          fontWeight: "900",
+                          flexShrink: 0,
+                          lineHeight: "1.35",
+                        }}
+                      >
+                        {isCorrect ? "✓" : "✗"} #{item.number}.
+                      </span>
+                      <span
+                        style={{
+                          color: isCorrect ? "#064e3b" : "#1e293b",
+                          lineHeight: "1.35",
+                          fontWeight: "600",
+                          fontSize: "18.5px",
+                          wordBreak: "break-word",
+                          flex: 1,
+                        }}
+                      >
+                        {item.clue}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* MENURUN */}
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <span
+                  style={{
+                    color: "#115e59",
+                    fontWeight: "900",
+                    textTransform: "uppercase",
+                    fontSize: "19px",
+                    letterSpacing: "0.05em",
+                    display: "block",
+                    marginBottom: "9px",
+                  }}
+                >
+                  Menurun
+                </span>
+                {crosswordData.clues?.down?.map((item) => {
+                  const wordKey = `DOWN-${item.number}`;
+                  const isCorrect = Boolean(wordStatuses && wordStatuses[wordKey] === "CORRECT");
+
+                  return (
+                    <div
+                      key={`down-${item.number}`}
+                      style={{ display: "flex", alignItems: "flex-start", gap: "9px", marginBottom: "9px" }}
+                    >
+                      <span
+                        style={{
+                          color: isCorrect ? "#059669" : "#e11d48",
+                          fontSize: "20px",
+                          fontWeight: "900",
+                          flexShrink: 0,
+                          lineHeight: "1.35",
+                        }}
+                      >
+                        {isCorrect ? "✓" : "✗"} #{item.number}.
+                      </span>
+                      <span
+                        style={{
+                          color: isCorrect ? "#064e3b" : "#1e293b",
+                          lineHeight: "1.35",
+                          fontWeight: "600",
+                          fontSize: "18.5px",
+                          wordBreak: "break-word",
+                          flex: 1,
+                        }}
+                      >
+                        {item.clue}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </AnimatePresence>
   );
