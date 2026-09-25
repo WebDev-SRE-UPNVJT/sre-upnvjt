@@ -45,7 +45,7 @@ export default function TTSShareCardModal({
 
   const totalWords = (crosswordData?.clues?.across?.length || 0) + (crosswordData?.clues?.down?.length || 0);
 
-  // Generate Image from Card using html2canvas with 4K Ultra HD crisp rendering
+  // Generate Image from Card using html2canvas with ultra HD crisp rendering
   const generateCanvasImage = async () => {
     if (!cardRef.current) return null;
     setIsGenerating(true);
@@ -64,42 +64,30 @@ export default function TTSShareCardModal({
         });
       }
 
-      // Ultra-HD scale factor (min 4x scale -> ~1480px x 2632px up to 4K resolution)
-      const deviceScale = typeof window !== "undefined" && window.devicePixelRatio ? window.devicePixelRatio : 1;
-      const targetScale = Math.max(deviceScale * 3, 4);
+      // 4x scale factor generates a crisp ~1480px x 2632px Full HD+ image
+      const scale = Math.max((typeof window !== "undefined" && window.devicePixelRatio) || 1, 4);
 
       const canvas = await html2canvas(cardRef.current, {
-        scale: targetScale,
+        scale: scale,
         useCORS: true,
         allowTaint: true,
         backgroundColor: "#ffffff",
         logging: false,
         imageTimeout: 15000,
-        windowWidth: 1080,
-        windowHeight: 1920,
         onclone: (clonedDoc) => {
           const clonedCard = clonedDoc.getElementById("tts-share-portrait-card");
           if (clonedCard) {
             clonedCard.style.transform = "none";
             clonedCard.style.webkitFontSmoothing = "antialiased";
-            clonedCard.style.mozOsxFontSmoothing = "grayscale";
             clonedCard.style.textRendering = "optimizeLegibility";
             clonedCard.style.boxSizing = "border-box";
-
+            
             // Remove crossorigin from local relative images in clone to prevent CORS canvas tainting
             const imgs = clonedCard.querySelectorAll("img");
             imgs.forEach((img) => {
               if (img.getAttribute("src")?.startsWith("/")) {
                 img.removeAttribute("crossorigin");
               }
-              img.style.imageRendering = "high-quality";
-            });
-
-            // Force vector geometric precision for all SVGs in clone
-            const svgs = clonedCard.querySelectorAll("svg");
-            svgs.forEach((svg) => {
-              svg.setAttribute("shape-rendering", "geometricPrecision");
-              svg.setAttribute("text-rendering", "geometricPrecision");
             });
           }
         },
@@ -397,8 +385,6 @@ export default function TTSShareCardModal({
                             viewBox={`0 0 ${crosswordData.cols * 36} ${crosswordData.rows * 36}`}
                             className="w-full h-full max-w-full max-h-full select-none"
                             preserveAspectRatio="xMidYMid meet"
-                            shapeRendering="geometricPrecision"
-                            textRendering="geometricPrecision"
                           >
                             {crosswordData.grid.map((row, rIdx) =>
                               row.map((cell, cIdx) => {
