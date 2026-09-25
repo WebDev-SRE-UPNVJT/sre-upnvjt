@@ -5,8 +5,8 @@ import { getTTSById } from "@/app/actions/ttsActions";
 import TTSParticipantPlayer from "../TTSParticipantPlayer";
 import TTSStatusNotice from "../TTSStatusNotice";
 import { db } from "@/lib/db";
-import { task, taskSubmission } from "@/db/schema";
-import { and, eq } from "drizzle-orm";
+import { task, taskSubmission, xpTransaction } from "@/db/schema";
+import { and, eq, inArray, desc } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +40,19 @@ export default async function TTSAssignmentPlayPage({ params, searchParams }) {
     redirect(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
   }
 
-  const res = await getTTSById(id);
+  const numericId = parseInt(id);
+  if (isNaN(numericId)) {
+    return (
+      <TTSStatusNotice
+        type="not_found"
+        error="ID TTS tidak valid"
+        taskId={taskId}
+        backUrl="/member/tugas"
+      />
+    );
+  }
+
+  const res = await getTTSById(numericId);
 
   if (!res.success || !res.data) {
     return (
@@ -48,57 +60,115 @@ export default async function TTSAssignmentPlayPage({ params, searchParams }) {
         type="not_found"
         error={res.error}
         taskId={taskId}
-        backUrl={taskId ? "/member/tugas" : "/games/tts"}
+        backUrl="/member/tugas"
       />
     );
   }
 
-  // Jika terhubung dengan Task, cek apakah tugas terkunci atau sudah pernah dikerjakan
-  if (taskId && session?.user?.id) {
-    const taskRecord = await db.query.task.findFirst({
-      where: eq(task.id, parseInt(taskId)),
+  const memberId = parseInt(session.user.id);
+
+  // 1. Cari task terkait jika taskId ada atau jika TTS ini ditautkan ke tabel Task
+  let targetTaskId = taskId ? parseInt(taskId) : null;
+  let linkedTaskRecord = null;
+
+  if (targetTaskId && !isNaN(targetTaskId)) {
+    linkedTaskRecord = await db.query.task.findFirst({
+      where: eq(task.id, targetTaskId),
       with: {
-        prerequisiteTask: { columns: { id: true, title: true } }
-      }
+        prerequisiteTask: { columns: { id: true, title: true } },
+      },
     });
-
-    // 1. Cek apakah Side Quest ini terkunci karena Main Quest prasyarat belum APPROVED
-    if (taskRecord?.prerequisiteTaskId) {
-      const prereqSub = await db.query.taskSubmission.findFirst({
-        where: and(
-          eq(taskSubmission.taskId, taskRecord.prerequisiteTaskId),
-          eq(taskSubmission.memberId, parseInt(session.user.id)),
-          eq(taskSubmission.status, "APPROVED")
-        ),
-      });
-
-      if (!prereqSub) {
-        return (
-          <TTSStatusNotice
-            type="locked"
-            prerequisiteTaskTitle={taskRecord.prerequisiteTask?.title || ""}
-            taskId={taskId}
-            backUrl="/member/tugas"
-          />
-        );
-      }
+  } else {
+    linkedTaskRecord = await db.query.task.findFirst({
+      where: eq(task.ttsCrosswordId, numericId),
+      with: {
+        prerequisiteTask: { columns: { id: true, title: true } },
+      },
+      orderBy: [desc(task.createdAt)],
+    });
+    if (linkedTaskRecord) {
+      targetTaskId = linkedTaskRecord.id;
     }
+  }
 
-    // 2. Cek apakah sudah pernah mengerjakan (1x pengerjaan)
-    const existingSubmission = await db.query.taskSubmission.findFirst({
+  // 2. Cek apakah Side Quest ini terkunci karena Main Quest prasyarat belum APPROVED
+  if (linkedTaskRecord?.prerequisiteTaskId && !isNaN(memberId)) {
+    const prereqSub = await db.query.taskSubmission.findFirst({
       where: and(
-        eq(taskSubmission.taskId, parseInt(taskId)),
-        eq(taskSubmission.memberId, parseInt(session.user.id))
+        eq(taskSubmission.taskId, linkedTaskRecord.prerequisiteTaskId),
+        eq(taskSubmission.memberId, memberId),
+        eq(taskSubmission.status, "APPROVED")
       ),
     });
 
-    if (existingSubmission) {
+    if (!prereqSub) {
+      return (
+        <TTSStatusNotice
+          type="locked"
+          prerequisiteTaskTitle={linkedTaskRecord.prerequisiteTask?.title || ""}
+          taskId={targetTaskId}
+          backUrl="/member/tugas"
+        />
+      );
+    }
+  }
+
+  // 3. CEK APAKAH MEMBER SUDAH PERNAH MENGERJAKAN TTS INI (TIDAK BOLEH AKSES LAGI JIKA SUDAH SELESAI)
+  if (!isNaN(memberId)) {
+    let existingSubmission = null;
+
+    if (targetTaskId) {
+      existingSubmission = await db.query.taskSubmission.findFirst({
+        where: and(
+          eq(taskSubmission.taskId, targetTaskId),
+          eq(taskSubmission.memberId, memberId)
+        ),
+      });
+    }
+
+    // Periksa juga jika ada pengerjaan di task manapun yang menautkan crossword ini
+    if (!existingSubmission) {
+      const allTasksForTTS = await db.query.task.findMany({
+        where: eq(task.ttsCrosswordId, numericId),
+        columns: { id: true },
+      });
+
+      if (allTasksForTTS.length > 0) {
+        const taskIds = allTasksForTTS.map((t) => t.id);
+        existingSubmission = await db.query.taskSubmission.findFirst({
+          where: and(
+            inArray(taskSubmission.taskId, taskIds),
+            eq(taskSubmission.memberId, memberId)
+          ),
+        });
+      }
+    }
+
+    // Periksa juga di riwayat log XP pengerjaan TTS mandiri
+    let existingXpLog = null;
+    if (!existingSubmission) {
+      existingXpLog = await db.query.xpTransaction.findFirst({
+        where: and(
+          eq(xpTransaction.userId, memberId),
+          eq(xpTransaction.sourceType, "tts"),
+          eq(xpTransaction.sourceId, numericId)
+        ),
+      });
+    }
+
+    // Jika member sudah pernah mengerjakan, tampilkan notifikasi tugas selesai + tombol bagikan (blokir pengerjaan ulang)
+    if (existingSubmission || existingXpLog) {
       return (
         <TTSStatusNotice
           type="completed"
           ttsTitle={res.data.title}
-          submission={existingSubmission}
-          taskId={taskId}
+          submission={
+            existingSubmission || {
+              score: 100,
+              xpEarned: existingXpLog?.amount ?? res.data.rewardXp ?? 0,
+            }
+          }
+          taskId={targetTaskId}
           backUrl="/member/tugas"
           puzzleData={res.data}
           currentUser={session.user}
@@ -106,14 +176,18 @@ export default async function TTSAssignmentPlayPage({ params, searchParams }) {
       );
     }
 
-    // 3. Cek apakah batas waktu tugas sudah berakhir dan pengumpulan terlambat tidak diizinkan
-    const isLateSubmissionBlocked = taskRecord?.allowLateSubmission === false && taskRecord?.deadline && new Date() > new Date(taskRecord.deadline);
+    // 4. Cek apakah batas waktu tugas sudah berakhir dan pengumpulan terlambat tidak diizinkan
+    const isLateSubmissionBlocked =
+      linkedTaskRecord?.allowLateSubmission === false &&
+      linkedTaskRecord?.deadline &&
+      new Date() > new Date(linkedTaskRecord.deadline);
+
     if (isLateSubmissionBlocked) {
       return (
         <TTSStatusNotice
           type="closed"
           ttsTitle={res.data.title}
-          taskId={taskId}
+          taskId={targetTaskId}
           backUrl="/member/tugas"
         />
       );
@@ -123,9 +197,9 @@ export default async function TTSAssignmentPlayPage({ params, searchParams }) {
   return (
     <TTSParticipantPlayer
       puzzleData={res.data}
-      onBackUrl={taskId ? "/member/tugas" : "/games/tts"}
+      onBackUrl="/member/tugas"
       currentUser={session.user}
-      taskId={taskId}
+      taskId={targetTaskId}
     />
   );
 }

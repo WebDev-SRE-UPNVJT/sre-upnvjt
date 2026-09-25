@@ -274,13 +274,7 @@ export default function TTSStatusNotice({
         >
           <ArrowLeft className="w-4 h-4" />
           <span>
-            {taskId
-              ? language === "en"
-                ? "Back to Task List"
-                : "Kembali ke Daftar Tugas"
-              : language === "en"
-              ? "Back to Crossword List"
-              : "Kembali ke Daftar TTS"}
+            {language === "en" ? "Back to Task List" : "Kembali ke Daftar Tugas"}
           </span>
         </Link>
       </div>

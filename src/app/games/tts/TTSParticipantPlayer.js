@@ -145,7 +145,7 @@ function ParticleExplosion({ count = 36 }) {
   );
 }
 
-export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/games/tts", currentUser, taskId }) {
+export default function TTSParticipantPlayer({ puzzleData, onBackUrl = "/member/tugas", currentUser, taskId }) {
   const [mounted, setMounted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const hiddenInputRef = useRef(null);
