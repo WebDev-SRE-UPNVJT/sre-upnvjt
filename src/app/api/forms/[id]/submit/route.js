@@ -295,10 +295,21 @@ export async function POST(req, { params }) {
 
           let taskSubRecord = existingTaskSub;
           const formResponseUrl = `/f/${form.uuid || form.id}`;
-          const subStatus = "PENDING"; // Diganti menjadi PENDING agar ditinjau/disetujui oleh admin terlebih dahulu
+          const subStatus = "APPROVED"; // Otomatis disetujui karena formulir terverifikasi sistem
           let feedbackMsg = isQuizForm
-            ? `Skor Kuis: ${earnedScore}/${maxScore} (${percentage}%)`
-            : `Formulir berhasil disubmit (Menunggu verifikasi/review admin)`;
+            ? `Skor Kuis: ${earnedScore}/${maxScore} (${percentage}%) | XP Dasar: +${baseTaskXp} XP`
+            : `Formulir berhasil diselesaikan | XP Dasar: +${baseTaskXp} XP`;
+
+          if (speedBonusXp > 0) {
+            feedbackMsg += ` | Bonus Kecepatan: +${speedBonusXp} XP`;
+          }
+          if (speedBonusXp > 0) {
+            feedbackMsg += ` (Total: +${totalTaskXpEarned} XP)`;
+          }
+
+          // Cek apakah sebelumnya sudah pernah APPROVED (agar tidak double award XP)
+          const wasAlreadyApproved = existingTaskSub?.status === "APPROVED";
+          const previousXpEarned = existingTaskSub?.xpEarned || 0;
 
           if (!existingTaskSub) {
             const [createdSub] = await db.insert(taskSubmission).values({
@@ -311,7 +322,7 @@ export async function POST(req, { params }) {
               correctCount: isQuizForm ? correctCount : null,
               wrongCount: isQuizForm ? Math.max(0, (totalScoredQuestions || 0) - correctCount) : null,
               totalQuestions: isQuizForm ? (totalScoredQuestions || 0) : null,
-              xpEarned: 0,
+              xpEarned: totalTaskXpEarned,
               feedback: feedbackMsg,
               submittedAt: new Date(),
             }).returning();
@@ -326,12 +337,50 @@ export async function POST(req, { params }) {
                 correctCount: isQuizForm ? correctCount : null,
                 wrongCount: isQuizForm ? Math.max(0, (totalScoredQuestions || 0) - correctCount) : null,
                 totalQuestions: isQuizForm ? (totalScoredQuestions || 0) : null,
+                xpEarned: totalTaskXpEarned,
                 feedback: feedbackMsg,
                 submittedAt: new Date(),
               })
               .where(eq(taskSubmission.id, existingTaskSub.id))
               .returning();
             taskSubRecord = updatedSub;
+          }
+
+          // Tambahkan XP ke Member Profile & Catat Transaksi XP
+          const xpDiff = wasAlreadyApproved ? Math.max(0, totalTaskXpEarned - previousXpEarned) : totalTaskXpEarned;
+          if (xpDiff > 0) {
+            const profile = await db.query.memberProfile.findFirst({
+              where: eq(memberProfile.userId, memberId),
+            });
+
+            if (!profile) {
+              await db.insert(memberProfile).values({
+                userId: memberId,
+                xp: xpDiff,
+                level: Math.floor(xpDiff / 100) + 1,
+              });
+            } else {
+              const nextXp = profile.xp + xpDiff;
+              const nextLevel = Math.floor(nextXp / 100) + 1;
+              await db.update(memberProfile)
+                .set({ xp: nextXp, level: nextLevel })
+                .where(eq(memberProfile.userId, memberId));
+            }
+
+            const reasons = [
+              `Penyelesaian Misi Formulir (${lTask.title}): +${baseTaskXp} XP (${scoringMode === "PROPORTIONAL" ? `Skor: ${percentage}%` : "Selesai"})`
+            ];
+            if (speedBonusXp > 0) {
+              reasons.push(`Bonus Kecepatan: +${speedBonusXp} XP`);
+            }
+
+            await db.insert(xpTransaction).values({
+              userId: memberId,
+              amount: xpDiff,
+              reason: reasons.join(" | "),
+              sourceType: "task",
+              sourceId: taskSubRecord.id,
+            });
           }
 
           // Sinkronkan ke Tab 1 ("Submisi Tugas") Google Spreadsheet jika Task memiliki spreadsheet
@@ -367,9 +416,9 @@ export async function POST(req, { params }) {
       correctCount: isQuizForm ? correctCount : null,
       totalQuestions: isQuizForm ? totalScoredQuestions : null,
       isQuiz: isQuizForm,
-      xpEarned: null,
-      baseXp: null,
-      speedBonusXp: null,
+      xpEarned: earnedTaskXp > 0 ? earnedTaskXp : null,
+      baseXp: earnedBaseXp > 0 ? earnedBaseXp : null,
+      speedBonusXp: earnedSpeedBonusXp > 0 ? earnedSpeedBonusXp : null,
     }, { status: 201 });
   } catch (error) {
     console.error('Error submitting form:', error);

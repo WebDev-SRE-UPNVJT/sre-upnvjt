@@ -165,7 +165,13 @@ export async function POST(req, { params }) {
 
       xpEarned = baseXp + speedBonusXp;
 
-      let feedback = `Skor: ${score}% | Terpecahkan: ${correctCount}/${totalQuestions} | Kesalahan Input: ${totalWrongAttempts}x | Waktu: ${formatSeconds(elapsedTime)}`;
+      let feedback = `Skor: ${score}% | Terpecahkan: ${correctCount}/${totalQuestions} | Kesalahan Input: ${totalWrongAttempts}x | Waktu: ${formatSeconds(elapsedTime)} | XP Dasar: +${baseXp} XP`;
+      if (speedBonusXp > 0) {
+        feedback += ` | Bonus Kecepatan: +${speedBonusXp} XP`;
+      }
+      if (speedBonusXp > 0) {
+        feedback += ` (Total: +${xpEarned} XP)`;
+      }
 
       const fileUrl = `[TTS Game] Skor: ${score}% (${correctCount}/${totalQuestions} Terpecahkan, ${totalWrongAttempts}x Keliru)`;
 
@@ -189,12 +195,12 @@ export async function POST(req, { params }) {
         .values({
           taskId: linkedTask.id,
           memberId: memberId,
-          status: "PENDING",
+          status: "APPROVED",
           score: score,
           correctCount: correctCount,
           wrongCount: totalWrongAttempts,
           totalQuestions: totalQuestions,
-          xpEarned: 0,
+          xpEarned: xpEarned,
           timeTakenSeconds: elapsedTime,
           feedback: feedback,
           fileUrl: fileUrl,
@@ -204,6 +210,43 @@ export async function POST(req, { params }) {
         .returning();
 
       submissionRecord = insertedSub;
+
+      // 6. Tambahkan XP ke Member Profile jika ada perolehan XP
+      if (xpEarned > 0) {
+        const profile = await db.query.memberProfile.findFirst({
+          where: eq(memberProfile.userId, memberId),
+        });
+
+        if (!profile) {
+          await db.insert(memberProfile).values({
+            userId: memberId,
+            xp: xpEarned,
+            level: Math.floor(xpEarned / 100) + 1,
+          });
+        } else {
+          const nextXp = profile.xp + xpEarned;
+          const nextLevel = Math.floor(nextXp / 100) + 1;
+          await db
+            .update(memberProfile)
+            .set({ xp: nextXp, level: nextLevel })
+            .where(eq(memberProfile.userId, memberId));
+        }
+
+        const reasons = [
+          `Penyelesaian TTS: ${crossword.title} (${correctCount}/${totalQuestions} Terpecahkan, Skor ${score}%) +${baseXp} XP`
+        ];
+        if (speedBonusXp > 0) {
+          reasons.push(`Bonus Kecepatan: +${speedBonusXp} XP`);
+        }
+
+        await db.insert(xpTransaction).values({
+          userId: memberId,
+          amount: xpEarned,
+          reason: reasons.join(" | "),
+          sourceType: "task",
+          sourceId: submissionRecord.id,
+        });
+      }
 
       // 7. Realtime sync to Google Spreadsheet if connected
       if (linkedTask.spreadsheetId) {
