@@ -152,9 +152,34 @@ export async function PUT(req, { params }) {
         );
       }
 
-      if (submission.task?.rewardXp > 0) {
-        totalGainedXp += submission.task.rewardXp;
-        reasons.push(`Penyelesaian Tugas: ${submission.task.title} (+${submission.task.rewardXp} XP)`);
+      let baseTaskXp = submission.task?.rewardXp || 0;
+      if (
+        (submission.task?.submissionType === "FORM" || submission.task?.formTemplateId) &&
+        submission.score !== null &&
+        submission.score !== undefined
+      ) {
+        const scoringMode = submission.task?.formScoringMode || "COMPLETION";
+        if (scoringMode === "PROPORTIONAL") {
+          baseTaskXp = Math.round(((submission.score || 0) / 100) * baseTaskXp);
+        } else if (scoringMode === "PERFECT") {
+          baseTaskXp = submission.score === 100 ? baseTaskXp : 0;
+        }
+      } else if (
+        (submission.task?.submissionType === "TTS" || submission.task?.ttsCrosswordId) &&
+        submission.score !== null &&
+        submission.score !== undefined
+      ) {
+        const scoringMode = submission.task?.ttsScoringMode || "COMPLETION";
+        if (scoringMode === "PROPORTIONAL") {
+          baseTaskXp = Math.round(((submission.score || 0) / 100) * baseTaskXp);
+        } else if (scoringMode === "PERFECT") {
+          baseTaskXp = (submission.score === 100 && (submission.wrongCount || 0) === 0) ? baseTaskXp : 0;
+        }
+      }
+
+      if (baseTaskXp > 0) {
+        totalGainedXp += baseTaskXp;
+        reasons.push(`Penyelesaian Tugas: ${submission.task.title} (+${baseTaskXp} XP)`);
       }
 
       if (speedBonusXp > 0) {
