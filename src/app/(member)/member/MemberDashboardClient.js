@@ -69,7 +69,7 @@ export default function MemberDashboardClient({
       const saved = localStorage.getItem(`sre_materi_progress_${latestPpt.id}`);
       if (saved) {
         const { currentSlideIdx = 0 } = JSON.parse(saved);
-        const total = latestPpt.slides?.length || 1;
+        const total = latestPpt.slideCount || latestPpt.slides?.length || 1;
         setPptProgress(
           total > 1 ? Math.round((currentSlideIdx / (total - 1)) * 100) : 100,
         );

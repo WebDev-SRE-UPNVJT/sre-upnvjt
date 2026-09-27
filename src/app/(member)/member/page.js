@@ -3,7 +3,18 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { user, memberProfile, task, taskSubmission, attendance, pptModule, literatureItem, xpTransaction, division, pptPhase, pptModuleProgress, role, department } from "@/db/schema";
+import {
+  user,
+  memberProfile,
+  task,
+  taskSubmission,
+  attendance,
+  pptModule,
+  pptSlide,
+  xpTransaction,
+  pptPhase,
+  pptModuleProgress,
+} from "@/db/schema";
 import { eq, desc, asc, and, sql } from "drizzle-orm";
 import MemberDashboardClient from "./MemberDashboardClient";
 
@@ -12,7 +23,7 @@ export const dynamic = "force-dynamic";
 export default async function MemberDashboardPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session || !session.user || !session.user.id) {
+  if (!session?.user?.id) {
     redirect("/login");
   }
 
@@ -21,38 +32,17 @@ export default async function MemberDashboardPage() {
     redirect("/login");
   }
 
-  // Ensure memberProfile exists safely without race condition
-  let profile = await db.query.memberProfile.findFirst({
-    where: eq(memberProfile.userId, userIdInt),
-  });
-
-  if (!profile) {
-    try {
-      await db.insert(memberProfile).values({
-        userId: userIdInt,
-        xp: 0,
-        level: 1,
-      }).onConflictDoNothing();
-
-      profile = await db.query.memberProfile.findFirst({
-        where: eq(memberProfile.userId, userIdInt),
-      }) || { userId: userIdInt, xp: 0, level: 1 };
-    } catch (e) {
-      profile = { userId: userIdInt, xp: 0, level: 1 };
-    }
-  }
-
-  // Fetch all parallel queries concurrently to optimize execution time
+  // Fetch all parallel queries concurrently in a single roundtrip batch
   const [
     currentUser,
-    higherRankCount,
+    profileResult,
+    higherRankResult,
     allTasks,
     submissions,
-    attendanceLogs,
+    presentAttendanceCount,
     allPublishedModules,
     allModuleProgress,
     allPhases,
-    latestLiterature,
     xpLogs,
   ] = await Promise.all([
     db.query.user.findFirst({
@@ -64,20 +54,13 @@ export default async function MemberDashboardPage() {
         npm: true,
         profilePictureUrl: true,
       },
-      with: {
-        role: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-        department: {
-          columns: {
-            id: true,
-            name: true,
-            code: true,
-          },
-        },
+    }),
+    db.query.memberProfile.findFirst({
+      where: eq(memberProfile.userId, userIdInt),
+      columns: {
+        userId: true,
+        xp: true,
+        level: true,
       },
     }),
     db
@@ -85,18 +68,8 @@ export default async function MemberDashboardPage() {
         count: sql`COUNT(*)::int`,
       })
       .from(memberProfile)
-      .innerJoin(user, eq(user.id, memberProfile.userId))
-      .leftJoin(role, eq(role.id, user.roleId))
-      .leftJoin(department, eq(department.id, user.departmentId))
-      .leftJoin(division, eq(division.id, user.divisionId))
       .where(
-        and(
-          sql`LOWER(${role.name}) = 'member'`,
-          sql`COALESCE(LOWER(${department.code}), '') NOT IN ('sys', 'system')`,
-          sql`COALESCE(LOWER(${department.name}), '') NOT LIKE '%sys%'`,
-          sql`COALESCE(LOWER(${division.name}), '') NOT LIKE '%sys%'`,
-          sql`${memberProfile.xp} > ${profile.xp || 0}`
-        )
+        sql`${memberProfile.xp} > (SELECT COALESCE(xp, 0) FROM "memberProfile" WHERE "userId" = ${userIdInt})`
       ),
     db.query.task.findMany({
       orderBy: [asc(task.deadline)],
@@ -118,31 +91,30 @@ export default async function MemberDashboardPage() {
         status: true,
       },
     }),
-    db.query.attendance.findMany({
-      where: eq(attendance.memberId, userIdInt),
-      orderBy: [desc(attendance.createdAt)],
-      columns: {
-        id: true,
-        status: true,
-      },
-    }),
-    db.query.pptModule.findMany({
-      where: eq(pptModule.isPublished, true),
-      orderBy: [asc(pptModule.createdAt)],
-      columns: {
-        id: true,
-        title: true,
-        phaseId: true,
-        createdAt: true,
-      },
-      with: {
-        slides: {
-          columns: {
-            id: true,
-          },
-        },
-      },
-    }),
+    db
+      .select({
+        count: sql`COUNT(*)::int`,
+      })
+      .from(attendance)
+      .where(
+        and(
+          eq(attendance.memberId, userIdInt),
+          sql`${attendance.status} IN ('PRESENT', 'LATE')`
+        )
+      ),
+    db
+      .select({
+        id: pptModule.id,
+        title: pptModule.title,
+        phaseId: pptModule.phaseId,
+        createdAt: pptModule.createdAt,
+        slideCount: sql`COUNT(${pptSlide.id})::int`,
+      })
+      .from(pptModule)
+      .leftJoin(pptSlide, eq(pptSlide.moduleId, pptModule.id))
+      .where(eq(pptModule.isPublished, true))
+      .groupBy(pptModule.id)
+      .orderBy(asc(pptModule.createdAt)),
     db.query.pptModuleProgress.findMany({
       where: eq(pptModuleProgress.userId, userIdInt),
       columns: {
@@ -161,26 +133,6 @@ export default async function MemberDashboardPage() {
         order: true,
       },
     }),
-    db.query.literatureItem.findFirst({
-      where: eq(literatureItem.isPublished, true),
-      orderBy: [desc(literatureItem.createdAt)],
-      columns: {
-        id: true,
-        title: true,
-        description: true,
-        coverUrl: true,
-        fileUrl: true,
-        createdAt: true,
-      },
-      with: {
-        category: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-    }),
     db.query.xpTransaction.findMany({
       where: eq(xpTransaction.userId, userIdInt),
       orderBy: [desc(xpTransaction.createdAt)],
@@ -197,15 +149,23 @@ export default async function MemberDashboardPage() {
 
   if (!currentUser) redirect("/login");
 
-  const currentRank = (higherRankCount[0]?.count || 0) + 1;
+  let profile = profileResult;
+  if (!profile) {
+    try {
+      await db.insert(memberProfile).values({
+        userId: userIdInt,
+        xp: 0,
+        level: 1,
+      }).onConflictDoNothing();
+      profile = { userId: userIdInt, xp: 0, level: 1 };
+    } catch {
+      profile = { userId: userIdInt, xp: 0, level: 1 };
+    }
+  }
 
-  // Calculate completed tasks
-  const completedTasksCount = submissions.filter(s => s.status === "APPROVED").length;
-
-  // Calculate attendance logs and streak
-  const presentCount = attendanceLogs.filter(a => a.status === "PRESENT" || a.status === "LATE").length;
-
-  // Latest PPT module for banner
+  const currentRank = (higherRankResult[0]?.count || 0) + 1;
+  const completedTasksCount = submissions.filter((s) => s.status === "APPROVED").length;
+  const presentCount = presentAttendanceCount[0]?.count || 0;
   const latestPpt = allPublishedModules[allPublishedModules.length - 1] || null;
 
   // Construct Phase Progress Hierarchy
@@ -218,7 +178,7 @@ export default async function MemberDashboardPage() {
       const userModProg = allModuleProgress.find((p) => p.moduleId === mod.id);
       const isModuleCompleted =
         !!userModProg?.isCompleted ||
-        (mod.slides?.length > 0 && (userModProg?.maxSlideIdx || 0) >= mod.slides.length - 1);
+        (mod.slideCount > 0 && (userModProg?.maxSlideIdx || 0) >= mod.slideCount - 1);
 
       totalPhaseItems += 1;
       if (isModuleCompleted) completedPhaseItems += 1;
@@ -263,11 +223,11 @@ export default async function MemberDashboardPage() {
       return {
         id: mod.id,
         title: mod.title,
-        slideCount: mod.slides?.length || 0,
+        slideCount: mod.slideCount || 0,
         isCompleted: isModuleCompleted,
         progressPct:
-          mod.slides?.length > 1
-            ? Math.round(((userModProg?.currentSlideIdx || 0) / (mod.slides.length - 1)) * 100)
+          mod.slideCount > 1
+            ? Math.round(((userModProg?.currentSlideIdx || 0) / (mod.slideCount - 1)) * 100)
             : isModuleCompleted
             ? 100
             : 0,
@@ -300,7 +260,7 @@ export default async function MemberDashboardPage() {
       const userModProg = allModuleProgress.find((p) => p.moduleId === mod.id);
       const isModuleCompleted =
         !!userModProg?.isCompleted ||
-        (mod.slides?.length > 0 && (userModProg?.maxSlideIdx || 0) >= mod.slides.length - 1);
+        (mod.slideCount > 0 && (userModProg?.maxSlideIdx || 0) >= mod.slideCount - 1);
 
       unphasedTotal += 1;
       if (isModuleCompleted) unphasedCompleted += 1;
@@ -328,7 +288,6 @@ export default async function MemberDashboardPage() {
         };
       });
 
-      // Sort tasks: Main Quest first
       tasksWithSub.sort((a, b) => {
         const isMainA =
           a.category === "MAIN" ||
@@ -344,11 +303,11 @@ export default async function MemberDashboardPage() {
       return {
         id: mod.id,
         title: mod.title,
-        slideCount: mod.slides?.length || 0,
+        slideCount: mod.slideCount || 0,
         isCompleted: isModuleCompleted,
         progressPct:
-          mod.slides?.length > 1
-            ? Math.round(((userModProg?.currentSlideIdx || 0) / (mod.slides.length - 1)) * 100)
+          mod.slideCount > 1
+            ? Math.round(((userModProg?.currentSlideIdx || 0) / (mod.slideCount - 1)) * 100)
             : isModuleCompleted
             ? 100
             : 0,
@@ -378,7 +337,6 @@ export default async function MemberDashboardPage() {
       completedTasksCount={completedTasksCount}
       presentCount={presentCount}
       latestPpt={latestPpt}
-      latestLiterature={latestLiterature}
       xpLogs={xpLogs}
       phaseHierarchy={phaseHierarchy}
     />
