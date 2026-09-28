@@ -4,6 +4,7 @@ import { memberProfile, xpTransaction } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
+import { calculateLevel } from "@/lib/leveling";
 
 export async function POST(req) {
   try {
@@ -36,11 +37,11 @@ export async function POST(req) {
       await db.insert(memberProfile).values({
         userId: targetUserId,
         xp: xpAmount,
-        level: Math.floor(xpAmount / 100) + 1,
+        level: calculateLevel(xpAmount),
       });
     } else {
       const nextXp = profile.xp + xpAmount;
-      const nextLevel = Math.floor(nextXp / 100) + 1;
+      const nextLevel = calculateLevel(nextXp);
       await db.update(memberProfile)
         .set({ xp: nextXp, level: nextLevel })
         .where(eq(memberProfile.userId, targetUserId));

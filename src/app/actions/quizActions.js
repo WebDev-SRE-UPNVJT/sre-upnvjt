@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { quiz, quizQuestion, quizSubmission } from "@/db/schema";
 import { desc, asc, eq, count } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { calculateLevel } from "@/lib/leveling";
 
 export async function getQuizzes() {
   try {
@@ -242,11 +243,11 @@ export async function gradeQuizSubmission(submissionId, data) {
         await db.insert(memberProfile).values({
           userId: submission.memberId,
           xp: gainedXp,
-          level: 1,
+          level: calculateLevel(gainedXp),
         });
       } else {
         const nextXp = profile.xp + gainedXp;
-        const nextLevel = Math.floor(nextXp / 100) + 1;
+        const nextLevel = calculateLevel(nextXp);
         await db.update(memberProfile)
           .set({ xp: nextXp, level: nextLevel })
           .where(eq(memberProfile.userId, submission.memberId));

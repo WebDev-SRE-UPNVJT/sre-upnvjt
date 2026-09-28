@@ -1,10 +1,21 @@
 export const LEVEL_TIERS = [
-  { level: 5, name: "RE-Power", minXp: 2100, color: "bg-purple-500/10 text-purple-400 border-purple-500/20" },
-  { level: 4, name: "RE-Gen", minXp: 1100, color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
-  { level: 3, name: "RE-Charge", minXp: 500, color: "bg-green-500/10 text-green-400 border-green-500/20" },
-  { level: 2, name: "RE-Act", minXp: 300, color: "bg-teal-500/10 text-teal-400 border-teal-500/20" },
+  { level: 5, name: "RE-Power", minXp: 3500, color: "bg-purple-500/10 text-purple-400 border-purple-500/20" },
+  { level: 4, name: "RE-Gen", minXp: 2500, color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
+  { level: 3, name: "RE-Charge", minXp: 1500, color: "bg-green-500/10 text-green-400 border-green-500/20" },
+  { level: 2, name: "RE-Act", minXp: 500, color: "bg-teal-500/10 text-teal-400 border-teal-500/20" },
   { level: 1, name: "RE-Source", minXp: 0, color: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
 ];
+
+/**
+ * Menghitung level numerik (1 - 5) berdasarkan total XP
+ * @param {number} totalXp
+ * @returns {number}
+ */
+export function calculateLevel(totalXp) {
+  const xp = Number(totalXp) || 0;
+  const currentTier = LEVEL_TIERS.find(tier => xp >= tier.minXp) || LEVEL_TIERS[LEVEL_TIERS.length - 1];
+  return currentTier.level;
+}
 
 /**
  * Mendapatkan data level lengkap (nama, warna, progress bar) berdasarkan total XP
@@ -40,6 +51,9 @@ export function getUserLevelData(totalXp) {
     color: currentTier.color,
     totalXp: xp,
     nextLevelXp: nextTier ? nextTier.minXp : null,
+    xpToNextLevel: nextTier ? Math.max(0, nextTier.minXp - xp) : 0,
+    currentTier,
+    nextTier: nextTier || null,
     progressPercentage: Math.min(Math.max(progress, 0), 100) // Memastikan nilai tidak bocor di bawah 0 atau di atas 100
   };
 }

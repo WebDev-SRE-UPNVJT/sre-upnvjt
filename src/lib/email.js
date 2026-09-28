@@ -1,5 +1,4 @@
 import nodemailer from "nodemailer";
-import { Resend } from "resend";
 
 // ============================================================
 // EMAIL PROVIDER SWITCH
@@ -19,10 +18,12 @@ import { Resend } from "resend";
 export async function sendEmail({ to, subject, html, text }) {
   // --- Resend (primary, deliverability tinggi) ---
   if (process.env.RESEND_API_KEY) {
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    const from = process.env.EMAIL_FROM_RESEND || "SRE UPN Veteran Jawa Timur <onboarding@resend.dev>";
+    try {
+      const { Resend } = await import("resend");
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const from = process.env.EMAIL_FROM_RESEND || "SRE UPN Veteran Jawa Timur <onboarding@resend.dev>";
 
-    const { data, error } = await resend.emails.send({
+      const { data, error } = await resend.emails.send({
       from,
       to,
       subject,
@@ -30,8 +31,11 @@ export async function sendEmail({ to, subject, html, text }) {
       text,
     });
 
-    if (error) throw new Error(error.message);
-    return data;
+      if (error) throw new Error(error.message);
+      return data;
+    } catch (err) {
+      console.warn("Resend failed or not installed, falling back to SMTP:", err.message);
+    }
   }
 
   // --- Nodemailer / Gmail SMTP (fallback) ---

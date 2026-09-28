@@ -7,6 +7,7 @@ import { getServerSession } from "next-auth/next";
 import { google } from "googleapis";
 import { Readable } from "stream";
 import { calculateSpeedBonusXp } from "@/lib/xpUtils";
+import { calculateLevel } from "@/lib/leveling";
 
 export async function GET(req, { params }) {
   try {
@@ -119,7 +120,7 @@ export async function PUT(req, { params }) {
 
         if (profile) {
           const nextXp = Math.max(0, profile.xp - revokeAmount);
-          const nextLevel = Math.max(1, Math.floor(nextXp / 100) + 1);
+          const nextLevel = calculateLevel(nextXp);
           await db.update(memberProfile)
             .set({ xp: nextXp, level: nextLevel })
             .where(eq(memberProfile.userId, submission.memberId));
@@ -205,11 +206,11 @@ export async function PUT(req, { params }) {
         await db.insert(memberProfile).values({
           userId: submission.memberId,
           xp: totalGainedXp,
-          level: Math.floor(totalGainedXp / 100) + 1,
+          level: calculateLevel(totalGainedXp),
         });
       } else {
         const nextXp = profile.xp + totalGainedXp;
-        const nextLevel = Math.floor(nextXp / 100) + 1;
+        const nextLevel = calculateLevel(nextXp);
         await db.update(memberProfile)
           .set({ xp: nextXp, level: nextLevel })
           .where(eq(memberProfile.userId, submission.memberId));

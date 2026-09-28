@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { user, memberProfile, division, xpTransaction, role, department } from "@/db/schema";
-import { eq, desc, gte, sql, and } from "drizzle-orm";
+import { eq, desc, gte, sql, and, or } from "drizzle-orm";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
-
+import { authOptions } from "@/lib/authOptions";
 import { getAugmentedLeaderboard } from "@/lib/dummyLeaderboard";
 
 /**
@@ -42,7 +41,11 @@ export async function GET(req) {
         .leftJoin(division, eq(division.id, user.divisionId))
         .where(
           and(
-            sql`LOWER(${role.name}) = 'member'`,
+            or(
+              sql`LOWER(${role.name}) = 'member'`,
+              sql`LOWER(${role.name}) LIKE '%member%'`,
+              sql`${role.name} IS NULL`
+            ),
             sql`COALESCE(LOWER(${department.code}), '') NOT IN ('sys', 'system')`,
             sql`COALESCE(LOWER(${department.name}), '') NOT LIKE '%sys%'`,
             sql`COALESCE(LOWER(${division.name}), '') NOT LIKE '%sys%'`
@@ -58,12 +61,12 @@ export async function GET(req) {
       let startDate;
 
       if (period === "month") {
-        // Awal bulan ini
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        // Awal bulan ini (00:00:00)
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
       } else {
-        // Awal minggu ini (Senin)
+        // Awal minggu ini (Senin 00:00:00)
         const dayOfWeek = now.getDay();
-        const diffToMonday = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+        const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
         startDate = new Date(now);
         startDate.setDate(now.getDate() + diffToMonday);
         startDate.setHours(0, 0, 0, 0);
@@ -73,11 +76,16 @@ export async function GET(req) {
       const sumExpr = sql`COALESCE(SUM(${xpTransaction.amount}), 0)`;
       const xpByUser = await db
         .select({
-          userId:   xpTransaction.userId,
-          totalXp:  sumExpr,
+          userId:  xpTransaction.userId,
+          totalXp: sumExpr,
         })
         .from(xpTransaction)
-        .where(gte(xpTransaction.createdAt, startDate))
+        .where(
+          and(
+            gte(xpTransaction.createdAt, startDate),
+            sql`${xpTransaction.amount} > 0`
+          )
+        )
         .groupBy(xpTransaction.userId)
         .orderBy(desc(sumExpr));
 
@@ -103,7 +111,11 @@ export async function GET(req) {
         .leftJoin(division, eq(division.id, user.divisionId))
         .where(
           and(
-            sql`LOWER(${role.name}) = 'member'`,
+            or(
+              sql`LOWER(${role.name}) = 'member'`,
+              sql`LOWER(${role.name}) LIKE '%member%'`,
+              sql`${role.name} IS NULL`
+            ),
             sql`COALESCE(LOWER(${department.code}), '') NOT IN ('sys', 'system')`,
             sql`COALESCE(LOWER(${department.name}), '') NOT LIKE '%sys%'`,
             sql`COALESCE(LOWER(${division.name}), '') NOT LIKE '%sys%'`
@@ -113,10 +125,10 @@ export async function GET(req) {
       const userMap = Object.fromEntries(users.map((u) => [u.id, u]));
 
       ranked = xpByUser
-        .filter((row) => Boolean(userMap[row.userId])) // Filter hanya user ber-role MEMBER & non-SYS
+        .filter((row) => Boolean(userMap[row.userId]))
         .map((row) => ({
           ...userMap[row.userId],
-          xp:   Number(row.totalXp),
+          xp: Number(row.totalXp),
         }));
     }
 

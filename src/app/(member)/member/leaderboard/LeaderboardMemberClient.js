@@ -109,11 +109,12 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
   }, [period, initialLeaderboard]);
 
   // ─── Derived data ────────────────────────────────────────────────────
-  const maxXp          = leaderboard[0]?.xp ?? 100;
-  const top3           = [1, 2, 3].map((r) => leaderboard.find((i) => i.rank === r)).filter(Boolean);
-  const restList       = leaderboard.filter((i) => i.rank > 3);
-  const currentUser    = leaderboard.find((i) => i.id === currentUserId);
-  const xpToNextRank   = currentUser && currentUser.rank > 1
+  const top3                  = [1, 2, 3].map((r) => leaderboard.find((i) => i.rank === r)).filter(Boolean);
+  const restList              = leaderboard.filter((i) => i.rank > 3);
+  const currentUser           = leaderboard.find((i) => i.id === currentUserId);
+  const currentUserLevel      = currentUser ? getUserLevelData(currentUser.xp) : null;
+  const isCurrentUserMaxLevel = currentUserLevel ? currentUserLevel.currentLevel >= 5 : false;
+  const xpToNextRank          = currentUser && currentUser.rank > 1
     ? (leaderboard.find((i) => i.rank === currentUser.rank - 1)?.xp ?? 0) - currentUser.xp + 1
     : 0;
 
@@ -152,7 +153,7 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
               key={key}
               onClick={() => handlePeriodChange(key)}
               className={[
-                "relative flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-black transition-all duration-300",
+                "relative flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-lg text-xs font-black transition-all duration-300",
                 period === key
                   ? "bg-white dark:bg-[#0d1f17] text-primary border border-primary/20 shadow-sm"
                   : "text-slate-500 dark:text-white/40 hover:text-slate-700 dark:hover:text-white/70",
@@ -282,7 +283,7 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
                     <div className="relative z-10 text-center">
                       <div className={`text-xl md:text-2xl font-black font-mono flex items-center justify-center gap-1 ${cfg.rankColor}`}>
                         <Zap className="w-4 h-4 fill-current animate-pulse" />
-                        {item.xp.toLocaleString()}
+                        {(item.xp ?? 0).toLocaleString()}
                       </div>
                       <div className={`text-[9px] font-black uppercase tracking-widest mt-1.5 flex items-center justify-center gap-1 ${cfg.labelColor}`}>
                         {isGold && <Trophy className="w-3 h-3 text-amber-400 fill-amber-400 inline" />}
@@ -328,7 +329,8 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
           ) : leaderboard.map((item, i) => {
             const isMe        = item.id === currentUserId;
             const levelData   = getUserLevelData(item.xp);
-            const barPct      = Math.max(3, (item.xp / Math.max(maxXp, 1)) * 100);
+            const isMaxLevel  = levelData.currentLevel >= 5;
+            const barPct      = isMaxLevel ? 100 : Math.max(3, levelData.progressPercentage);
             const isTop3      = item.rank <= 3;
 
             return (
@@ -396,9 +398,11 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
                   <div className="flex justify-between items-center">
                     <span className="flex items-center gap-1 text-[10px] font-black text-slate-600 dark:text-white/60 font-mono">
                       <Zap className="w-3 h-3 text-amber-500 fill-amber-500/70" />
-                      {item.xp.toLocaleString()}
+                      {(item.xp ?? 0).toLocaleString()} XP
                     </span>
-                    <span className="text-[9px] text-slate-400 dark:text-white/25">{Math.round(barPct)}%</span>
+                    <span className="text-[9px] font-bold text-slate-400 dark:text-white/40">
+                      {isMaxLevel ? "MAX" : `${Math.round(levelData.progressPercentage)}%`}
+                    </span>
                   </div>
                   <div className="h-1.5 w-full bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
                     <motion.div
@@ -446,26 +450,37 @@ export default function LeaderboardMemberClient({ initialLeaderboard, currentUse
                     </div>
                   </div>
 
-                  {/* Right: XP to next rank */}
-                  {xpToNextRank > 0 ? (
-                    <div className="flex flex-col items-end gap-1 sm:gap-1.5 shrink-0 max-w-[150px] sm:max-w-[220px]">
+                  {/* Right: XP to next level / standard tier */}
+                  {!isCurrentUserMaxLevel && currentUserLevel ? (
+                    <div className="flex flex-col items-end gap-1 sm:gap-1.5 shrink-0 min-w-[140px] sm:min-w-[200px] max-w-[180px] sm:max-w-[250px]">
                       <div className="flex items-center gap-1 text-[9px] sm:text-[10px] font-black text-amber-600 dark:text-amber-400 text-right leading-tight">
-                        <ArrowUp className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
-                        <span>{t("leaderboard.need_xp_to_rank", { count: xpToNextRank.toLocaleString() }) || `Butuh ${xpToNextRank.toLocaleString()} XP untuk naik rank`}</span>
+                        <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 fill-current" />
+                        <span>
+                          {t("leaderboard.need_xp_to_level", {
+                            count: (currentUserLevel.xpToNextLevel ?? 0).toLocaleString(),
+                            target: currentUserLevel.nextTier?.name || `Lv.${currentUserLevel.currentLevel + 1}`,
+                          }) || `Butuh ${(currentUserLevel.xpToNextLevel ?? 0).toLocaleString()} XP ke ${currentUserLevel.nextTier?.name || "Next Level"}`}
+                        </span>
+                      </div>
+                      <div className="w-full flex items-center justify-between text-[8px] sm:text-[9px] font-mono font-bold text-slate-400 dark:text-white/40">
+                        <span>{(currentUserLevel.totalXp ?? 0).toLocaleString()} / {(currentUserLevel.nextLevelXp ?? 0).toLocaleString()} XP</span>
+                        <span>{Math.round(currentUserLevel.progressPercentage ?? 0)}%</span>
                       </div>
                       <div className="w-full h-1.5 sm:h-2 bg-slate-100 dark:bg-white/8 rounded-full overflow-hidden">
                         <motion.div
-                          className="h-full bg-gradient-to-r from-amber-400 to-orange-400 rounded-full"
+                          className="h-full bg-gradient-to-r from-primary via-emerald-400 to-teal-400 rounded-full"
                           initial={{ width: 0 }}
-                          animate={{ width: `${Math.min(75, (currentUser.xp / (currentUser.xp + xpToNextRank)) * 100)}%` }}
-                          transition={{ duration: 1, delay: 0.8 }}
+                          animate={{ width: `${Math.max(4, currentUserLevel.progressPercentage ?? 0)}%` }}
+                          transition={{ duration: 1, delay: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
                         />
                       </div>
                     </div>
                   ) : (
                     <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-amber-500/10 border border-amber-500/25 shrink-0">
                       <Crown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 fill-amber-500/50 animate-bounce" />
-                      <span className="text-[11px] sm:text-xs font-black text-amber-600 dark:text-amber-400">{t("leaderboard.rank_first") || "Peringkat #1!"}</span>
+                      <span className="text-[11px] sm:text-xs font-black text-amber-600 dark:text-amber-400">
+                        {t("leaderboard.max_level_reached") || "Level Maksimal!"}
+                      </span>
                     </div>
                   )}
                 </div>

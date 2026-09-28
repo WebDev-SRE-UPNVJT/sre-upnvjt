@@ -8,6 +8,7 @@ import { authOptions } from "@/lib/authOptions";
 import { hasAccess } from "@/lib/permissions";
 import { revalidatePath } from "next/cache";
 import { calculateSpeedBonusXp } from "@/lib/xpUtils";
+import { calculateLevel } from "@/lib/leveling";
 import { google } from "googleapis";
 
 /**
@@ -410,7 +411,7 @@ export async function reviewTaskSubmissionAction(submissionId, { status, feedbac
 
         if (profile) {
           const nextXp = Math.max(0, profile.xp - revokeAmount);
-          const nextLevel = Math.max(1, Math.floor(nextXp / 100) + 1);
+          const nextLevel = calculateLevel(nextXp);
           await db
             .update(memberProfile)
             .set({ xp: nextXp, level: nextLevel })
@@ -476,11 +477,11 @@ export async function reviewTaskSubmissionAction(submissionId, { status, feedbac
         await db.insert(memberProfile).values({
           userId: submission.memberId,
           xp: totalGainedXp,
-          level: Math.floor(totalGainedXp / 100) + 1,
+          level: calculateLevel(totalGainedXp),
         });
       } else {
         const nextXp = profile.xp + totalGainedXp;
-        const nextLevel = Math.floor(nextXp / 100) + 1;
+        const nextLevel = calculateLevel(nextXp);
         await db
           .update(memberProfile)
           .set({ xp: nextXp, level: nextLevel })

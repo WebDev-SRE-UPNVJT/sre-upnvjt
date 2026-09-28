@@ -5,6 +5,7 @@ import { eq, and } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { calculateSpeedBonusXp } from "@/lib/xpUtils";
+import { calculateLevel } from "@/lib/leveling";
 
 export async function POST(req, { params }) {
   try {
@@ -77,7 +78,7 @@ export async function POST(req, { params }) {
 
         if (revokeAmount > 0 && profile) {
           const nextXp = Math.max(0, profile.xp - revokeAmount);
-          const nextLevel = Math.max(1, Math.floor(nextXp / 100) + 1);
+          const nextLevel = calculateLevel(nextXp);
           await db.update(memberProfile)
             .set({ xp: nextXp, level: nextLevel })
             .where(eq(memberProfile.userId, sub.memberId));
@@ -163,11 +164,11 @@ export async function POST(req, { params }) {
           await db.insert(memberProfile).values({
             userId: sub.memberId,
             xp: totalGainedXp,
-            level: Math.floor(totalGainedXp / 100) + 1,
+            level: calculateLevel(totalGainedXp),
           });
         } else {
           const nextXp = profile.xp + totalGainedXp;
-          const nextLevel = Math.floor(nextXp / 100) + 1;
+          const nextLevel = calculateLevel(nextXp);
           await db.update(memberProfile)
             .set({ xp: nextXp, level: nextLevel })
             .where(eq(memberProfile.userId, sub.memberId));

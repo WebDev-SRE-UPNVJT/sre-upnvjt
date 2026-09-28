@@ -23,28 +23,37 @@ export default async function MemberLayout({ children }) {
   }
 
   // Parallel load of mustChangePassword and profile with lean columns
-  const [currentUser, memberProfileResult] = await Promise.all([
-    db.query.user.findFirst({
-      where: eq(user.id, userIdInt),
-      columns: {
-        mustChangePassword: true,
-      },
-    }),
-    db.query.memberProfile.findFirst({
-      where: eq(memberProfile.userId, userIdInt),
-      columns: {
-        userId: true,
-        xp: true,
-        level: true,
-      },
-    }),
-  ]);
+  let currentUser = null;
+  let memberProfileResult = null;
 
-  const mustChangePassword = !!currentUser?.mustChangePassword;
+  try {
+    const results = await Promise.all([
+      db.query.user.findFirst({
+        where: eq(user.id, userIdInt),
+        columns: {
+          mustChangePassword: true,
+        },
+      }),
+      db.query.memberProfile.findFirst({
+        where: eq(memberProfile.userId, userIdInt),
+        columns: {
+          userId: true,
+          xp: true,
+          level: true,
+        },
+      }),
+    ]);
+    currentUser = results[0];
+    memberProfileResult = results[1];
+  } catch (err) {
+    console.error("Warning: DB query error in MemberLayout:", err.message);
+  }
+
+  const mustChangePassword = !!(currentUser?.mustChangePassword ?? session.user.mustChangePassword);
   let profile = memberProfileResult;
 
   if (!profile) {
-    // If somehow profile is missing, initialize it safely
+    // If profile is missing, initialize it safely
     try {
       await db.insert(memberProfile).values({
         userId: userIdInt,
