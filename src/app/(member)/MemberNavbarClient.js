@@ -65,7 +65,7 @@ export default function MemberNavbarClient({ user, profile }) {
     { name: t("member_nav.attendance") || "Presensi", href: "/member/absensi", icon: ClipboardCheck },
   ];
 
-  const levelData = getUserLevelData(profile?.xp || user?.totalPoints || 0);
+  const levelData = getUserLevelData(profile?.xp || user?.xp || 0);
 
   // Hide Navbar completely on the Quiz Taking page for fullscreen Quizizz experience
   const isTakingQuiz = pathname.match(/^\/member\/quiz\/\d+$/);

@@ -73,7 +73,6 @@ export async function POST(req) {
       departmentId: departmentId ? Number(departmentId) : null,
       divisionId: divisionId ? Number(divisionId) : null,
       isActive: true, // Assuming auto-activate. Change to false if manual approval is needed.
-      totalPoints: 0,
     });
 
     return NextResponse.json({ success: true, message: "User registered successfully." });

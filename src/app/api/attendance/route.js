@@ -4,6 +4,7 @@ import { attendance, attendanceSession, user, memberProfile, xpTransaction } fro
 import { desc, eq, and, sql } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
+import { calculateLevel } from "@/lib/leveling";
 
 export async function GET() {
   try {
@@ -90,22 +91,23 @@ export async function POST(req) {
       // Prevent Staff/Admin from gaining XP, only MEMBER gets XP
       if (userRoleRecord && userRoleRecord.role?.name?.toUpperCase() === "MEMBER") {
         const xpAmount = 10;
-        
-        // 1. Update legacy totalPoints
-        await db.update(user)
-          .set({ totalPoints: sql`${user.totalPoints} + ${xpAmount}` })
-          .where(eq(user.id, memberIdInt));
 
-        // 2. Upsert memberProfile
+        // 1. Fetch current XP and Upsert memberProfile with proper calculated level
+        const currentProfile = await db.query.memberProfile.findFirst({
+          where: eq(memberProfile.userId, memberIdInt)
+        });
+        const newXp = (currentProfile?.xp || 0) + xpAmount;
+        const newLevel = calculateLevel(newXp);
+
         await db.insert(memberProfile)
           .values({
             userId: memberIdInt,
-            xp: xpAmount,
-            level: 1,
+            xp: newXp,
+            level: newLevel,
           })
           .onConflictDoUpdate({
             target: memberProfile.userId,
-            set: { xp: sql`${memberProfile.xp} + ${xpAmount}` }
+            set: { xp: newXp, level: newLevel }
           });
 
         // 3. Log XP transaction

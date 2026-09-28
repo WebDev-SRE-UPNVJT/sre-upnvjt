@@ -52,7 +52,6 @@ export const user = pgTable('user', {
   departmentId: integer('departmentId').references(() => department.id, { onDelete: 'set null' }),
   divisionId: integer('divisionId').references(() => division.id, { onDelete: 'set null' }),
   profilePictureUrl: varchar('profilePictureUrl', { length: 500 }),
-  totalPoints: integer('totalPoints').default(0).notNull(), // kept for legacy
   createdAt: timestamp('createdAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
   updatedAt: timestamp('updatedAt', { mode: 'date' }).$defaultFn(() => new Date()).notNull(),
 });
