@@ -27,7 +27,7 @@ export default async function MemberLayout({ children }) {
   let memberProfileResult = null;
 
   try {
-    const results = await Promise.all([
+    const results = await Promise.allSettled([
       db.query.user.findFirst({
         where: eq(user.id, userIdInt),
         columns: {
@@ -43,8 +43,8 @@ export default async function MemberLayout({ children }) {
         },
       }),
     ]);
-    currentUser = results[0];
-    memberProfileResult = results[1];
+    currentUser = results[0].status === "fulfilled" ? results[0].value : null;
+    memberProfileResult = results[1].status === "fulfilled" ? results[1].value : null;
   } catch (err) {
     console.error("Warning: DB query error in MemberLayout:", err.message);
   }

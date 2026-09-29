@@ -32,19 +32,8 @@ export default async function MemberDashboardPage() {
     redirect("/login");
   }
 
-  // Fetch all parallel queries concurrently in a single roundtrip batch
-  const [
-    currentUser,
-    profileResult,
-    higherRankResult,
-    allTasks,
-    submissions,
-    presentAttendanceCount,
-    allPublishedModules,
-    allModuleProgress,
-    allPhases,
-    xpLogs,
-  ] = await Promise.all([
+  // Fetch all parallel queries concurrently using Promise.allSettled for maximum fault tolerance against DB timeouts
+  const results = await Promise.allSettled([
     db.query.user.findFirst({
       where: eq(user.id, userIdInt),
       columns: {
@@ -146,6 +135,18 @@ export default async function MemberDashboardPage() {
       },
     }),
   ]);
+
+  // Extract results safely with fallback values
+  const currentUser = results[0].status === "fulfilled" && results[0].value ? results[0].value : session.user;
+  const profileResult = results[1].status === "fulfilled" ? results[1].value : null;
+  const higherRankResult = results[2].status === "fulfilled" ? results[2].value : [];
+  const allTasks = results[3].status === "fulfilled" ? (results[3].value || []) : [];
+  const submissions = results[4].status === "fulfilled" ? (results[4].value || []) : [];
+  const presentAttendanceCount = results[5].status === "fulfilled" ? results[5].value : [];
+  const allPublishedModules = results[6].status === "fulfilled" ? (results[6].value || []) : [];
+  const allModuleProgress = results[7].status === "fulfilled" ? (results[7].value || []) : [];
+  const allPhases = results[8].status === "fulfilled" ? (results[8].value || []) : [];
+  const xpLogs = results[9].status === "fulfilled" ? (results[9].value || []) : [];
 
   if (!currentUser) redirect("/login");
 
