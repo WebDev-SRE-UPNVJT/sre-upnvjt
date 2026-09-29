@@ -98,129 +98,110 @@ export async function PUT(req, { params }) {
       }
     }
 
-    // Handle XP revocation if previously APPROVED and now changed to REJECTED or PENDING
-    if (wasApproved && !nowApproved) {
-      const prevTransactions = await db.query.xpTransaction.findMany({
-        where: (tx, { eq, and }) => and(
-          eq(tx.userId, submission.memberId),
-          eq(tx.sourceId, submission.id)
-        ),
-      });
-
-      const netAwardedXp = prevTransactions
-        .filter(tx => tx.sourceType === "task" || tx.sourceType === "task_import" || tx.sourceType === "task_revocation")
-        .reduce((sum, tx) => sum + tx.amount, 0);
-
-      const revokeAmount = netAwardedXp > 0 ? netAwardedXp : (submission.xpEarned || 0);
-
-      if (revokeAmount > 0) {
-        const profile = await db.query.memberProfile.findFirst({
-          where: eq(memberProfile.userId, submission.memberId),
-        });
-
-        if (profile) {
-          const nextXp = Math.max(0, profile.xp - revokeAmount);
-          const nextLevel = calculateLevel(nextXp);
-          await db.update(memberProfile)
-            .set({ xp: nextXp, level: nextLevel })
-            .where(eq(memberProfile.userId, submission.memberId));
-        }
-
-        await db.insert(xpTransaction).values({
-          userId: submission.memberId,
-          amount: -revokeAmount,
-          reason: `Pembatalan Persetujuan Tugas: ${submission.task?.title || "Tugas"} (-${revokeAmount} XP)`,
-          sourceType: "task_revocation",
-          sourceId: submission.id,
-          grantedById: session.user.id,
-        });
-      }
-    }
-
-    // Reward XP if transitioned to APPROVED or if additional bonusXp > 0 while remaining APPROVED
+    // Hitung total target XP yang seharusnya didapatkan untuk submisi ini
     const parsedBonusXp = parseInt(bonusXp) || 0;
-    let totalGainedXp = 0;
-    let reasons = [];
+    const isSpeedBonusEnabled = submission.task?.enableSpeedBonus !== false;
     let speedBonusXp = 0;
-
-    if (nowApproved && !wasApproved) {
-      const isSpeedBonusEnabled = submission.task?.enableSpeedBonus !== false;
-      if (isSpeedBonusEnabled) {
-        speedBonusXp = calculateSpeedBonusXp(
-          submission.task?.createdAt,
-          submission.task?.deadline,
-          submission.submittedAt
-        );
-      }
-
-      let baseTaskXp = submission.task?.rewardXp || 0;
-      if (
-        (submission.task?.submissionType === "FORM" || submission.task?.formTemplateId) &&
-        submission.score !== null &&
-        submission.score !== undefined
-      ) {
-        const scoringMode = submission.task?.formScoringMode || "COMPLETION";
-        if (scoringMode === "PROPORTIONAL") {
-          baseTaskXp = Math.round(((submission.score || 0) / 100) * baseTaskXp);
-        } else if (scoringMode === "PERFECT") {
-          baseTaskXp = submission.score === 100 ? baseTaskXp : 0;
-        }
-      } else if (
-        (submission.task?.submissionType === "TTS" || submission.task?.ttsCrosswordId) &&
-        submission.score !== null &&
-        submission.score !== undefined
-      ) {
-        const scoringMode = submission.task?.ttsScoringMode || "COMPLETION";
-        if (scoringMode === "PROPORTIONAL") {
-          baseTaskXp = Math.round(((submission.score || 0) / 100) * baseTaskXp);
-        } else if (scoringMode === "PERFECT") {
-          baseTaskXp = (submission.score === 100 && (submission.wrongCount || 0) === 0) ? baseTaskXp : 0;
-        }
-      }
-
-      if (baseTaskXp > 0) {
-        totalGainedXp += baseTaskXp;
-        reasons.push(`Penyelesaian Tugas: ${submission.task.title} (+${baseTaskXp} XP)`);
-      }
-
-      if (speedBonusXp > 0) {
-        totalGainedXp += speedBonusXp;
-        reasons.push(`Bonus Kecepatan: +${speedBonusXp} XP`);
-      }
-
-      if (parsedBonusXp > 0) {
-        totalGainedXp += parsedBonusXp;
-        reasons.push(`Bonus Admin: +${parsedBonusXp} XP`);
-      }
-    } else if (wasApproved && nowApproved && parsedBonusXp > 0) {
-      totalGainedXp += parsedBonusXp;
-      reasons.push(`Bonus Tambahan Admin: +${parsedBonusXp} XP`);
+    if (isSpeedBonusEnabled && (submission.task?.rewardXp || 0) > 0) {
+      speedBonusXp = calculateSpeedBonusXp(
+        submission.task?.createdAt,
+        submission.task?.deadline,
+        submission.submittedAt
+      );
     }
 
-    if (totalGainedXp > 0) {
+    let baseTaskXp = submission.task?.rewardXp || 0;
+    if (
+      (submission.task?.submissionType === "FORM" || submission.task?.formTemplateId) &&
+      submission.score !== null &&
+      submission.score !== undefined
+    ) {
+      const scoringMode = submission.task?.formScoringMode || "COMPLETION";
+      if (scoringMode === "PROPORTIONAL") {
+        baseTaskXp = Math.round(((submission.score || 0) / 100) * baseTaskXp);
+      } else if (scoringMode === "PERFECT") {
+        baseTaskXp = submission.score === 100 ? baseTaskXp : 0;
+      }
+    } else if (
+      (submission.task?.submissionType === "TTS" || submission.task?.ttsCrosswordId) &&
+      submission.score !== null &&
+      submission.score !== undefined
+    ) {
+      const scoringMode = submission.task?.ttsScoringMode || "COMPLETION";
+      if (scoringMode === "PROPORTIONAL") {
+        baseTaskXp = Math.round(((submission.score || 0) / 100) * baseTaskXp);
+      } else if (scoringMode === "PERFECT") {
+        baseTaskXp = (submission.score === 100 && (submission.wrongCount || 0) === 0) ? baseTaskXp : 0;
+      }
+    }
+
+    const targetTotalXp = nowApproved ? (baseTaskXp + speedBonusXp + parsedBonusXp) : 0;
+
+    // Ambil histori seluruh transaksi XP untuk submisi ini guna menghitung net XP yang saat ini telah diberikan
+    const prevTransactions = await db.query.xpTransaction.findMany({
+      where: (tx, { eq, and }) => and(
+        eq(tx.userId, submission.memberId),
+        eq(tx.sourceId, submission.id)
+      ),
+    });
+
+    const validTxList = prevTransactions.filter(
+      tx => tx.sourceType === "task" || tx.sourceType === "task_import" || tx.sourceType === "task_revocation"
+    );
+
+    const currentAwardedXp = validTxList.length > 0
+      ? validTxList.reduce((sum, tx) => sum + tx.amount, 0)
+      : (wasApproved ? (submission.xpEarned || 0) : 0);
+
+    const deltaXp = targetTotalXp - currentAwardedXp;
+
+    if (deltaXp !== 0) {
       const profile = await db.query.memberProfile.findFirst({
         where: eq(memberProfile.userId, submission.memberId),
       });
 
+      const currentProfileXp = profile ? profile.xp : 0;
+      const nextXp = Math.max(0, currentProfileXp + deltaXp);
+      const nextLevel = calculateLevel(nextXp);
+
       if (!profile) {
-        await db.insert(memberProfile).values({
-          userId: submission.memberId,
-          xp: totalGainedXp,
-          level: calculateLevel(totalGainedXp),
-        });
+        if (nextXp > 0) {
+          await db.insert(memberProfile).values({
+            userId: submission.memberId,
+            xp: nextXp,
+            level: nextLevel,
+          });
+        }
       } else {
-        const nextXp = profile.xp + totalGainedXp;
-        const nextLevel = calculateLevel(nextXp);
         await db.update(memberProfile)
           .set({ xp: nextXp, level: nextLevel })
           .where(eq(memberProfile.userId, submission.memberId));
       }
 
+      let reason = "";
+      let txSourceType = "task";
+
+      if (!nowApproved && wasApproved) {
+        reason = `Pembatalan Persetujuan Tugas: ${submission.task?.title || "Tugas"} (${deltaXp} XP)`;
+        txSourceType = "task_revocation";
+      } else if (nowApproved && !wasApproved) {
+        const parts = [];
+        if (baseTaskXp > 0) parts.push(`Penyelesaian Tugas (+${baseTaskXp} XP)`);
+        if (speedBonusXp > 0) parts.push(`Bonus Kecepatan (+${speedBonusXp} XP)`);
+        if (parsedBonusXp > 0) parts.push(`Bonus Admin (+${parsedBonusXp} XP)`);
+        reason = parts.length > 0 ? parts.join(" | ") : `Penilaian Tugas: ${submission.task?.title || "Tugas"} (+${deltaXp} XP)`;
+      } else {
+        // Penyesuaian / Edit nilai saat status tetap APPROVED
+        reason = deltaXp > 0
+          ? `Penyesuaian Nilai Tugas: ${submission.task?.title || "Tugas"} (+${deltaXp} XP)`
+          : `Koreksi Pengurangan Nilai Tugas: ${submission.task?.title || "Tugas"} (${deltaXp} XP)`;
+      }
+
       await db.insert(xpTransaction).values({
         userId: submission.memberId,
-        amount: totalGainedXp,
-        reason: reasons.join(" | "),
-        sourceType: "task",
+        amount: deltaXp,
+        reason,
+        sourceType: txSourceType,
         sourceId: submission.id,
         grantedById: session.user.id,
       });
@@ -230,15 +211,8 @@ export async function PUT(req, { params }) {
       status,
       feedback: feedback || null,
       reviewedById: session.user.id,
+      xpEarned: targetTotalXp,
     };
-
-    if (nowApproved && !wasApproved) {
-      updatePayload.xpEarned = totalGainedXp;
-    } else if (wasApproved && !nowApproved) {
-      updatePayload.xpEarned = 0;
-    } else if (wasApproved && nowApproved && parsedBonusXp > 0) {
-      updatePayload.xpEarned = (submission.xpEarned || 0) + parsedBonusXp;
-    }
 
     const [updated] = await db.update(taskSubmission)
       .set(updatePayload)
