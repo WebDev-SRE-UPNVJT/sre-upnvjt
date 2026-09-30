@@ -500,9 +500,25 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
       }
 
       const res = await fetch(`/api/tasks/${task.id}/submissions`, { method: "POST", body: fd });
-      const data = await res.json();
+      let data = {};
+      const resText = await res.text();
 
-      if (!res.ok) throw new Error(data.error ?? "Gagal mengirim submisi.");
+      try {
+        data = JSON.parse(resText);
+      } catch (jsonErr) {
+        if (res.status === 413 || resText.toLowerCase().includes("request entity too large") || resText.toLowerCase().includes("payload too large")) {
+          throw new Error(
+            language === "en"
+              ? `File size is too large (max ${maxMb} MB). Please reduce file size.`
+              : `Ukuran berkas terlalu besar (melebihi batas ${maxMb} MB). Harap kompres file.`
+          );
+        }
+        throw new Error(resText || `Gagal mengirim submisi (Error ${res.status})`);
+      }
+
+      if (!res.ok) {
+        throw new Error(data.error ?? (language === "en" ? "Failed to submit assignment." : "Gagal mengirim submisi tugas."));
+      }
 
       setSuccess(t("member_tasks.modal.success_msg") || "Quest berhasil diselesaikan! Menunggu review dari pengurus.");
       onSubmitSuccess(data.submission);

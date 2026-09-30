@@ -9,6 +9,9 @@ import { Readable } from "stream";
 import { calculateSpeedBonusXp } from "@/lib/xpUtils";
 import { calculateLevel } from "@/lib/leveling";
 
+export const dynamic = "force-dynamic";
+export const maxDuration = 120; // 2 minutes timeout for large file uploads to Google Drive
+
 export async function GET(req, { params }) {
   try {
     const p = await params;
