@@ -14,6 +14,9 @@ import {
   xpTransaction,
   pptPhase,
   pptModuleProgress,
+  role,
+  department,
+  division,
 } from "@/db/schema";
 import { eq, desc, asc, and, sql } from "drizzle-orm";
 import MemberDashboardClient from "./MemberDashboardClient";
@@ -57,8 +60,19 @@ export default async function MemberDashboardPage() {
         count: sql`COUNT(*)::int`,
       })
       .from(memberProfile)
+      .innerJoin(user, eq(user.id, memberProfile.userId))
+      .leftJoin(role, eq(role.id, user.roleId))
+      .leftJoin(department, eq(department.id, user.departmentId))
+      .leftJoin(division, eq(division.id, user.divisionId))
       .where(
-        sql`${memberProfile.xp} > (SELECT COALESCE(xp, 0) FROM "memberProfile" WHERE "userId" = ${userIdInt})`
+        and(
+          sql`LOWER(${role.name}) = 'member'`,
+          sql`COALESCE(LOWER(${department.code}), '') NOT IN ('sys', 'system')`,
+          sql`COALESCE(LOWER(${department.name}), '') NOT LIKE '%sys%'`,
+          sql`COALESCE(LOWER(${division.name}), '') NOT LIKE '%sys%'`,
+          sql`(${memberProfile.xp} > (SELECT COALESCE(xp, 0) FROM "memberProfile" WHERE "userId" = ${userIdInt})
+              OR (${memberProfile.xp} = (SELECT COALESCE(xp, 0) FROM "memberProfile" WHERE "userId" = ${userIdInt}) AND ${user.id} < ${userIdInt}))`
+        )
       ),
     db.query.task.findMany({
       orderBy: [asc(task.deadline)],

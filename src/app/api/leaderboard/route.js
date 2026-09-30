@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { user, memberProfile, division, xpTransaction, role, department } from "@/db/schema";
-import { eq, desc, gte, sql, and, or } from "drizzle-orm";
+import { eq, desc, asc, gte, sql, and, or } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { getAugmentedLeaderboard } from "@/lib/dummyLeaderboard";
@@ -51,7 +51,7 @@ export async function GET(req) {
             sql`COALESCE(LOWER(${division.name}), '') NOT LIKE '%sys%'`
           )
         )
-        .orderBy(desc(memberProfile.xp));
+        .orderBy(desc(memberProfile.xp), asc(user.id), asc(user.name));
 
       ranked = data;
 
@@ -87,7 +87,7 @@ export async function GET(req) {
           )
         )
         .groupBy(xpTransaction.userId)
-        .orderBy(desc(sumExpr));
+        .orderBy(desc(sumExpr), asc(xpTransaction.userId));
 
       if (xpByUser.length === 0) {
         return NextResponse.json(getAugmentedLeaderboard([]));

@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { user, memberProfile, division, role, department } from "@/db/schema";
-import { eq, desc, sql, and } from "drizzle-orm";
+import { eq, desc, asc, sql, and } from "drizzle-orm";
 import LeaderboardMemberClient from "./LeaderboardMemberClient";
 import { getAugmentedLeaderboard } from "@/lib/dummyLeaderboard";
 
@@ -52,7 +52,7 @@ export default async function MemberLeaderboardPage() {
         sql`COALESCE(LOWER(${division.name}), '') NOT LIKE '%sys%'`
       )
     )
-    .orderBy(desc(memberProfile.xp));
+    .orderBy(desc(memberProfile.xp), asc(user.id), asc(user.name));
 
   const ranked = getAugmentedLeaderboard(data);
 

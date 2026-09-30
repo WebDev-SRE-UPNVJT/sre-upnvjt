@@ -48,7 +48,7 @@ export default async function LeaderboardAdminPage() {
         sql`COALESCE(LOWER(${division.name}), '') NOT LIKE '%sys%'`
       )
     )
-    .orderBy(desc(memberProfile.xp));
+    .orderBy(desc(memberProfile.xp), asc(user.id), asc(user.name));
 
   const ranked = getAugmentedLeaderboard(data);
 

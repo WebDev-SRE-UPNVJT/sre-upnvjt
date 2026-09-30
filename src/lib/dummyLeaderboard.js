@@ -13,8 +13,24 @@ export const DUMMY_LEADERBOARD_MEMBERS = [];
 export function getAugmentedLeaderboard(realMembers = []) {
   const list = [...(realMembers || [])];
 
-  // Sort descending by XP
-  list.sort((a, b) => (b.xp ?? 0) - (a.xp ?? 0));
+  // Sort descending by XP, with deterministic tie-breaker:
+  // 1. XP (descending)
+  // 2. User ID / Registration order (ascending - earlier user wins tie)
+  // 3. Name (ascending alphabetical)
+  list.sort((a, b) => {
+    const diffXp = (b.xp ?? 0) - (a.xp ?? 0);
+    if (diffXp !== 0) return diffXp;
+
+    const idA = typeof a.id === "number" ? a.id : parseInt(a.id) || 0;
+    const idB = typeof b.id === "number" ? b.id : parseInt(b.id) || 0;
+    if (idA !== idB && idA > 0 && idB > 0) {
+      return idA - idB;
+    }
+
+    const nameA = String(a.name || "").trim().toLowerCase();
+    const nameB = String(b.name || "").trim().toLowerCase();
+    return nameA.localeCompare(nameB);
+  });
 
   return list.map((item, idx) => ({
     ...item,
