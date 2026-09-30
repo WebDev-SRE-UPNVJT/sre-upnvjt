@@ -144,13 +144,20 @@ function getDeadlineInfo(deadlineStr, t, language) {
     return { isOverdue: true, text, isSoon: false, isUrgent: false };
   }
 
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) {
-    return { isOverdue: false, text: t("member_tasks.due_hours", { count: diffHours }) || `Tenggat ${diffHours} jam lagi`, isSoon: true, isUrgent: true };
+  if (diffHours === 0) {
+    const mins = Math.max(1, diffMinutes);
+    const text = t("member_tasks.due_minutes", { count: mins }) || (language === "en" ? `Due in ${mins} minutes` : `Tenggat ${mins} menit lagi`);
+    return { isOverdue: false, text, isSoon: true, isUrgent: true };
+  } else if (diffDays === 0) {
+    const text = t("member_tasks.due_hours", { count: diffHours }) || (language === "en" ? `Due in ${diffHours} hours` : `Tenggat ${diffHours} jam lagi`);
+    return { isOverdue: false, text, isSoon: true, isUrgent: true };
   } else if (diffDays <= 3) {
-    return { isOverdue: false, text: t("member_tasks.due_days", { count: diffDays }) || `Tenggat ${diffDays} hari lagi`, isSoon: true, isUrgent: false };
+    const text = t("member_tasks.due_days", { count: diffDays }) || (language === "en" ? `Due in ${diffDays} days` : `Tenggat ${diffDays} hari lagi`);
+    return { isOverdue: false, text, isSoon: true, isUrgent: false };
   } else {
     const formatted = formatJakartaDisplay(deadline, { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false }, language === "en" ? "en-US" : "id-ID");
     return { isOverdue: false, text: t("member_tasks.due_date", { days: diffDays, formatted }) || `${diffDays} hari lagi (${formatted})`, isSoon: false, isUrgent: false };

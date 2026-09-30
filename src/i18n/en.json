@@ -156,6 +156,7 @@
     "overdue_today": "Overdue (Today)",
     "overdue_days": "Overdue by {count} days",
     "due_hours": "Due in {count} hours",
+    "due_minutes": "Due in {count} minutes",
     "due_days": "Due in {count} days",
     "due_date": "{days} days left ({formatted})",
     "empty_title": "No Quests Found",

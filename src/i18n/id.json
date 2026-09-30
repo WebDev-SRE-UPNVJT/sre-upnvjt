@@ -156,6 +156,7 @@
     "overdue_today": "Lewat deadline (Hari ini)",
     "overdue_days": "Lewat {count} hari",
     "due_hours": "Tenggat {count} jam lagi",
+    "due_minutes": "Tenggat {count} menit lagi",
     "due_days": "Tenggat {count} hari lagi",
     "due_date": "{days} hari lagi ({formatted})",
     "empty_title": "Quest Tidak Ditemukan",
