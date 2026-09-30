@@ -421,6 +421,14 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
     let incoming = Array.from(rawFiles || []);
 
     for (const f of incoming) {
+      if (f.size > 4.5 * 1024 * 1024) {
+        setError(
+          language === "en"
+            ? `File "${f.name}" is ${(f.size / (1024 * 1024)).toFixed(1)} MB (exceeds 4.5 MB limit).`
+            : `Berkas "${f.name}" berukuran ${(f.size / (1024 * 1024)).toFixed(1)} MB (melebihi batas 4.5 MB).`
+        );
+        return;
+      }
       if (f.size > maxMb * 1024 * 1024) {
         setError(
           t("member_tasks.modal.error_file_size", {
