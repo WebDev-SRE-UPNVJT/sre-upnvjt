@@ -326,21 +326,32 @@ function QuestCard({ task, submission, onOpen, index, isLocked = false }) {
 
           {/* Bottom Metas: Clean & Streamlined (Deadline on Left, Status Badge on Right) */}
           <div className="flex items-center justify-between gap-2 mt-3.5 pt-3 border-t border-slate-100 dark:border-white/5 min-w-0">
-            {/* Deadline chip */}
-            <span
-              className={`inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-bold px-2 sm:px-2.5 py-1 rounded-md border transition-all truncate min-w-0 ${
-                dlInfo.isOverdue
-                  ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/25 font-black"
-                  : dlInfo.isUrgent
-                  ? "bg-rose-500/10 text-rose-500 border-rose-500/20 font-bold animate-pulse"
-                  : dlInfo.isSoon
-                  ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20 font-bold"
-                  : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white/50 border-slate-200 dark:border-white/10"
-              }`}
-            >
-              <Clock className="w-3 h-3 shrink-0" />
-              <span className="truncate">{dlInfo.text}</span>
-            </span>
+            {/* Deadline chip (neutral when completed) */}
+            {status === "APPROVED" ? (
+              <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-bold px-2 sm:px-2.5 py-1 rounded-md border transition-all truncate min-w-0 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white/50 border-slate-200 dark:border-white/10">
+                <Clock className="w-3 h-3 shrink-0" />
+                <span className="truncate">
+                  {task.deadline
+                    ? `${language === "en" ? "Deadline" : "Tenggat"}: ${formatJakartaDisplay(task.deadline, { day: "numeric", month: "short" }, language === "en" ? "en-US" : "id-ID")}`
+                    : (t("member_tasks.no_deadline") || "Tanpa Deadline")}
+                </span>
+              </span>
+            ) : (
+              <span
+                className={`inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-bold px-2 sm:px-2.5 py-1 rounded-md border transition-all truncate min-w-0 ${
+                  dlInfo.isOverdue
+                    ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/25 font-black"
+                    : dlInfo.isUrgent
+                    ? "bg-rose-500/10 text-rose-500 border-rose-500/20 font-bold animate-pulse"
+                    : dlInfo.isSoon
+                    ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20 font-bold"
+                    : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white/50 border-slate-200 dark:border-white/10"
+                }`}
+              >
+                <Clock className="w-3 h-3 shrink-0" />
+                <span className="truncate">{dlInfo.text}</span>
+              </span>
+            )}
 
             {/* Status badge */}
             <span
@@ -736,7 +747,8 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
           {/* Deadline & Upload Limits */}
           <div className="flex flex-wrap gap-2.5">
             {(() => {
-              const isOverdue = task.deadline && new Date(task.deadline) < new Date();
+              const isApproved = submission?.status === "APPROVED";
+              const isOverdue = !isApproved && task.deadline && new Date(task.deadline) < new Date();
               return (
                 <span
                   className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl border ${
