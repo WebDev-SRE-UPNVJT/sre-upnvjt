@@ -34,6 +34,11 @@ export default async function TTSAssignmentPlayPage({ params, searchParams }) {
   const id = resolvedParams?.id;
   const taskId = resolvedSearchParams?.taskId;
 
+  const autoShare =
+    resolvedSearchParams?.share === "1" ||
+    resolvedSearchParams?.share === "true" ||
+    resolvedSearchParams?.shareModal === "1";
+
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     const callbackUrl = taskId ? `/games/tts/${id}?taskId=${taskId}` : `/games/tts/${id}`;
@@ -172,6 +177,7 @@ export default async function TTSAssignmentPlayPage({ params, searchParams }) {
           backUrl="/member/tugas"
           puzzleData={res.data}
           currentUser={session.user}
+          initialOpenShare={autoShare}
         />
       );
     }

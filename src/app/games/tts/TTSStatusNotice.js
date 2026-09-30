@@ -17,9 +17,10 @@ export default function TTSStatusNotice({
   backUrl = "/member/tugas",
   puzzleData = null,
   currentUser = null,
+  initialOpenShare = false,
 }) {
   const { language } = useLanguage();
-  const [showShareModal, setShowShareModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(Boolean(initialOpenShare));
 
   // Generate crossword layout & filled inputs if puzzleData is passed
   const items = useMemo(() => {
@@ -58,11 +59,49 @@ export default function TTSStatusNotice({
   const wordStatuses = useMemo(() => {
     if (!crosswordData?.placedWords) return {};
     const map = {};
+
+    let detailedAnswers = null;
+    try {
+      if (Array.isArray(submission?.answers)) {
+        detailedAnswers = submission.answers;
+      } else if (typeof submission?.answers === "string" && submission.answers.trim().length > 0) {
+        detailedAnswers = JSON.parse(submission.answers);
+      }
+    } catch (e) {
+      detailedAnswers = null;
+    }
+
+    const subScore = typeof submission?.score === "number" ? submission.score : 0;
+    const isZeroScore = subScore === 0 || submission?.correctCount === 0;
+
     crosswordData.placedWords.forEach((pw) => {
-      map[`${pw.direction}-${pw.number}`] = "CORRECT";
+      const key = `${pw.direction}-${pw.number}`;
+      if (isZeroScore) {
+        map[key] = "WRONG";
+        return;
+      }
+
+      if (detailedAnswers && detailedAnswers.length > 0) {
+        const cleanPwAns = String(pw.answer || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+        const cleanPwClue = String(pw.clue || "").trim().toLowerCase();
+
+        const matched = detailedAnswers.find((a) => {
+          const cleanAns = String(a.correctAnswer || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+          const cleanClue = String(a.clue || "").trim().toLowerCase();
+          return (cleanClue && cleanClue === cleanPwClue) || (cleanAns && cleanAns === cleanPwAns);
+        });
+
+        if (matched) {
+          map[key] = matched.isCorrect === true ? "CORRECT" : "WRONG";
+          return;
+        }
+      }
+
+      // If no granular answers array, fallback based on score
+      map[key] = subScore > 0 ? "CORRECT" : "WRONG";
     });
     return map;
-  }, [crosswordData]);
+  }, [crosswordData, submission]);
 
   if (type === "closed") {
     return (
@@ -187,7 +226,7 @@ export default function TTSStatusNotice({
               <div className="text-[10px] uppercase font-bold text-gray-400">
                 {language === "en" ? "Score" : "Skor"}
               </div>
-              <div className="text-lg font-black text-emerald-400">{submission?.score ?? 100}%</div>
+              <div className="text-lg font-black text-emerald-400">{submission?.score ?? 0}%</div>
             </div>
             <div>
               <div className="text-[10px] uppercase font-bold text-gray-400">
@@ -237,11 +276,11 @@ export default function TTSStatusNotice({
             userInputs={userInputs}
             wordStatuses={wordStatuses}
             stats={{
-              elapsedTime: submission?.elapsedSeconds || 120,
-              mistakeCount: 0,
+              elapsedTime: submission?.timeTakenSeconds || submission?.elapsedSeconds || 120,
+              mistakeCount: submission?.wrongCount ?? 0,
               xpEarned: submission?.xpEarned || puzzleData?.rewardXp || 10,
-              score: submission?.score ?? 100,
-              starsEarned: 3,
+              score: submission?.score ?? 0,
+              starsEarned: (submission?.score ?? 0) >= 80 ? 3 : (submission?.score ?? 0) >= 50 ? 2 : (submission?.score ?? 0) >= 20 ? 1 : 0,
             }}
             currentUser={currentUser}
           />

@@ -8,7 +8,7 @@ import {
   ExternalLink, Send, X, AlertTriangle, UploadCloud,
   LinkIcon, FileText, ChevronRight, Search, Sparkles,
   Target, Compass, Gamepad2, Puzzle, Play, Lock, FileCheck,
-  BookOpen, Presentation,
+  BookOpen, Presentation, Share2,
 } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageProvider";
 import { useRouter } from "next/navigation";
@@ -858,9 +858,28 @@ function QuestDetailModal({ task, submission, onClose, onSubmitSuccess, isLocked
                       </div>
                       <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20">
                         <span className="text-[10px] text-rose-500 font-bold block">{language === "en" ? "Wrong" : "Salah"}</span>
-                        <span className="text-sm font-black text-rose-500">{submission.wrongCount ?? 0}</span>
+                        <span className="text-sm font-black text-rose-500">
+                          {submission.totalQuestions !== undefined && submission.totalQuestions !== null
+                            ? Math.max(0, submission.totalQuestions - (submission.correctCount ?? 0))
+                            : (submission.wrongCount ?? 0)}
+                        </span>
                       </div>
                     </div>
+
+                    {(task.submissionType === "TTS" || task.ttsCrosswordId) && (
+                      <div className="pt-2 border-t border-emerald-500/20 flex items-center justify-between">
+                        <span className="text-[11px] text-emerald-700/80 dark:text-emerald-300/80 font-medium">
+                          {language === "en" ? "Achievement card ready to share" : "Kartu hasil & skor siap dibagikan"}
+                        </span>
+                        <Link
+                          href={`/games/tts/${task.ttsCrosswordId || 1}?taskId=${task.id}&share=1`}
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 underline underline-offset-4 transition-colors"
+                        >
+                          <Share2 className="w-3.5 h-3.5" />
+                          <span>{language === "en" ? "Share Score Card" : "Buka & Bagikan Kartu Hasil"}</span>
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 ) : submission?.fileUrl ? (
                   <div className={`p-4 rounded-xl border space-y-2.5 ${

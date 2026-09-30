@@ -277,17 +277,21 @@ export default function TTSShareCardModal({
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-md overflow-y-auto select-none">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          className="relative w-full max-w-4xl bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl text-zinc-100 overflow-hidden my-auto flex flex-col max-h-[94vh]"
-        >
+    <>
+      <AnimatePresence>
+        {isOpen && (
+          <div
+            key="tts-share-card-modal-backdrop"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-md overflow-y-auto select-none"
+          >
+            <motion.div
+              key="tts-share-card-modal-content"
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-4xl bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl text-zinc-100 overflow-hidden my-auto flex flex-col max-h-[94vh]"
+            >
           {/* MODAL HEADER */}
           <div className="flex items-center justify-between px-5 sm:px-7 py-4 border-b border-zinc-800 bg-zinc-900/80 backdrop-blur-md shrink-0">
             <div>
@@ -774,10 +778,14 @@ export default function TTSShareCardModal({
           </div>
         </motion.div>
       </div>
+    )}
+  </AnimatePresence>
 
-      {/* HIDDEN OFF-SCREEN NATIVE 1080x1920 FULL-HD EXPORT CONTAINER */}
-      <div
-        style={{
+  {/* HIDDEN OFF-SCREEN NATIVE 1080x1920 FULL-HD EXPORT CONTAINER */}
+  {isOpen && (
+    <div
+      key="tts-share-hd-export-container"
+      style={{
           position: "fixed",
           left: "-9999px",
           top: "-9999px",
@@ -1134,6 +1142,7 @@ export default function TTSShareCardModal({
           </div>
         </div>
       </div>
-    </AnimatePresence>
-  );
+    )}
+  </>
+);
 }
